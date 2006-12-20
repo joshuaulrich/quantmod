@@ -1,0 +1,45 @@
+import(methods)
+importFrom(graphics,plot)
+importFrom(stats,predict)
+importFrom(stats,lag)
+export(modelData,
+    Op,Lo,Hi,Cl,Vo,Ad,
+    OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
+    Delta,
+    Next,
+    Lag,
+    lags2,
+    tradeModel,
+    saveModels,
+    loadModels,
+	papply,
+	returnBy,
+	breakpoints,
+	importKM,
+	tR.kmgmdh,
+	specifyModel,
+	getModelData,
+    stripModelData,
+    predictModel,
+	fetchRawData,
+    getSymbols,
+    showSymbols,
+    removeSymbols,
+    fittedModel,
+	buildModel)
+S3method(plot,tR.results)
+##S3method(lag,numeric)
+S3method(predict,kmgmdh)
+S3method(predictModel,default)
+S3method(predictModel,nnet)
+S3method(predictModel,mars)
+S3method(predictModel,polymars)
+S3method(predictModel,lars)
+S3method(predictModel,rpart)
+S3method(predictModel,tree)
+S3method(predictModel,randomForest)
+export(weeks,weeks.zoo,months.zoo,quarters.zoo,years,years.zoo,weekdays.zoo)
+exportClass(tR.model)
+exportClass(tR.results,tR.return)
+exportClass(kmgmdh)
+exportMethods(show,summary,'fittedModel<-')
