@@ -66,12 +66,10 @@ function(Symbols=NULL,
 function(env=.GlobalEnv) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
         Symbols <- paste(get('.getSymbols',env))
-        for(i in 1:length(Symbols)) {
-            search.pos = which(match(search(),Symbols[i])==TRUE)
-####            if(length(search.pos) > 0) detach(pos=search.pos)            
-        }
-        remove(list=as.character(Symbols),envir=env)
         remove(list=c('.getSymbols'),envir=env)
+    #            search.pos = which(match(search(),symbols[i])==TRUE)
+    #            if(length(search.pos) > 0) detach(pos=search.pos)            
+        remove(list=as.character(Symbols),envir=env)
     }
 }
 

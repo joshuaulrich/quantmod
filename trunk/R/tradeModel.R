@@ -1,5 +1,5 @@
 "tradeModel" <- function(tR.model,
-                       #  signal.threshold=c(0,0),
+                         signal.threshold=c(0,0),
                          leverage=1,
                          return.model=TRUE,
                          plot.model=FALSE,
