@@ -96,7 +96,7 @@ function(x,k=1)
 }
 
 "Delta" <-
-function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
+function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
 {
     type <- match.arg(type)[1]
     if(length(x2)!=length(x1) && !is.null(x2)) stop('x1 and x2 must be of same length');
