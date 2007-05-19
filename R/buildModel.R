@@ -5,8 +5,9 @@ function(tR.model,training.per,method,...) {
     model.data <- tR.model@model.data;
     start.date.index <- index(model.data[which(index(model.data) >= as.Date(training.per[1]))])
     end.date.index <- index(model.data[which(index(model.data) <= as.Date(training.per[2]))])
+    training.dates <- as.Date(intersect(start.date.index,end.date.index));
     method <- as.character(paste("tR.",method,sep=''));
-    training.data <- model.data[intersect(start.date.index,end.date.index)];
+    training.data <- model.data[training.dates];
     formula <- tR.model@model.formula
     mcall <- do.call(method,list(tR.model=tR.model,training.data=training.data, ...));
     tR.model@fitted.model <- mcall$fitted;
@@ -14,6 +15,6 @@ function(tR.model,training.per,method,...) {
     tR.model@build.date = as.Date(Sys.time());
     tR.model@model.id <- paste(class(mcall$fitted)[length(class(mcall$fitted))],
                                as.numeric(Sys.time()),sep='');
-    tR.model@training.data <- intersect(start.date.index,end.date.index);
+    tR.model@training.data <- training.dates;
     invisible(tR.model);
 }
