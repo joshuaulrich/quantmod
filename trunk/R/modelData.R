@@ -8,7 +8,8 @@
     } else {
       start.date.index <- index(model.data[which(index(model.data) >= as.Date(data.window[1]))])
       end.date.index <- index(model.data[which(index(model.data) <= as.Date(data.window[2]))])
-      model.data <- model.data[intersect(start.date.index,end.date.index)]
+      date.range <- as.Date(intersect(start.date.index,end.date.index))
+      model.data <- model.data[date.range]
     }
   }
   if(exclude.training == TRUE)
