@@ -19,7 +19,8 @@
     pos.days <- trade.signal[trade.signal[,1] > 0]
     neg.days <- trade.signal[trade.signal[,1] < 0]
     
-    if(NROW(pos.days) == 0 || NROW(neg.days) == 0) {
+    signal.summary <- table(trade.signal[,2])
+    if(any(signal.summary==0))
         warning("Model results are all one direction.")
     } else {
         pos.days.accuracy <- sum(ifelse(pos.days[,1]*pos.days[,2] > 0, 1, 0))/NROW(pos.days)
@@ -34,6 +35,8 @@
   CAGR <- as.numeric((model.cumret[trade.end])^(1/(as.numeric(holding.period)/252))-1);
   HPR <- as.numeric(model.cumret[length(model.cumret)])-1;
   accuracy <- zoo(NULL,model.index);
+  accuracy = list(
+             raw.signal.bias,pos.days.accuracy,neg.days.accuracy)
   
 
     periods <- match.arg(ret.type,c("weeks","months","quarters","years"),several.ok=TRUE)
