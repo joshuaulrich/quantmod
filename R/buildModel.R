@@ -1,20 +1,20 @@
 "buildModel" <-
-function(tR.model,training.per,method,...) {
-    model.id=deparse(substitute(tR.model))
+function(x,training.per,method,...) {
+    model.id=deparse(substitute(x))
     if(length(training.per) != 2) stop("training.per must be of length 2");
-    model.data <- tR.model@model.data;
+    model.data <- x@model.data;
     start.date.index <- index(model.data[which(index(model.data) >= as.Date(training.per[1]))])
     end.date.index <- index(model.data[which(index(model.data) <= as.Date(training.per[2]))])
     training.dates <- as.Date(intersect(start.date.index,end.date.index));
-    method <- as.character(paste("tR.",method,sep=''));
+    method <- as.character(paste("buildModel.",method,sep=''));
     training.data <- model.data[training.dates];
-    formula <- tR.model@model.formula
-    mcall <- do.call(method,list(tR.model=tR.model,training.data=training.data, ...));
-    tR.model@fitted.model <- mcall$fitted;
-    tR.model@model.inputs <- as.character(mcall$inputs);
-    tR.model@build.date = as.Date(Sys.time());
-    tR.model@model.id <- paste(class(mcall$fitted)[length(class(mcall$fitted))],
+    formula <- x@model.formula
+    mcall <- do.call(method,list(quantmod=x,training.data=training.data, ...));
+    x@fitted.model <- mcall$fitted;
+    x@model.inputs <- as.character(mcall$inputs);
+    x@build.date = as.Date(Sys.time());
+    x@model.id <- paste(class(mcall$fitted)[length(class(mcall$fitted))],
                                as.numeric(Sys.time()),sep='');
-    tR.model@training.data <- training.dates;
-    invisible(tR.model);
+    x@training.data <- training.dates;
+    invisible(x);
 }

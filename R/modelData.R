@@ -1,6 +1,6 @@
-"modelData" <- function(tR.model,data.window=NULL,exclude.training=FALSE)
+"modelData" <- function(x,data.window=NULL,exclude.training=FALSE)
 {
-  model.data <- tR.model@model.data;
+  model.data <- x@model.data;
   if(!is.null(data.window))
   {
     if(length(data.window) > 2) {
@@ -14,7 +14,7 @@
   }
   if(exclude.training == TRUE)
   {
-    model.data <- model.data[!index(model.data) %in% tR.model@training.data];
+    model.data <- model.data[!index(model.data) %in% x@training.data];
   } 
   return(model.data);
 } 

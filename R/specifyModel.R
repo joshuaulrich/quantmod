@@ -1,6 +1,6 @@
 "specifyModel" <-
 function(formula,na.rm=TRUE) {
-  new.tR.model <- new("tR.model");
+  new.quantmod <- new("quantmod");
   formula <- as.formula(formula);
   dot.vars <- all.vars(formula);
     convert.vars <- function(vars) {
@@ -11,28 +11,28 @@ function(formula,na.rm=TRUE) {
 #    model.vars <- unlist(lapply(dot.vars,convert.vars));
 #    model.formula <- paste(model.vars[1],paste(model.vars[-1],collapse=' + '),sep=' ~ ');
 
-  new.tR.model@model.spec <- formula
-  new.tR.model@model.formula <- as.formula(gsub("[) ]","",gsub("[(,=:'\"]",".",deparse(formula))));
-  new.tR.model@model.target <- as.character(new.tR.model@model.formula[[2]])
-  new.tR.model@build.inputs <- as.character(attr(terms(new.tR.model@model.formula),"term.labels"));
+  new.quantmod@model.spec <- formula
+  new.quantmod@model.formula <- as.formula(gsub("[) ]","",gsub("[(,=:'\"]",".",deparse(formula))));
+  new.quantmod@model.target <- as.character(new.quantmod@model.formula[[2]])
+  new.quantmod@build.inputs <- as.character(attr(terms(new.quantmod@model.formula),"term.labels"));
   vars <- all.vars(formula);
-  new.tR.model@symbols <- vars;
-  new.tR.model@product <- vars[1]; 
-  new.tR.model <- getModelData(new.tR.model,na.rm=na.rm);
-  return(new.tR.model);
+  new.quantmod@symbols <- vars;
+  new.quantmod@product <- vars[1]; 
+  new.quantmod <- getModelData(new.quantmod,na.rm=na.rm);
+  return(new.quantmod);
 }
 "specifyModel.original" <-
 function(formula,na.rm=TRUE) {
-  new.tR.model <- new("tR.model");
+  new.quantmod <- new("quantmod");
   formula <- as.formula(formula);
-  new.tR.model@model.spec <- formula
-  new.tR.model@model.formula <- as.formula(gsub("\\)","",gsub("\\(",".",deparse(formula))));
-  new.tR.model@model.target <- deparse(formula[[2]]);
-  new.tR.model@build.inputs <- as.character(attr(terms(formula),"term.labels"));
+  new.quantmod@model.spec <- formula
+  new.quantmod@model.formula <- as.formula(gsub("\\)","",gsub("\\(",".",deparse(formula))));
+  new.quantmod@model.target <- deparse(formula[[2]]);
+  new.quantmod@build.inputs <- as.character(attr(terms(formula),"term.labels"));
   vars <- all.vars(formula);
-  new.tR.model@symbols <- vars;
-  new.tR.model@product <- vars[1]; 
-  new.tR.model <- getModelData(new.tR.model,na.rm=na.rm);
-  return(new.tR.model);
+  new.quantmod@symbols <- vars;
+  new.quantmod@product <- vars[1]; 
+  new.quantmod <- getModelData(new.quantmod,na.rm=na.rm);
+  return(new.quantmod);
 }
 

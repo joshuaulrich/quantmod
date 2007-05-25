@@ -1,7 +1,7 @@
 "updateModel" <-
-function(fitted.model,tR.model) {
-   tR.model@model.inputs <- fitted.model@model.inputs;
-   tR.model@fitted.model <- fitted.model;
-   return(tR.model);
+function(fitted.model,quantmod) {
+   quantmod@model.inputs <- fitted.model@model.inputs;
+   quantmod@fitted.model <- fitted.model;
+   return(quantmod);
 }
 

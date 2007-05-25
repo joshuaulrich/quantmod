@@ -1,75 +1,75 @@
-"tR.glm" <-
-function(tR.model=tR.model,training.data=training.data,...)
+"buildModel.glm" <-
+function(quantmod,training.data=training.data,...)
 {
-	gl <- glm(formula=tR.model@model.formula,data=training.data,...);
+	gl <- glm(formula=quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=gl,
                 "inputs"=attr(terms(gl),"term.labels"))); 
 }
 
-"tR.lm" <-
-function(tR.model=tR.model,training.data=training.data,...)
+"buildModel.lm" <-
+function(quantmod,training.data,...)
 {
-	l <- lm(formula=tR.model@model.formula,data=training.data,...);
+	l <- lm(formula=quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=l,
                 "inputs"=attr(terms(l),"term.labels"))); 
 }
 
-"tR.step" <-
-function(tR.model,training.data,...)
+"buildModel.step" <-
+function(quantmod,training.data,...)
 {
-    s <- step(lm(formula=tR.model@model.formula,data=training.data,...),...);
+    s <- step(lm(formula=quantmod@model.formula,data=training.data,...),...);
 	return(list("fitted"=s,
                 "inputs"=NULL)); 
 }
 
-"tR.loess" <-
-function(tR.model,training.data,...)
+"buildModel.loess" <-
+function(quantmod,training.data,...)
 {
-    l <- loess(tR.model@model.formula,data=training.data,...);
+    l <- loess(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=l,
                 "inputs"=attr(terms(l),"term.labels"))); 
 }
 
 ####### quantile regression method 'rq' - requires package quantreg
-"tR.rq" <-
-function(tR.model,training.data,...)
+"buildModel.rq" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(quantreg),FALSE)) == 1) 
         stop("Required package 'quantreg' for method 'rq' was not found\n");
-    r <- rq(tR.model@model.formula,data=training.data,...);
+    r <- rq(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=r,
                 "inputs"=attr(terms(r),"term.labels"))); 
 }
 
 ####### resistant regression method 'lqs' - requires package MASS
-"tR.lqs" <-
-function(tR.model,training.data,...)
+"buildModel.lqs" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(MASS),FALSE)) == 1) 
         stop("Required package 'MASS' for method 'lqs' was not found\n");
-    lq <- lqs(tR.model@model.formula,data=training.data,...);
+    lq <- lqs(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=lq,
                 "inputs"=attr(terms(lq),"term.labels"))); 
 }
 
 ####### robust regression method 'rlm' - requires package MASS
-"tR.rlm" <-
-function(tR.model,training.data,...)
+"buildModel.rlm" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(MASS),FALSE)) == 1) 
         stop("Required package 'MASS' for method 'rlm' was not found\n");
-    rl <- rlm(tR.model@model.formula,data=training.data,...);
+    rl <- rlm(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=rl,
                 "inputs"=attr(terms(rl),"term.labels"))); 
 }
 
 ####### neural net method - requires package nnet
-"tR.nnet" <-
-function(tR.model,training.data,...)
+"buildModel.nnet" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(nnet),FALSE)) == 1) 
         stop("Required package 'nnet' for method 'nnet' was not found\n");
-	nn <- nnet(tR.model@model.formula,data=training.data,...);
+	nn <- nnet(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=nn,
                 "inputs"=attr(terms(nn),"term.labels"))); 
 }
@@ -82,17 +82,17 @@ function(object,data,...)
 }
 
 ####### projection pursuit regression method - requires stats
-"tR.ppr" <-
-function(tR.model,training.data,...)
+"buildModel.ppr" <-
+function(quantmod,training.data,...)
 {
-	p <- ppr(tR.model@model.formula,data=training.data,...);
+	p <- ppr(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=p,
                 "inputs"=attr(terms(p),"term.labels"))); 
 }
 
 ####### mars method - requires package mda
-"tR.mars" <-
-function(tR.model,training.data,...)
+"buildModel.mars" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(mda),FALSE)) == 1)
         stop("Required package 'mda' for method 'mars' was not found\n");
@@ -112,8 +112,8 @@ function(object,data,...)
 }
 
 ####### polymars method - requires package polspline
-"tR.polymars" <-
-function(tR.model,training.data,...)
+"buildModel.polymars" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(polspline),FALSE)) == 1)
         stop("Required package 'polspline' for method 'polymars' was not found\n");
@@ -133,8 +133,8 @@ function(object,data,...)
 }
 
 ####### lars method - requires package lars
-"tR.lars" <-
-function(tR.model,training.data,...)
+"buildModel.lars" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(lars),FALSE)) == 1)
         stop("Required package 'lars' for method 'lars' was not found\n");
@@ -155,12 +155,12 @@ function(object,data,lars.s,...)
 }
 
 ####### rpart method - requires package rpart
-"tR.rpart" <-
-function(tR.model,training.data,...)
+"buildModel.rpart" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(rpart),FALSE)) == 1)
          stop("Required package 'rpart' for method 'rpart' was not found\n");
-	rp <- rpart(tR.model@model.formula,data=training.data,...);
+	rp <- rpart(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
 }
@@ -174,12 +174,12 @@ function(object,data,...)
 }
 
 ####### tree method - requires package tree
-"tR.tree" <-
-function(tR.model,training.data,...)
+"buildModel.tree" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(tree),FALSE)) == 1)
          stop("Required package 'tree' for method 'tree' was not found\n");
-	rp <- tree(tR.model@model.formula,data=training.data,...);
+	rp <- tree(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
 }
@@ -193,12 +193,12 @@ function(object,data,...)
 }
 
 ####### randomForest method - requires package randomForest
-"tR.randomForest" <-
-function(tR.model,training.data,...)
+"buildModel.randomForest" <-
+function(quantmod,training.data,...)
 {
     if(length(try(library(randomForest),FALSE)) == 1)
          stop("Required package 'randomForest' for method 'randomForest' was not found\n");
-	rp <- randomForest(tR.model@model.formula,data=training.data,...);
+	rp <- randomForest(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
 }
