@@ -16,11 +16,11 @@
   model.results[which(is.na(model.results))] <- 0;
   model.cumret <- cumprod(1+model.results);
     signal.accuracy <- length(model.results[as.numeric(model.results) > 0])/length(model.results);
-    pos.days <- trade.signal[trade.signal[,1] > 0]
-    neg.days <- trade.signal[trade.signal[,1] < 0]
+    pos.days <- trade.signal[which(trade.signal[,1] > 0),]
+    neg.days <- trade.signal[which(trade.signal[,1] < 0),]
     
     signal.summary <- table(trade.signal[,2])
-    if(any(signal.summary==0))
+    if(any(signal.summary==0)) {
         warning("Model results are all one direction.")
     } else {
         pos.days.accuracy <- sum(ifelse(pos.days[,1]*pos.days[,2] > 0, 1, 0))/NROW(pos.days)
@@ -35,8 +35,9 @@
   CAGR <- as.numeric((model.cumret[trade.end])^(1/(as.numeric(holding.period)/252))-1);
   HPR <- as.numeric(model.cumret[length(model.cumret)])-1;
   accuracy <- zoo(NULL,model.index);
-  accuracy = list(
-             raw.signal.bias,pos.days.accuracy,neg.days.accuracy)
+  directional.accuracy = list(
+             raw.signal.bias,pos.days.accuracy,neg.days.accuracy,
+             pos.days.results,neg.days.results)
   
 
     periods <- match.arg(ret.type,c("weeks","months","quarters","years"),several.ok=TRUE)
@@ -65,7 +66,7 @@
   quantmodReturn@CAGR <- CAGR
   quantmodReturn@HPR <- HPR
   quantmodReturn@accuracy <- accuracy
-#  quantmodReturn@accuracy <- accuracy;
+  quantmodReturn@directional.accuracy <- directional.accuracy;
   return(quantmodReturn);
 
 }

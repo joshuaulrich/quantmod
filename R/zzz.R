@@ -27,6 +27,7 @@ setClass("quantmodReturn",representation(
                     CAGR="numeric",
                     HPR="numeric",
                     accuracy="zoo",
+                    directional.accuracy="list",
                     dist.of.returns="list",
                     returnsBy="zoo"
                     )
