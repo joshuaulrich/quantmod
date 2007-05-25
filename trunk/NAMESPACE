@@ -27,7 +27,7 @@ export(modelData,
     removeSymbols,
     fittedModel,
 	buildModel)
-S3method(plot,tR.results)
+S3method(plot,quantmodResults)
 ##S3method(lag,numeric)
 S3method(predict,kmgmdh)
 S3method(predictModel,default)
@@ -39,7 +39,7 @@ S3method(predictModel,rpart)
 S3method(predictModel,tree)
 S3method(predictModel,randomForest)
 export(weeks,weeks.zoo,months.zoo,quarters.zoo,years,years.zoo,weekdays.zoo)
-exportClass(tR.model)
-exportClass(tR.results,tR.return)
+exportClass(quantmod)
+exportClass(quantmodResults,quantmodReturn)
 exportClass(kmgmdh)
 exportMethods(show,summary,'fittedModel<-')

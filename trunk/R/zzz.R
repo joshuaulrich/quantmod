@@ -5,7 +5,7 @@
 }
 setOldClass("zoo");
 setOldClass("Date");
-setClass("tR.model",representation(
+setClass("quantmod",representation(
                     model.id="character",
 		            model.spec="formula",
                     model.formula="formula",
@@ -21,7 +21,7 @@ setClass("tR.model",representation(
                     model.data="zoo"
                     )
         );
-setClass("tR.return",representation(
+setClass("quantmodReturn",representation(
                     results="zoo",
                     returns="zoo",
                     CAGR="numeric",
@@ -31,14 +31,14 @@ setClass("tR.return",representation(
                     returnsBy="zoo"
                     )
         );
-setClass("tR.results",representation(
-                    model="tR.model",
+setClass("quantmodResults",representation(
+                    model="quantmod",
                     signal="zoo",
-                    return="tR.return"
+                    return="quantmodReturn"
                     )
         );
-setMethod("show","tR.model", function(object) {
-	cat("\ntR.model object:  ",
+setMethod("show","quantmod", function(object) {
+	cat("\nquantmod object:  ",
         object@model.id,"\tBuild date: ",
         paste(object@build.date),"\n");
 	cat("\nModel Specified: \n    ",
@@ -62,8 +62,8 @@ setMethod("show","tR.model", function(object) {
 	}
 }
 )
-setMethod("summary","tR.model", function(object) {
-	cat("\ntR.model object:  ",
+setMethod("summary","quantmod", function(object) {
+	cat("\nquantmod object:  ",
         object@model.id,"\tBuild date: ",
         paste(object@build.date),"\n");
 	cat("\nModel Specified: \n    ",
@@ -87,7 +87,7 @@ setMethod("summary","tR.model", function(object) {
     }
 })
 
-setMethod("show","tR.results", function(object) {
+setMethod("show","quantmodResults", function(object) {
     cat("\n  Model: ",object@model@model.id,"\n")
 	cat("\n  C.A.G.R.: ",sprintf("%04.2f%%",object@return@CAGR*100),"\tH.P.R.: ",
         sprintf("%04.2f%%",object@return@HPR*100),"\n");
@@ -106,7 +106,7 @@ setMethod("show","tR.results", function(object) {
 
 "fittedModel"<-function(object) {object@fitted.model}
 setGeneric("fittedModel<-", function(x,...,value) {standardGeneric("fittedModel<-")})
-setReplaceMethod("fittedModel","tR.model", function(x,...,value)
+setReplaceMethod("fittedModel","quantmod", function(x,...,value)
 {
     x@fitted.model <- value
     
@@ -136,7 +136,7 @@ function(object,data,...)
 {
     predict(object,data,...);
 }
-'plot.tR.results' <-
+'plot.quantmodResults' <-
 function(object,...)
 {
     ret.by <- object@return@returnsBy

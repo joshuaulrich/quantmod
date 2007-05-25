@@ -1,7 +1,7 @@
 "getModelData" <-
 function(model,na.rm=TRUE)
 {
-    if(class(model) != 'tR.model') stop("model must be of class 'tR.model'\n");
+    if(class(model) != 'quantmod') stop("model must be of class 'quantmod'\n");
     if(length(model@model.inputs) == 0) {
         #if model.inputs is not yet defined, create full zoo object for building
         build.vars <- c(model@model.target,model@build.inputs);
@@ -75,7 +75,7 @@ function(model,na.rm=TRUE)
 }
 "getModelData.original" <-
 function(model,na.rm=TRUE) {
-  if(class(model) != "tR.model") stop("model must be of class 'tR.model'");
+  if(class(model) != "quantmod") stop("model must be of class 'quantmod'");
   if(length(model@model.inputs) == 0) {
     #if model.inputs is not yet defined, create full zoo object for building
     build.vars <- c(model@model.target,model@build.inputs);
@@ -110,7 +110,7 @@ function(model,na.rm=TRUE) {
 
 "stripModelData" <-
 function(model) {
-    if(class(model) != "tR.model") stop("model must be of class 'tR.model'");
+    if(class(model) != "quantmod") stop("model must be of class 'quantmod'");
     model@model.data <- zoo(0,0);
     model@price.levels <- zoo(0,0);
     return(model);
