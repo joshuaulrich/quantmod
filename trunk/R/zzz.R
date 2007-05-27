@@ -113,6 +113,7 @@ setReplaceMethod("fittedModel","quantmod", function(x,...,value)
     
 }
 )
+
 ## setGeneric('plot', function(x,y,...) { standardGeneric('plot') });
 ## setMethod("plot","tR.results", function(x,y,...) {
 ##     object <- x
