@@ -20,7 +20,7 @@
     neg.days <- trade.signal[which(trade.signal[,1] < 0),]
     
     signal.summary <- table(trade.signal[,2])
-    if(any(signal.summary==0)) {
+    if(any(signal.summary==0) | dim(signal.summary)==1) {
         warning("Model results are all one direction.")
     } else {
         pos.days.accuracy <- sum(ifelse(pos.days[,1]*pos.days[,2] > 0, 1, 0))/NROW(pos.days)
