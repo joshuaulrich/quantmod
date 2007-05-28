@@ -6,7 +6,8 @@ function(Symbols=NULL,
          reload.Symbols = TRUE,
          verbose = FALSE,
          warnings = TRUE,
-         na.rm = TRUE,
+         #na.rm = TRUE,
+         src = c("MySQL","yahoo","google","economagic"),
          user=NULL,password=NULL,dbname=NULL)  {
 
         if(reload.Symbols) {
@@ -15,24 +16,43 @@ function(Symbols=NULL,
                 Symbols <- unique(c(old.Symbols, Symbols))
             }
         }
-        removeSymbols(env)
+        removeSymbols(env=env)
+      available.src = c("MySQL","yahoo","google","economagic")
+      src = available.src[pmatch(src,available.src)][1]
 
       if(!is.null(Symbols)) {
         Symbols <- as.list(Symbols)
+        Symbols <- do.call(paste('getSymbols.',src,sep=''),list(Symbols=Symbols,env=env,db.fields=db.fields,
+                                        field.names=field.names,reload.Symbols=reload.Symbols,
+                                        verbose=verbose,warnings=warnings,
+                                        user=user,password=password,dbname=dbname))
+
+    
+        assign('.getSymbols',Symbols,env);
+        invisible(return(env))
+    } else {warning('no Symbols specified')}
+}
+"getSymbols.MySQL" <- function(Symbols,env,
+                               db.fields=c('date','o','h','l','c','v','a'),
+                               field.names = NULL,
+                               reload.Symbols = TRUE,
+                               verbose = FALSE,
+                               warnings = TRUE,
+                               user=NULL,password=NULL,dbname=NULL,...) {
         if(is.null(user) || is.null(password) || is.null(dbname)) {
             if(!is.null(getOption('tR.db'))) {
-                user <- getOption('tR.db')['user'];
-                password <- getOption('tR.db')['password'];
-                dbname <- getOption('tR.db')['dbname'];
+                user <- getOption('tR.db')$user
+                password <- getOption('tR.db')$password
+                dbname <- getOption('tR.db')$dbname
             } else {
                 stop('db connection params must be specified in fetchRawData call or via options("tR.")');
             }
         }
-    
         con <- dbConnect(MySQL(),user=user,password=password,dbname=dbname)
         db.Symbols <- dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
-            missing.db.symbol = unlist(Symbols[which((Symbols %in% db.Symbols) == FALSE)])
+          missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
+          #missing.db.symbol = unlist(Symbols[which((Symbols %in% db.Symbols) == FALSE)])
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
                 Symbols <- Symbols[Symbols %in% db.Symbols]
         }
@@ -44,10 +64,10 @@ function(Symbols=NULL,
                 rs <- dbSendQuery(con, query)
                 fr <- fetch(rs, n=-1)
                 fr <- data.frame(fr[,-1],row.names=fr[,1])
-            if(na.rm) {
+#            if(na.rm) {
                 ##if(i > 1) fr <- subset(fr, rownames(fr) %in% dates)
                 ##if(i==1) dates <- rownames(fr);
-            }
+#            }
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
@@ -56,20 +76,26 @@ function(Symbols=NULL,
             if(verbose) cat('done\n')
         }
         dbDisconnect(con)
-        assign('.getSymbols',Symbols,env);
-        invisible(return(env))
-    } else {warning('no Symbols specified')}
+        return(Symbols)
+
 }
-
-
 "removeSymbols" <- 
-function(env=.GlobalEnv) {
+function(Symbols=NULL,env=.GlobalEnv) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
-        Symbols <- paste(get('.getSymbols',env))
+    getSymbols <- get('.getSymbols',env,inherits=FALSE)
+      if(is.null(Symbols)) {
+        Symbols <- paste(getSymbols)
+      } else {
+        #Symbols now has ONLY existing Symbols in it
+        Symbols <- Symbols[Symbols %in% unlist(getSymbols)]
+      }
+      remove(list=as.character(Symbols),envir=env)
+      Symbols.remaining <- getSymbols[!unlist(getSymbols) %in% Symbols]
+      if(length(Symbols.remaining) == 0) {
         remove(list=c('.getSymbols'),envir=env)
-    #            search.pos = which(match(search(),symbols[i])==TRUE)
-    #            if(length(search.pos) > 0) detach(pos=search.pos)            
-        remove(list=as.character(Symbols),envir=env)
+      } else {
+        assign('.getSymbols',Symbols.remaining,env)
+      }
     }
 }
 
