@@ -52,7 +52,6 @@ function(Symbols=NULL,
         db.Symbols <- dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
           missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
-          #missing.db.symbol = unlist(Symbols[which((Symbols %in% db.Symbols) == FALSE)])
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
                 Symbols <- Symbols[Symbols %in% db.Symbols]
         }
@@ -64,15 +63,10 @@ function(Symbols=NULL,
                 rs <- dbSendQuery(con, query)
                 fr <- fetch(rs, n=-1)
                 fr <- data.frame(fr[,-1],row.names=fr[,1])
-#            if(na.rm) {
-                ##if(i > 1) fr <- subset(fr, rownames(fr) %in% dates)
-                ##if(i==1) dates <- rownames(fr);
-#            }
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
             assign(Symbols[[i]],fr,env)
-####            attach(get(Symbols[[i]],1),name=Symbols[[i]])
             if(verbose) cat('done\n')
         }
         dbDisconnect(con)
