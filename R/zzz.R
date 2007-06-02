@@ -1,7 +1,7 @@
 ".onLoad" <- function(lib,pkg) {
-  require(methods,quietly=TRUE);
-  require(zoo,quietly=TRUE);
-  require(RMySQL,quietly=TRUE);
+#  require(methods,quietly=TRUE);
+#  require(zoo,quietly=TRUE);
+#  require(RMySQL,quietly=TRUE);
 }
 setOldClass("zoo");
 setOldClass("Date");
