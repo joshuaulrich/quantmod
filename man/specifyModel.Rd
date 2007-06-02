@@ -10,48 +10,70 @@
 \alias{Vo}
 \alias{Ad}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Create quantmod object }
+\title{ Specify Model Formula For quantmod Process }
 \description{
-Used to create a quantmod object for use in building, trading, and testing.
+Create a single reusable model specification for subsequent buildModel calls. 
+An object of class \code{quantmod} is created that can be then be reused with different
+modelling methods and parameters.  No data frame is specified, as data is retrieved
+from potentially multiple environments, and internal calls to getSymbols.
 }
 \usage{
 specifyModel(formula)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-    \item{formula: target ~ input1 [+ input2 [+ ...]]}
+    \item{formula}{an object of class \code{formula} (or one that can be coerced to
+                   that class): a symbolic description of the model to be fitted.
+                   The details of model specifcation are given under Details.}
 }
 \details{
-Models are specified through the standard formula mechanism. Dependent variable ~ Independent variables.  Individual elements must be specified using tR package conventions. (e.g. To use the close of Motorola for an input you would type: Cl(MOT).
+Models are specified through the standard formula mechanism. 
+
+As financial models may include a variety of financial and economic indicators,
+each differing in source, frequency and/or class,
+a single mechanism to specify sources is included within a call to specifyModel.
+All symbols are first retrieved from the global environment, without inheritence.
+If an object is not found in the global environment, it is added to a
+list of objects to load through the getSymbols function. getSymbols retrieves each
+object specified by using information as to its location specified apriori with a
+call to quantmodOptions.  
 
 Current transforms include:
 
-[Op]en, [Lo]w, [Hi]gh, [Cl]ose, [Vo]lume, [Ad]justed close
-
-[Next](x, k=1) next k period's value,  
-[Lag](x, k=1) previous period's value, an S3 method.
-[Delta] change over k periods
+\itemize{
+    \item \code{Op:} Open
+    \item \code{Lo} Low
+    \item \code{Hi} High
+    \item \code{Cl} Close
+    \item \code{Vo} Volume
+    \item \code{Ad} Adj. Close
+    \item \code{OpCl} Open to Close 
+    \item \code{OpHi} Open to High 
+    \item \code{OpLo} Open to Low 
+    \item \code{LoHi} Low to High 
+    \item \code{LoCl} Low to Close 
+    \item \code{HiCl} High to Close
+    \item \code{Next}(x, k=1) next (k-)period's value
+    \item \code{Lag}(x, k=1) previous (k-)period's value
+    \item \code{Delta} change over (k-)periods
+}
 }
 
 \value{
-Returns object of class \code{quantmod}
+Returns object of class \code{quantmod}.  Use \code{modelData} to extract
+full data set as \code{zoo} object.
 }
 
 \author{ Jeffrey Ryan }
-\note{ Additional transforms are coming }
+\note{ It is possible to include additional series by simply specifying
+       the objects symbol in the formula.  Additional methods and sources of 
+       data acquisition can be added through \code{getSymbols} customization.
+       See \code{\link{getSymbols.MySQL}} and \code{\link{getSymbols.yahoo}} for examples}
 
 
 \seealso{ \code{\link{getModelData}} \code{\link{getSymbols}}
- \code{\link{buildModel}} \code{\link{tradeModel}} \code{\link{formula}}
+ \code{\link{buildModel}} \code{\link{tradeModel}} \code{\link{formula}}}
 \examples{
-# create model with dependent variable next_open_to_close on DIA,
-# against independent variables open_to_high DIA and a 2,3,4-day lag
-# of the open of the DIA.
 
-#DO NOT RUN
-#newmodel <- specifyModel(next.per(delta(Op(DIA),Cl(DIA))) ~ delta(Op(DIA),Hi(DIA)) + lag(Op(DIA),2:4))
-
-# returns a tR.object for modelling and evaluation
 
 }
 \keyword{ models formula }% at least one, from doc/KEYWORDS
