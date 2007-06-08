@@ -37,44 +37,44 @@ function(x)
 "OpCl" <-
 function(x)
 {
-    return(quantmod::Delta(Op(x),Cl(x)))
+    return(quantmod::Delt(Op(x),Cl(x)))
 }
 
 "OpOp" <-
 function(x)
 {
-    return(quantmod::Delta(Op(x)))
+    return(quantmod::Delt(Op(x)))
 }
 
 "ClCl" <-
 function(x)
 {
-    return(quantmod::Delta(Cl(x)))
+    return(quantmod::Delt(Cl(x)))
 }
 "OpLo" <-
 function(x)
 {
-    return(quantmod::Delta(Op(x),Lo(x)))
+    return(quantmod::Delt(Op(x),Lo(x)))
 }
 "OpHi" <-
 function(x)
 {
-    return(quantmod::Delta(Op(x),Hi(x)))
+    return(quantmod::Delt(Op(x),Hi(x)))
 }
 "LoHi" <-
 function(x)
 {
-    return(quantmod::Delta(Lo(x),Hi(x)))
+    return(quantmod::Delt(Lo(x),Hi(x)))
 }
 "LoCl" <-
 function(x)
 {
-    return(quantmod::Delta(Lo(x),Cl(x)))
+    return(quantmod::Delt(Lo(x),Cl(x)))
 }
 "HiCl" <-
 function(x)
 {
-    return(quantmod::Delta(Hi(x),Cl(x)))
+    return(quantmod::Delt(Hi(x),Cl(x)))
 }
 "Next" <-
 function(x,k=1)
@@ -95,7 +95,7 @@ function(x,k=1)
     )
 }
 
-"Delta" <-
+"Delt" <-
 function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
 {
     type <- match.arg(type)[1]
