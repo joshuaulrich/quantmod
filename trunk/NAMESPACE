@@ -5,7 +5,7 @@ importFrom(stats,lag)
 export(modelData,
     Op,Lo,Hi,Cl,Vo,Ad,
     OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
-    Delta,
+    Delt,
     Next,
     Lag,
     lags2,

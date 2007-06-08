@@ -2,7 +2,7 @@
 \alias{specifyModel}
 \alias{Next}
 \alias{Lag}
-\alias{Delta}
+\alias{Delt}
 \alias{Op}
 \alias{Hi}
 \alias{Lo}
@@ -54,7 +54,7 @@ Current transforms include:
     \item \code{HiCl} High to Close
     \item \code{Next}(x, k=1) next (k-)period's value
     \item \code{Lag}(x, k=1) previous (k-)period's value
-    \item \code{Delta} change over (k-)periods
+    \item \code{Delt} change over (k-)periods
 }
 }
 
