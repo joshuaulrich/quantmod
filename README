@@ -1,0 +1,49 @@
+			R-Forge SVN README
+
+
+(See "http://download.r-forge.r-project.org/manuals/R-Forge_Manual.pdf"
+       for detailed information on registering a new project.
+
+1. Introduction
+-----------------------------------------------------------------------
+R is free software distributed under a GNU-style copyleft. R-Forge is
+a service for R users and package developers providing certain tools
+for collaborative source code management.
+
+2. The directory you're in
+-----------------------------------------------------------------------
+This is the repository of your project. It contains two important
+pre-defined directories namely 'www' and 'pkg'. They must not be
+deleted otherwise R-Forge's core functionality will not be available
+(daily check and build of your package or project websites).
+These two directories are standardized and therefore are going to be
+described in this README. The rest of your repository can be used as
+you like.
+
+3. 'pkg' directory
+-----------------------------------------------------------------------
+Typically this directory contains the R package with the usual
+DESCRIPTION and R/, man/, data/ directories etc (see 'Writing R 
+Extension' for more details). In the future it will also be possible to
+have multiple packages managed by a control file, however currently
+this feature is still under development).
+
+Furthermore, this directory will be checked out daily, the package is
+checked and if it passes this procedure it is build and made available at
+http://R-Forge.R-project.org/src/contrib/ (as source tar.gz and win32
+.zip). It should be possible to install the package via
+install.packages("foo",url="R-Forge.R-project.org") within R
+then.
+
+4. 'www' directory
+-----------------------------------------------------------------------
+This directory contains your project homepage which is available at
+http://<projectname>.R-Forge.R-project.org. 
+Note that it will be checked out daily, so please take
+into consideration that it will not be available right after you
+commit your changes or updates. 
+
+5. Help
+-----------------------------------------------------------------------
+If you need help don't hesitate to contact us
+(R-Forge@R-project.org)
