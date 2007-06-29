@@ -2,7 +2,7 @@
 function(x,by=months,from=NULL,to=NULL) {
   if(is.null(from)) from <- start(as.zoo(x))
   if(is.null(to)) to <- end(as.zoo(x))
-  x <- subset(x,subset=rownames(x) >= from & rownames(x) <= to)
+  ##x <- subset(x,subset=rownames(x) >= from & rownames(x) <= to)
   x.period <- x[breakpoints(as.zoo(x),by=by,TRUE),]
   adj.length <- NROW(x.period)
   adj.x.period <- Ad(x.period)
