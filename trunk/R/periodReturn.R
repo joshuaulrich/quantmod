@@ -10,7 +10,7 @@ function(x,by=months,from=NULL,to=NULL) {
   returns <- ((adj.x.period - adj.start)/adj.start)
   returns <- zoo(returns,as.Date(index(as.zoo(x.period))))
   class(returns) <- c('quantmod.returns',as.character(substitute(by)),'zoo')
-  returns
+  subset(returns,index(returns) >= as.Date(from) & index(returns) <= as.Date(to))
 }
 `dailyReturn` <-
 function(x,from=NULL,to=NULL) {
