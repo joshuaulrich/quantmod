@@ -13,6 +13,13 @@ of returns calculated during specified period.
 }
 \usage{
 periodReturn(x, by = months, from = NULL, to = NULL)
+
+allReturns(x, from = NULL, to = NULL)
+dailyReturn(x, from = NULL, to = NULL)
+weeklyReturn(x, from = NULL, to = NULL)
+monthlyReturn(x, from = NULL, to = NULL)
+quarterlyReturn(x, from = NULL, to = NULL)
+annualReturn(x, from = NULL, to = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
