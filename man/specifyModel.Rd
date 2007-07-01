@@ -34,10 +34,10 @@ a single mechanism to specify sources is included within a call to specifyModel.
 All symbols are first retrieved from the global environment, without inheritence.
 If an object is not found in the global environment, it is added to a
 list of objects to load through the getSymbols function. getSymbols retrieves each
-object specified by using information as to its location specified apriori with a
-call to quantmodOptions.  
+object specified by using information as to its location specified apriori 
+via getSymbols.Default or quantmod.Default
 
-Current transforms include:
+Current transforms to \code{zoo.OHLC} objects include:
 
 \itemize{
     \item \code{Op:} Open
