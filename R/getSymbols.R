@@ -2,11 +2,11 @@
 function(Symbols=NULL,
          env=.GlobalEnv,
          db.fields = c('date','o','h','l','c','v','a'),
+         return.type = c('quantmod.ohlc','data.frame'),
          field.names = NULL,
          reload.Symbols = TRUE,
          verbose = FALSE,
          warnings = TRUE,
-         #na.rm = TRUE,
          src = c("MySQL","yahoo","google","economagic"),
          user=NULL,password=NULL,dbname=NULL)  {
 
@@ -17,6 +17,7 @@ function(Symbols=NULL,
             }
         }
         removeSymbols(env=env)
+#this needs to be changed to accomodate additional methods - no partials??!!
       available.src = c("MySQL","yahoo","google","economagic")
       src = available.src[pmatch(src,available.src)][1]
 
@@ -27,13 +28,13 @@ function(Symbols=NULL,
                                         verbose=verbose,warnings=warnings,
                                         user=user,password=password,dbname=dbname))
 
-    
         assign('.getSymbols',Symbols,env);
         invisible(return(env))
     } else {warning('no Symbols specified')}
 }
 "getSymbols.MySQL" <- function(Symbols,env,
                                db.fields=c('date','o','h','l','c','v','a'),
+                               return.type = c('quantmod.ohlc','data.frame'),
                                field.names = NULL,
                                reload.Symbols = TRUE,
                                verbose = FALSE,
@@ -59,13 +60,14 @@ function(Symbols=NULL,
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
-                query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
-                rs <- dbSendQuery(con, query)
-                fr <- fetch(rs, n=-1)
-                fr <- data.frame(fr[,-1],row.names=fr[,1])
+            query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
+            rs <- dbSendQuery(con, query)
+            fr <- fetch(rs, n=-1)
+            fr <- data.frame(fr[,-1],row.names=fr[,1])
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
+            class(fr) <- c("quantmod.OHLC","data.frame")
             assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
         }
