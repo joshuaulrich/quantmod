@@ -33,6 +33,7 @@ export(modelData,
 	buildModel)
 S3method(plot,quantmodResults)
 ##S3method(lag,numeric)
+S3method(periodReturn,quantmod.OHLC)
 S3method(predict,kmgmdh)
 S3method(predictModel,default)
 S3method(predictModel,nnet)
