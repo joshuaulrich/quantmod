@@ -1,16 +1,21 @@
 `periodReturn` <-
+function(x,...)
+{
+    UseMethod("periodReturn");
+}
+`periodReturn.quantmod.OHLC` <-
 function(x,by=months,from=NULL,to=NULL) {
   if(is.null(from)) from <- start(as.zoo(x))
   if(is.null(to)) to <- end(as.zoo(x))
-  ##x <- subset(x,subset=rownames(x) >= from & rownames(x) <= to)
   x.period <- x[breakpoints(as.zoo(x),by=by,TRUE),]
   adj.length <- NROW(x.period)
   adj.x.period <- Ad(x.period)
   adj.start <- c(Ad(x)[1],Ad(x.period)[-adj.length])
   returns <- ((adj.x.period - adj.start)/adj.start)
   returns <- zoo(returns,as.Date(index(as.zoo(x.period))))
+  returns <- subset(returns,index(returns) >= as.Date(from) & index(returns) <= as.Date(to))
   class(returns) <- c('quantmod.returns',as.character(substitute(by)),'zoo')
-  subset(returns,index(returns) >= as.Date(from) & index(returns) <= as.Date(to))
+  return(returns)
 }
 `dailyReturn` <-
 function(x,from=NULL,to=NULL) {
