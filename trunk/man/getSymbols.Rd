@@ -8,6 +8,7 @@
 \alias{getSymbols.Postgresql}
 \alias{getSymbols.economagic}
 \alias{getSymbols.stlfed}
+\alias{getSymbols.Default}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Retrieve Symbols from Multiple Sources }
 \description{
@@ -18,7 +19,17 @@ data sources follow an S3-like naming convention. Additional methods can be adde
 by simply adhering to the convention.
 }
 \usage{
-getSymbols(Symbols = NULL, env = .GlobalEnv, db.fields = c("date", "o", "h", "l", "c", "v", "a"), field.names = NULL, reload.Symbols = TRUE, verbose = FALSE, warnings = TRUE, src = c("MySQL", "yahoo", "google", "economagic"), user = NULL, password = NULL, dbname = NULL)
+getSymbols(Symbols = NULL, 
+           env = .GlobalEnv,
+           db.fields = c("date", "o", "h", "l", "c", "v", "a"),
+           field.names = NULL,
+           reload.Symbols = TRUE,
+           verbose = FALSE,
+           warnings = TRUE,
+           src = c("MySQL", "yahoo", "google", "economagic"),
+           user = NULL, password = NULL, dbname = NULL)
+
+getSymbols.Default()
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,12 +49,14 @@ getSymbols(Symbols = NULL, env = .GlobalEnv, db.fields = c("date", "o", "h", "l"
 \details{
 \code{getSymbols} first looks to the local environment for matching symbols. 
 If found, the next symbol in Symbols is attempted.  Upon completion a list of 
-loaded symbols is stored in the global environment under the name .getSymbols.
+loaded symbols is stored in the global environment under the name \code{.getSymbols}.
 
 Objects loaded by \code{getSymbols} can be viewed with \code{showSymbols} and
-removed by a call to \code{removeSymbols}.  Additional methods can be created simply 
-following the S3-like naming convention where getSymbols.NAME is used for your function
-NAME.
+removed by a call to \code{removeSymbols}.  Additional retrieval methods can be
+created simply following the S3-like naming convention where getSymbols.NAME 
+is used for your function NAME.  See \code{getSymbols.skeleton}.
+
+getSymbols.Default can be used to specify defaults for all arguments.
 
 }
 \value{
@@ -57,42 +70,7 @@ A call to getSymbols will load into the specified environment one object for eac
 }
 \seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (Symbols = NULL, env = .GlobalEnv, db.fields = c("date", 
-    "o", "h", "l", "c", "v", "a"), field.names = NULL, reload.Symbols = TRUE, 
-    verbose = FALSE, warnings = TRUE, src = c("MySQL", "yahoo", 
-        "google", "economagic"), user = NULL, password = NULL, 
-    dbname = NULL) 
-{
-    if (reload.Symbols) {
-        if (exists(".getSymbols", env, inherits = FALSE)) {
-            old.Symbols <- get(".getSymbols", env)
-            Symbols <- unique(c(old.Symbols, Symbols))
-        }
-    }
-    removeSymbols(env = env)
-    available.src = c("MySQL", "yahoo", "google", "economagic")
-    src = available.src[pmatch(src, available.src)][1]
-    if (!is.null(Symbols)) {
-        Symbols <- as.list(Symbols)
-        Symbols <- do.call(paste("getSymbols.", src, sep = ""), 
-            list(Symbols = Symbols, env = env, db.fields = db.fields, 
-                field.names = field.names, reload.Symbols = reload.Symbols, 
-                verbose = verbose, warnings = warnings, user = user, 
-                password = password, dbname = dbname))
-        assign(".getSymbols", Symbols, env)
-        invisible(return(env))
-    }
-    else {
-        warning("no Symbols specified")
-    }
-  }
+getSymbols('QQQQ')  # loads symbol from default source
+getSymbols('F',src='yahoo') # loads Ford market data from yahoo
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ data }
