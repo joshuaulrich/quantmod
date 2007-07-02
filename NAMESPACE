@@ -2,6 +2,7 @@
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)
+importFrom(zoo,as.zoo)
 export(modelData,
     Op,Lo,Hi,Cl,Vo,Ad,
     OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
@@ -30,10 +31,14 @@ export(modelData,
     showSymbols,
     removeSymbols,
     fittedModel,
-	buildModel)
+	buildModel,
+    as.quantmod.OHLC)
 S3method(plot,quantmodResults)
 ##S3method(lag,numeric)
+S3method(as.zoo,data.frame)
+S3method(as.quantmod.OHLC,data.frame)
 S3method(periodReturn,quantmod.OHLC)
+S3method(periodReturn,zoo)
 S3method(predict,kmgmdh)
 S3method(predictModel,default)
 S3method(predictModel,nnet)
