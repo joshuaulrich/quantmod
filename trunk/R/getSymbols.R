@@ -63,11 +63,13 @@ function(Symbols=NULL,
             query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
             rs <- dbSendQuery(con, query)
             fr <- fetch(rs, n=-1)
-            fr <- data.frame(fr[,-1],row.names=fr[,1])
+            #fr <- data.frame(fr[,-1],row.names=fr[,1])
+            fr <- zoo(fr[,-1],order.by=as.Date(fr[,1]))
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
-            class(fr) <- c("quantmod.OHLC","data.frame")
+            #class(fr) <- c("quantmod.OHLC","data.frame")
+            class(fr) <- c("quantmod.OHLC","zoo")
             assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
         }
