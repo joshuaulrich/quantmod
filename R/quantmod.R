@@ -25,3 +25,36 @@ function(x,
   class(x) <- c('quantmod.OHLC','zoo')
   x
 }
+
+`as.quantmod.OHLC.quantmod.OHLC` <-
+function(x,
+         col.names=c('Open','High','Low','Close','Volume','Adjusted'),
+         name=NULL)
+{
+  if(is.null(name)) name <- deparse(substitute(x))
+  x <- as.zoo(x)
+  colnames(x) <- paste(name,'.',col.names,sep='')
+  class(x) <- c('quantmod.OHLC','zoo')
+  x
+}
+
+`as.quantmod.OHLC.zoo` <-
+function(x,
+         col.names=c('Open','High','Low','Close','Volume','Adjusted'),
+         name=NULL)
+{
+  if(is.null(name)) name <- deparse(substitute(x))
+  x <- as.zoo(x)
+  colnames(x) <- paste(name,'.',col.names,sep='')
+  class(x) <- c('quantmod.OHLC','zoo')
+  x
+}
+
+`[.quantmod.OHLC`<-
+function(x,i,j,drop=TRUE,...)
+{
+  class(x) <- "zoo"
+  x <- x[i,j,drop=TRUE,...]
+  class(x) <- c("quantmod.OHLC","zoo")
+  x
+}
