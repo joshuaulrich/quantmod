@@ -20,13 +20,18 @@ function(model,na.rm=TRUE)
         } else {
             ## get symbols from GlobaEnv and place in this environment
             assign(model.symbols[[i]],get(model.symbols[[i]],1),environment())
+            ## NEED to coerce to quantmod.OHLC and zoo object
         }
     }
 
     if(length(missing.symbols > 0)) getSymbols(missing.symbols,env=environment())
 
     target.data <- get(model.symbols[[1]],environment())
-    target.dates  <- rownames(target.data)
+    if("zoo" %in% class(target.data)) {
+        target.dates <- index(target.data)
+    } else {
+        target.dates  <- rownames(target.data)
+    }
     total.columns = NULL
     for(j in 1:length(model.symbols)) { # build single zoo object
         if(j == 1) {
@@ -34,7 +39,7 @@ function(model,na.rm=TRUE)
         } else {
             m <- merge(m,
                        zoo(get(model.symbols[[j]],environment()), #input columns from symbol i
-                       as.Date(rownames(get(model.symbols[[j]],environment()))))) 
+                       as.Date(index(get(model.symbols[[j]],environment()))))) 
         }            
         total.columns[j] <- ncol(m)
     }

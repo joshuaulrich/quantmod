@@ -43,7 +43,7 @@ setMethod("show","quantmod", function(object) {
         object@model.id,"\tBuild date: ",
         paste(object@build.date),"\n");
 	cat("\nModel Specified: \n    ",
-        gsub("\s+"," ",deparse(object@model.spec)),"\n");
+        gsub("[ ]+"," ",deparse(object@model.spec)),"\n");
         cat("\nModel Target: ",object@model.target,"\t\t",
             "Product: ",object@product,"\n");
 	cat("Model Inputs: ",
@@ -68,7 +68,7 @@ setMethod("summary","quantmod", function(object) {
         object@model.id,"\tBuild date: ",
         paste(object@build.date),"\n");
 	cat("\nModel Specified: \n    ",
-        gsub("\s+"," ",deparse(object@model.spec)),"\n");
+        gsub("[ ]+"," ",deparse(object@model.spec)),"\n");
         cat("\nModel Target: ",object@model.target,"\t\t",
             "Product: ",object@product,"\n");
 	cat("Model Inputs: ",
@@ -139,8 +139,69 @@ function(object,data,...)
     predict(object,data,...);
 }
 'plot.quantmodResults' <-
+function(x,...)
+{
+    ret.by <- x@return@returnsBy
+    plot(ret.by,type=c('l',rep('h',ncol(ret.by)-1)),...)
+}
+
+'formula.quantmod' <-
+function(x,...)
+{
+    x@model.spec
+}
+
+'coef.quantmod' <-
 function(object,...)
 {
-    ret.by <- object@return@returnsBy
-    plot(ret.by,type=c('l',rep('h',ncol(ret.by)-1)),...)
+    if(!is.null(fittedModel(object)))
+    coef(fittedModel(object),...)    
+}
+
+'coefficients.quantmod' <- coef.quantmod
+
+'fitted.quantmod' <-
+function(object,...)
+{
+    if(!is.null(fittedModel(object)))
+    fitted(fittedModel(object),...)
+}
+
+'fitted.values.quantmod' <- fitted.quantmod
+
+'residuals.quantmod' <-
+function(object,...)
+{
+    if(!is.null(fittedModel(object)))
+    residuals(fittedModel(object,...))
+}
+
+'resid.quantmod' <- residuals.quantmod
+
+'vcov.quantmod' <-
+function(object,...)
+{
+    if(!is.null(fittedModel(object)))
+    vcov(fittedModel(object,...))
+}
+
+'logLik.quantmod' <-
+function(object, ...)
+{
+    if(!is.null(fittedModel(object)))
+    logLik(fittedModel(object),...)
+}
+
+'anova.quantmod' <-
+function(object,...)
+{
+    if(!is.null(fittedModel(object)))
+    anova(fittedModel(object),...)
+}
+
+'plot.quantmod' <-
+function(x,...)
+{
+    if(!is.null(fittedModel(x)))
+    plot(fittedModel(x),...)
 }
