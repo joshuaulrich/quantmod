@@ -1,5 +1,5 @@
 `as.zoo.data.frame`<-
-function(x, row.date=TRUE, ...)
+function(x,row.date=TRUE,...)
 {
     if(row.date) {
         zoo(x,as.Date(rownames(x)),...)
@@ -10,14 +10,19 @@ function(x, row.date=TRUE, ...)
 }
 
 `as.quantmod.OHLC`<-
-function(x,...) {
+function(x,
+         #col.names=c('Open','High','Low','Close','Volume','Adjusted'),
+         #name=NULL,
+         ...)
+{
     UseMethod("as.quantmod.OHLC")
 }
 
 `as.quantmod.OHLC.data.frame`<-
 function(x,
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
-         name=NULL)
+         name=NULL,
+         ...)
 {
   if(is.null(name)) name <- deparse(substitute(x))
   x <- as.zoo(x)
@@ -29,7 +34,8 @@ function(x,
 `as.quantmod.OHLC.quantmod.OHLC` <-
 function(x,
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
-         name=NULL)
+         name=NULL,
+         ...)
 {
   if(is.null(name)) name <- deparse(substitute(x))
   x <- as.zoo(x)
@@ -41,7 +47,8 @@ function(x,
 `as.quantmod.OHLC.zoo` <-
 function(x,
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
-         name=NULL)
+         name=NULL,
+         ...)
 {
   if(is.null(name)) name <- deparse(substitute(x))
   x <- as.zoo(x)
