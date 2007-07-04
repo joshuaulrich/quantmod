@@ -1,12 +1,13 @@
 Package: quantmod
 Type: Package
 Title: quantmod - quantitative modelling and trading toolkit for R
-Version: 0.1-4
+Version: 0.1-5
 Date: 2007-05-19
 Author: Jeff Ryan
 Depends: zoo, DBI, RMySQL
+Suggests: MASS,mda,randomForest
 Maintainer: Jeff Ryan <jeff.a.ryan@gmail.com>
 Description: Trading support package for building, testing, and trading statistical models.
 LazyLoad: yes
 License: GPL
-Packaged: Sat May 19 2006; jeff ryan
+Packaged: Wed Jul 4 2007; jeff ryan
