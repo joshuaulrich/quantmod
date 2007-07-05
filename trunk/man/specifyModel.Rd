@@ -76,4 +76,4 @@ full data set as \code{zoo} object.
 
 
 }
-\keyword{ models formula }% at least one, from doc/KEYWORDS
+\keyword{ models }% at least one, from doc/KEYWORDS
