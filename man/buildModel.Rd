@@ -30,7 +30,7 @@ An object of class \code{quantmod} with fitted model attached
 ##---- Should be DIRECTLY executable !! ----
 ##-- ==>  Define data, use random,
 ##--	or do  help(data=index)  for the standard data sets.
-data(QQQQ)  # load QQQQ data set
+getSymbols('QQQQ',src='yahoo')  # load QQQQ data set
 q.model = specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ),0:3)
  
 

@@ -64,7 +64,7 @@ conversion to the suitable zoo object as returned by a call to \code{getSymbols}
 }
 \seealso{ \code{\link{modelReturn}} \code{\link{modelAnalysis}} \code{\link{getSymbols}} }
 \examples{
-getSymbols(QQQQ,src='yahoo')
+getSymbols('QQQQ',src='yahoo')
 allReturns(QQQQ)  # returns all periods
 
 periodReturn(QQQQ,by=years,from='2003-01-01')  # returns years 2003 to present
@@ -72,5 +72,4 @@ periodReturn(QQQQ,by=years,from='2003-01-01',to='2004-01-01')  # returns year 20
 
 rm(QQQQ)
 }
-\keyword{ ~kwd1 }% at least one, from doc/KEYWORDS
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ utilities }% at least one, from doc/KEYWORDS
