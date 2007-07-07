@@ -1,6 +1,7 @@
 "getModelData" <-
-function(model,na.rm=TRUE)
+function(x,na.rm=TRUE)
 {
+    model <- x
     if(class(model) != 'quantmod') stop("model must be of class 'quantmod'\n");
     if(length(model@model.inputs) == 0) {
         #if model.inputs is not yet defined, create full zoo object for building

@@ -1,5 +1,5 @@
 `periodReturn.quantmod.OHLC` <-
-function(x,by=months,from=NULL,to=NULL,....) {
+function(x,by=months,from=NULL,to=NULL) {
   if(is.null(from)) from <- start(as.zoo(x))
   if(is.null(to)) to <- end(as.zoo(x))
   x.period <- x[breakpoints(as.zoo(x),by=by,TRUE),]
@@ -14,7 +14,8 @@ function(x,by=months,from=NULL,to=NULL,....) {
   return(returns)
 }
 `periodReturn.zoo` <-
-function(x,by=months,from=NULL,to=NULL,...) {
+function(x,by=months,from=NULL,to=NULL) {
+  from.col <- 4
   x <- as.data.frame(x)
   if(is.null(from)) from <- start(as.zoo(x))
   if(is.null(to)) to <- end(as.zoo(x))
@@ -29,9 +30,8 @@ function(x,by=months,from=NULL,to=NULL,...) {
   attr(returns,'periodicity') <- as.character(substitute(by))
   return(returns)
 }
-formals(periodReturn.zoo) <- alist(x=,by=months,from=NULL,to=NULL,from.col=4,...=)
 `periodReturn` <-
-function(x,by=months,from=NULL,to=NULL,....) 
+function(x,by=months,from=NULL,to=NULL) 
 {
     UseMethod("periodReturn");
 }
@@ -39,7 +39,7 @@ function(x,by=months,from=NULL,to=NULL,....)
 
 `dailyReturn` <-
 function(x,from=NULL,to=NULL) {
-  periodReturn(x,by=weekdays,from,to,...)
+  periodReturn(x,by=weekdays,from,to)
 }
 
 `weeklyReturn` <-

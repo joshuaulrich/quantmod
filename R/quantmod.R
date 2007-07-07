@@ -11,8 +11,8 @@ function(x,row.date=TRUE,...)
 
 `as.quantmod.OHLC`<-
 function(x,
-         #col.names=c('Open','High','Low','Close','Volume','Adjusted'),
-         #name=NULL,
+         col.names=c('Open','High','Low','Close','Volume','Adjusted'),
+         name=NULL,
          ...)
 {
     UseMethod("as.quantmod.OHLC")
