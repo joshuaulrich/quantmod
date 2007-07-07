@@ -31,7 +31,7 @@ getSymbols(Symbols = NULL,
            reload.Symbols = TRUE,
            verbose = FALSE,
            warnings = TRUE,
-           src = c("MySQL", "yahoo", "google", "economagic"),
+           src = c("yahoo", "MySQL", "google", "economagic"),
            ...)
 
 showSymbols(env=.GlobalEnv)
