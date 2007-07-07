@@ -2,6 +2,7 @@
 \alias{getSymbols}
 \alias{showSymbols}
 \alias{removeSymbols}
+\alias{saveSymbols}
 \alias{getSymbols.yahoo}
 \alias{getSymbols.MySQL}
 \alias{getSymbols.csv}
@@ -12,9 +13,9 @@
 \alias{getSymbols.stlfed}
 \alias{getSymbols.Default}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Retrieve Symbols from Multiple Sources }
+\title{ Manage Data from Multiple Sources }
 \description{
-Load \code{Symbols} into
+Functions to manage \code{Symbols} in
 specified environment. Used by \code{\link{specifyModel}}
 to retrieve symbols specified in first step of modelling 
 procedure.  Not a true S3 method, but methods for different
@@ -35,6 +36,9 @@ getSymbols(Symbols = NULL,
 
 showSymbols(env=.GlobalEnv)
 removeSymbols(Symbols=NULL,env=.GlobalEnv)
+saveSymbols(Symbols = NULL,
+            file.path=stop("must specify 'file.path'"),
+            env = .GlobalEnv)
 }
 \arguments{
   \item{Symbols}{ a character vector specifying the names of each symbol to be loaded}
@@ -47,6 +51,7 @@ removeSymbols(Symbols=NULL,env=.GlobalEnv)
   \item{verbose}{ boolean to turn on status of retrieval. Defaults to FALSE }
   \item{warnings}{ boolean to turn on warnings. Defaults to TRUE }
   \item{src}{ character vector specifying method of retrieval.  }
+  \item{file.path}{ character string of file location }
   \item{\dots}{ additional parameters (currently not used) }
 }
 \details{

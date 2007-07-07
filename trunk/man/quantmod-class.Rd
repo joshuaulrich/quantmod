@@ -1,6 +1,7 @@
 \name{quantmod-class}
 \docType{class}
 \alias{quantmod-class}
+\alias{quantmod-show}
 
 \title{Class "quantmod" }
 \description{   Objects of class \code{quantmod} help to 
@@ -36,10 +37,6 @@ Normally objects are created as a result of a call to \code{specifyModel}.
 No methods defined with class "quantmod" in the signature.
 }
 \author{ Jeffrey A. Ryan }
-\note{ ~~further notes~~ }
-This is the core object used throughout the modelling process in
-the \code{quantmod} package.
-
 \seealso{
 }
 \examples{
