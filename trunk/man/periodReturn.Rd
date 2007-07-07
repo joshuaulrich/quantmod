@@ -45,7 +45,7 @@ annualReturn(x, from = NULL, to = NULL)
 }
 }
 \value{
-Returns a zoo object of class \code{quantmod.returns} with ending dates of each
+Returns object of class \code{quantmod.returns} with ending dates of each
 period indexing the returns
 }
 \references{ Bodie,Kane...}
@@ -62,7 +62,7 @@ be character strings representing dates in ISO 8601 format. (e.g. 1992-01-01).
 Additional methods to handle \code{ts} and \code{data.frame} objects will enable automatic
 conversion to the suitable zoo object as returned by a call to \code{getSymbols}
 }
-\seealso{ \code{\link{modelReturn}} \code{\link{modelAnalysis}} \code{\link{getSymbols}} }
+\seealso{\code{\link{getSymbols}} }
 \examples{
 getSymbols('QQQQ',src='yahoo')
 allReturns(QQQQ)  # returns all periods

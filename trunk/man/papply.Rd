@@ -16,7 +16,6 @@ papply(x, INDEX, FUN, ...)
   \item{\dots}{ ~~Describe \code{\dots} here~~ }
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
 }
 \value{
   ~Describe the value returned
@@ -29,26 +28,8 @@ papply(x, INDEX, FUN, ...)
 \author{ ~~who you are~~ }
 \note{ ~~further notes~~ 
 
- ~Make other sections like Warning with \section{Warning }{....} ~
 }
 \seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, INDEX, FUN, ...) 
-{
-    FUN <- match.fun(FUN)
-    y <- NULL
-    for (i in 1:(length(INDEX) - 1)) {
-        sindex <- (INDEX[i] + 1):INDEX[i + 1]
-        dat <- x[sindex]
-        y <- c(y, FUN(dat, ...))
-    }
-    return(y)
-  }
 }
-\keyword{ ~kwd1 }% at least one, from doc/KEYWORDS
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ utilities }% __ONLY ONE__ keyword per line

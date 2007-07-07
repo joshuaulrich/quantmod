@@ -18,7 +18,8 @@ setClass("quantmod",representation(
                     training.data="Date",
                     build.date="Date",
                     fitted.model="ANY",
-                    model.data="zoo"
+                    model.data="zoo",
+                    quantmod.version="numeric"
                     )
         );
 setClass("quantmodReturn",representation(

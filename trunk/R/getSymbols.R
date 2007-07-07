@@ -2,7 +2,7 @@
 function(Symbols=NULL,
          env=.GlobalEnv,
          db.fields = c('date','o','h','l','c','v','a'),
-         return.type = c('quantmod.ohlc','data.frame'),
+         return.type = c('quantmod.OHLC','zoo'),
          field.names = NULL,
          reload.Symbols = TRUE,
          verbose = FALSE,

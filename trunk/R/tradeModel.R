@@ -1,4 +1,4 @@
-"tradeModel" <- function(quantmod,
+"tradeModel" <- function(x,
                          signal.threshold=c(0,0),
                          leverage=1,
                          return.model=TRUE,
@@ -8,7 +8,7 @@
                          ret.type=c('weeks','months','quarters','years'),...)
 {
   trade.offset = 0;
-  quantmod <- getModelData(quantmod);
+  quantmod <- getModelData(x);
   if(class(quantmod) != "quantmod") stop("model must be of class quantmod");
   if(!is.null(trade.dates) & length(trade.dates) < 2) stop("trade.dates must be of length 2");
   model.data <- modelData(quantmod,trade.dates,exclude.training=exclude.training);

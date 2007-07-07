@@ -1,26 +1,37 @@
 \name{tradeModel}
 \alias{tradeModel}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Trade Model Built by buildModel }
+\title{ Simulate Trading of Fitted quantmod Object }
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+Simulated trading of fitted quantmod object.  Given a fitted model, 
+tradeModel calculates the signal generated over a given historical
+period, then applies specified \code{trade.rule} to calculate
+and return a \code{tradeLog} object.  Additional methods can then 
+be called to evaluate the performance of the model's strategy.
 }
 \usage{
-tradeModel(tR.model, signal.threshold = c(0, 0), leverage = 1, return.model = TRUE, plot.model = FALSE, trade.dates = NULL, exclude.training = TRUE, ...)
+tradeModel(x,
+           signal.threshold = c(0, 0),
+           leverage = 1,
+           return.model = TRUE, 
+           plot.model = FALSE,
+           trade.dates = NULL,
+           exclude.training = TRUE,
+           ret.type = c("weeks", "months", "quarters", "years"),
+           ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{tR.model}{ ~~Describe \code{tR.model} here~~ }
+  \item{x}{  }
   \item{signal.threshold}{ ~~Describe \code{signal.threshold} here~~ }
   \item{leverage}{ ~~Describe \code{leverage} here~~ }
   \item{return.model}{ ~~Describe \code{return.model} here~~ }
   \item{plot.model}{ ~~Describe \code{plot.model} here~~ }
   \item{trade.dates}{ ~~Describe \code{trade.dates} here~~ }
   \item{exclude.training}{ ~~Describe \code{exclude.training} here~~ }
+  \item{ret.type}{ ~~Describe \code{ret.type} here~~ }
   \item{\dots}{ ~~Describe \code{\dots} here~~ }
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
 }
 \value{
   ~Describe the value returned
@@ -31,11 +42,7 @@ tradeModel(tR.model, signal.threshold = c(0, 0), leverage = 1, return.model = TR
 }
 \references{ ~put references to the literature/web site here ~ }
 \author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
- ~Make other sections like Warning with \section{Warning }{....} ~
-}
-\seealso{  \code{\link{specifyModel}} \code{\link{buildModel}} \code{\link{modelAnalysis}} }
+\seealso{  \code{\link{specifyModel}} \code{\link{buildModel}} }
 \examples{
 }
 \keyword{ models }% at least one, from doc/KEYWORDS

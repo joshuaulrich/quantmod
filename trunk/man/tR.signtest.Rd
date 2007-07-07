@@ -15,7 +15,6 @@ tR.signtest(x, mu = 0, p = 0.5)
   \item{p}{ ~~Describe \code{p} here~~ }
 }
 \details{
-  ~~ If necessary, more details than the __description__  above ~~
 }
 \value{
   ~Describe the value returned
@@ -26,22 +25,7 @@ tR.signtest(x, mu = 0, p = 0.5)
 }
 \references{ ~put references to the literature/web site here ~ }
 \author{ ~~who you are~~ }
-\note{ ~~further notes~~ }
 
- ~Make other sections like Warning with \section{Warning }{....} ~
-
-\seealso{ ~~objects to See Also as \code{\link{~~fun~~}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function(x,mu=0,p=.5) {
-  D <- length( (x-mu)[sign(x-mu) > 0] )
-  p.value <- sum(dbinom(D:length(x),length(x),p))
-  return(list("d-positive" = D,"p.value"=p.value))
-  }
 }
-\keyword{ ~kwd1 }% at least one, from doc/KEYWORDS
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ models }% __ONLY ONE__ keyword per line

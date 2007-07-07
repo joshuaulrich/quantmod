@@ -15,7 +15,6 @@ breakpoints(x, by = c(weekdays, weeks, months, quarters, years), ...)
   \item{\dots}{ ~~Describe \code{\dots} here~~ }
 }
 \details{
-  ~~ If necessary, more details than the description above ~~
 }
 \value{
   ~Describe the value returned
@@ -28,25 +27,8 @@ breakpoints(x, by = c(weekdays, weeks, months, quarters, years), ...)
 \author{ ~~who you are~~ }
 \note{ ~~further notes~~ 
 
- ~Make other sections like Warning with \section{Warning }{....} ~
 }
 \seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (x, by = c(weekdays, weeks, months, quarters, years), 
-    ...) 
-{
-    if (length(by) != 1) 
-        stop("choose ONE method for \"by\"")
-    by <- match.fun(by)
-    breaks <- which(diff(as.numeric(by(x, ...))) != 0)
-    breaks <- c(0, breaks, NROW(x))
-    return(breaks)
-  }
 }
-\keyword{ ~kwd1 }% at least one, from doc/KEYWORDS
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ utilities }% __ONLY ONE__ keyword per line
