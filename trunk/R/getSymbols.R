@@ -25,19 +25,32 @@ function(Symbols=NULL,
       if(reload.Symbols) {
         if(exists('.getSymbols',env,inherits=FALSE)) {
           old.Symbols <- get('.getSymbols',env)
-          Symbols <- unique(c(old.Symbols, Symbols))
+##remove duplicates!!!!!!!!!!
+          Symbols <- c(old.Symbols, Symbols)
         }
       }
       removeSymbols(env=env)
 
       if(!is.null(Symbols)) {
-        Symbols <- as.list(Symbols)
-        Symbols <- do.call(paste('getSymbols.',src,sep=''),list(Symbols=Symbols,env=env,db.fields=db.fields,
-                                        field.names=field.names,reload.Symbols=reload.Symbols,
-                                        verbose=verbose,warnings=warnings,
-                                        ...))
+        #group all Symbols by source
+        Symbols <- as.list(unlist(lapply(unique(as.character(Symbols)),
+                           FUN=function(x) {
+                             Symbols[Symbols==x]
+                           }
+                           )))
+        #Symbols <- as.list(Symbols)
+        all.symbols <- list()
+        for(symbol.source in unique(as.character(Symbols))) {
+          current.symbols <- names(Symbols[Symbols==symbol.source])
+          symbols.returned <- do.call(paste('getSymbols.',src,sep=''),
+                                      list(Symbols=current.symbols,env=env,db.fields=db.fields,
+                                           field.names=field.names,reload.Symbols=reload.Symbols,
+                                           verbose=verbose,warnings=warnings,
+                                           ...))
+          for(each.symbol in symbols.returned) all.symbols[[each.symbol]]=symbol.source 
+        }
 
-        assign('.getSymbols',Symbols,env);
+        assign('.getSymbols',all.symbols,env);
         invisible(return(env))
     } else {warning('no Symbols specified')}
 }
@@ -78,6 +91,8 @@ function(Symbols=NULL,
 function(Symbols,env,
          from='1990-01-01',
          to=Sys.Date(),
+         verbose = FALSE,
+         warnings = TRUE,
          ...)
 {
      yahoo.URL <- "http://chart.yahoo.com/table.csv?"
@@ -88,6 +103,7 @@ function(Symbols,env,
      to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])-1
      to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
      for(i in 1:length(Symbols)) {
+       if(verbose) cat("downloading ",Symbols[[i]],".....")
        fr <- read.csv(paste(yahoo.URL,
                            "s=",Symbols[[i]],
                            "&a=",from.m,
@@ -99,6 +115,7 @@ function(Symbols,env,
                            "&g=d&q=q&y=0",
                            "&z=",Symbols[[i]],"&x=.csv",
                            sep=''))
+       if(verbose) cat("done.\n")
        fr <- zoo(fr[,-1],as.Date(fr[,1]))
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
                              c('Open','High','Low','Close','Volume','Adjusted'),
@@ -160,13 +177,15 @@ function(Symbols=NULL,env=.GlobalEnv) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
     getSymbols <- get('.getSymbols',env,inherits=FALSE)
       if(is.null(Symbols)) {
-        Symbols <- paste(getSymbols)
+        #Symbols <- paste(getSymbols)
+        Symbols <- names(getSymbols)
       } else {
         #Symbols now has ONLY existing Symbols in it
-        Symbols <- Symbols[Symbols %in% unlist(getSymbols)]
+        #Symbols <- Symbols[Symbols %in% unlist(getSymbols)]
+        Symbols <- Symbols[Symbols %in% names(getSymbols)]
       }
       remove(list=as.character(Symbols),envir=env)
-      Symbols.remaining <- getSymbols[!unlist(getSymbols) %in% Symbols]
+      Symbols.remaining <- getSymbols[!names(getSymbols) %in% Symbols]
       if(length(Symbols.remaining) == 0) {
         remove(list=c('.getSymbols'),envir=env)
       } else {
