@@ -7,17 +7,60 @@ function(Symbols=NULL,
          reload.Symbols = TRUE,
          verbose = FALSE,
          warnings = TRUE,
-         src = c("MySQL","yahoo","google","economagic"),
+         src = c("yahoo","MySQL","google","economagic"),
          ...)  {
 
-        if(reload.Symbols) {
-            if(exists('.getSymbols',env,inherits=FALSE)) {
-                old.Symbols <- get('.getSymbols',env)
-                Symbols <- unique(c(old.Symbols, Symbols))
-            }
+## function to handle Symbols as pairlist
+      available.src = c("yahoo","MySQL","google","economagic")
+      src = available.src[pmatch(src,available.src)][1]
+
+      if(is.character(Symbols)) {
+        tmp.Symbols <- vector("list")
+        for(each.symbol in Symbols) {
+          tmp.Symbols[[each.symbol]] <- src          
         }
-        removeSymbols(env=env)
-      available.src = c("MySQL","yahoo","google","economagic")
+        Symbols <- tmp.Symbols
+      }
+
+      if(reload.Symbols) {
+        if(exists('.getSymbols',env,inherits=FALSE)) {
+          old.Symbols <- get('.getSymbols',env)
+          Symbols <- unique(c(old.Symbols, Symbols))
+        }
+      }
+      removeSymbols(env=env)
+
+      if(!is.null(Symbols)) {
+        Symbols <- as.list(Symbols)
+        Symbols <- do.call(paste('getSymbols.',src,sep=''),list(Symbols=Symbols,env=env,db.fields=db.fields,
+                                        field.names=field.names,reload.Symbols=reload.Symbols,
+                                        verbose=verbose,warnings=warnings,
+                                        ...))
+
+        assign('.getSymbols',Symbols,env);
+        invisible(return(env))
+    } else {warning('no Symbols specified')}
+}
+"getSymbols.original" <-
+function(Symbols=NULL,
+         env=.GlobalEnv,
+         db.fields = c('date','o','h','l','c','v','a'),
+         return.type = c('quantmod.OHLC','zoo'),
+         field.names = NULL,
+         reload.Symbols = TRUE,
+         verbose = FALSE,
+         warnings = TRUE,
+         src = c("yahoo","MySQL","google","economagic"),
+         ...)  {
+
+      if(reload.Symbols) {
+        if(exists('.getSymbols',env,inherits=FALSE)) {
+          old.Symbols <- get('.getSymbols',env)
+          Symbols <- unique(c(old.Symbols, Symbols))
+        }
+      }
+      removeSymbols(env=env)
+      available.src = c("yahoo","MySQL","google","economagic")
       src = available.src[pmatch(src,available.src)][1]
 
       if(!is.null(Symbols)) {
@@ -61,7 +104,8 @@ function(Symbols,env,
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
        class(fr) <- c("quantmod.OHLC","zoo")
-       assign(toupper(gsub('\\^','',Symbols[[i]])),fr,env)
+       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+       assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
 }
@@ -139,7 +183,7 @@ function(env=.GlobalEnv) {
 }
 
 "saveSymbols"<-
-function(Symbols=NULL,file.path=stop("must specify file.path"),env=.GlobalEnv) {
+function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv) {
   if(exists('.getSymbols',env,inherits=FALSE)) {
     getSymbols <- get('.getSymbols',env,inherits=FALSE)
       if(is.null(Symbols)) {
