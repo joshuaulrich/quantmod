@@ -28,8 +28,8 @@ export(modelData,
 	papply,
 	returnBy,
 	breakpoints,
-	importKM,
-	tR.kmgmdh,
+#	importKM,
+#	tR.kmgmdh,
 	specifyModel,
 	getModelData,
     stripModelData,
@@ -63,7 +63,7 @@ S3method(as.quantmod.OHLC,quantmod.OHLC)
 S3method('[',quantmod.OHLC)
 S3method(periodReturn,zoo)
 S3method(periodReturn,quantmod.OHLC)
-S3method(predict,kmgmdh)
+#S3method(predict,kmgmdh)
 S3method(predictModel,default)
 S3method(predictModel,nnet)
 S3method(predictModel,mars)
@@ -80,5 +80,5 @@ S3method(quarters,zoo)
 S3method(years,zoo)
 exportClass(quantmod)
 exportClass(quantmodResults,quantmodReturn)
-exportClass(kmgmdh)
+#exportClass(kmgmdh)
 exportMethods(show,summary,'fittedModel<-')

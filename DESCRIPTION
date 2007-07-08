@@ -4,8 +4,8 @@ Title: quantmod - quantitative modelling and trading toolkit for R
 Version: 0.1-5
 Date: 2007-05-19
 Author: Jeff Ryan
-Depends: zoo, DBI, RMySQL
-Suggests: MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree
+Depends: zoo
+Suggests: MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL
 Maintainer: Jeff Ryan <jeff.a.ryan@gmail.com>
 Description: Trading support package for building, testing, and trading statistical models.
 LazyLoad: yes
