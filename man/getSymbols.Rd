@@ -25,10 +25,8 @@ methods can be added by simply adhering to the convention.
 \usage{
 getSymbols(Symbols = NULL, 
            env = .GlobalEnv,
-           db.fields = c("date", "o", "h", "l", "c", "v", "a"),
-           return.type=c('quantmod.OHLC','zoo'),
-           field.names = NULL,
-           reload.Symbols = TRUE,
+           return.class=c('quantmod.OHLC','zoo'),
+           reload.Symbols = FALSE,
            verbose = FALSE,
            warnings = TRUE,
            src = c("yahoo", "MySQL", "google", "economagic"),
@@ -43,9 +41,8 @@ saveSymbols(Symbols = NULL,
 \arguments{
   \item{Symbols}{ a character vector specifying the names of each symbol to be loaded}
   \item{env}{ where to create objects.  Defaults to .GlobalEnv}
-  \item{db.fields}{ character vector of names of fields to load  }
-  \item{return.type}{ character string specifying class of returned object }
-  \item{field.names}{ character vector of colnames to be used in created data.frame }
+  \item{return.class}{ desired class of returned object.  Can be quantmod.OHLC (default),
+                       zoo, data.frame, ts, its }
   \item{reload.Symbols}{ boolean to reload current symbols in specified environment. Defaults
                          to TRUE } 
   \item{verbose}{ boolean to turn on status of retrieval. Defaults to FALSE }
@@ -69,7 +66,7 @@ created simply following the S3-like naming
 convention where getSymbols.NAME 
 is used for your function NAME.  See \code{getSymbols.skeleton}.
 
-getSymbols.Default can be used to specify defaults for all arguments.
+getSymbols.Defaults can be used to specify defaults for all arguments.
 
 }
 \value{
@@ -84,6 +81,7 @@ A call to getSymbols will load into the specified environment one object for eac
 \dontrun{
 getSymbols('QQQQ')  # loads symbol from default source
 getSymbols('F',src='yahoo') # loads Ford market data from yahoo
+getSymbols('F',return.class='ts') # loads Ford as time series class ts 
 
 getSymbols.Defaults(list(QQQQ='yahoo'))
 }

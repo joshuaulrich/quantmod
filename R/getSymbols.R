@@ -1,18 +1,14 @@
 "getSymbols" <-
 function(Symbols=NULL,
          env=.GlobalEnv,
-         db.fields = c('date','o','h','l','c','v','a'),
-         return.type = c('quantmod.OHLC','zoo'),
-         field.names = NULL,
-         reload.Symbols = TRUE,
+         return.class = c('quantmod.OHLC','zoo'),
+         reload.Symbols = FALSE,
          verbose = FALSE,
          warnings = TRUE,
          src = c("yahoo","MySQL","google","economagic"),
          ...)  {
 
-## function to handle Symbols as pairlist
-      available.src = c("yahoo","MySQL","google","economagic")
-      src = available.src[pmatch(src,available.src)][1]
+      src = src[1]
 
       if(is.character(Symbols)) {
         tmp.Symbols <- vector("list")
@@ -21,15 +17,13 @@ function(Symbols=NULL,
         }
         Symbols <- tmp.Symbols
       }
-
-      if(reload.Symbols) {
-        if(exists('.getSymbols',env,inherits=FALSE)) {
-          old.Symbols <- get('.getSymbols',env)
-##remove duplicates!!!!!!!!!!
-          Symbols <- c(old.Symbols, Symbols)
-        }
+      old.Symbols <- NULL
+      if(exists('.getSymbols',env,inherits=FALSE)) {
+        old.Symbols <- get('.getSymbols',env)
       }
-      removeSymbols(env=env)
+      if(reload.Symbols) {
+        Symbols <- c(Symbols, old.Symbols)[unique(names(c(Symbols,old.Symbols)))]
+      }
 
       if(!is.null(Symbols)) {
         #group all Symbols by source
@@ -42,53 +36,21 @@ function(Symbols=NULL,
         all.symbols <- list()
         for(symbol.source in unique(as.character(Symbols))) {
           current.symbols <- names(Symbols[Symbols==symbol.source])
-          symbols.returned <- do.call(paste('getSymbols.',src,sep=''),
-                                      list(Symbols=current.symbols,env=env,db.fields=db.fields,
-                                           field.names=field.names,reload.Symbols=reload.Symbols,
+          symbols.returned <- do.call(paste('getSymbols.',symbol.source,sep=''),
+                                      list(Symbols=current.symbols,env=env,
+                                           return.class=return.class,
+                                           reload.Symbols=reload.Symbols,
                                            verbose=verbose,warnings=warnings,
                                            ...))
           for(each.symbol in symbols.returned) all.symbols[[each.symbol]]=symbol.source 
         }
-
+        all.symbols <- c(all.symbols,old.Symbols)[unique(names(c(all.symbols,old.Symbols)))]
         assign('.getSymbols',all.symbols,env);
         invisible(return(env))
     } else {warning('no Symbols specified')}
 }
-"getSymbols.original" <-
-function(Symbols=NULL,
-         env=.GlobalEnv,
-         db.fields = c('date','o','h','l','c','v','a'),
-         return.type = c('quantmod.OHLC','zoo'),
-         field.names = NULL,
-         reload.Symbols = TRUE,
-         verbose = FALSE,
-         warnings = TRUE,
-         src = c("yahoo","MySQL","google","economagic"),
-         ...)  {
-
-      if(reload.Symbols) {
-        if(exists('.getSymbols',env,inherits=FALSE)) {
-          old.Symbols <- get('.getSymbols',env)
-          Symbols <- unique(c(old.Symbols, Symbols))
-        }
-      }
-      removeSymbols(env=env)
-      available.src = c("yahoo","MySQL","google","economagic")
-      src = available.src[pmatch(src,available.src)][1]
-
-      if(!is.null(Symbols)) {
-        Symbols <- as.list(Symbols)
-        Symbols <- do.call(paste('getSymbols.',src,sep=''),list(Symbols=Symbols,env=env,db.fields=db.fields,
-                                        field.names=field.names,reload.Symbols=reload.Symbols,
-                                        verbose=verbose,warnings=warnings,
-                                        ...))
-
-        assign('.getSymbols',Symbols,env);
-        invisible(return(env))
-    } else {warning('no Symbols specified')}
-}
 "getSymbols.yahoo" <-
-function(Symbols,env,
+function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          from='1990-01-01',
          to=Sys.Date(),
          verbose = FALSE,
@@ -120,20 +82,47 @@ function(Symbols,env,
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
-       class(fr) <- c("quantmod.OHLC","zoo")
+       if('quantmod.OHLC' %in% return.class) {
+         class(fr) <- c('quantmod.OHLC','zoo')
+       } else
+       if('ts' == return.class) {
+         fr <- as.ts(fr)
+       } else
+       if('data.frame' == return.class) {
+         fr <- as.data.frame(fr)
+       } else
+       if('its' == return.class) {
+         if("package:its" %in% search() || require("its", quietly=TRUE)) {
+           index(fr) <- as.POSIXct(index(fr))
+           fr <- its::as.its(fr)
+         } else {
+           warning("package its could not be loaded: zoo class returned")
+         }
+       }
+       #add (its,timeSeries)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
 }
-"getSymbols.MySQL" <- function(Symbols,env,
+"getSymbols.file" <- function() {}
+"getSymbols.url" <- function() {}
+"getSymbols.freelunch" <- function() {}
+"getSymbols.RODBC" <- function() {}
+"getSymbols.oanda" <- function() {}
+
+"getSymbols.MySQL" <- function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                                db.fields=c('date','o','h','l','c','v','a'),
-                               return.type = c('quantmod.OHLC','zoo'),
                                field.names = NULL,
-                               reload.Symbols = TRUE,
                                verbose = FALSE,
                                warnings = TRUE,
                                user=NULL,password=NULL,dbname=NULL,...) {
+        if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
+          if('package:RMySQL' %in% search() || require('RMySQL',quietly=TRUE)) {
+          } else { warning("package RMySQL can't be loaded" ) }
+        } else {
+          stop(" package DBI can't be loaded.")
+        }
         if(is.null(user) || is.null(password) || is.null(dbname)) {
             if(!is.null(getOption('tR.db'))) {
                 user <- getOption('tR.db')$user
@@ -162,9 +151,24 @@ function(Symbols,env,
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
-            #class(fr) <- c("quantmod.OHLC","data.frame")
-            
-            class(fr) <- c("quantmod.OHLC","zoo")
+            if('quantmod.OHLC' %in% return.class) {
+              class(fr) <- c('quantmod.OHLC','zoo')
+            } else
+            if('ts' == return.class) {
+              fr <- as.ts(fr)
+            } else
+            if('data.frame' == return.class) {
+              fr <- as.data.frame(fr)
+            } else
+            if('its' == return.class) {
+              if("package:its" %in% search() || require("its", quietly=TRUE)) {
+                index(fr) <- as.POSIXct(index(fr))
+                fr <- its::as.its(fr)
+              } else {
+                warning("package 'its' could not be loaded: 'quantmod.OHLC' class returned")
+                class(fr) <- c('quantmod.OHLC','zoo')
+              }
+            }
             assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
         }
@@ -206,14 +210,14 @@ function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv)
   if(exists('.getSymbols',env,inherits=FALSE)) {
     getSymbols <- get('.getSymbols',env,inherits=FALSE)
       if(is.null(Symbols)) {
-        Symbols <- paste(getSymbols)
+        Symbols <- names(getSymbols)
       } else {
         #Symbols now has ONLY existing Symbols in it
-        Symbols <- Symbols[Symbols %in% unlist(getSymbols)]
+        Symbols <- Symbols[Symbols %in% names(getSymbols)]
       }
     for(each.symbol in Symbols) {
       save(list=each.symbol,
-           file=paste(each.symbol,"RData",sep='.'),
+           file=paste(file.path,'/',each.symbol,".RData",sep=''),
            env=env)
     }    
   }
