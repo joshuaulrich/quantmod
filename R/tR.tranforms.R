@@ -79,13 +79,58 @@ function(x)
 "Next" <-
 function(x,k=1)
 {
-    if(k<0||k!=as.integer(k)) stop("k must be a non-negative integer")
-    if(k==0) return(x);
-    c(x[-c(0:k)],rep(NA,k))
+  UseMethod("Next")
 }
-
-
+"Next.data.frame" <-
+function(x,k=1)
+{
+    if(k<0||k!=as.integer(k)||length(k)>1) stop("k must be a non-negative integer")
+    if(k==0) return(x);
+    new.x <- as.data.frame(c(x[-(0:k),],rep(NA,k)))
+    rownames(new.x) <- rownames(x)
+    colnames(new.x) <- "Next"
+    return(new.x)
+}
+"Next.quantmod.OHLC" <-
+function(x,k=1)
+{
+    if(k<0||k!=as.integer(k)||length(k)>1) stop("k must be a non-negative integer")
+    if(k==0) return(x);
+    new.x <- as.matrix(c(as.numeric(x[-(0:k),]),rep(NA,k)))
+    x.index <- index(x)
+    new.x <- zoo(new.x,x.index)
+    colnames(new.x) <- "Next"
+    return(new.x)
+}
+"Next.zoo" <- Next.quantmod.OHLC
+"Next.numeric" <-
+function(x,k=1)
+{
+    if(k<0||k!=as.integer(k)||length(k)>1) stop("k must be a non-negative integer")
+    if(k==0) return(x);
+    new.x <- as.matrix(c(as.numeric(x[-(0:k)]),rep(NA,k)))
+    colnames(new.x) <- "Next"
+    return(new.x)
+}
 "Lag" <-
+function(x,k=1)
+{
+  UseMethod("Lag")
+}
+"Lag.data.frame"<-
+function(x,k=1)
+{
+    new.x <- sapply(as.list(k), function(k.e) {
+        if(k.e<0||k.e!=as.integer(k.e)) stop("k must be a non-negative integer")
+        if(k.e==0) return(x);
+        c(rep(NA,k.e),x[-((nrow(x)-k.e+1):nrow(x)),])
+    }
+    )
+    rownames(new.x) <- rownames(x)
+    colnames(new.x) <- paste("Lag.",k,sep="")
+    return(new.x)
+}
+"Lag.quantmod.OHLC" <-
 function(x,k=1)
 {
     new.x <- sapply(as.list(k), function(k.e) {
@@ -95,10 +140,31 @@ function(x,k=1)
     }
     )
     x.index <- index(x)
-    if(is.data.frame(x)) x.index <- rownames(x)
-    zoo(new.x,x.index)
+    new.x <- zoo(new.x,x.index)
+    colnames(new.x) <- paste("Lag.",k,sep="")
+    return(new.x)
+}
+"Lag.zoo" <- Lag.quantmod.OHLC
+
+"Lag.numeric" <-
+function(x,k=1)
+{
+    new.x <- sapply(as.list(k), function(k.e) {
+        if(k.e<0||k.e!=as.integer(k.e)) stop("k must be a non-negative integer")
+        if(k.e==0) return(x);
+        c(rep(NA,k.e),x[-((length(x)-k.e+1):length(x))])
+    }
+    )
+    colnames(new.x) <- paste("Lag.",k,sep="")
+    return(new.x)
 }
 
+"Lag.default"<-
+function(x,k=1)
+{
+    if(is.character(x)) stop("x must be a time series or numeric vector")
+    lag(x,k)
+}
 
 "Delt" <-
 function(x1,x2=NULL,k=0,type=c('log','arithmetic'))

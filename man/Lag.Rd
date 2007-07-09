@@ -3,40 +3,65 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Lag a Time Series }
 \description{
-Create a lagged series from data. Can return multiple lags if
-given a vector for \code{k}.  Always returns a series with the
-same length as the original, with \code{NA}'s padding.
+Create a lagged series from data, with \code{NA} used to fill.
 }
 \usage{
 Lag(x, k = 1)
+
+\method{Lag}{quantmod.OHLC}(x, k = 1)
+
+\method{Lag}{zoo}(x, k = 1)
+
+\method{Lag}{data.frame}(x, k = 1)
+
+\method{Lag}{numeric}(x, k = 1)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ \code{vector} or series to be lagged }
-  \item{k}{ periods to lag. Multiple periods can be passed as vector }
+  \item{x}{ vector or series to be lagged }
+  \item{k}{ periods to lag. }
 }
 \details{
-Performs a basic lag of a data series, shifting the values down
-k-periods.  Specifying multiple values for \code{k} (e.g.
-\code{k=c(1,3,5)}), will return an object with the number of
-columns corresponding to the number of different lags
-specified.
+Shift series k-periods down, prepending \code{NA}s to front
+of series.
+
+Specifically designed to handle \code{quantmod.OHLC} and
+\code{zoo} series within the \code{quantmod} workflow.
+
+If no S3 method is found, a call to \code{lag} in \pkg{base}
+is made.
 }
 \value{
-A lagged data series, or columns of lagged data series, while
-maintaining the \code{class} of the original.
+The original \code{x} prepended with \code{k} \code{NA}s
+and missing the trailing \code{k} values.
+
+The returned series maintains the number of obs. of the
+original.
 }
 \author{ Jeffrey A. Ryan }
 \note{ 
-The primary reason for yet another lag function is to offer a
-more natural function for financial lags.  Additionally it was
-desired to be able to specify multiple lags within one call, 
-maximizing the vectorization approach in \R.
+This function differs from \code{lag} by returning 
+the original series modified, as opposed to simply changing
+the time series properties.  It differs from the like
+named \code{Lag} in the \pkg{Hmisc} as it deals primarily
+with time-series like objects.
+
+It is important to realize that if there is no applicable
+method for \code{Lag}, the value returned will be from 
+\code{lag} in \pkg{base}.  That is, coerced to \code{'ts'}
+if necessary, and subsequently shifted.
 }
 \seealso{ \code{\link{lag}} }
 \examples{
+Stock.Close <- c(102.12,102.62,100.12,103.00,103.87,103.12,105.12)
+Close.Dates <- as.Date(c(10660,10661,10662,10665,10666,10667,10668))
+Stock.Close <- zoo(Stock.Close,Close.Dates)
+
+Lag(Stock.Close)        #lag by 1 period
+Lag(Stock.Close,k=1)    #same
+Lag(Stock.Close,k=1:3)  #lag 1,2 and 3 periods
 
 }
 \keyword{ ts }
 \keyword{ datagen }
 \keyword{ misc }
+\concept{ trading }
