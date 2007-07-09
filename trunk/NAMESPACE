@@ -44,6 +44,15 @@ export(modelData,
     fittedModel,
 	buildModel,
     as.quantmod.OHLC)
+S3method(Next,zoo)
+S3method(Next,numeric)
+S3method(Next,data.frame)
+S3method(Next,quantmod.OHLC)
+S3method(Lag,default)
+S3method(Lag,numeric)
+S3method(Lag,data.frame)
+S3method(Lag,zoo)
+S3method(Lag,quantmod.OHLC)
 S3method(formula,quantmod)
 S3method(fitted,quantmod)
 S3method(fitted.values,quantmod)

@@ -27,47 +27,32 @@ All symbols are first retrieved from the global environment, without inheritence
 If an object is not found in the global environment, it is added to a
 list of objects to load through the getSymbols function. getSymbols retrieves each
 object specified by using information as to its location specified apriori 
-via getSymbols.Default or quantmod.Default
+via \code{getSymbols.Default} or \code{quantmod.Default}.
 
-Current transforms to \code{quantmod.OHLC} objects include:
-
-\itemize{
-    \item \code{Op:} Open
-    \item \code{Lo} Low
-    \item \code{Hi} High
-    \item \code{Cl} Close
-    \item \code{Vo} Volume
-    \item \code{Ad} Adj. Close
-    \item \code{OpCl} Open to Close 
-    \item \code{OpHi} Open to High 
-    \item \code{OpLo} Open to Low 
-    \item \code{LoHi} Low to High 
-    \item \code{LoCl} Low to Close 
-    \item \code{HiCl} High to Close
-    \item \code{OpOp} Open to Open
-    \item \code{ClCl} Close to Close
-    \item \code{Next}(x, k=1) next (k-)period's value
-    \item \code{Lag}(x, k=1) previous (k-)period's value
-    \item \code{Delt} change over (k-)periods
-}
+Internally all data is coerced to \code{zoo},\code{data.frame}, or
+\code{numeric} classes.
 }
 
 \value{
 Returns object of class \code{quantmod}.  Use \code{modelData} to extract
-full data set as \code{quantmod.OHLC} object.
+full data set as \code{zoo} object.
 }
 
 \author{ Jeffrey Ryan }
-\note{ It is possible to include additional series by simply specifying
-       the objects symbol in the formula.  
+\note{ It is possible to include any series by simply specifying
+       the object's symbol in the formula.
        Use \code{getSymbols.skeleton} to create additional methods.
+
        See \code{getSymbols.MySQL} and \code{getSymbols.yahoo} for examples}
 
 
-\seealso{ \code{\link{getModelData}} \code{\link{getSymbols}}
- \code{\link{buildModel}} \code{\link{tradeModel}} \code{\link{formula}}}
+\seealso{ \code{\link{getModelData}},\code{\link{getSymbols}},
+\code{\link{buildModel}},\code{\link{tradeModel}},\code{\link{formula}}}
 \examples{
 \dontrun{
+# if QQQQ is not in the Global environment, an attempt will be made
+# to retrieve it from the source specified with getSymbols.Default
+
 specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ),0:3) + Hi(DIA))
 }
 }

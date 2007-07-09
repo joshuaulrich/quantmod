@@ -41,10 +41,11 @@ saveSymbols(Symbols = NULL,
 \arguments{
   \item{Symbols}{ a character vector specifying the names of each symbol to be loaded}
   \item{env}{ where to create objects.  Defaults to .GlobalEnv}
-  \item{return.class}{ desired class of returned object.  Can be quantmod.OHLC (default),
-                       zoo, data.frame, ts, its }
+  \item{return.class}{ desired class of returned object.  Can be quantmod.OHLC (default
+                       for \dQuote{yahoo} OHLC data),
+                       zoo, data.frame, ts, or its }
   \item{reload.Symbols}{ boolean to reload current symbols in specified environment. Defaults
-                         to TRUE } 
+                         to FALSE } 
   \item{verbose}{ boolean to turn on status of retrieval. Defaults to FALSE }
   \item{warnings}{ boolean to turn on warnings. Defaults to TRUE }
   \item{src}{ character vector specifying method of retrieval.  }
@@ -54,7 +55,8 @@ saveSymbols(Symbols = NULL,
 \details{
 \code{getSymbols} first looks to the local environment for
 matching symbols. If found, the next symbol in Symbols 
-is attempted.  Upon completion a list of 
+is attempted, if not found, it is skipped and a warning will
+be displayed.  Upon completion a list of 
 loaded symbols is stored in the global environment 
 under the name \code{.getSymbols}.
 
