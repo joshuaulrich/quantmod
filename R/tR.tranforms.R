@@ -84,16 +84,21 @@ function(x,k=1)
     c(x[-c(0:k)],rep(NA,k))
 }
 
+
 "Lag" <-
 function(x,k=1)
 {
-    sapply(as.list(k), function(k.e) {
+    new.x <- sapply(as.list(k), function(k.e) {
         if(k.e<0||k.e!=as.integer(k.e)) stop("k must be a non-negative integer")
         if(k.e==0) return(x);
         c(rep(NA,k.e),x[-((length(x)-k.e+1):length(x))])
     }
     )
+    x.index <- index(x)
+    if(is.data.frame(x)) x.index <- rownames(x)
+    zoo(new.x,x.index)
 }
+
 
 "Delt" <-
 function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
