@@ -71,7 +71,9 @@ function(name,confirm=TRUE) {
             paste("Are you sure you want to remove",name,"defaults? Y/N (N)"))
     if(toupper(substr(CONFIRMATION,1,1))!="Y") return()
   }
-  do.call(paste('setDefaults',name,sep='.'),list(clear.all=TRUE))
+  set.method <- paste('setDefaults',name,sep='.')
+  if(!exists(set.method)) setDefaults.skeleton(name)
+  do.call(set.method,list(clear.all=TRUE))
 }
 
 "getDefaults" <-
