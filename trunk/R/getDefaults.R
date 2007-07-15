@@ -68,8 +68,11 @@ function(name,confirm=TRUE) {
   default.name <- paste(name,"Default",sep=".")
   if(confirm) {
     CONFIRMATION <- readline(prompt=
-            paste("Are you sure you want to remove",name,"defaults? Y/N (N)"))
-    if(toupper(substr(CONFIRMATION,1,1))!="Y") return()
+            paste("Are you sure you want to remove",name,"defaults? Y/N (N) "))
+    if(toupper(substr(CONFIRMATION,1,1))!="Y") {
+      warning("Nothing removed!")
+      invisible()
+    }
   }
   set.method <- paste('setDefaults',name,sep='.')
   if(!exists(set.method)) setDefaults.skeleton(name)
