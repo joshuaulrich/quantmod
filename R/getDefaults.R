@@ -7,11 +7,15 @@ function(...) {
   envir <- as.environment(-1)
   passed.args <- names(sapply(match.call(call=as.call(sys.call(-1)))[-1],deparse))
   formal.args <- names(formals(as.character(sys.call(-1))))
-  default.args <- names(all.defaults)
+  default.args <- names(which(sapply(all.defaults,function(x) !is.null(x))==TRUE))
   for(arg in formal.args) {
     if(!arg %in% passed.args) {
       if(arg %in% default.args) {
-        assign(arg, as.vector(unlist(all.defaults[arg])),envir=envir)
+        if(typeof(all.defaults[arg])=='list') {
+          assign(arg, as.vector(all.defaults[arg][[1]]),envir=envir)
+        } else {
+          assign(arg, as.vector(unlist(all.defaults[arg][[1]])),envir=envir)
+        }
       }
     }
   }
