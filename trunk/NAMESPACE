@@ -49,8 +49,7 @@ export(importDefaults,
        unDefaults,
        getDefaults,
        setDefaults,
-       setDefaults.skeleton,
-       clearDefaults)
+       unsetDefaults)
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
