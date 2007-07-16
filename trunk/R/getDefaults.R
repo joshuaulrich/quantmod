@@ -2,14 +2,12 @@
 function(...) {
   if(is.null(sys.call(-1))) 
     stop("importDefaults is only valid inside a function call") 
-  # usage: importDefaults()
   calling.fun <- as.character(match.call(call=as.call(sys.call(-1)))[1])
   all.defaults <- getDefaults(calling.fun)
   envir <- as.environment(-1)
   passed.args <- names(sapply(match.call(call=as.call(sys.call(-1)))[-1],deparse))
   formal.args <- names(formals(as.character(sys.call(-1))))
-  #default.args <- names(def[!is.null(def)])
-  default.args <- names(unlist(all.defaults))
+  default.args <- names(all.defaults)
   for(arg in formal.args) {
     if(!arg %in% passed.args) {
       if(arg %in% default.args) {
@@ -19,19 +17,17 @@ function(...) {
   }
 }
 
-"checkDefaults" <- importDefaults
-
 "useDefaults" <-
 function(name)
 {
   if(is.function(name)) name <- deparse(substitute(name))
   env <- as.environment(-1)
-  #add importDefaults to beginning of function
   new.fun.body <- as.call(parse(text=
                   c(deparse(body(name))[1],
                   'importDefaults()',
                   deparse(body(name))[-1])))[[1]]
-  assign(paste('.',name,'.orig',sep=''),get(name,env),env)
+  if(exists(name,env,inherits=FALSE))
+    assign(paste('.',name,'.orig',sep=''),get(name,env),env)
   assign(name,as.function(c(formals(name),new.fun.body)),env)
 }
 
@@ -40,8 +36,12 @@ function(name)
 {
   if(is.function(name)) name <- deparse(substitute(name))
   env <- as.environment(-1)
-  assign(name,get(paste('.',name,'.orig',sep=''),env),env)
-  remove(list=paste('.',name,'.orig',sep=''),envir=env)
+  if(exists(paste('.',name,'.orig',sep=''),env,inherits=FALSE)) {
+    assign(name,get(paste('.',name,'.orig',sep=''),env),env)
+    remove(list=paste('.',name,'.orig',sep=''),envir=env)
+  } else {
+    remove(list=name,envir=env)
+  }
 }
 
 "setDefaults" <-
@@ -58,38 +58,17 @@ function(name,...) {
   }
   env <- as.environment(-1)
   eval(parse(text=paste('options(',default.name,'=list(',
-       paste(paste(names(all.defaults),'=',all.defaults),collapse=','),'))',
+       paste(paste(names(all.defaults),'=',
+       lapply(all.defaults,function(x) {
+         if(is.character(x)) {
+           deparse(x)
+         } else {
+           x
+         }})),collapse=','),'))',
        sep='')),envir=env)
-# set.method <- paste('setDefaults',name,sep='.')
-# if(!exists(set.method)) setDefaults.skeleton(name)
-# do.call(set.method,all.defaults)
 }
 
-"setDefaults.skeleton" <-
-function(name) {
-  if(is.function(name)) name <- deparse(substitute(name))
-  default.name <- paste(name,"Default",sep=".")
-  sDtxt <- paste(
-           "\"setDefaults.",name,"\" <-\n",
-           "function(...,clear.all=FALSE) {\n",
-           "  set.to <- list(...)\n",
-           "  if(clear.all) set.to <- NULL\n",
-           "  options(",default.name,"=set.to)\n",
-           "}",sep="") 
-  filename <- paste("sD",name,".tmp.R",sep="")
-  cat(sDtxt, file = filename)
-  source(filename)
-  unlink(filename)
-}
-
-"setDefaults.mc" <-
-function(...,clear.all=FALSE) {
-  set.to <- list(...)
-  if(clear.all) set.to <- NULL
-  options(mc.Default=set.to)
-}
-
-"clearDefaults" <-
+"unsetDefaults" <-
 function(name,confirm=TRUE) {
   if(is.function(name)) name <- deparse(substitute(name))
   default.name <- paste(name,"Default",sep=".")
@@ -101,9 +80,8 @@ function(name,confirm=TRUE) {
       invisible()
     }
   }
-  set.method <- paste('setDefaults',name,sep='.')
-  if(!exists(set.method)) setDefaults.skeleton(name)
-  do.call(set.method,list(clear.all=TRUE))
+  env <- as.environment(-1)
+  eval(parse(text=paste('options(',default.name,'=NULL)',sep='')),envir=env)
 }
 
 "getDefaults" <-
