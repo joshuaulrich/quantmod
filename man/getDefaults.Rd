@@ -6,10 +6,10 @@
 \alias{unDefaults}
 \title{ Use and Manage Global Function Defaults }
 \description{
-Allows for the use of globally managed default 
+Allows for the use of globally managed default
 values for formal function arguments. Adds
-the ability to pre-specify a value for any formal argument
-as if it were specified in the function call.
+the ability to pre-specify a value for any formal
+argument as if it were specified in the function call.
 } 
 \usage{
 getDefaults(name, arg = NULL)
@@ -45,11 +45,13 @@ The order of lookup is as follows, with the lookup
 halted once a specified value is found:
 
 1. Check for arguments specified in the actual call.
+
 2. Check for arguments specified by setDefaults.
+
 3. Use original function defaults. (if any)
 }
 
-Setting default values is accompished via 
+Setting default values is accompished via
 \code{setDefaults}, with the values being written
 to \R's \code{options} list as a named list set
 to the function's name appended with a .Default,
@@ -59,43 +61,53 @@ and delete defaults with the functions
 respectively.
 
 To return a function enabled by \code{useDefaults}
-to its original state, call \code{unDefaults}. 
-Conceptually this is similar to \code{debug} and 
+to its original state, call \code{unDefaults}.
+Conceptually this is similar to \code{debug} and
 \code{debug}, though implemented entirely in \R.
 \value{
-With the exception of \code{getDefaults}
-}
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
+With the exception of \code{getDefaults}, these functions
+are used for their side effects.
 
- ~Make other sections like Warning with \section{Warning }{....} ~
+\code{getDefaults} returns a named list of defaults
+and associated values, similar to \code{formals}, only
+returning \code{setDefaults} set values.
 }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{ Jeffrey A. Ryan }
+\note{
+\code{useDefaults} only works on functions defined
+with opening and closing braces.  At present it does
+not work with simple on line functions or some S3
+methods.
+
+Additionally, it is \emph{NOT} possible to pass
+values for \dots arguments, only formally specified
+arguments in the original function definition.
+}
+\seealso{ \code{\link{importDefaults}},
+          \code{\link{options}},
+          \code{\link{formals}},
+          \code{\link{body}},
+          \code{\link{as.function}}
+}
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
+my.fun <- function(x=2,y=1) { x ^ y }
+my.fun()            #returns 2
+my.fun(x=2,y=10)    #returns 1024
 
-## The function is currently defined as
-function (name, arg = NULL) 
-{
-    if (is.function(name)) 
-        name <- deparse(substitute(name))
-    default.name <- paste(name, "Default", sep = ".")
-    if (is.null(arg)) {
-        return(options(default.name)[[1]])
-    }
-    else {
-        default.list <- list()
-        for (each.arg in arg) {
-            default.list[[each.arg]] <- options(default.name)[[1]][[each.arg]]
-        }
-        return(default.list)
-    }
-  }
+setDefaults(my.fun,x=2,y=3)
+useDefaults(my.fun)
+my.fun
+
+my.fun()            #returns 8
+my.fun(y=10)        #returns 1024
+my.fun(x=2,y=10)    #returns 1024
+
+unDefaults(my.fun)
+my.fun
+my.fun()            #returns 2
+
+getDefaults(my.fun)
+unsetDefaults(my.fun,confirm=FALSE)  
+getDefaults(my.fun)
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ ~kwd1 }
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{ utilities }
