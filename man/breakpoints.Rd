@@ -1,34 +1,52 @@
 \name{breakpoints}
 \alias{breakpoints}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{ Locate Breakpoints by Date }
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+Extract index values of a given zoo object, where the
+returned index is equal to the last date of each 
+recurring period.
 }
 \usage{
-breakpoints(x, by = c(weekdays, weeks, months, quarters, years), ...)
+breakpoints(x, by = c(weekdays, weeks, months, quarters, years),
+            ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{by}{ ~~Describe \code{by} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
+  \item{x}{ zoo object with index of class \code{Date} }
+  \item{by}{ period to be indexed from }
+  \item{\dots}{ currently unused }
 }
 \details{
+Given a \code{zoo} object with the appropriate
+index type, \code{breakpoints} will return
+a numeric vector corresponding to the final
+rows in each period specified.
+
+For example, \code{by=years} would return the
+index values matching the last observation
+in each calendar year. Similarly, \code{by=weeks}
+would match the last observations in any given week.
+
+The final index returned
+corresponds to the last observation in the
+data object, as this may be useful for calculating
+\dQuote{values to date}.
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+A numeric vector which can be used to extract
+rows from the given data object.
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
+\author{ Jeffrey A. Ryan }
+\note{
+The last value in the returned vector \emph{most likely}
+does not mark the end of the specified period,
+rather it marks the end of the data.
 }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\seealso{ \code{\link{papply}} calculate values for each interval }
 \examples{
+zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
+breakpoints(zoo.data,by=weeks)
+
+bp <- breakpoints(zoo.data,by=quarters)
+zoo.data[bp]
 }
 \keyword{ utilities }% __ONLY ONE__ keyword per line

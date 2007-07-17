@@ -1,35 +1,40 @@
 \name{papply}
 \alias{papply}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{ Apply Function Over Specified Interval }
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+Apply a specified function to data over a given
+interval, where the interval is taken to be
+the data from INDEX[k] to INDEX[k+1], for
+k=1:length(INDEX).
 }
 \usage{
 papply(x, INDEX, FUN, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{ ~~Describe \code{x} here~~ }
-  \item{INDEX}{ ~~Describe \code{INDEX} here~~ }
-  \item{FUN}{ ~~Describe \code{FUN} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
+  \item{x}{ data to apply FUN to }
+  \item{INDEX}{ numeric vector specifying indexing }
+  \item{FUN}{ an argument of type \code{function} }
+  \item{\dots}{ additional arguments for \code{FUN}}
 }
 \details{
+Similar to the rest of the apply family, calculate
+a specified functions value given a shifting set
+of data values.
+
+Useful for applying arbitrary functions over
+time, as when INDEX is the result of a call
+to breakpoints.
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+A numeric vector with length INDEX
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
-}
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
+\author{ Jeffrey A. Ryan }
+\seealso{ \code{\link{breakpoints}}
 \examples{
+zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
+bp <- breakpoints(zoo.data,by=weeks)
+papply(zoo.data, INDEX=bp, FUN=function(x) sd(x))
+papply(zoo.data, INDEX=bp, FUN=sd)                  #same
+
 }
 \keyword{ utilities }% __ONLY ONE__ keyword per line
