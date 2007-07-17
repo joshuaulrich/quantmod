@@ -23,7 +23,16 @@ Returns object of class \code{quantmod.OHLC}
 }
 \author{ Jeffrey Ryan }
 
-\seealso{ \code{\link{getSymbols}} \code{\link{specifyModel}} \code{\link{buildModel}}}
+\seealso{
+\code{\link{getSymbols}} load data
+\code{\link{specifyModel}} create model structure
+\code{\link{buildModel}} construct model
+\code{\link{modelData}} extract model dataset
+}
 \examples{
+\dontrun{
+my.model <- specifyModel(Next(OpCl(QQQQ)) ~ Lag(Cl(NDX),0:5))
+getModelData(my.model)
+}
 }
 \keyword{ datasets }% at least one, from doc/KEYWORDS
