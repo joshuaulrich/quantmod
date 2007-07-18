@@ -6,14 +6,25 @@ function(Symbols=NULL,
          verbose = FALSE,
          warnings = TRUE,
          src = c("yahoo","MySQL","google","economagic"),
+         symbol.lookup = TRUE,
          ...)  {
 
+      importDefaults()
+      if(symbol.lookup) {
+        symbols.src <- getOption('getSymbols.sources')
+      } else {
+        symbols.src <- NULL
+      }
       src = src[1]
-
       if(is.character(Symbols)) {
+      # at least one Symbol has been specified
         tmp.Symbols <- vector("list")
         for(each.symbol in Symbols) {
-          tmp.Symbols[[each.symbol]] <- src          
+          if(each.symbol %in% names(symbols.src)) {
+            tmp.Symbols[[each.symbol]] <- symbols.src[[each.symbol]]
+          } else {
+            tmp.Symbols[[each.symbol]] <- src          
+          }
         }
         Symbols <- tmp.Symbols
       }
@@ -47,7 +58,9 @@ function(Symbols=NULL,
         all.symbols <- c(all.symbols,old.Symbols)[unique(names(c(all.symbols,old.Symbols)))]
         assign('.getSymbols',all.symbols,env);
         invisible(return(env))
-    } else {warning('no Symbols specified')}
+      } else {
+        warning('no Symbols specified')
+      }
 }
 "getSymbols.yahoo" <-
 function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
