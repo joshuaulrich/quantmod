@@ -45,6 +45,8 @@ export(modelData,
 	buildModel,
     as.quantmod.OHLC)
 export(importDefaults,
+       setSymbolLookup,
+       getSymbolLookup,
        useDefaults,
        unDefaults,
        getDefaults,

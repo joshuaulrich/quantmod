@@ -1,7 +1,7 @@
 Package: quantmod
 Type: Package
 Title: quantmod - quantitative modelling and trading toolkit for R
-Version: 0.1-5
+Version: 0.3-5
 Date: 2007-05-19
 Author: Jeff Ryan
 Depends: zoo
