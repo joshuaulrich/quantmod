@@ -1,4 +1,4 @@
-"papply" <-
+"period.apply" <-
 function(x,INDEX,FUN,...)
 {
   FUN <- match.fun(FUN);
