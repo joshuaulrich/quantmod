@@ -1,5 +1,5 @@
-\name{papply}
-\alias{papply}
+\name{period.apply}
+\alias{period.apply}
 \title{ Apply Function Over Specified Interval }
 \description{
 Apply a specified function to data over a given
@@ -8,7 +8,7 @@ the data from INDEX[k] to INDEX[k+1], for
 k=1:length(INDEX).
 }
 \usage{
-papply(x, INDEX, FUN, ...)
+period.apply(x, INDEX, FUN, ...)
 }
 \arguments{
   \item{x}{ data to apply FUN to }
@@ -33,8 +33,8 @@ A numeric vector with length INDEX
 \examples{
 zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
 bp <- breakpoints(zoo.data,by=weeks)
-papply(zoo.data, INDEX=bp, FUN=function(x) sd(x))
-papply(zoo.data, INDEX=bp, FUN=sd)                  #same
+period.apply(zoo.data, INDEX=bp, FUN=function(x) sd(x))
+period.apply(zoo.data, INDEX=bp, FUN=sd)                  #same
 
 }
 \keyword{ utilities }% __ONLY ONE__ keyword per line
