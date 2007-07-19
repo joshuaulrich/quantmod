@@ -49,19 +49,19 @@ saveSymbolLookup(filename)
 
 }
 \arguments{
-         \item{Symbols}{ a character vector specifying the names of each symbol to be loaded}
-             \item{env}{ where to create objects.  Defaults to .GlobalEnv}
-    \item{return.class}{ desired class of returned object.  Can be quantmod.OHLC (default
+       \item{Symbols}{ a character vector specifying the names of each symbol to be loaded}
+       \item{env}{ where to create objects.  Defaults to .GlobalEnv}
+       \item{return.class}{ desired class of returned object.  Can be quantmod.OHLC (default
                        for \dQuote{yahoo} OHLC data),
                        zoo, data.frame, ts, or its }
-  \item{reload.Symbols}{ boolean to reload current symbols in specified environment. Defaults
+       \item{reload.Symbols}{ boolean to reload current symbols in specified environment. Defaults
                          to FALSE } 
-         \item{verbose}{ boolean to turn on status of retrieval. Defaults to FALSE }
-        \item{warnings}{ boolean to turn on warnings. Defaults to TRUE }
-             \item{src}{ character string specifying sourcing method.}
-   \item{symbol.lookup}{ retrieve symbol's sourcing method from external lookup }
+       \item{verbose}{ boolean to turn on status of retrieval. Defaults to FALSE }
+       \item{warnings}{ boolean to turn on warnings. Defaults to TRUE }
+       \item{src}{ character string specifying sourcing method.}
+       \item{symbol.lookup}{ retrieve symbol's sourcing method from external lookup }
        \item{file.path}{ character string of file location }
-           \item{\dots}{ additional parameters (currently not used) }
+       \item{\dots}{ additional parameters (currently not used) }
 }
 \details{
 \code{getSymbols} first looks to the local environment for
