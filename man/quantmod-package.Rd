@@ -1,0 +1,68 @@
+\name{quantmod-package}
+\alias{quantmod-package}
+\alias{quantmod}
+\docType{package}
+\title{
+quantmod - Quantitative Financial Modelling Framework
+}
+\description{
+Trading support package for building, testing, and trading
+statistical models.
+}
+\details{
+\tabular{ll}{
+Package: \tab quantmod\cr
+Type: \tab Package\cr
+Version: \tab 0.3-5\cr
+Date: \tab 2007-05-19\cr
+Depends: \tab zoo\cr
+Suggests: \tab 
+MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL\cr
+LazyLoad: \tab yes\cr
+License: \tab GPL\cr
+Packaged: \tab Wed Jul 4 2007; jeff ryan\cr
+Built: \tab R 2.5.0; ; 2007-07-19 11:20:18; unix\cr
+}
+
+Index:
+\preformatted{
+Ad                      Extract and Transform quantmod.OHLC Columns
+Delt                    Calculate Percent Change
+Lag                     Lag a Time Series
+Next                    Advance a Time Series
+SPY                     SP500 Data Set
+breakpoints             Locate Breakpoints by Date
+buildModel              Build quantmod model given specified fitting
+                        method
+getDefaults             Use and Manage Global Function Defaults
+getModelData            Update model's dataset
+getSymbols              Manage Data from Multiple Sources
+importDefaults          Import Global Default Argument Values
+period.apply            Apply Function Over Specified Interval
+periodReturn            Calculate Periodic Returns
+quantmod-class          Class "quantmod"
+specifyModel            Specify Model Formula For quantmod Process
+tradeModel              Simulate Trading of Fitted quantmod Object
+}
+~~ An overview of how to use the package, including the most important ~~
+~~ functions ~~
+}
+\author{
+Jeff Ryan
+
+Maintainer: Jeff Ryan <jeff.a.ryan@gmail.com>
+~~ The author and/or maintainer of the package ~~
+}
+\references{
+~~ Literature or other references for background information ~~
+}
+~~ Optionally other standard keywords, one per line, from file KEYWORDS in ~~
+~~ the R documentation directory ~~
+\keyword{ package }
+\seealso{
+~~ Optional links to other man pages, e.g. ~~
+~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
+}
+\examples{
+~~ simple examples of the most important functions ~~
+}
