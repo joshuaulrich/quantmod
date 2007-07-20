@@ -52,6 +52,7 @@ export(importDefaults,
        getDefaults,
        setDefaults,
        unsetDefaults)
+export(tradeLog)
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
