@@ -39,28 +39,28 @@ setClass("quantmodResults",representation(
                     return="quantmodReturn"
                     )
         );
-setClass("tradeLog",representation(
-                    action="character",
-                    quantity="numeric",
-                    underlying="character",
-                    price="numeric",
-                    currency="character",
-                    date="Date",
-                    trade.id="numeric"),
-                    prototype = list(action='',
-                                     quantity=0,
-                                     underlying='',
-                                     price=0,
-                                     currency='USD',
-                                     date=as.Date('2007-01-01'),
-                                     trade.id=1)
-        )
-setMethod("show","tradeLog", 
-         function(object)
-         {
-         tradeLog <- cbind(object@date,object@trade.id,object@price,object@quantity)
-         print(zoo(tradeLog,order.by=object@date))
-         })
+#setClass("tradeLog",representation(
+#                    action="character",
+#                    quantity="numeric",
+#                    underlying="character",
+#                    price="numeric",
+#                    currency="character",
+#                    date="Date",
+#                    trade.id="numeric"),
+#                    prototype = list(action='',
+#                                     quantity=0,
+#                                     underlying='',
+#                                     price=0,
+#                                     currency='USD',
+#                                     date=as.Date('2007-01-01'),
+#                                     trade.id=1)
+#        )
+#setMethod("show","tradeLog", 
+#         function(object)
+#         {
+#         tradeLog <- cbind(object@date,object@trade.id,object@price,object@quantity)
+#         print(zoo(tradeLog,order.by=object@date))
+#         })
 setMethod("show","quantmod", function(object) {
 	cat("\nquantmod object:  ",
         object@model.id,"\tBuild date: ",

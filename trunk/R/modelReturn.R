@@ -48,7 +48,7 @@
   {
     this.period <- periods[i];
     this.bp <- breakpoints(trade.signal,by=this.period,TRUE);
-    accuracy <- merge(accuracy,zoo(papply(x=model.results,INDEX=this.bp,function(x) {
+    accuracy <- merge(accuracy,zoo(period.apply(x=model.results,INDEX=this.bp,function(x) {
                         length(x[as.numeric(x) > 0])/length(x)
                         }),model.index[this.bp]));
     returnsBy <- merge(returnsBy,returnBy(x=model.results,dat=trade.signal,by=this.period)[,2]);
