@@ -3,8 +3,6 @@
 \alias{showSymbols}
 \alias{removeSymbols}
 \alias{saveSymbols}
-\alias{getSymbols.yahoo}
-\alias{getSymbols.MySQL}
 \alias{getSymbols.csv}
 \alias{getSymbols.RData}
 \alias{getSymbols.Oracle}
@@ -49,40 +47,45 @@ saveSymbolLookup(filename)
 
 }
 \arguments{
-       \item{Symbols}{ a character vector specifying the names of each symbol to be loaded}
-       \item{env}{ where to create objects.  Defaults to .GlobalEnv}
-       \item{return.class}{ desired class of returned object.  Can be quantmod.OHLC (default
-                       for \dQuote{yahoo} OHLC data),
-                       zoo, data.frame, ts, or its }
-       \item{reload.Symbols}{ boolean to reload current symbols in specified environment. Defaults
-                         to FALSE } 
-       \item{verbose}{ boolean to turn on status of retrieval. Defaults to FALSE }
-       \item{warnings}{ boolean to turn on warnings. Defaults to TRUE }
-       \item{src}{ character string specifying sourcing method.}
-       \item{symbol.lookup}{ retrieve symbol's sourcing method from external lookup }
+       \item{Symbols}{ a character vector specifying
+                       the names of each symbol to be loaded}
+       \item{env}{ where to create objects. (.GlobalEnv)}
+       \item{return.class}{ desired class of returned object.
+                            Can be quantmod.OHLC (default
+                            for \dQuote{yahoo} OHLC data),
+                            zoo, data.frame, ts, or its. (zoo)}
+       \item{reload.Symbols}{ boolean to reload current symbols
+                              in specified environment. (FALSE)}
+       \item{verbose}{ boolean to turn on status of retrieval.
+                       (FALSE)}
+       \item{warnings}{ boolean to turn on warnings. (TRUE)}
+       \item{src}{ character string specifying sourcing method.
+                   (yahoo)}
+       \item{symbol.lookup}{ retrieve symbol's sourcing method
+                             from external lookup (TRUE) }
        \item{file.path}{ character string of file location }
-       \item{\dots}{ additional parameters (currently not used) }
+       \item{\dots}{ additional parameters }
 }
 \details{
 \code{getSymbols} first looks to the local environment for
-matching symbols. If found, the next symbol in Symbols 
+matching symbols. If found, the next symbol in Symbols
 is attempted, if not found, it is skipped and a warning will
-be displayed.  Upon completion a list of 
-loaded symbols is stored in the global environment 
+be displayed.  Upon completion a list of
+loaded symbols is stored in the global environment
 under the name \code{.getSymbols}.
 
-Objects loaded by \code{getSymbols} can be viewed with 
+Objects loaded by \code{getSymbols} can be viewed with
 \code{showSymbols} and
 removed by a call to \code{removeSymbols}.  Additional
 retrieval methods can be
-created simply following the S3-like naming 
-convention where getSymbols.NAME 
-is used for your function NAME.  See \code{getSymbols.skeleton}.
+created simply following the S3-like naming
+convention where getSymbols.NAME
+is used for your function NAME. See \code{getSymbols.skeleton}.
 
 \code{setDefaults(getSymbols)} can be used to
 specify defaults for all passed \code{getSymbols} arguments.
 \code{setDefaults(getSymbols.MySQL)} for arguments
-specific to \code{getSymbols.MySQL}, etc. 
+specific to \code{getSymbols.MySQL}, etc.
 
 The \dQuote{sourcing} of data is managed internally
 through a complex lookup procedure. If \code{symbol.lookup}
@@ -99,13 +102,15 @@ the default \code{getSymbols} \code{src} method is
 used (\sQuote{yahoo}).
 }
 \value{
-A call to getSymbols will load into the specified environment one object for each
-\code{Symbol} specified, with class defined by \code{return.class}.
+A call to getSymbols will load into the specified
+environment one object for each
+\code{Symbol} specified, with class defined
+by \code{return.class}.
 }
 \author{ Jeffrey A. Ryan }
 \note{
 While it is possible to load symbols as classes other
-\code{zoo}, \pkg{quantmod} requires most, if not
+than \code{zoo}, \pkg{quantmod} requires most, if not
 all, data to be of class \code{zoo}. The additional
 methods are meant mainly to be of use for those
 using the functionality elsewhere.

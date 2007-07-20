@@ -1,4 +1,5 @@
-\name{quantmod.OHLC Transformations}
+\name{OHLC.Transformations}
+\alias{OHLC.Transformations}
 \alias{Ad}
 \alias{Cl}
 \alias{ClCl}
@@ -13,10 +14,9 @@
 \alias{OpLo}
 \alias{OpOp}
 \alias{Vo}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Extract and Transform quantmod.OHLC Columns }
 \description{
-Extract (transformed) data from an object of class 
+Extract (transformed) data from an object of class
 \code{quantmod.OHLC}. Column names must contain the
 complete description - either Open, High, Low, Close,
 Volume, or Adjusted.  This is the default for objects
@@ -32,7 +32,7 @@ necessary to call \code{OpCl(x)}. If multiple periods
 are desired a call to the function \code{Delt} is 
 necessary.
 
-These functions are merely for speed the model 
+These functions are merely for speed the model
 specification process.  All columns may also be extracted
 through standard R methods
 }
@@ -64,7 +64,7 @@ column names matching the requirements in the description
 section
 }
 \value{
-Returns an object of class \code{quantmod.OHLC}
+Returns an object of class \code{zoo}
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{specifyModel}}  }

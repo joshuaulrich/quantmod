@@ -12,9 +12,13 @@ preference.
 }
 \usage{
 importDefaults(...)
+
+useDefaults(name)
+unDefaults(name)
 }
 \arguments{
   \item{\dots}{ ignored }
+  \item{name}{function to enable Defaults on}
 }
 \details{
 Placed immediately after the function declaration,
@@ -26,6 +30,11 @@ call to \code{setDefaults}, and will override
 any default formal parameters, essentially
 replacing the original defaults with user
 supplied values instead.
+
+If a function has not been written with
+\code{importDefaults}, it is possible to
+simply call \code{useDefaults} to achieve
+the same results. See the related help page.
 
 Any values specified by the user in a
 name-value fashion in the parent function
