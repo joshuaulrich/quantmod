@@ -2,7 +2,8 @@
 function(x,na.rm=TRUE)
 {
     model <- x
-    if(class(model) != 'quantmod') stop("model must be of class 'quantmod'\n");
+    if(is.quantmod(model)) 
+        stop(sQuote('x'),"must be of class",dQuote("quantmod"),"\n");
     if(length(model@model.inputs) == 0) {
         #if model.inputs is not yet defined, create full zoo object for building
         build.vars <- c(model@model.target,model@build.inputs);
