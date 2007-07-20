@@ -23,7 +23,7 @@ function(x, abbreviate = FALSE)
     format(index(x), ifelse(abbreviate, "%m", "%B"))
 
 "quarters.zoo" <-
-function(x, ...)
+function(x, abbreviate = FALSE)
 {
    x <- (as.POSIXlt(index(x))$mon) %/% 3;
    return(x+1);
