@@ -9,12 +9,21 @@ function(x,row.date=TRUE,...)
     }
 }
 
+`as.zoo.quantmod.OHLC` <-
+function(x,...)
+{
+  class(x) <- 'zoo'
+  x
+}
+
 `as.quantmod.OHLC`<-
 function(x,
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
          name=NULL,
          ...)
 {
+    if(ncol(x) != length(col.names))
+      stop("'col.names' must match number of columns of 'x'")
     UseMethod("as.quantmod.OHLC")
 }
 
