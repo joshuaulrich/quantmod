@@ -1,3 +1,14 @@
+"is.quantmod" <-
+function(x)
+{
+  (class(x) == 'quantmod')
+}
+"is.quantmodResults" <-
+function(x)
+{
+  (class(x) == 'quantmodResults')
+}
+
 `as.zoo.data.frame`<-
 function(x,row.date=TRUE,...)
 {

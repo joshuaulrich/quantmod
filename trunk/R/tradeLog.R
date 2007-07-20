@@ -64,8 +64,12 @@ function(initial.value=10000,currency="USD",currency.symbol="$",
 "as.tradeLog.tradeLog" <- function() {}
 "as.matrix.tradeLog" <- function() {}
 
-"addTrade" <- function() {
-  
+"addTrade" <-
+function(x,date,action,price,quantity,
+         underlying=NULL,currency=NULL,currency.symbol=NULL,
+         exch=NULL)
+{
+   
 }
 "reverseTrade" <- function() {}
 "adjustTrade" <- function() {}
