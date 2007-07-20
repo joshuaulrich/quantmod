@@ -1,7 +1,7 @@
 "getSymbols" <-
 function(Symbols=NULL,
          env=.GlobalEnv,
-         return.class = c('quantmod.OHLC','zoo'),
+         return.class = "zoo",
          reload.Symbols = FALSE,
          verbose = FALSE,
          warnings = TRUE,
@@ -98,6 +98,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        if('quantmod.OHLC' %in% return.class) {
          class(fr) <- c('quantmod.OHLC','zoo')
        } else
+       if('zoo' == return.class) {
+         fr
+       }
        if('ts' == return.class) {
          fr <- as.ts(fr)
        } else
@@ -109,15 +112,15 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
            index(fr) <- as.POSIXct(index(fr))
            fr <- its::as.its(fr)
          } else {
-           warning("package its could not be loaded: zoo class returned")
+           warning("package its could not be loaded: 'zoo' class returned")
          }
        }
-       #add (its,timeSeries)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
 }
+"getSymbols.cache" <- function() {}
 "getSymbols.file" <- function() {}
 "getSymbols.url" <- function() {}
 "getSymbols.freelunch" <- function() {}
@@ -166,6 +169,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                                   sep='.')
             if('quantmod.OHLC' %in% return.class) {
               class(fr) <- c('quantmod.OHLC','zoo')
+            } else
+            if('zoo' == return.class) {
+              fr
             } else
             if('ts' == return.class) {
               fr <- as.ts(fr)
