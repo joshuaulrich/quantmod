@@ -13,6 +13,7 @@ importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
 export(modelData,
+    modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,
     OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
     Delt,
@@ -43,6 +44,8 @@ export(modelData,
     saveSymbols,
     fittedModel,
 	buildModel,
+    is.quantmod,
+    is.quantmodResults,
     as.quantmod.OHLC)
 export(importDefaults,
        setSymbolLookup,
