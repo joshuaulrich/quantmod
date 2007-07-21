@@ -2,7 +2,7 @@
 function(x,na.rm=TRUE)
 {
     model <- x
-    if(is.quantmod(model)) 
+    if(!is.quantmod(model)) 
         stop(sQuote('x'),"must be of class",dQuote("quantmod"),"\n");
     if(length(model@model.inputs) == 0) {
         #if model.inputs is not yet defined, create full zoo object for building
