@@ -11,7 +11,7 @@ function(x,na.rm=TRUE)
         #else create data object with only relevant model.inputs
         build.vars <- c(model@model.target,model@model.inputs);
     }
-    price.level <- paste(c("Op(","Hi(","Lo(","Cl("),model@product,")",sep="");
+    #price.level <- paste(c("Op(","Hi(","Lo(","Cl("),model@product,")",sep="");
 
     model.symbols <- model@symbols;
     missing.symbols = NULL
@@ -57,21 +57,21 @@ function(x,na.rm=TRUE)
 
     mf <- zoo(model.frame(model@model.spec,data=environment(),na.action=NULL),fullIndex);
 
-    pl.formula <- as.formula(paste('Op(',model@product,') ~ ',
-                    paste(c('Hi(',' + Lo(',' + Cl('),model@product,
-                    ')',collapse=''),sep=''));
-    pl.mf <- zoo(model.frame(pl.formula,data=environment()),as.Date(target.dates))
+    #pl.formula <- as.formula(paste('Op(',model@product,') ~ ',
+    #                paste(c('Hi(',' + Lo(',' + Cl('),model@product,
+    #                ')',collapse=''),sep=''));
+    #pl.mf <- zoo(model.frame(pl.formula,data=environment()),as.Date(target.dates))
 
     if(na.rm) mf <- rbind(na.exclude(mf[-nrow(mf),]),mf[nrow(mf),]);
 
     colnames(mf) <- lapply(colnames(mf),function(x) 
                         { gsub("[) ]","",gsub("[(,=:'\"]",".",x)) });
-    colnames(pl.mf) <- lapply(price.level,function(x) 
-                        { gsub("[) ]","",gsub("[(,=:'\"]",".",x)) });
-    colnames(pl.mf) <- paste(model@product,c('.Open','.High','.Low','.Close'),sep='')
+    #colnames(pl.mf) <- lapply(price.level,function(x) 
+    #                    { gsub("[) ]","",gsub("[(,=:'\"]",".",x)) });
+    #colnames(pl.mf) <- paste(model@product,c('.Open','.High','.Low','.Close'),sep='')
 
     model@model.data <- mf;
-    model@price.levels <- pl.mf;
+    #model@price.levels <- pl.mf;
     model@build.inputs <- colnames(mf)[-1]
     model@model.formula = as.formula(paste(colnames(mf)[1],'~',
                                         paste(colnames(mf)[-1],collapse='+'),
