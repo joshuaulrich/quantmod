@@ -1,5 +1,6 @@
 \name{getSymbols.MySQL}
 \alias{getSymbols.MySQL}
+\alias{getSymbols.mysql}
 \title{ Retrieve Data from MySQL Database }
 \description{
 Fetch data from MySQL database.  As with other
@@ -60,7 +61,17 @@ A call to getSymbols.MySQL will load into the specified
 environment one object for each \code{Symbol} specified,
 with class defined by \code{return.class}.
 }
-\references{ MySQL AB \url{http://www.mysql.com} }
+\references{ 
+\itemize{
+   \cite{MySQL AB \url{http://www.mysql.com}}
+
+   \cite{David A. James and Saikat DebRoy (2006).
+         R Interface to the MySQL databse.
+         \url{www.omegahat.org}}
+
+   \cite{R-SIG-DB. DBI: R Database Interface}
+ }
+ }
 \author{ Jeffrey A. Ryan }
 \note{ 
 The default configuration needs a table named
