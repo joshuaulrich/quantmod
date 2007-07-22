@@ -195,6 +195,8 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         return(Symbols)
 
 }
+"getSymbols.mysql" <- getSymbols.MySQL
+
 "removeSymbols" <- 
 function(Symbols=NULL,env=.GlobalEnv) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
