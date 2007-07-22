@@ -15,14 +15,16 @@ function(x,by=months,from=NULL,to=NULL) {
 }
 `periodReturn.zoo` <-
 function(x,by=months,from=NULL,to=NULL) {
-  from.col <- 4
-  x <- as.data.frame(x)
+  if(NCOL(x) > 1)
+    stop(paste(sQuote('x'),'must be a univariate',dQuote('zoo'),'object'))
+  from.col <- 1
+#  x <- as.data.frame(x)
   if(is.null(from)) from <- start(as.zoo(x))
   if(is.null(to)) to <- end(as.zoo(x))
   x.period <- x[breakpoints(as.zoo(x),by=by,TRUE),]
   adj.length <- NROW(x.period)
-  adj.x.period <- x.period[,from.col]
-  adj.start <- c(x[1,from.col],x.period[-adj.length,from.col])
+  adj.x.period <- as.numeric(x.period[,1])
+  adj.start <- c(as.numeric(x[,from.col])[1],x.period[-adj.length])
   returns <- ((adj.x.period - adj.start)/adj.start)
   returns <- zoo(returns,as.Date(index(as.zoo(x.period))))
   returns <- subset(returns,index(returns) >= as.Date(from) & index(returns) <= as.Date(to))
