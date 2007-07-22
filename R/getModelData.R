@@ -11,7 +11,7 @@ function(x,na.rm=TRUE)
         #else create data object with only relevant model.inputs
         build.vars <- c(model@model.target,model@model.inputs);
     }
-    #price.level <- paste(c("Op(","Hi(","Lo(","Cl("),model@product,")",sep="");
+    
 
     model.symbols <- model@symbols;
     missing.symbols = NULL
@@ -34,13 +34,14 @@ function(x,na.rm=TRUE)
     } else {
         target.dates  <- rownames(target.data)
     }
+    #price.level <- paste(c("Op(","Hi(","Lo(","Cl("),model@product,")",sep="");
     total.columns = NULL
     for(j in 1:length(model.symbols)) { # build single zoo object
         if(j == 1) {
-            m <- merge(zoo(target.data,as.Date(target.dates)))     #target columns
+            m <- merge(zoo(as.matrix(target.data),as.Date(target.dates)))     #target columns
         } else {
             m <- merge(m,
-                       zoo(get(model.symbols[[j]],environment()), #input columns from symbol i
+                       zoo(as.matrix(get(model.symbols[[j]],environment())), #input columns from symbol i
                        as.Date(index(get(model.symbols[[j]],environment()))))) 
         }            
         total.columns[j] <- ncol(m)
