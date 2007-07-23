@@ -47,14 +47,14 @@ export(modelData,
     is.quantmod,
     is.quantmodResults,
     as.quantmod.OHLC)
-export(importDefaults,
-       setSymbolLookup,
-       getSymbolLookup,
-       useDefaults,
-       unDefaults,
-       getDefaults,
-       setDefaults,
-       unsetDefaults)
+export(setSymbolLookup)
+export(getSymbolLookup)
+#export(importDefaults,
+#       useDefaults,
+#       unDefaults,
+#       getDefaults,
+#       setDefaults,
+#       unsetDefaults)
 export(tradeLog)
 export(gainloss)
 S3method(Next,zoo)
