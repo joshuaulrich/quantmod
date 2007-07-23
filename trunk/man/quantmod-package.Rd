@@ -34,18 +34,14 @@ SPY                     SP500 Data Set
 breakpoints             Locate Breakpoints by Date
 buildModel              Build quantmod model given specified fitting
                         method
-getDefaults             Use and Manage Global Function Defaults
 getModelData            Update model's dataset
 getSymbols              Manage Data from Multiple Sources
-importDefaults          Import Global Default Argument Values
 period.apply            Apply Function Over Specified Interval
 periodReturn            Calculate Periodic Returns
 quantmod-class          Class "quantmod"
 specifyModel            Specify Model Formula For quantmod Process
 tradeModel              Simulate Trading of Fitted quantmod Object
 }
-~~ An overview of how to use the package, including the most important ~~
-~~ functions ~~
 }
 \author{
 Jeff Ryan
