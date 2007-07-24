@@ -23,7 +23,6 @@ methods can be added by simply adhering to the convention.
 \usage{
 getSymbols(Symbols = NULL, 
            env = .GlobalEnv,
-           return.class=c('quantmod.OHLC','zoo'),
            reload.Symbols = FALSE,
            verbose = FALSE,
            warnings = TRUE,
@@ -50,10 +49,6 @@ saveSymbolLookup(filename)
        \item{Symbols}{ a character vector specifying
                        the names of each symbol to be loaded}
        \item{env}{ where to create objects. (.GlobalEnv)}
-       \item{return.class}{ desired class of returned object.
-                            Can be quantmod.OHLC (default
-                            for \dQuote{yahoo} OHLC data),
-                            zoo, data.frame, ts, or its. (zoo)}
        \item{reload.Symbols}{ boolean to reload current symbols
                               in specified environment. (FALSE)}
        \item{verbose}{ boolean to turn on status of retrieval.
