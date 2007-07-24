@@ -1,7 +1,7 @@
+# getSymbols {{{
 "getSymbols" <-
 function(Symbols=NULL,
          env=.GlobalEnv,
-         return.class = "zoo",
          reload.Symbols = FALSE,
          verbose = FALSE,
          warnings = TRUE,
@@ -50,7 +50,7 @@ function(Symbols=NULL,
           symbols.returned <- do.call(paste('getSymbols.',symbol.source,sep=''),
                                       list(Symbols=current.symbols,env=env,
                                            #return.class=return.class,
-                                           reload.Symbols=reload.Symbols,
+                                           #reload.Symbols=reload.Symbols,
                                            verbose=verbose,warnings=warnings,
                                            ...))
           for(each.symbol in symbols.returned) all.symbols[[each.symbol]]=symbol.source 
@@ -62,17 +62,19 @@ function(Symbols=NULL,
         warning('no Symbols specified')
       }
 }
+#}}}
+
+# getSymbols.yahoo {{{
 "getSymbols.yahoo" <-
 function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
-         from='1990-01-01',
+         from='2007-01-01',
          to=Sys.Date(),
-         #verbose = FALSE,
-         #warnings = TRUE,
          ...)
 {
      importDefaults()
      this.env <- environment()
      for(var in names(list(...))) {
+        # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
      yahoo.URL <- "http://chart.yahoo.com/table.csv?"
@@ -125,33 +127,30 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
      }
      return(Symbols)
 }
-"getSymbols.cache" <- function() {}
-"getSymbols.file" <- function() {}
-"getSymbols.url" <- function() {}
-"getSymbols.freelunch" <- function() {}
-"getSymbols.RODBC" <- function() {}
-"getSymbols.oanda" <- function() {}
+# }}}
 
+# getSymbols.MySQL {{{
 "getSymbols.MySQL" <- function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                                db.fields=c('date','o','h','l','c','v','a'),
                                field.names = NULL,
-                               verbose = FALSE,
-                               warnings = TRUE,
                                user=NULL,password=NULL,dbname=NULL,...) {
+     importDefaults()
+     this.env <- environment()
+     for(var in names(list(...))) {
+        # import all named elements that are NON formals
+        assign(var, list(...)[[var]], this.env)
+     }
         if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
           if('package:RMySQL' %in% search() || require('RMySQL',quietly=TRUE)) {
-          } else { warning("package RMySQL can't be loaded" ) }
+          } else { warning(paste("package:",dQuote("RMySQL"),"cannot be loaded" )) }
         } else {
-          stop(" package DBI can't be loaded.")
+          stop(paste("package:",dQuote('DBI'),"cannot be loaded."))
         }
         if(is.null(user) || is.null(password) || is.null(dbname)) {
-            if(!is.null(getOption('tR.db'))) {
-                user <- getOption('tR.db')$user
-                password <- getOption('tR.db')$password
-                dbname <- getOption('tR.db')$dbname
-            } else {
-                stop('db connection params must be specified in fetchRawData call or via options("tR.")');
-            }
+          stop(paste(
+              'At least one connection arguement (',sQuote('user'),
+              sQuote('password'),sQuote('dbname'),
+              ") is not set"))
         }
         con <- dbConnect(MySQL(),user=user,password=password,dbname=dbname)
         db.Symbols <- dbListTables(con)
@@ -201,7 +200,16 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 
 }
 "getSymbols.mysql" <- getSymbols.MySQL
+# }}}
 
+"getSymbols.cache" <- function() {}
+"getSymbols.file" <- function() {}
+"getSymbols.url" <- function() {}
+"getSymbols.freelunch" <- function() {}
+"getSymbols.RODBC" <- function() {}
+"getSymbols.oanda" <- function() {}
+
+# removeSymbols {{{
 "removeSymbols" <- 
 function(Symbols=NULL,env=.GlobalEnv) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
@@ -223,14 +231,18 @@ function(Symbols=NULL,env=.GlobalEnv) {
       }
     }
 }
+# }}}
 
+# showSymbols {{{
 "showSymbols" <-
 function(env=.GlobalEnv) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
         return(unlist(get('.getSymbols',env)))
     } else { return(NULL) }
 }
+# }}}
 
+# saveSymbols {{{
 "saveSymbols"<-
 function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv) {
   if(exists('.getSymbols',env,inherits=FALSE)) {
@@ -248,3 +260,4 @@ function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv)
     }    
   }
 }
+# }}}
