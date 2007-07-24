@@ -1,6 +1,5 @@
 \name{getSymbols.MySQL}
 \alias{getSymbols.MySQL}
-\alias{getSymbols.mysql}
 \title{ Retrieve Data from MySQL Database }
 \description{
 Fetch data from MySQL database.  As with other
@@ -16,8 +15,6 @@ getSymbols.MySQL(Symbols,
                  return.class = c("quantmod.OHLC", "zoo"), 
                  db.fields = c("date", "o", "h", "l", "c", "v", "a"), 
                  field.names = NULL,
-                 verbose = FALSE, 
-                 warnings = TRUE, 
                  user = NULL, 
                  password = NULL, 
                  dbname = NULL, 
@@ -35,9 +32,6 @@ getSymbols.MySQL(Symbols,
        \item{db.fields}{ character vector indicating
                            names of fields to retrieve}
        \item{field.names}{ names to assign to returned columns }
-       \item{verbose}{ boolean to turn on status of retrieval.
-                       (FALSE)}
-       \item{warnings}{ boolean to turn on warnings. (TRUE)}
        \item{user}{ username to access database }
        \item{password}{ password to access database }
        \item{dbname}{ database name }

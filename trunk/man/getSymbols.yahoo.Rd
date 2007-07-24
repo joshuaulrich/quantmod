@@ -18,8 +18,6 @@ getSymbols.yahoo(Symbols,
                  return.class = c("quantmod.OHLC", "zoo"),
                  from = "1990-01-01",
                  to = Sys.Date(),
-                 verbose = FALSE,
-                 warnings = TRUE,
                   ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -30,9 +28,6 @@ getSymbols.yahoo(Symbols,
        \item{from}{ Retrieve data no earlier than this date. 
                     (1990-01-01)}
        \item{to}{ Retrieve data through this date (Sys.Date())}
-       \item{verbose}{ boolean to turn on status of retrieval. 
-                       (FALSE)}
-       \item{warnings}{ boolean to turn on warnings. (TRUE) }
        \item{\dots}{ additional parameters }
 }
 \details{
