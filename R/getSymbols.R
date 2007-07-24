@@ -49,7 +49,7 @@ function(Symbols=NULL,
           current.symbols <- names(Symbols[Symbols==symbol.source])
           symbols.returned <- do.call(paste('getSymbols.',symbol.source,sep=''),
                                       list(Symbols=current.symbols,env=env,
-                                           return.class=return.class,
+                                           #return.class=return.class,
                                            reload.Symbols=reload.Symbols,
                                            verbose=verbose,warnings=warnings,
                                            ...))
@@ -66,10 +66,15 @@ function(Symbols=NULL,
 function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          from='1990-01-01',
          to=Sys.Date(),
-         verbose = FALSE,
-         warnings = TRUE,
+         #verbose = FALSE,
+         #warnings = TRUE,
          ...)
 {
+     importDefaults()
+     this.env <- environment()
+     for(var in names(list(...))) {
+        assign(var, list(...)[[var]], this.env)
+     }
      yahoo.URL <- "http://chart.yahoo.com/table.csv?"
      from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
      from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])-1
