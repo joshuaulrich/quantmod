@@ -13,13 +13,13 @@ statistical models.
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.3-5\cr
+Version: \tab 0.1.0\cr
 Date: \tab 2007-05-19\cr
-Depends: \tab zoo\cr
+Depends: \tab zoo, Defaults\cr
 Suggests: \tab 
-MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL\cr
+MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,fCalendar,DBI,RMySQL\cr
 LazyLoad: \tab yes\cr
-License: \tab GPL\cr
+License: \tab GPL Version 2 or later\cr
 Packaged: \tab Wed Jul 4 2007; jeff ryan\cr
 Built: \tab R 2.5.0; ; 2007-07-19 11:20:18; unix\cr
 }
@@ -41,13 +41,20 @@ periodReturn            Calculate Periodic Returns
 quantmod-class          Class "quantmod"
 specifyModel            Specify Model Formula For quantmod Process
 tradeModel              Simulate Trading of Fitted quantmod Object
+
+
+
+\pkg{quantmod} is designed to augment the existing financial
+modelling tools available in R, by providing an interface
+designed to accomodate a standardized workflow of data management,
+model specification and building, through post-modelling
+analysis.
 }
 }
 \author{
-Jeff Ryan
+Jeffrey A. Ryan
 
-Maintainer: Jeff Ryan <jeff.a.ryan@gmail.com>
-~~ The author and/or maintainer of the package ~~
+Maintainer: Jeffrey A. Ryan <jeff.a.ryan@gmail.com>
 }
 \references{
 ~~ Literature or other references for background information ~~
