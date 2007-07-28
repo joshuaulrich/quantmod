@@ -105,21 +105,30 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        if('quantmod.OHLC' %in% return.class) {
          class(fr) <- c('quantmod.OHLC','zoo')
        } else
-       if('zoo' == return.class) {
+       if('zoo' %in% return.class) {
          fr
        }
-       if('ts' == return.class) {
+       if('ts' %in% return.class) {
          fr <- as.ts(fr)
        } else
-       if('data.frame' == return.class) {
+       if('data.frame' %in% return.class) {
          fr <- as.data.frame(fr)
        } else
-       if('its' == return.class) {
+       if('its' %in% return.class) {
          if("package:its" %in% search() || require("its", quietly=TRUE)) {
            index(fr) <- as.POSIXct(index(fr))
            fr <- its::as.its(fr)
          } else {
-           warning("package its could not be loaded: 'zoo' class returned")
+           warning(paste("'its' from package 'its' could not be loaded:",
+                         " 'zoo' class returned"))
+         }
+       } else 
+       if('timeSeries' %in% return.class) {
+         if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+           fr <- as.timeSeries(fr)
+         } else {
+           warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                   " 'zoo' class returned"))
          }
        }
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
@@ -174,22 +183,30 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
             if('quantmod.OHLC' %in% return.class) {
               class(fr) <- c('quantmod.OHLC','zoo')
             } else
-            if('zoo' == return.class) {
+            if('zoo' %in% return.class) {
               fr
             } else
-            if('ts' == return.class) {
+            if('ts' %in% return.class) {
               fr <- as.ts(fr)
             } else
-            if('data.frame' == return.class) {
+            if('data.frame' %in% return.class) {
               fr <- as.data.frame(fr)
             } else
-            if('its' == return.class) {
+            if('its' %in% return.class) {
               if("package:its" %in% search() || require("its", quietly=TRUE)) {
                 index(fr) <- as.POSIXct(index(fr))
                 fr <- its::as.its(fr)
               } else {
-                warning("package 'its' could not be loaded: 'quantmod.OHLC' class returned")
-                class(fr) <- c('quantmod.OHLC','zoo')
+                warning(paste("'its' from package 'its' could not be loaded:",
+                        " 'zoo' class returned"))
+              }
+            } else 
+            if('timeSeries' %in% return.class) {
+              if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+                fr <- as.timeSeries(fr)
+              } else {
+                warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                        " 'zoo' class returned"))
               }
             }
             assign(Symbols[[i]],fr,env)
