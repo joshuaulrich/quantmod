@@ -1,5 +1,9 @@
 \name{Next}
 \alias{Next}
+\alias{Next.quantmod.OHLC}
+\alias{Next.zoo}
+\alias{Next.data.frame}
+\alias{Next.numeric}
 \title{ Advance a Time Series }
 \description{
 Create a new series with all values advanced forward one period.

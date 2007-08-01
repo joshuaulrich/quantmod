@@ -75,7 +75,7 @@ layout changes it is best to use
 \code{setDefaults(getSymbols.MySQL,...)} with
 the new db.fields values specified.
 }
-\seealso{ \code{\link{getSymbols}},\code{\link{setDefaults}},
+\seealso{ \code{\link{getSymbols}},
           \code{\link{setSymbolLookup}} }
 \examples{
 \dontrun{

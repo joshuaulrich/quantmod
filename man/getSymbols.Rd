@@ -110,8 +110,8 @@ all, data to be of class \code{zoo}. The additional
 methods are meant mainly to be of use for those
 using the functionality elsewhere.
 }
-\seealso{ \code{\link{getModelData}},\code{\link{specifyModel}}
-          \code{\link{setDefaults}},\code{\link{setSymbolLookup}} }
+\seealso{ \code{\link{getModelData}},\code{\link{specifyModel}},
+          \code{\link{setSymbolLookup}} }
 \examples{
 \dontrun{
 setSymbolLookup(QQQQ='yahoo',SPY='MySQL')
