@@ -1,5 +1,9 @@
 \name{Lag}
 \alias{Lag}
+\alias{Lag.quantmod.OHLC}
+\alias{Lag.zoo}
+\alias{Lag.data.frame}
+\alias{Lag.numeric}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Lag a Time Series }
 \description{
