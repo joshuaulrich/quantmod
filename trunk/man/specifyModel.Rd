@@ -70,7 +70,7 @@ full data set as \code{zoo} object.
 
 \seealso{ \code{\link{getModelData}},\code{\link{getSymbols}},
 \code{\link{buildModel}},\code{\link{tradeModel}},\code{\link{formula}}
-\code{\link{setSymbolLookup}} \code{\link{setDefaults}}}
+\code{\link{setSymbolLookup}}}
 \examples{
 \dontrun{
 # if QQQQ is not in the Global environment, an attempt will be made

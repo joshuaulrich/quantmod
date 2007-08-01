@@ -46,7 +46,7 @@ by \code{return.class}.
 }
 \references{ \url{http://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{getSymbols}},\code{\link{setDefaults}},
+\seealso{ \code{\link{getSymbols}},
           \code{\link{setSymbolLookup}} }
 \examples{
 \dontrun{
