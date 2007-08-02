@@ -5,7 +5,7 @@ Version: 0.1-0
 Date: 2007-05-19
 Author: Jeff Ryan
 Depends: zoo,Defaults
-Suggests: MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL
+Suggests: MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL,fCalendar
 Maintainer: Jeff Ryan <jeff.a.ryan@gmail.com>
 Description: Specify, build, trade, and analyse quantitative financial trading srategies
 LazyLoad: yes
