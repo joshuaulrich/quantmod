@@ -129,10 +129,12 @@ setMethod("show","quantmodResults", function(object) {
 )
 
 "fittedModel"<-function(object) {object@fitted.model}
-setGeneric("fittedModel<-", function(x,...,value) {standardGeneric("fittedModel<-")})
-setReplaceMethod("fittedModel","quantmod", function(x,...,value)
+#setGeneric("fittedModel<-", function(x,...,value) {standardGeneric("fittedModel<-")})
+setGeneric("fittedModel<-", function(object,value) {standardGeneric("fittedModel<-")})
+#setReplaceMethod("fittedModel","quantmod", function(x,...,value)
+setReplaceMethod("fittedModel","quantmod", function(object,value)
 {
-    x@fitted.model <- value
+    object@fitted.model <- value
     
 }
 )
