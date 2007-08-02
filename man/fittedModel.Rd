@@ -49,6 +49,9 @@ fittedModel(object) <- value
 }
 \arguments{
   \item{object}{ a \code{quantmod} object }
+  \item{x}{ a \code{quantmod} object }
+  \item{value}{ a new fitted model }
+  \item{\dots}{ additional arguments }
 }
 \details{
 Most often used to extract the final fitted
