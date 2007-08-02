@@ -1,4 +1,9 @@
 ".onLoad" <- function(lib,pkg) {
+  cat("\n**WARNING**\n\n")
+  cat("This is currently 'quantmod' version 0.1-0")
+  cat("\nMany functions, features, and documentation are\n")
+  cat("incomplete. A new package will be available on CRAN\n")
+  cat("on or around useR2007 in Ames, IA, USA\n\n")
 #  require(methods,quietly=TRUE);
 #  require(zoo,quietly=TRUE);
 #  require(RMySQL,quietly=TRUE);
