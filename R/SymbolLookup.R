@@ -30,6 +30,6 @@ function(Symbols=NULL)
 }
 
 "unsetSymbolLookup" <-
-function(Symbol)
+function(Symbols,confirm=TRUE)
 {
 }
