@@ -18,6 +18,7 @@ unsetSymbolLookup(Symbols,confirm=TRUE)
 \arguments{
   \item{\dots}{ name=value pairs for symbol defaults }
   \item{Symbols}{ name of symbol(s) }
+  \item{confirm}{ warn before deleting lookup table }
 }
 \details{
 Use of these functions allows the user to specify
@@ -57,18 +58,16 @@ This \emph{may} change to allow for an easier to
 manage process, as for now it is designed to minimize
 the clutter created during a typical session.
 }
-\seealso{ \code{\link{getSymbols}}, \code{\link{options}},
-          \code{\link{getDefaults}} }
+\seealso{ \code{\link{getSymbols}}, \code{\link{options}},}
 \examples{
-setSymbolSource(QQQQ='yahoo',DIA='MySQL')
-getSymbolSource('QQQQ')
-getSymbolSource(c('QQQQ','DIA')
+setSymbolLookup(QQQQ='yahoo',DIA='MySQL')
+getSymbolLookup('QQQQ')
+getSymbolLookup(c('QQQQ','DIA'))
 
 \dontrun{
 ## Will download QQQQ from yahoo
 ## and load DIA from MySQL
 getSymbols(c('QQQQ','DIA'))
-
 }
 }
 \keyword{ utilities }

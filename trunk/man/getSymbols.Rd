@@ -35,15 +35,6 @@ removeSymbols(Symbols=NULL,env=.GlobalEnv)
 saveSymbols(Symbols = NULL,
             file.path=stop("must specify 'file.path'"),
             env = .GlobalEnv)
-
-setSymbolLookup(...)
-getSymbolLookup(Symbols=NULL)
-
-unsetSymbolLookup(Symbols=NULL)
-
-loadSymbolLookup(filename)
-saveSymbolLookup(filename)
-
 }
 \arguments{
        \item{Symbols}{ a character vector specifying

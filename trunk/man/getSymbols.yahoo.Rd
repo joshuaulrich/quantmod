@@ -16,7 +16,7 @@ additional getSymbols \sQuote{methods}.
 getSymbols.yahoo(Symbols,
                  env,
                  return.class = c("quantmod.OHLC", "zoo"),
-                 from = "1990-01-01",
+                 from = "2007-01-01",
                  to = Sys.Date(),
                   ...)
 }
@@ -25,6 +25,7 @@ getSymbols.yahoo(Symbols,
        \item{Symbols}{ a character vector specifying
                        the names of each symbol to be loaded}
        \item{env}{ where to create objects. (.GlobalEnv) }  
+       \item{return.class}{ class of returned object }  
        \item{from}{ Retrieve data no earlier than this date. 
                     (1990-01-01)}
        \item{to}{ Retrieve data through this date (Sys.Date())}
@@ -42,7 +43,8 @@ historical data download.
 A call to getSymbols.yahoo will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
-by \code{return.class}.
+by \code{return.class}. Presently this may be \code{ts},
+\code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
 }
 \references{ \url{http://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }
