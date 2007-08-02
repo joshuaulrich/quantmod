@@ -24,19 +24,18 @@ export(modelData,
     dailyReturn,weeklyReturn,monthlyReturn,quarterlyReturn,annualReturn,
     allReturns,
     tradeModel,
-    saveModels,
-    loadModels,
+#    saveModels,
+#    loadModels,
 	period.apply,
-	returnBy,
+#	returnBy,
 	breakpoints,
 #	importKM,
 #	tR.kmgmdh,
 	specifyModel,
 	getModelData,
-    stripModelData,
+#    stripModelData,
     predictModel,
     getSymbols,
-    saveSymbols,
     getSymbols.MySQL,
     getSymbols.yahoo,
     showSymbols,
@@ -49,12 +48,6 @@ export(modelData,
     as.quantmod.OHLC)
 export(setSymbolLookup)
 export(getSymbolLookup)
-#export(importDefaults,
-#       useDefaults,
-#       unDefaults,
-#       getDefaults,
-#       setDefaults,
-#       unsetDefaults)
 export(tradeLog)
 export(gainloss)
 S3method(Next,zoo)
