@@ -43,6 +43,7 @@ export(modelData,
     saveSymbols,
     fittedModel,
 	buildModel,
+	buildData,
     is.quantmod,
     is.quantmodResults,
     as.quantmod.OHLC)
