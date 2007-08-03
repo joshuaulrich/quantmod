@@ -278,3 +278,43 @@ function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv)
   }
 }
 # }}}
+
+# buildData {{{
+"buildData" <- function(formula,na.rm=TRUE,return.class="zoo") {
+  fr <- modelData(specifyModel(formula,na.rm=na.rm))
+  if('zoo' %in% return.class) {
+    fr
+  } else
+  if('ts' %in% return.class) {
+    fr <- as.ts(fr)
+    return(fr)
+  } else
+  if('data.frame' %in% return.class) {
+    fr <- as.data.frame(fr)
+    return(fr)
+  } else
+  if('its' %in% return.class) {
+    if("package:its" %in% search() || require("its", quietly=TRUE)) {
+      index(fr) <- as.POSIXct(index(fr))
+      fr <- its::as.its(fr)
+      return(fr)
+    } else {
+      warning(paste("'its' from package 'its' could not be loaded:",
+                    " 'zoo' class returned"))
+    }
+  } else 
+  if('timeSeries' %in% return.class) {
+    if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+      fr <- as.timeSeries(fr)
+      return(fr)
+    } else {
+      warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                    " 'zoo' class returned"))
+    }
+  } else {
+    warning(paste("unable to return class",sQuote(return.class),":",
+                  " 'zoo' class returned"))
+  }
+    
+}
+#}}}
