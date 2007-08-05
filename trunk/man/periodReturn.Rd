@@ -64,6 +64,7 @@ conversion to the suitable zoo object as returned by a call to \code{getSymbols}
 }
 \seealso{\code{\link{getSymbols}} }
 \examples{
+\dontrun{
 getSymbols('QQQQ',src='yahoo')
 allReturns(QQQQ)  # returns all periods
 
@@ -71,5 +72,6 @@ periodReturn(QQQQ,by=years,from='2003-01-01')  # returns years 2003 to present
 periodReturn(QQQQ,by=years,from='2003-01-01',to='2004-01-01')  # returns year 2003
 
 rm(QQQQ)
+}
 }
 \keyword{ utilities }% at least one, from doc/KEYWORDS
