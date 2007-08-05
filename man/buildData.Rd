@@ -42,4 +42,4 @@ An object of class \code{return.class}.
   buildData(Next(OpCl(DIA)) ~ Lag(TBILL) + I(Lag(OpHi(DIA))^2))
 }
 }
-\keyword{ dataset }
+\keyword{ datagen }
