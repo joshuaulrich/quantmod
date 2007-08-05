@@ -13,23 +13,23 @@ buildData(formula, na.rm = TRUE, return.class = "zoo")
 that can be coerced to that class): a symbolic description
 of the desired output data object, with the \code{dependent} side
 corresponding to first column, and the \code{independent} parameters of
-the formula to assigned to the remaining columns. }
+the formula assigned to the remaining columns. }
   \item{na.rm}{ drop rows with missing values? }
-  \item{return.class}{ one of the followign character strings:
-zoo, data.frame, ts, its, timeSeries}
+  \item{return.class}{ one of "zoo","data.frame","ts","its","timeSeries" }
 }
 \details{
-Makes available for use outside the \pkg{quantmod} workflow a dataset
+Makes available for use \emph{outside} the \pkg{quantmod} workflow a dataset
 of appropriately transformed variables, using the same mechanism
-underlying \code{specifyModel}. Offering the ability to apply transformations
+underlying \code{specifyModel}. Offers the ability to apply transformations
 to raw data using a common formula mechanism, without having to explicitly
-merge different data objects, or in some instances, does not require for
-the desired underlying data to currently loaded in the users environment.
+merge different data objects.
+
+Interally calls \code{specifyModel} followed by \code{modelData}, with the
+returned object being coerced to the desired 'return.class' if possible,
+otherwise returns a \code{zoo} object.
+
 See \code{getSymbols} and \code{specifyModel} for more information
 regarding proper usage.
-
-Calls \code{specifyModel} followed by \code{modelData}, with the
-returned object being coerced internally to the desired 'return.class'.
 }
 \value{
 An object of class \code{return.class}.
@@ -40,6 +40,8 @@ An object of class \code{return.class}.
 \examples{
 \dontrun{
   buildData(Next(OpCl(DIA)) ~ Lag(TBILL) + I(Lag(OpHi(DIA))^2))
+  buildData(Next(OpCl(DIA)) ~ Lag(TBILL), na.rm=FALSE)
+  buildData(Next(OpCl(DIA)) ~ Lag(TBILL), na.rm=FALSE, return.class="ts")
 }
 }
 \keyword{ datagen }
