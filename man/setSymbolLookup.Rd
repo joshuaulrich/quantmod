@@ -14,7 +14,6 @@ setSymbolLookup(...)
 getSymbolLookup(Symbols=NULL)
 unsetSymbolLookup(Symbols,confirm=TRUE)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{\dots}{ name=value pairs for symbol defaults }
   \item{Symbols}{ name of symbol(s) }
@@ -26,13 +25,15 @@ a default scheme for each \code{Symbol} to be
 loaded.
 
 Different sources (e.g. yahoo, MySQL),
-return classes (e.g. quantmod.OHLC,zoo, etc),
-and more can be specified for each Symbol of
-interest.
+can be specified for each Symbol of
+interest. The sources must be \emph{valid}
+\code{getSymbols} methods - see \code{getSymbols}
+for details on which methods are available, as well as
+how to add additional methods.
 
 The argument list to \code{setSymbolLookup} is
 simply the unquoted name of the \code{Symbol} matched
-to the desired defaults.
+to the desired default source.
 
 For example, to signify that the stock data for
 Sun Microsystems (SUNW) should be downloaded from
@@ -40,9 +41,10 @@ Yahoo! Finance, one would call
 \code{setSymbolLookup(SUNW='yahoo')}
 
 All changes are made to the current list, and will
-persist until the end of the session. If it is
-desirable to maintain the values, use \code{saveSymbolLookup}
-and \code{loadSymbolLookup}.
+persist \emph{only} until the end of the session. To \emph{always}
+use the same defaults it is necessary to call
+\code{setSymbolLookup} from a startup file (e.g.
+.Rprofile)
 }
 \value{
 Called for its side effects, the function changes the
@@ -69,5 +71,14 @@ getSymbolLookup(c('QQQQ','DIA'))
 ## and load DIA from MySQL
 getSymbols(c('QQQQ','DIA'))
 }
+
+## Use something like this to always retrieve
+## from the same source
+
+.First <- function() {
+  require(quantmod,quietly=TRUE)
+  quantmod::setSymbolLookup(SUNW="MySQL")
+}
+
 }
 \keyword{ utilities }
