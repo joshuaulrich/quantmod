@@ -2,8 +2,6 @@
 \alias{setSymbolLookup}
 \alias{getSymbolLookup}
 \alias{unsetSymbolLookup}
-\alias{loadSymbolLookup}
-\alias{saveSymbolLookup}
 \title{ Manage Symbol Lookup Table }
 \description{
 Create and manage Symbol defaults lookup table within

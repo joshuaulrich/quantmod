@@ -3,13 +3,6 @@
 \alias{showSymbols}
 \alias{removeSymbols}
 \alias{saveSymbols}
-\alias{getSymbols.csv}
-\alias{getSymbols.RData}
-\alias{getSymbols.Oracle}
-\alias{getSymbols.Postgresql}
-\alias{getSymbols.economagic}
-\alias{getSymbols.stlfed}
-\alias{getSymbols.Default}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Manage Data from Multiple Sources }
 \description{
