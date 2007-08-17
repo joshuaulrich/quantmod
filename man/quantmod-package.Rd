@@ -13,8 +13,8 @@ trading srategies
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.1-0\cr
-Date: \tab 2007-05-19\cr
+Version: \tab 0.1-3\cr
+Date: \tab 2007-08-06\cr
 Depends: \tab zoo,Defaults\cr
 Suggests: \tab 
 MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL,fCalendar\cr
