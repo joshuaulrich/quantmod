@@ -9,7 +9,7 @@ function(Symbols=NULL,
          symbol.lookup = TRUE,
          ...)  {
 
-      importDefaults()
+      importDefaults("getSymbols")
       if(symbol.lookup) {
         symbols.src <- getOption('getSymbols.sources')
       } else {
@@ -71,7 +71,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          to=Sys.Date(),
          ...)
 {
-     importDefaults()
+     importDefaults("getSymbols.yahoo")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -143,7 +143,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                                db.fields=c('date','o','h','l','c','v','a'),
                                field.names = NULL,
                                user=NULL,password=NULL,dbname=NULL,...) {
-     importDefaults()
+     importDefaults("getSymbols.MySQL")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
