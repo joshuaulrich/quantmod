@@ -43,18 +43,19 @@
 #  period.options <- c("weeks","months","quarters","years");
 #  periods <- period.options[pmatch(ret.type,period.options)];
 
-  returnsBy <- merge(model.cumret,model.results);
-  for(i in 1:length(periods))
-  {
-    this.period <- periods[i];
-    this.bp <- breakpoints(trade.signal,by=this.period,TRUE);
-    accuracy <- merge(accuracy,zoo(period.apply(x=model.results,INDEX=this.bp,function(x) {
-                        length(x[as.numeric(x) > 0])/length(x)
-                        }),model.index[this.bp]));
-    returnsBy <- merge(returnsBy,returnBy(x=model.results,dat=trade.signal,by=this.period)[,2]);
-  }
-  colnames(returnsBy) <- c("cum.return","days",periods);
+# returnsBy <- merge(model.cumret,model.results);
+# for(i in 1:length(periods))
+# {
+#   this.period <- periods[i];
+#   this.bp <- breakpoints(trade.signal,by=this.period,TRUE);
+#   accuracy <- merge(accuracy,zoo(period.apply(x=model.results,INDEX=this.bp,function(x) {
+#                       length(x[as.numeric(x) > 0])/length(x)
+#                       }),model.index[this.bp]));
+#   returnsBy <- merge(returnsBy,returnBy(x=model.results,dat=trade.signal,by=this.period)[,2]);
+# }
+# colnames(returnsBy) <- c("cum.return","days",periods);
   if(NCOL(accuracy)>1) colnames(accuracy) <- periods;
+  returnsBy <- allReturns(model.cumret)
   quantmodReturn@returnsBy <- returnsBy;  
   
   quantmodReturn@dist.of.returns <- lapply(as.data.frame(returnsBy), function(x) as.numeric(summary(x))[1:6])

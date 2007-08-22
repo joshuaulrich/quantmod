@@ -32,6 +32,12 @@ function(x,by=months,from=NULL,to=NULL) {
   attr(returns,'periodicity') <- as.character(substitute(by))
   return(returns)
 }
+`periodReturn.quantmodResults` <-
+function(x,by=months,from=NULL,to=NULL)
+{
+  x <- x@return@returns
+  periodReturn(x,by=by,from=from,to=to)
+}
 `periodReturn` <-
 function(x,by=months,from=NULL,to=NULL) 
 {

@@ -21,7 +21,7 @@ MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL,fCa
 LazyLoad: \tab yes\cr
 License: \tab GPL 2 or later\cr
 Packaged: \tab Thu Aug 2 00:04:35 2007; jryan\cr
-URL: \tab http://www.quantmod.com
+URL: \tab http://www.quantmod.com\cr
 Built: \tab R 2.5.0; ; 2007-08-02 00:04:38; unix\cr
 }
 

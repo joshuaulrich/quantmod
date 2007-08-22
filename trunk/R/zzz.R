@@ -178,7 +178,7 @@ function(x,...)
 'formula.quantmod' <-
 function(x,...)
 {
-    x@model.spec
+    x@model.formula
 }
 
 'coef.quantmod' <-
