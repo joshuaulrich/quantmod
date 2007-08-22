@@ -205,3 +205,24 @@ function(x,period=months) {
 }
 
 `to.period.zoo` <- to.period.quantmod.OHLC
+
+`to.weekly` <-
+function(x)
+{
+  to.period(x,weeks)
+}
+`to.monthly` <-
+function(x)
+{
+  to.period(x,months)
+}
+`to.quarterly` <-
+function(x)
+{
+  to.period(x,quarters)
+}
+`to.yearly` <-
+function(x)
+{
+  to.period(x,years)
+}
