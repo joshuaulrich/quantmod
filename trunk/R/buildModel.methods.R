@@ -225,5 +225,5 @@ function(object,data,...)
 {
   if(length(try(library(e1071),FALSE))==1)
     stop("Required package 'e1071' for method 'svm' was not found\n")
-  predict(object,data,...) 
+  predict(object,data[-NROW(data),],...) 
 }
