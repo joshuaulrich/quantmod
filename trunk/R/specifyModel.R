@@ -12,7 +12,7 @@ function(formula,na.rm=TRUE) {
 #    model.formula <- paste(model.vars[1],paste(model.vars[-1],collapse=' + '),sep=' ~ ');
 
   new.quantmod@model.spec <- formula
-  new.quantmod@model.formula <- as.formula(gsub("[) ]","",gsub("[(,=:'\"]",".",deparse(formula))));
+  new.quantmod@model.formula <- as.formula(gsub("[) ]","",gsub("[(,=:^'\"]",".",deparse(formula))));
   new.quantmod@model.target <- as.character(new.quantmod@model.formula[[2]])
   new.quantmod@build.inputs <- as.character(attr(terms(new.quantmod@model.formula),"term.labels"));
   vars <- all.vars(formula);
