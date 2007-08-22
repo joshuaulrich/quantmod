@@ -19,7 +19,7 @@ export(modelData,
     Delt,
     Next,
     Lag,
-#    lags2,
+    to.period,
     periodReturn,
     dailyReturn,weeklyReturn,monthlyReturn,quarterlyReturn,annualReturn,
     allReturns,
@@ -51,6 +51,7 @@ export(setSymbolLookup)
 export(getSymbolLookup)
 #export(tradeLog)
 #export(gainloss)
+S3method(to.period,quantmod.OHLC)
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
