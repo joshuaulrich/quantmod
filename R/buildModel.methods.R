@@ -210,3 +210,20 @@ function(object,data,...)
         stop("Required package 'randomForest' for method 'randomForest' was not found\n");
     predict(object,data,...)
 }
+
+`buildModel.svm` <-
+function(quantmod,training.data,...)
+{
+  if(length(try(library(e1071),FALSE))==1)
+    stop("Required package 'e1071' for method 'svm' was not found\n")
+  rp <- svm(formula(quantmod),data=training.data,...)
+  return(list('fitted'=rp,attr(terms(rp),'term.labels')))
+}
+
+`predictModel.svm` <-
+function(object,data,...)
+{
+  if(length(try(library(e1071),FALSE))==1)
+    stop("Required package 'e1071' for method 'svm' was not found\n")
+  predict(object,data,...) 
+}
