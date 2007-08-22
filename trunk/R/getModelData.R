@@ -66,7 +66,7 @@ function(x,na.rm=TRUE)
     if(na.rm) mf <- rbind(na.exclude(mf[-nrow(mf),]),mf[nrow(mf),]);
 
     colnames(mf) <- lapply(colnames(mf),function(x) 
-                        { gsub("[) ]","",gsub("[(,=:'\"]",".",x)) });
+                        { gsub("[) ]","",gsub("[(,=^:'\"]",".",x)) });
     #colnames(pl.mf) <- lapply(price.level,function(x) 
     #                    { gsub("[) ]","",gsub("[(,=:'\"]",".",x)) });
     #colnames(pl.mf) <- paste(model@product,c('.Open','.High','.Low','.Close'),sep='')
