@@ -183,3 +183,23 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
         (x2-Lag(x1,k))/Lag(x1,k)
     }
 }
+`to.period` <-
+function(x,period=months)
+{
+  UseMethod('to.period')
+}
+
+`to.period.quantmod.OHLC` <-
+function(x,period=months) {
+  bp <- breakpoints(x,period,TRUE)
+  op <- as.numeric(Op(x)[bp+1][-length(bp)])
+  hi <- period.apply(Hi(x),bp,max)
+  lo <- period.apply(Lo(x),bp,min)
+  cl <- as.numeric(Cl(x)[bp])
+  vo <- period.apply(Vo(x),bp,sum)
+  ad <- as.numeric(Ad(x)[bp])
+  date <- index(x)[bp]
+  x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
+  colnames(x.out) <- colnames(x)
+  x.out
+}
