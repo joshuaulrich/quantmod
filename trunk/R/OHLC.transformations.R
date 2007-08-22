@@ -203,3 +203,5 @@ function(x,period=months) {
   colnames(x.out) <- colnames(x)
   x.out
 }
+
+`to.period.zoo` <- to.period.quantmod.OHLC
