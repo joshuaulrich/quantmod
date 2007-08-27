@@ -12,7 +12,7 @@ function(x,training.per,method,...) {
     mcall <- do.call(method,list(quantmod=x,training.data=training.data, ...));
     x@fitted.model <- mcall$fitted;
     x@model.inputs <- as.character(mcall$inputs);
-    x@build.date = as.Date(Sys.time());
+    x@build.date = as.character(Sys.time());
     x@model.id <- paste(class(mcall$fitted)[length(class(mcall$fitted))],
                                as.numeric(Sys.time()),sep='');
     x@training.data <- training.dates;
