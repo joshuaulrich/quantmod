@@ -26,7 +26,7 @@ lm, glm, loess, step, ppr,
 rpart[rpart], tree[tree],
 randomForest[randomForest], mars[mda],
 polymars[polspline], lars[lars], rq[quantreg],
-lqs[MASS], rlm[MASS], and nnet[nnet].
+lqs[MASS], rlm[MASS], svm[e1071], and nnet[nnet].
 
 Additional methods wrappers can be created to allow for modelling 
 using custom functions.  The only requirements are for a wrapper 
