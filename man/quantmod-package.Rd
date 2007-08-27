@@ -13,7 +13,7 @@ trading srategies
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.1-3\cr
+Version: \tab 0.1-4\cr
 Date: \tab 2007-08-06\cr
 Depends: \tab zoo,Defaults\cr
 Suggests: \tab 
