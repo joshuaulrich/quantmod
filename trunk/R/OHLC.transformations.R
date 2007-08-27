@@ -213,6 +213,7 @@ function(x,period=months) {
   date <- index(x)[bp]
   x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
   colnames(x.out) <- colnames(x)
+  class(x.out) <- class(x)
   x.out
 }
 
