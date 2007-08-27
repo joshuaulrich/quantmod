@@ -15,7 +15,6 @@ given period, as well as the maximum and minimum prices over the
 new period, reflected in the new high and low, respectively.
 }
 \usage{
-to.daily(x)
 to.weekly(x)
 to.monthly(x)
 to.quarterly(x)
