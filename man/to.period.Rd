@@ -1,6 +1,5 @@
 \name{to.period}
 \alias{to.period}
-\alias{to.daily}
 \alias{to.weekly}
 \alias{to.monthly}
 \alias{to.quarterly}
@@ -23,9 +22,6 @@ to.quarterly(x)
 to.yearly(x)
 
 to.period(x, period = months)
-
-\method{to.period}{quantmod.OHLC}(x,period=months)
-\method{to.period}{zoo}(x,period=months)
 }
 \arguments{
   \item{x}{ OHLC type object } 
