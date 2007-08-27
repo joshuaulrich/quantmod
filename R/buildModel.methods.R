@@ -1,4 +1,4 @@
-"buildModel.glm" <-
+`buildModel.glm` <-
 function(quantmod,training.data=training.data,...)
 {
 	gl <- glm(formula=quantmod@model.formula,data=training.data,...);
@@ -6,7 +6,7 @@ function(quantmod,training.data=training.data,...)
                 "inputs"=attr(terms(gl),"term.labels"))); 
 }
 
-"buildModel.lm" <-
+`buildModel.lm` <-
 function(quantmod,training.data,...)
 {
 	l <- lm(formula=quantmod@model.formula,data=training.data,...);
@@ -14,7 +14,7 @@ function(quantmod,training.data,...)
                 "inputs"=attr(terms(l),"term.labels"))); 
 }
 
-"buildModel.step" <-
+`buildModel.step` <-
 function(quantmod,training.data,...)
 {
     s <- step(lm(formula=quantmod@model.formula,data=training.data,...),...);
@@ -22,7 +22,7 @@ function(quantmod,training.data,...)
                 "inputs"=NULL)); 
 }
 
-"buildModel.loess" <-
+`buildModel.loess` <-
 function(quantmod,training.data,...)
 {
     l <- loess(quantmod@model.formula,data=training.data,...);
@@ -31,199 +31,216 @@ function(quantmod,training.data,...)
 }
 
 ####### quantile regression method 'rq' - requires package quantreg
-"buildModel.rq" <-
+`buildModel.rq` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(quantreg),FALSE)) == 1) 
-        stop("Required package 'quantreg' for method 'rq' was not found\n");
-    r <- rq(quantmod@model.formula,data=training.data,...);
+  if(is.method.available('rq','quantreg')) {
+    r <- rq(quantmod@model.formula,data=training.data,...)
 	return(list("fitted"=r,
-                "inputs"=attr(terms(r),"term.labels"))); 
+                "inputs"=attr(terms(r),"term.labels"))) 
+  }
 }
 
 ####### resistant regression method 'lqs' - requires package MASS
-"buildModel.lqs" <-
+`buildModel.lqs` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(MASS),FALSE)) == 1) 
-        stop("Required package 'MASS' for method 'lqs' was not found\n");
-    lq <- lqs(quantmod@model.formula,data=training.data,...);
+  if(is.method.available('lqs','MASS')) {
+    lq <- lqs(quantmod@model.formula,data=training.data,...)
 	return(list("fitted"=lq,
-                "inputs"=attr(terms(lq),"term.labels"))); 
+                "inputs"=attr(terms(lq),"term.labels"))) 
+  }
 }
 
 ####### robust regression method 'rlm' - requires package MASS
-"buildModel.rlm" <-
+`buildModel.rlm` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(MASS),FALSE)) == 1) 
-        stop("Required package 'MASS' for method 'rlm' was not found\n");
-    rl <- rlm(quantmod@model.formula,data=training.data,...);
+  if(is.method.available('lqs','MASS')) {
+    rl <- rlm(quantmod@model.formula,data=training.data,...)
 	return(list("fitted"=rl,
-                "inputs"=attr(terms(rl),"term.labels"))); 
+                "inputs"=attr(terms(rl),"term.labels"))) 
+  }
 }
 
 ####### neural net method - requires package nnet
-"buildModel.nnet" <-
+`buildModel.nnet` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(nnet),FALSE)) == 1) 
-        stop("Required package 'nnet' for method 'nnet' was not found\n");
-	nn <- nnet(quantmod@model.formula,data=training.data,...);
+  if(is.method.available('nnet','nnet')) {
+	nn <- nnet(quantmod@model.formula,data=training.data,...)
 	return(list("fitted"=nn,
-                "inputs"=attr(terms(nn),"term.labels"))); 
+                "inputs"=attr(terms(nn),"term.labels"))) 
+  }
 }
-"predictModel.nnet" <-
+`predictModel.nnet` <-
 function(object,data,...)
 {
-    if(length(try(library(nnet),FALSE)) == 1) 
-        stop("Required package 'nnet' for method 'nnet' was not found\n");
+  if(is.method.available('nnet','nnet')) {
     predict(object,data,...)
+  }
 }
 
 ####### projection pursuit regression method - requires stats
-"buildModel.ppr" <-
+`buildModel.ppr` <-
 function(quantmod,training.data,...)
 {
-	p <- ppr(quantmod@model.formula,data=training.data,...);
+	p <- ppr(quantmod@model.formula,data=training.data,...)
 	return(list("fitted"=p,
-                "inputs"=attr(terms(p),"term.labels"))); 
+                "inputs"=attr(terms(p),"term.labels"))) 
 }
 
 ####### mars method - requires package mda
-"buildModel.mars" <-
+`buildModel.mars` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(mda),FALSE)) == 1)
-        stop("Required package 'mda' for method 'mars' was not found\n");
-	x <- training.data[,-1];
-	y <- training.data[,1];
-	m <- mars(x=x,y=y,...);
+  if(is.method.available('mars','mda')) {
+	x <- training.data[,-1]
+	y <- training.data[,1]
+	m <- mars(x=x,y=y,...)
 	return(list("fitted"=m,
-                "inputs"=colnames(x))); 
+                "inputs"=colnames(x))) 
+  }
 }
 
-"predictModel.mars" <-
+`predictModel.mars` <-
 function(object,data,...)
 {
-    if(length(try(library(mda),FALSE)) == 1) 
-        stop("Required package 'mda' for method 'mars' was not found\n");
-    predict(object,data[,-1]);
+  if(is.method.available('mars','mda')) {
+    predict(object,data[,-1])
+  }
 }
 
 ####### polymars method - requires package polspline
-"buildModel.polymars" <-
+`buildModel.polymars` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(polspline),FALSE)) == 1)
-        stop("Required package 'polspline' for method 'polymars' was not found\n");
-	responses <- training.data[,1];
-	predictors <- training.data[,-1];
-	m <- polymars(responses,predictors,...);
+  if(is.method.available('polymars','polspline')) {
+	responses <- training.data[,1]
+	predictors <- training.data[,-1]
+	m <- polymars(responses,predictors,...)
 	return(list("fitted"=m,
-                "inputs"=colnames(predictors))); 
+                "inputs"=colnames(predictors))) 
+  }
 }
 
-"predictModel.polymars" <-
+`predictModel.polymars` <-
 function(object,data,...)
 {
-    if(length(try(library(polspline),FALSE)) == 1) 
-        stop("Required package 'polspline' for method 'polymars' was not found\n");
+  if(is.method.available('polymars','polspline')) {
     predict(object,data[,-1]);
+  }
 }
 
 ####### lars method - requires package lars
-"buildModel.lars" <-
+`buildModel.lars` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(lars),FALSE)) == 1)
-        stop("Required package 'lars' for method 'lars' was not found\n");
-	x <- training.data[,-1];
-	y <- training.data[,1];
-	m <- lars(x=x,y=y,...);
+  if(is.method.available('lars','lars')) {
+	x <- training.data[,-1]
+	y <- training.data[,1]
+	m <- lars(x=x,y=y,...)
 	return(list("fitted"=m,
-                "inputs"=colnames(x))); 
+                "inputs"=colnames(x))) 
+  }
 }
 
-"predictModel.lars" <-
+`predictModel.lars` <-
 function(object,data,lars.s,...)
 {
-    if(length(try(library(lars),FALSE)) == 1) 
-        stop("Required package 'lars' for method 'lars' was not found\n");
+  if(is.method.available('lars','lars')) {
     lars.s = min(lars.s,object$Cp)
-    predict(object,data[,-1],s=lars.s,...)$fit;
+    predict(object,data[,-1],s=lars.s,...)$fit
+  }
 }
 
 ####### rpart method - requires package rpart
-"buildModel.rpart" <-
+`buildModel.rpart` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(rpart),FALSE)) == 1)
-         stop("Required package 'rpart' for method 'rpart' was not found\n");
+  if(is.method.available('rpart','rpart')) {
 	rp <- rpart(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
+  }
 }
 
-"predictModel.rpart" <-
+`predictModel.rpart` <-
 function(object,data,...)
 {
-    if(length(try(library(rpart),FALSE)) == 1)
-        stop("Required package 'rpart' for method 'rpart' was not found\n");
+  if(is.method.available('rpart','rpart')) {
     predict(object,data,...)
+  }
 }
 
 ####### tree method - requires package tree
-"buildModel.tree" <-
+`buildModel.tree` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(tree),FALSE)) == 1)
-         stop("Required package 'tree' for method 'tree' was not found\n");
+  if(is.method.available('tree','tree')) {
 	rp <- tree(quantmod@model.formula,data=training.data,...);
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
+  }
 }
 
-"predictModel.tree" <-
+`predictModel.tree` <-
 function(object,data,...)
 {
-    if(length(try(library(tree),FALSE)) == 1)
-        stop("Required package 'tree' for method 'tree' was not found\n");
+  if(is.method.available('tree','tree')) {
     predict(object,data,...)
+  }
 }
 
 ####### randomForest method - requires package randomForest
-"buildModel.randomForest" <-
+`buildModel.randomForest` <-
 function(quantmod,training.data,...)
 {
-    if(length(try(library(randomForest),FALSE)) == 1)
-         stop("Required package 'randomForest' for method 'randomForest' was not found\n");
-	rp <- randomForest(quantmod@model.formula,data=training.data,...);
-	return(list("fitted"=rp,
-                "inputs"=attr(terms(rp),"term.labels"))); 
+  if(is.method.available('randomForest','randomForest')) {
+    rp <- randomForest(quantmod@model.formula,data=training.data,...)
+    return(list("fitted"=rp,
+            "inputs"=attr(terms(rp),"term.labels"))) 
+  }
 }
 
-"predictModel.randomForest" <-
+`predictModel.randomForest` <-
 function(object,data,...)
 {
-    if(length(try(library(randomForest),FALSE)) == 1)
-        stop("Required package 'randomForest' for method 'randomForest' was not found\n");
-    predict(object,data,...)
+    if(is.method.available('randomForest','randomForest')) {
+      predict(object,data,...)
+    }
 }
 
 `buildModel.svm` <-
 function(quantmod,training.data,...)
 {
-  if(length(try(library(e1071),FALSE))==1)
-    stop("Required package 'e1071' for method 'svm' was not found\n")
-  rp <- svm(formula(quantmod),data=training.data,...)
-  return(list('fitted'=rp,attr(terms(rp),'term.labels')))
+#  if(length(try(library(e1071),FALSE))==1)
+#    stop("Required package 'e1071' for method 'svm' was not found\n")
+  if(is.method.available('svm','e1071')) {
+    rp <- svm(formula(quantmod),data=training.data,...)
+    return(list('fitted'=rp,attr(terms(rp),'term.labels')))
+  }
 }
 
 `predictModel.svm` <-
 function(object,data,...)
 {
-  if(length(try(library(e1071),FALSE))==1)
-    stop("Required package 'e1071' for method 'svm' was not found\n")
-  predict(object,data[-NROW(data),],...) 
+  if(is.method.available('svm','e1071')) {
+    predict(object,data[-NROW(data),],...) 
+  }
+}
+
+`is.method.available` <-
+function(method,package)
+{
+  if(!package %in% .packages()) {
+    if(package %in% .packages(all=TRUE)) {
+      cat(paste("loading required package:",package,"\n"))
+      library(package,character.only=TRUE)
+    } else {
+      stop(paste('package',sQuote(package),'containing',
+                 sQuote(method),'unable to be located'))
+    }
+  }
+  return(TRUE)
 }

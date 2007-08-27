@@ -1,80 +1,92 @@
 "Op" <-
 function(x)
 {
+  op <- grep('Open',colnames(x))
+  if(!identical(op,integer(0)))
     return(x[,grep('Open',colnames(x))])
 }
 
 "Hi" <-
 function(x)
 {
+  hi <- grep('High',colnames(x))
+  if(!identical(hi,integer(0)))
     return(x[,grep('High',colnames(x))])
 }
 
 "Lo" <-
 function(x)
 {
+  lo <- grep('Low',colnames(x))
+  if(!identical(lo,integer(0)))
     return(x[,grep('Low',colnames(x))])
 }
 
 "Cl" <-
 function(x)
 {
+  cl <- grep('Close',colnames(x))
+  if(!identical(cl,integer(0)))
     return(x[,grep('Close',colnames(x))])
 }
 
 "Vo" <-
 function(x)
 {
+  vo <- grep('Volume',colnames(x))
+  if(!identical(vo,integer(0)))
     return(x[,grep('Volume',colnames(x))])
 }
 
 "Ad" <-
 function(x)
 {
+  ad <- grep('Adjusted',colnames(x))
+  if(!identical(ad,integer(0)))
     return(x[,grep('Adjusted',colnames(x))])
 }
 
 "OpCl" <-
 function(x)
 {
-    return(quantmod::Delt(Op(x),Cl(x)))
+    return(Delt(Op(x),Cl(x)))
 }
 
 "OpOp" <-
 function(x)
 {
-    return(quantmod::Delt(Op(x)))
+    return(Delt(Op(x)))
 }
 
 "ClCl" <-
 function(x)
 {
-    return(quantmod::Delt(Cl(x)))
+    return(Delt(Cl(x)))
 }
 "OpLo" <-
 function(x)
 {
-    return(quantmod::Delt(Op(x),Lo(x)))
+    return(Delt(Op(x),Lo(x)))
 }
 "OpHi" <-
 function(x)
 {
-    return(quantmod::Delt(Op(x),Hi(x)))
+    return(Delt(Op(x),Hi(x)))
 }
 "LoHi" <-
 function(x)
 {
-    return(quantmod::Delt(Lo(x),Hi(x)))
+    return(Delt(Lo(x),Hi(x)))
 }
 "LoCl" <-
 function(x)
 {
-    return(quantmod::Delt(Lo(x),Cl(x)))
+    return(Delt(Lo(x),Cl(x)))
 }
 "HiCl" <-
 function(x)
 {
-    return(quantmod::Delt(Hi(x),Cl(x)))
+    return(Delt(Hi(x),Cl(x)))
 }
 "Next" <-
 function(x,k=1)
