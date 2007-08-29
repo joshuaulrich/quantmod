@@ -204,13 +204,18 @@ function(x,period=months)
 `to.period.quantmod.OHLC` <-
 function(x,period=months) {
   bp <- breakpoints(x,period,TRUE)
+  date <- index(x)[bp]
   op <- as.numeric(Op(x)[bp+1][-length(bp)])
   hi <- period.apply(Hi(x),bp,max)
   lo <- period.apply(Lo(x),bp,min)
   cl <- as.numeric(Cl(x)[bp])
   vo <- period.apply(Vo(x),bp,sum)
-  ad <- as.numeric(Ad(x)[bp])
-  date <- index(x)[bp]
+
+  ad <- NULL
+  has.ad <- grep('Adjusted',colnames(x))
+  if(!identical(has.ad,integer(0)))
+    ad <- as.numeric(Ad(x)[bp])
+
   x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
   colnames(x.out) <- colnames(x)
   class(x.out) <- class(x)
