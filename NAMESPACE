@@ -28,6 +28,12 @@ export(modelData,
 #    saveModels,
 #    loadModels,
 	period.apply,
+    apply.weekly,
+    apply.monthly,
+    apply.quarterly,
+    apply.yearly,
+    first,
+    last,
 #	returnBy,
 	breakpoints,
 #	importKM,
@@ -38,6 +44,7 @@ export(modelData,
 #    predictModel,
     getSymbols,
     getSymbols.MySQL,
+    getSymbols.FRED,
     getSymbols.yahoo,
     getSymbols.google,
     showSymbols,
@@ -55,6 +62,8 @@ export(getSymbolLookup)
 #export(gainloss)
 S3method(to.period,quantmod.OHLC)
 S3method(to.period,zoo)
+S3method(first,default)
+S3method(last,default)
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
