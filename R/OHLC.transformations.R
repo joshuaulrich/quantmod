@@ -238,6 +238,7 @@ function(x,period,name=NULL,...)
                              max(k),min(k),as.numeric(last(k))))
     x.zoo <- zoo(matrix(x.out,ncol=4,byrow=TRUE),date)
     colnames(x.zoo) <- paste(name,c("Open","High","Low","Close"),sep='.')
+    class(x.zoo) <- c('quantmod.OHLC','zoo')
     x.zoo
   }
   else {
