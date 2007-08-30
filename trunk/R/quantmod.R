@@ -81,7 +81,7 @@ function(x,
 function(x,i,j,drop=TRUE,...)
 {
   class(x) <- "zoo"
-  x <- x[i=i,j=j,drop=drop,...]
+  x <- x[i,j,drop,...]
   class(x) <- c("quantmod.OHLC","zoo")
   x
 }
