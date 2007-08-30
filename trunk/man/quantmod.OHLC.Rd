@@ -1,4 +1,5 @@
-\name{as.quantmod.OHLC}
+\name{quantmod.OHLC}
+\alias{quantmod.OHLC}
 \alias{as.quantmod.OHLC}
 \alias{quantmod.OHLC}
 \title{ Create Open High Low Close Object }
