@@ -229,7 +229,7 @@ function(x,period,...) {
 function(x,period,name=NULL,...)
 {
   if(is.null(name)) name <- deparse(substitute(x))
-  if(is.null(dim(x))) {
+  if(NCOL(x)==1) {
     # for single dimension (or no?) data 
     bp <- breakpoints(x,period,TRUE)
     date <- index(x)[bp]
