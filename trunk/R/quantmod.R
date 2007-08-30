@@ -12,6 +12,7 @@ function(x)
 `as.zoo.data.frame`<-
 function(x,row.date=TRUE,...)
 {
+    #really need to test order - ???how?
     if(row.date) {
         zoo(x,as.Date(rownames(x)),...)
     }
