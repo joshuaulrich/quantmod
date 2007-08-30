@@ -196,24 +196,27 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
     }
 }
 `to.period` <-
-function(x,period=months)
+function(x,period=months,...)
 {
   UseMethod('to.period')
 }
 
 `to.period.quantmod.OHLC` <-
-function(x,period=months) {
+function(x,period,...) {
   bp <- breakpoints(x,period,TRUE)
   date <- index(x)[bp]
   op <- as.numeric(Op(x)[bp+1][-length(bp)])
   hi <- period.apply(Hi(x),bp,max)
   lo <- period.apply(Lo(x),bp,min)
   cl <- as.numeric(Cl(x)[bp])
-  vo <- period.apply(Vo(x),bp,sum)
+  vo <- NULL
+  has.Vo <- grep('Volume',colnames(x))
+  if(!identical(has.Vo,integer(0)))
+    vo <- period.apply(Vo(x),bp,sum)
 
   ad <- NULL
-  has.ad <- grep('Adjusted',colnames(x))
-  if(!identical(has.ad,integer(0)))
+  has.Ad <- grep('Adjusted',colnames(x))
+  if(!identical(has.Ad,integer(0)))
     ad <- as.numeric(Ad(x)[bp])
 
   x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
@@ -222,25 +225,47 @@ function(x,period=months) {
   x.out
 }
 
-`to.period.zoo` <- to.period.quantmod.OHLC
+`to.period.zoo` <-
+function(x,period,name=NULL,...)
+{
+  if(is.null(name)) name <- deparse(substitute(x))
+  if(is.null(dim(x))) {
+    # for single dimension (or no?) data 
+    bp <- breakpoints(x,period,TRUE)
+    date <- index(x)[bp]
+    x.out <- period.apply(x,bp,
+               function(k) c(as.numeric(first(k)),
+                             max(k),min(k),as.numeric(last(k))))
+    x.zoo <- zoo(matrix(x.out,ncol=4,byrow=TRUE),date)
+    colnames(x.zoo) <- paste(name,c("Open","High","Low","Close"),sep='.')
+    x.zoo
+  }
+  else {
+    stop("'x' must be a single column or of class 'quantmod.OHLC'")
+  }
+}
 
 `to.weekly` <-
 function(x)
 {
-  to.period(x,weeks)
+  name <- deparse(substitute(x))
+  to.period(x,weeks,name)
 }
 `to.monthly` <-
 function(x)
 {
-  to.period(x,months)
+  name <- deparse(substitute(x))
+  to.period(x,months,name)
 }
 `to.quarterly` <-
 function(x)
 {
-  to.period(x,quarters)
+  name <- deparse(substitute(x))
+  to.period(x,quarters,name)
 }
 `to.yearly` <-
 function(x)
 {
-  to.period(x,years)
+  name <- deparse(substitute(x))
+  to.period(x,years,name)
 }
