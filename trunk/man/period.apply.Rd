@@ -29,7 +29,7 @@ to breakpoints.
 A numeric vector with length INDEX
 }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{breakpoints}} \code{\link{monthly.apply}}}
+\seealso{ \code{\link{breakpoints}} \code{\link{apply.monthly}}}
 \examples{
 zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
 bp <- breakpoints(zoo.data,by=weeks)

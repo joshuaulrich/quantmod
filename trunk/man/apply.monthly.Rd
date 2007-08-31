@@ -36,7 +36,8 @@ A vector of results produced by \code{FUN}, corresponding
 to the appropriate periods.
 }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{breakpoints}}, \code{\link{period.apply}} }
+\seealso{ \code{\link{breakpoints}}, \code{\link{period.apply}},
+          \code{\link{to.monthly}} }
 \examples{
 zoo.ts <- zoo(rnorm(231),as.Date(13514:13744))
 
