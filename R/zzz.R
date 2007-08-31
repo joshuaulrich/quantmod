@@ -1,6 +1,7 @@
 ".onLoad" <- function(lib,pkg) {
-  cat("quantmod version 0.2-1\n")
-  cat("http://www.quantmod.com\n")
+  cat("quantmod: Quantitative Financial Modelling Framework\n\n")
+  cat("Version 0-2.1\n")
+  cat("http://www.quantmod.com\n\n")
 }
 setOldClass("zoo");
 setOldClass("Date");
