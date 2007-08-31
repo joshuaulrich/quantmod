@@ -1,19 +1,19 @@
-\name{getSymbols.yahoo}
-\alias{getSymbols.yahoo}
+\name{getSymbols.google}
+\alias{getSymbols.google}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Download OHLC Data From Yahoo Finance }
+\title{ Download OHLC Data From Google Finance }
 \description{
 Downloads \code{Symbols} to specified \code{env}
-from \sQuote{finance.yahoo.com}.  This method is
+from \sQuote{finance.google.com}.  This method is
 not to be called directly, instead a call to
-\code{getSymbols(Symbols,src='yahoo')} will in
+\code{getSymbols(Symbols,src='google')} will in
 turn call this method. It is documented for the
 sole purpose of highlighting the arguments
 accepted, and to serve as a guide to creating
 additional getSymbols \sQuote{methods}.
 }
 \usage{
-getSymbols.yahoo(Symbols,
+getSymbols.google(Symbols,
                  env,
                  return.class = c("quantmod.OHLC", "zoo"),
                  from = "2007-01-01",
@@ -27,7 +27,7 @@ getSymbols.yahoo(Symbols,
        \item{env}{ where to create objects. (.GlobalEnv) }  
        \item{return.class}{ class of returned object }  
        \item{from}{ Retrieve data no earlier than this date. 
-                    (1990-01-01)}
+                    (2007-01-01)}
        \item{to}{ Retrieve data through this date (Sys.Date())}
        \item{\dots}{ additional parameters }
 }
@@ -36,17 +36,32 @@ Meant to be called internally by \code{getSymbols} (see also).
 
 One of a few currently defined methods for loading
 data for use with \pkg{quantmod}.  Essentially a
-simple wrapper to the underlying Yahoo! finance site's
+simple wrapper to the underlying Google Finance site's
 historical data download.
+
+A word of warning. Google is the home of \emph{BETA}, and
+historic data is no exception. There is a \emph{\bold{BUG}}
+in practically all series that include the dates Dec 29,30, and 31
+of 2003. The data will show the wrong date and corresponding prices.
+This essentially makes it useless, but if they ever apply a fix
+the data is nice(r) than Yahoo, in so much as it is all split adjusted
+and there is forty years worth to be had.  As long as you skip the holiday week of 2003. : )
+
 }
 \value{
-A call to getSymbols.yahoo will load into the specified
+A call to getSymbols.google will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
 \code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
 }
-\references{ Yahoo Finance: \url{http://finance.yahoo.com} }
+\note{
+As mentioned in the details section, a serious flaw exists within
+the google database/SQL. A caution is issued when retrieving data
+via this method if this particular error is encountered, but one
+can only wonder what else may be wrong. Caveat emptor.
+}
+\references{ Google Finance: \url{http://finance.google.com} }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}},
           \code{\link{setSymbolLookup}} }
@@ -57,13 +72,13 @@ by \code{return.class}. Presently this may be \code{ts},
 # The last example is what NOT to do!
 
 ## Method #1
-getSymbols('MSFT',src='yahoo')
+getSymbols('MSFT',src='google')
 
 
 ## Method #2
-setDefaults(getSymbols,src='yahoo')
+setDefaults(getSymbols,src='google')
   # OR
-setSymbolLookup(MSFT='yahoo')
+setSymbolLookup(MSFT='google')
 
 getSymbols('MSFT')
 
@@ -71,7 +86,7 @@ getSymbols('MSFT')
 ##  NOT RECOMMENDED!!!
 #########################################
 ## Method #3
-getSymbols.yahoo('MSFT',env=globalenv())
+getSymbols.google('MSFT',env=globalenv())
 }
 }
 \keyword{ data }
