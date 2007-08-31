@@ -41,13 +41,13 @@ function(x,FUN)
 }
 
 `first` <-
-function(x)
+function(x,...)
 {
   UseMethod("first")
 }
 
 `first.default` <-
-function(x)
+function(x,...)
 {
   if(is.null(dim(x))) {
     x[1]
@@ -57,13 +57,13 @@ function(x)
 }
 
 `last` <-
-function(x)
+function(x,...)
 {
   UseMethod("last")
 }
 
 `last.default` <-
-function(x)
+function(x,...)
 {
   if(is.null(dim(x))) {
     x[NROW(x)]
