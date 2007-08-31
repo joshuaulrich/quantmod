@@ -79,5 +79,5 @@ identical(q1,q2)
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{as.quantmod.OHLC}}, \code{\link{getSymbols}},
-          \code{\link{monthly.apply}} }
+          \code{\link{apply.monthly}}}
 \keyword{ utilities }
