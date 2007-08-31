@@ -12,6 +12,10 @@ to retrieve symbols specified in first step of modelling
 procedure.  Not a true S3 method, but methods for different
 data sources follow an S3-like naming convention. Additional 
 methods can be added by simply adhering to the convention.
+
+Current package methods include \code{getSymbols.yahoo},
+\code{getSymbols.google}, \code{getSymbols.MySQL}, and
+\code{getSymbols.FRED}.  More to come...
 }
 \usage{
 getSymbols(Symbols = NULL, 
@@ -19,7 +23,7 @@ getSymbols(Symbols = NULL,
            reload.Symbols = FALSE,
            verbose = FALSE,
            warnings = TRUE,
-           src = c("yahoo", "MySQL", "google", "economagic"),
+           src = c("yahoo", "MySQL", "google", "FRED"),
            symbol.lookup = TRUE,
            ...)
 
