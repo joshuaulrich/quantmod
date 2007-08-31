@@ -1,6 +1,8 @@
 \name{first}
 \alias{first}
+\alias{first.default}
 \alias{last}
+\alias{last.default}
 \title{ Return First or Last Element of Data }
 \description{
 A simple generic function to return the first or last
