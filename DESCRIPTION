@@ -1,8 +1,8 @@
 Package: quantmod
 Type: Package
 Title: Quantitative Financial Modelling Framework
-Version: 0.1-4
-Date: 2007-08-06
+Version: 0.2-1
+Date: 2007-09-30
 Author: Jeff Ryan
 Depends: zoo,Defaults
 Suggests: its,DBI,RMySQL,fCalendar
@@ -11,4 +11,4 @@ Description: Specify, build, trade, and analyse quantitative financial trading s
 LazyLoad: yes
 License: GPL 2 or later
 URL: http://www.quantmod.com
-Packaged: Wed Jul 4 2007; jeff ryan
+Packaged: Wed Aug 30 2007; jeffrey a ryan
