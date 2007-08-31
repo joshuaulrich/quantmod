@@ -80,5 +80,4 @@ specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ),0:3) + Hi(DIA))
 }
 }
 
-}
 \keyword{ models }% at least one, from doc/KEYWORDS
