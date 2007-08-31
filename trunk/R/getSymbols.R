@@ -77,6 +77,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+     if(missing(verbose)) verbose <- FALSE
      yahoo.URL <- "http://chart.yahoo.com/table.csv?"
      from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
      from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])-1
@@ -152,6 +153,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+     if(missing(verbose)) verbose <- FALSE
      google.URL <- "http://finance.google.com/finance/historical?"
      from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
      from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
@@ -231,6 +233,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+     if(missing(verbose)) verbose <- FALSE
         if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
           if('package:RMySQL' %in% search() || require('RMySQL',quietly=TRUE)) {
           } else { warning(paste("package:",dQuote("RMySQL"),"cannot be loaded" )) }
@@ -310,6 +313,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+     if(missing(verbose)) verbose <- FALSE
      FRED.URL <- "http://research.stlouisfed.org/fred2/series"
      for(i in 1:length(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....")

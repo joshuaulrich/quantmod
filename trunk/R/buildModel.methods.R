@@ -36,6 +36,7 @@ function(quantmod,training.data,...)
 {
   if(is.method.available('rq','quantreg')) {
     r <- rq(quantmod@model.formula,data=training.data,...)
+    #r <- do.call('rq',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=r,
                 "inputs"=attr(terms(r),"term.labels"))) 
   }

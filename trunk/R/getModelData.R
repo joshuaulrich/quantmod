@@ -81,41 +81,6 @@ function(x,na.rm=TRUE)
     ##removeSymbols()
     return(model);
 }
-"getModelData.original" <-
-function(model,na.rm=TRUE) {
-  if(class(model) != "quantmod") stop("model must be of class 'quantmod'");
-  if(length(model@model.inputs) == 0) {
-    #if model.inputs is not yet defined, create full zoo object for building
-    build.vars <- c(model@model.target,model@build.inputs);
-  } else {
-    #else create data object with only relevant model.inputs
-    build.vars <- c(model@model.target,model@model.inputs);
-  }
-  # add OHLC of model.target product
-  price.level <- paste(c("O(","H(","L(","C("),model@product,")",sep="");
-  rd <- fetchRawData(model@symbols); 
-
-  build.and.price <- c(build.vars,price.level);  
-  bapd <- sapply(build.and.price,tR.transformData,data=rd);
-  dt <- as.Date(rd[,1]);
-
-  # convert original vars to zoo object
-  md <- zoo(as.matrix(bapd[,1:length(build.vars)]),dt);
-
-  # convert price.levels (last 4 cols OHLC) to zoo object
-  pl <- zoo(as.matrix(bapd[,((length(build.vars)+1):(length(build.vars)+4))]),dt);
-
-  # convert parens to dot notation (e.g. OC(DIA) => OC.DIA)
-  colnames(md) <- lapply(build.vars,function(x) { gsub("\\)","",gsub("\\(",".",x)) });
-  colnames(pl) <- lapply(price.level,function(x) { gsub("\\)","",gsub("\\(",".",x)) });
-
-  # remove all NAs from zoo, excepting LAST NA
-  if(na.rm) md <- rbind(na.exclude(md[-nrow(md),]),md[nrow(md),]);
-  model@model.data <- md;
-  model@price.levels <- pl;
-  return(model);
-}
-
 "stripModelData" <-
 function(model) {
     if(class(model) != "quantmod") stop("model must be of class 'quantmod'");
