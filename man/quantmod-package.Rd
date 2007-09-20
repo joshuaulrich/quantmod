@@ -13,13 +13,12 @@ trading srategies
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.2-1\cr
+Version: \tab 0.2-2\cr
 Date: \tab 2007-08-30\cr
 Depends: \tab zoo,Defaults\cr
-Suggests: \tab 
-MASS,mda,randomForest,lars,nnet,polspline,rpart,quantreg,tree,its,DBI,RMySQL,fCalendar\cr
+Suggests: \tab its,DBI,RMySQL,fCalendar\cr
 LazyLoad: \tab yes\cr
-License: \tab GPL 2 or later\cr
+License: \tab GPL 3\cr
 Packaged: \tab Thu Aug 30 00:04:35 2007; jryan\cr
 URL: \tab http://www.quantmod.com\cr
 Built: \tab R 2.5.0; ; 2007-08-30 00:04:38; unix\cr
