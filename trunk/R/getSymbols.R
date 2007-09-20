@@ -358,6 +358,68 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 } #}}}
 
 "getSymbols.cache" <- function() {}
+# getSymbols.csv {{{
+"getSymbols.csv" <-
+function(Symbols,env,
+         file.path="",
+         return.class="zoo",
+         extension="csv",
+         ...) {
+  importDefaults("getSymbols.csv")
+  this.env <- environment()
+  for(var in names(list(...))) {
+    assign(var,list(...)[[var]], this.env)
+  }
+  if(missing(verbose))
+    verbose <- FALSE
+  for(i in 1:length(Symbols)) {
+    if(verbose)
+      cat("loading ",Symbols[[i]],".....")
+# add some sort of try catch block here to make failure
+# palatable...
+    fr <- read.csv(paste(Symbols[[i]],extension,sep="."))
+    if(verbose)  
+      cat("done.\n")
+    fr <- zoo(fr[,-1],as.Date(fr[,1]))
+    colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
+                          c('Open','High','Low','Close','Volume','Adjusted'),
+                             sep='.')
+    if('quantmod.OHLC' %in% return.class) {
+      class(fr) <- c('quantmod.OHLC','zoo')
+    } else
+    if('zoo' %in% return.class) {
+      fr
+    }
+    if('ts' %in% return.class) {
+      fr <- as.ts(fr)
+    } else
+    if('data.frame' %in% return.class) {
+      fr <- as.data.frame(fr)
+    } else
+    if('its' %in% return.class) {
+      if("package:its" %in% search() || require("its", quietly=TRUE)) {
+        index(fr) <- as.POSIXct(index(fr))
+        fr <- its::as.its(fr)
+      } else {
+        warning(paste("'its' from package 'its' could not be loaded:",
+                      " 'zoo' class returned"))
+      }
+    } else 
+    if('timeSeries' %in% return.class) {
+      if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+        fr <- as.timeSeries(fr)
+      } else {
+        warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                " 'zoo' class returned"))
+      }
+    }
+    Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+    assign(Symbols[[i]],fr,env)
+    }
+    return(Symbols)
+}
+#}}}
+
 "getSymbols.file" <- function() {}
 "getSymbols.url" <- function() {}
 "getSymbols.freelunch" <- function() {}
