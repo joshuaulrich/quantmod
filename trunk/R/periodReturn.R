@@ -80,3 +80,9 @@ function(x,from=NULL,to=NULL) {
   colnames(all.ret) <- c('daily','weekly','monthly','quarterly','annual')
   all.ret
 }
+
+`periodicity` <-
+function(x,...)
+{
+  median(diff(time(x)))
+}
