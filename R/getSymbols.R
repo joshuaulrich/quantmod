@@ -22,10 +22,12 @@ function(Symbols=NULL,
         tmp.Symbols <- vector("list")
         for(each.symbol in Symbols) {
           if(each.symbol %in% names(symbols.src)) {
-            tmp.Symbols[[each.symbol]] <- symbols.src[[each.symbol]]
-          } else {
-            tmp.Symbols[[each.symbol]] <- src          
-          }
+            tmp.src <- symbols.src[[each.symbol]]$src
+            if(is.null(tmp.src)) {
+              tmp.Symbols[[each.symbol]] <- src
+            } else {
+              tmp.Symbols[[each.symbol]] <- tmp.src
+            }
         }
         Symbols <- tmp.Symbols
       }
