@@ -13,8 +13,8 @@ trading srategies
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.2-2\cr
-Date: \tab 2007-08-30\cr
+Version: \tab 0.2-4\cr
+Date: \tab 2007-09-24\cr
 Depends: \tab zoo,Defaults\cr
 Suggests: \tab its,DBI,RMySQL,fCalendar\cr
 LazyLoad: \tab yes\cr
