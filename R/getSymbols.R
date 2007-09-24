@@ -5,12 +5,13 @@ function(Symbols=NULL,
          reload.Symbols = FALSE,
          verbose = FALSE,
          warnings = TRUE,
-         src = c("yahoo","MySQL","google","FRED"),
+         src = c("yahoo","MySQL","google","FRED","csv"),
          symbol.lookup = TRUE,
          ...)  {
 
       importDefaults("getSymbols")
-      if(symbol.lookup && missing(src)) {
+      if(symbol.lookup & missing(src)) {
+        # if src is specified - override symbol.lookup
         symbols.src <- getOption('getSymbols.sources')
       } else {
         symbols.src <- NULL
@@ -226,7 +227,8 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 "getSymbols.MySQL" <- function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                                db.fields=c('date','o','h','l','c','v','a'),
                                field.names = NULL,
-                               user=NULL,password=NULL,dbname=NULL,...) {
+                               user=NULL,password=NULL,dbname=NULL,
+                               ...) {
      importDefaults("getSymbols.MySQL")
      this.env <- environment()
      for(var in names(list(...))) {
@@ -358,6 +360,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 } #}}}
 
 "getSymbols.cache" <- function() {}
+
 # getSymbols.csv {{{
 "getSymbols.csv" <-
 function(Symbols,env,
@@ -420,10 +423,16 @@ function(Symbols,env,
 }
 #}}}
 
-"getSymbols.file" <- function() {}
+"getSymbols.rda" <- function() {}
+
+`getSymbols.RData` <- getSymbols.rda
+
 "getSymbols.url" <- function() {}
+
 "getSymbols.freelunch" <- function() {}
+
 "getSymbols.RODBC" <- function() {}
+
 "getSymbols.oanda" <- function() {}
 
 # removeSymbols {{{
