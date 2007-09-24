@@ -21,28 +21,42 @@ tradeModel(x,
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{  }
-  \item{signal.threshold}{ ~~Describe \code{signal.threshold} here~~ }
-  \item{leverage}{ ~~Describe \code{leverage} here~~ }
-  \item{return.model}{ ~~Describe \code{return.model} here~~ }
-  \item{plot.model}{ ~~Describe \code{plot.model} here~~ }
-  \item{trade.dates}{ ~~Describe \code{trade.dates} here~~ }
-  \item{exclude.training}{ ~~Describe \code{exclude.training} here~~ }
-  \item{ret.type}{ ~~Describe \code{ret.type} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
+  \item{x}{ a quantmod object from \code{buildModel}  }
+  \item{signal.threshold}{ a numeric vector describing simple lower
+                           and upper thresholds before trade occurs}
+  \item{leverage}{ amount of leverage to apply - currently a constant }
+  \item{return.model}{ should the full model be returned? }
+  \item{plot.model}{ plot the model? }
+  \item{trade.dates}{ specific trade interval - defaults to full dataset }
+  \item{exclude.training}{ exclude the period trained on? }
+  \item{ret.type}{ a table of period returns }
+  \item{\dots}{ additional parameters needed by the underlying modelling function, if any }
 }
 \details{
+Still highly experimental and changing. The purpose is to apply
+a newly contructed model from \code{buildModel} to a new dataset
+to investigate the model's trading potential.
+
+At present all parameters are very basic. The near term changes include
+allowing for a trade.rule argument to allow for a dynamic trade rule given
+a set of signals. Additional the application of variable leverage and costs
+will become part of the final structure.
+
+Any suggestions as to inclusions or alterations are appreciated and should
+be directed to the maintainer of the package.
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+A quantmodResults object
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
+\author{ Jeffrey A. Ryan }
 \seealso{  \code{\link{specifyModel}} \code{\link{buildModel}} }
 \examples{
+\dontrun{
+m <- specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ)))
+m.built <- buildModel(m,method='rpart',training.per=c('2007-01-01','2007-04-01'))
+
+tradeModel(m.built)
+tradeModel(m.built,leverage=2)
+}
 }
 \keyword{ models }% at least one, from doc/KEYWORDS
