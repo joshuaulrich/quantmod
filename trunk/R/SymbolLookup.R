@@ -4,6 +4,27 @@ function(...)
   new.symbols <- list(...)
   all.symbols <- getOption("getSymbols.sources")
   for(each.symbol in names(new.symbols)) {
+    if(length(new.symbols[[each.symbol]])==1 &
+       !is.list(new.symbols[[each.symbol]])) {
+      # if a single value is passed then it
+      # is interpreted as 'src', unless
+      # it is part of a list, then it is the
+      # appropriately named element.
+
+      all.symbols[[each.symbol]] <- list(src=new.symbols[[each.symbol]])
+    } else {
+      all.symbols[[each.symbol]] <- new.symbols[[each.symbol]]
+    }
+  }
+  options(getSymbols.sources=all.symbols)
+}
+
+"setSymbolLookup.bak" <-
+function(...)
+{
+  new.symbols <- list(...)
+  all.symbols <- getOption("getSymbols.sources")
+  for(each.symbol in names(new.symbols)) {
     all.symbols[[each.symbol]] <- new.symbols[[each.symbol]]
   }
   options(getSymbols.sources=all.symbols)
