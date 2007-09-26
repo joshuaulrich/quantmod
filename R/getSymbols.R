@@ -2,32 +2,35 @@
 "getSymbols" <-
 function(Symbols=NULL,
          env=.GlobalEnv,
-         reload.Symbols = FALSE,
-         verbose = FALSE,
-         warnings = TRUE,
-         src = c("yahoo","MySQL","google","FRED","csv"),
-         symbol.lookup = TRUE,
+         reload.Symbols=FALSE,
+         verbose=FALSE,
+         warnings=TRUE,
+         src=c("yahoo","MySQL","google","FRED","csv"),
+         symbol.lookup=TRUE,
          ...)  {
-
       importDefaults("getSymbols")
-      if(symbol.lookup & missing(src)) {
+      if(symbol.lookup && missing(src)) {
         # if src is specified - override symbol.lookup
         symbols.src <- getOption('getSymbols.sources')
       } else {
-        symbols.src <- NULL
+        symbols.src <- src[1]
       }
-      src = src[1]
+      #src <- src[1]
       if(is.character(Symbols)) {
       # at least one Symbol has been specified
         tmp.Symbols <- vector("list")
         for(each.symbol in Symbols) {
           if(each.symbol %in% names(symbols.src)) {
-            tmp.src <- symbols.src[[each.symbol]]$src
+            tmp.src <- symbols.src[[each.symbol]]$src[1]
+            #tmp.src <- symbols.src[[each.symbol]]
             if(is.null(tmp.src)) {
-              tmp.Symbols[[each.symbol]] <- src
+              tmp.Symbols[[each.symbol]] <- src[1]
             } else {
               tmp.Symbols[[each.symbol]] <- tmp.src
             }
+          } else {
+            tmp.Symbols[[each.symbol]] <- src[1]
+          }
         }
         Symbols <- tmp.Symbols
       }
@@ -180,10 +183,12 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- fr[nrow(fr):1,] #google data is backwards
        if(fix.google.bug) {
          bad.dates <- c('29-Dec-04','30-Dec-04','31-Dec-04')
-         dup.dates <- which(fr[,1] %in% bad.dates)[(1:3)]
-         fr <- fr[-dup.dates,]
-         if(length(dup.dates) > 0) 
+         if(as.Date(from) < as.Date("2003-12-28") &&
+            as.Date(to) > as.Date("2003-12-30")) {
+           dup.dates <- which(fr[,1] %in% bad.dates)[(1:3)]
+           fr <- fr[-dup.dates,]
            warning("google duplicate bug - missing Dec 28,29,30 of 2003")
+         }
        }
        fr <- zoo(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y")))
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
@@ -246,7 +251,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         }
         if(is.null(user) || is.null(password) || is.null(dbname)) {
           stop(paste(
-              'At least one connection arguement (',sQuote('user'),
+              'At least one connection argument (',sQuote('user'),
               sQuote('password'),sQuote('dbname'),
               ") is not set"))
         }
@@ -366,7 +371,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 # getSymbols.csv {{{
 "getSymbols.csv" <-
 function(Symbols,env,
-         file.path="",
+         dir="",
          return.class="zoo",
          extension="csv",
          ...) {
@@ -382,7 +387,12 @@ function(Symbols,env,
       cat("loading ",Symbols[[i]],".....")
 # add some sort of try catch block here to make failure
 # palatable...
-    fr <- read.csv(paste(Symbols[[i]],extension,sep="."))
+    sym.file <- file.path(dir,paste(Symbols[[i]],extension,sep="."))
+    if(!file.exists(sym.file)) {
+      cat("\nfile ",Symbols[[i]]," does not exist....skipping\n")
+      next
+    }
+    fr <- read.csv(sym.file)
     if(verbose)  
       cat("done.\n")
     fr <- zoo(fr[,-1],as.Date(fr[,1]))
