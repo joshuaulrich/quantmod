@@ -387,9 +387,14 @@ function(Symbols,env,
       cat("loading ",Symbols[[i]],".....")
 # add some sort of try catch block here to make failure
 # palatable...
-    sym.file <- file.path(dir,paste(Symbols[[i]],extension,sep="."))
+    if(dir=="") {
+      sym.file <- paste(Symbols[[i]],extension,sep=".")
+    } else {
+      sym.file <- file.path(dir,paste(Symbols[[i]],extension,sep="."))
+    }
     if(!file.exists(sym.file)) {
-      cat("\nfile ",Symbols[[i]]," does not exist....skipping\n")
+      cat("\nfile ",paste(Symbols[[i]],"csv",sep='.')," does not exist ",
+          "in ",dir,"....skipping\n")
       next
     }
     fr <- read.csv(sym.file)
