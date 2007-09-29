@@ -507,7 +507,11 @@ function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv)
 
 # buildData {{{
 "buildData" <- function(formula,na.rm=TRUE,return.class="zoo") {
-  fr <- modelData(specifyModel(formula,na.rm=na.rm))
+  if(is.quantmod(formula)) {
+    fr <- modelData(formula)
+  } else {
+    fr <- modelData(specifyModel(formula,na.rm=na.rm))
+  }
   if('zoo' %in% return.class) {
     fr
   } else
