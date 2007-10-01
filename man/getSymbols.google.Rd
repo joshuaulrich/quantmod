@@ -1,5 +1,5 @@
-\name{getSymbols.csv}
-\alias{getSymbols.csv}
+\name{getSymbols.google}
+\alias{getSymbols.google}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Download OHLC Data From Google Finance }
 \description{
