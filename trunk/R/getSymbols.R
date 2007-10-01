@@ -92,9 +92,11 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
      to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])-1
      to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
      for(i in 1:length(Symbols)) {
-       if(verbose) cat("downloading ",Symbols[[i]],".....")
+       Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
+       Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
+       if(verbose) cat("downloading ",Symbols.name,".....")
        fr <- read.csv(paste(yahoo.URL,
-                           "s=",Symbols[[i]],
+                           "s=",Symbols.name,
                            "&a=",from.m,
                            "&b=",sprintf('%.2d',from.d),
                            "&c=",from.y,
@@ -102,11 +104,11 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                            "&e=",sprintf('%.2d',to.d),
                            "&f=",to.y,
                            "&g=d&q=q&y=0",
-                           "&z=",Symbols[[i]],"&x=.csv",
+                           "&z=",Symbols.name,"&x=.csv",
                            sep=''))
        if(verbose) cat("done.\n")
        fr <- zoo(fr[,-1],as.Date(fr[,1]))
-       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
+       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
        if('quantmod.OHLC' %in% return.class) {
@@ -138,7 +140,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                    " 'zoo' class returned"))
          }
        }
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+       Symbols[[i]] <-toupper(gsub('\\^','',Symbols.name)) 
        assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
@@ -168,9 +170,11 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
      to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])
      to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
      for(i in 1:length(Symbols)) {
-       if(verbose) cat("downloading ",Symbols[[i]],".....")
+       Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
+       Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
+       if(verbose) cat("downloading ",Symbols.name,".....")
        fr <- read.csv(paste(google.URL,
-                           "q=",Symbols[[i]],
+                           "q=",Symbols.name,
                            "&startdate=",month.abb[from.m],
                            "+",sprintf('%.2d',from.d),
                            ",+",from.y,
@@ -191,7 +195,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          }
        }
        fr <- zoo(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y")))
-       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
+       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
        if('quantmod.OHLC' %in% return.class) {
@@ -223,7 +227,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                    " 'zoo' class returned"))
          }
        }
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+       Symbols[[i]] <-toupper(gsub('\\^','',Symbols.name)) 
        assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
