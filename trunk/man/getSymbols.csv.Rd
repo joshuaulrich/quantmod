@@ -13,7 +13,7 @@ accepted, and to serve as a guide to creating
 additional getSymbols \sQuote{methods}.
 }
 \usage{
-getSymbols.google(Symbols,
+getSymbols.csv(Symbols,
                  env,
                  dir="",
                  return.class = "zoo",
