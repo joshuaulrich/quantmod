@@ -13,15 +13,13 @@ trading srategies
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.2-4\cr
-Date: \tab 2007-09-24\cr
+Version: \tab 0.2-5\cr
+Date: \tab 2007-10-02\cr
 Depends: \tab zoo,Defaults\cr
 Suggests: \tab its,DBI,RMySQL,fCalendar\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL 3\cr
-Packaged: \tab Thu Aug 30 00:04:35 2007; jryan\cr
 URL: \tab http://www.quantmod.com\cr
-Built: \tab R 2.5.0; ; 2007-08-30 00:04:38; unix\cr
 }
 
 Index:
