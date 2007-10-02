@@ -83,15 +83,29 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+
+     default.return.class <- return.class
+     default.from <- from
+     default.to <- to
+
      if(missing(verbose)) verbose <- FALSE
      yahoo.URL <- "http://chart.yahoo.com/table.csv?"
-     from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
-     from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])-1
-     from.d <- as.numeric(strsplit(as.character(from),'-',)[[1]][3])
-     to.y <- as.numeric(strsplit(as.character(to),'-',)[[1]][1])
-     to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])-1
-     to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
      for(i in 1:length(Symbols)) {
+       return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+       return.class <- ifelse(is.null(return.class),default.return.class,
+                              return.class)
+       from <- getSymbolLookup()[[Symbols[[i]]]]$from
+       from <- ifelse(is.null(from),default.from,from)
+       to <- getSymbolLookup()[[Symbols[[i]]]]$to
+       to <- ifelse(is.null(to),default.to,to)
+   
+       from.y <- as.numeric(strsplit(as.character(as.Date(from)),'-',)[[1]][1])
+       from.m <- as.numeric(strsplit(as.character(as.Date(from)),'-',)[[1]][2])-1
+       from.d <- as.numeric(strsplit(as.character(as.Date(from)),'-',)[[1]][3])
+       to.y <- as.numeric(strsplit(as.character(as.Date(to)),'-',)[[1]][1])
+       to.m <- as.numeric(strsplit(as.character(as.Date(to)),'-',)[[1]][2])-1
+       to.d <- as.numeric(strsplit(as.character(as.Date(to)),'-',)[[1]][3])
+       
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....")
@@ -140,7 +154,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                    " 'zoo' class returned"))
          }
        }
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols.name)) 
+       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
@@ -227,7 +241,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                    " 'zoo' class returned"))
          }
        }
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols.name)) 
+       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        assign(Symbols[[i]],fr,env)
      }
      return(Symbols)
@@ -384,13 +398,24 @@ function(Symbols,env,
   for(var in names(list(...))) {
     assign(var,list(...)[[var]], this.env)
   }
-  if(missing(verbose))
-    verbose <- FALSE
+
+  default.return.class <- return.class
+  default.dir <- dir
+  default.extension <- extension
+
+  if(missing(verbose)) verbose <- FALSE
+
   for(i in 1:length(Symbols)) {
-    if(verbose)
-      cat("loading ",Symbols[[i]],".....")
-# add some sort of try catch block here to make failure
-# palatable...
+    return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+    return.class <- ifelse(is.null(return.class),default.return.class,
+                           return.class)
+    dir <- getSymbolLookup()[[Symbols[[i]]]]$dir
+    dir <- ifelse(is.null(dir),default.dir,
+                           dir)
+    extension <- getSymbolLookup()[[Symbols[[i]]]]$extension
+    extension <- ifelse(is.null(extension),default.extension,
+                           extension)
+    if(verbose) cat("loading ",Symbols[[i]],".....")
     if(dir=="") {
       sym.file <- paste(Symbols[[i]],extension,sep=".")
     } else {
@@ -444,7 +469,93 @@ function(Symbols,env,
 }
 #}}}
 
-"getSymbols.rda" <- function() {}
+# getSymbols.rda {{{
+"getSymbols.rda" <-
+function(Symbols,env,
+         dir="",
+         return.class="zoo",
+         extension="rda",
+         col.names=c('Open','High','Low','Close','Volume','Adjusted'),
+         ...) {
+  importDefaults("getSymbols.rda")
+  this.env <- environment()
+  for(var in names(list(...))) {
+    assign(var,list(...)[[var]], this.env)
+  }
+
+  default.return.class <- return.class
+  default.dir <- dir
+  default.extension <- extension
+
+  if(missing(verbose)) verbose <- FALSE
+
+  for(i in 1:length(Symbols)) {
+    return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+    return.class <- ifelse(is.null(return.class),default.return.class,
+                           return.class)
+    dir <- getSymbolLookup()[[Symbols[[i]]]]$dir
+    dir <- ifelse(is.null(dir),default.dir,
+                           dir)
+    extension <- getSymbolLookup()[[Symbols[[i]]]]$extension
+    extension <- ifelse(is.null(extension),default.extension,
+                           extension)
+    if(verbose) cat("loading ",Symbols[[i]],".....")
+    if(dir=="") {
+      sym.file <- paste(Symbols[[i]],extension,sep=".")
+    } else {
+      sym.file <- file.path(dir,paste(Symbols[[i]],extension,sep="."))
+    }
+    if(!file.exists(sym.file)) {
+      cat("\nfile ",paste(Symbols[[i]],extension,sep='.')," does not exist ",
+          "in ",dir,"....skipping\n")
+      next
+    }
+    #fr <- read.csv(sym.file)
+    local.name <- load(sym.file)
+    assign('fr',get(local.name))
+    if(verbose)  
+      cat("done.\n")
+    if(!is.zoo(fr)) fr <- zoo(fr[,-1],as.Date(fr[,1]))
+    colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),col.names,sep='.')
+    if('quantmod.OHLC' %in% return.class) {
+      class(fr) <- c('quantmod.OHLC','zoo')
+    } else
+    if('zoo' %in% return.class) {
+      if(class(fr)==zoo) {
+        fr
+      } else {
+        as.zoo(fr)
+      }
+    }
+    if('ts' %in% return.class) {
+      fr <- as.ts(fr)
+    } else
+    if('data.frame' %in% return.class) {
+      fr <- as.data.frame(fr)
+    } else
+    if('its' %in% return.class) {
+      if("package:its" %in% search() || require("its", quietly=TRUE)) {
+        index(fr) <- as.POSIXct(index(fr))
+        fr <- its::as.its(fr)
+      } else {
+        warning(paste("'its' from package 'its' could not be loaded:",
+                      " 'zoo' class returned"))
+      }
+    } else 
+    if('timeSeries' %in% return.class) {
+      if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+        fr <- as.timeSeries(fr)
+      } else {
+        warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                " 'zoo' class returned"))
+      }
+    }
+    Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+    assign(Symbols[[i]],fr,env)
+    }
+    return(Symbols)
+}
+#}}}
 
 `getSymbols.RData` <- getSymbols.rda
 

@@ -4,6 +4,7 @@ function(x,by=months,from=NULL,to=NULL) {
   if(is.null(to)) to <- end(as.zoo(x))
   x.period <- x[breakpoints(as.zoo(x),by=by,TRUE),]
   adj.length <- NROW(x.period)
+  if(adj.length==1) x.period <- x[breakpoints(as.zoo(x),by=by,TRUE)[-1],]
   adj.x.period <- as.numeric(Ad(x.period))
   adj.start <- c(as.numeric(Ad(x))[1],adj.x.period[-adj.length])
   returns <- ((adj.x.period - adj.start)/adj.start)
