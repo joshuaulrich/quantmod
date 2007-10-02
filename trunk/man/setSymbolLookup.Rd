@@ -2,6 +2,8 @@
 \alias{setSymbolLookup}
 \alias{getSymbolLookup}
 \alias{unsetSymbolLookup}
+\alias{loadSymbolLookup}
+\alias{saveSymbolLookup}
 \title{ Manage Symbol Lookup Table }
 \description{
 Create and manage Symbol defaults lookup table within
@@ -11,11 +13,15 @@ Create and manage Symbol defaults lookup table within
 setSymbolLookup(...)
 getSymbolLookup(Symbols=NULL)
 unsetSymbolLookup(Symbols,confirm=TRUE)
+
+saveSymbolLookup(file=stop("'file' must be specified"))
+loadSymbolLookup(file=stop("'file' must be specified"))
 }
 \arguments{
   \item{\dots}{ name=value pairs for symbol defaults }
   \item{Symbols}{ name of symbol(s) }
   \item{confirm}{ warn before deleting lookup table }
+  \item{file}{ system filename }
 }
 \details{
 Use of these functions allows the user to specify
@@ -38,11 +44,22 @@ Sun Microsystems (SUNW) should be downloaded from
 Yahoo! Finance, one would call
 \code{setSymbolLookup(SUNW='yahoo')}
 
+It is also possible to specify additional,
+possibly source specific, lookup details on
+a per symbol basis.  These include an alternate
+naming convention (useful for sites like yahoo),
+as well as passed parameters like \code{dbname} and
+\code{password} for database sources. See the
+specific getSymbols function related to the source
+in question for more details of each implementation.
+
 All changes are made to the current list, and will
 persist \emph{only} until the end of the session. To \emph{always}
 use the same defaults it is necessary to call
 \code{setSymbolLookup} from a startup file (e.g.
-.Rprofile)
+.Rprofile) or to use \code{saveSymbolLookup} and
+\code{loadSymbolLookup} to save and restore lookup
+tables.
 }
 \value{
 Called for its side effects, the function changes the
