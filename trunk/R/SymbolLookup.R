@@ -31,15 +31,27 @@ function(...)
 }
 
 "loadSymbolLookup" <-
-function(file=stop("'file' must be specified"))
+function(file,dir="")
 {
-  load(file)
-  options(getSymbols.sources=lookup.list)
+  if(missing(file)) file <- ".quantmod.SymbolLookup.rda"
+  if(dir!="") {
+    file <- file.path(dir,file)
+  }
+  if(file.exists(file)) {
+    load(file)
+    options(getSymbols.sources=lookup.list)
+  } else {
+    stop("no SymbolLookup file exists in this directory")
+  }
 }
 
 "saveSymbolLookup" <-
-function(file=stop("'file' must be specified"))
+function(file,dir="")
 {
+  if(missing(file)) file <- ".quantmod.SymbolLookup.rda"
+  if(dir!="") {
+    file <- file.path(dir,file)
+  }
   lookup.list <- getSymbolLookup()
   save(lookup.list,file=file)
 }
