@@ -521,10 +521,10 @@ function(Symbols,env,
       class(fr) <- c('quantmod.OHLC','zoo')
     } else
     if('zoo' %in% return.class) {
-      if(class(fr)[1]==zoo) {
+      if(class(fr)[1]=="zoo") {
         fr
       } else {
-        as.zoo(fr)
+        fr <- as.zoo(fr)
       }
     }
     if('ts' %in% return.class) {
