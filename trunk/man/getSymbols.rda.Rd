@@ -18,7 +18,8 @@ getSymbols.rda(Symbols,
                  env,
                  dir="",
                  return.class = "zoo",
-                 extension="csv",
+                 extension="rda",
+                 col.names=c("Open","High","Low","Close","Volume","Adjusted"),
                  ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -26,9 +27,10 @@ getSymbols.rda(Symbols,
        \item{Symbols}{ a character vector specifying
                        the names of each symbol to be loaded}
        \item{env}{ where to create objects. (.GlobalEnv) }  
-       \item{dir}{ directory of csv file }
+       \item{dir}{ directory of rda/RData file }
        \item{return.class}{ class of returned object }  
        \item{extension}{ extension of R data file }
+       \item{col.names}{ data column names }
        \item{\dots}{ additional parameters }
 }
 \details{
@@ -43,11 +45,8 @@ A call to getSymbols.csv will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
-}
-\note{
-This has yet to be tested on a windows platform. It \emph{should} work
-though file seperators may be an issue.
+\code{its}, \code{zoo}, \code{quantmod.OHLC}, \code{data.frame}, 
+or \code{timeSeries}.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}},
@@ -68,6 +67,8 @@ getSymbols('MSFT',src='RData')
 setDefaults(getSymbols,src='rda')
   # OR
 setSymbolLookup(MSFT='rda')
+  # OR
+setSymbolLookup(MSFT=list(src='rda'))
 
 getSymbols('MSFT')
 
