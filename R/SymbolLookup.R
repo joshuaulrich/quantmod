@@ -31,15 +31,17 @@ function(...)
 }
 
 "loadSymbolLookup" <-
-function(filename=".quantmod.SymbolSource.RData")
+function(file=stop("'file' must be specified"))
 {
-
+  load(file)
+  options(getSymbols.sources=lookup.list)
 }
 
 "saveSymbolLookup" <-
-function(filename=".quantmod.SymbolSource.RData")
+function(file=stop("'file' must be specified"))
 {
-
+  lookup.list <- getSymbolLookup()
+  save(lookup.list,file=file)
 }
 
 "getSymbolLookup" <-
