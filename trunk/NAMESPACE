@@ -60,6 +60,8 @@ export(modelData,
     as.quantmod.OHLC)
 export(setSymbolLookup)
 export(getSymbolLookup)
+export(saveSymbolLookup)
+export(loadSymbolLookup)
 #export(tradeLog)
 #export(gainloss)
 S3method(to.period,quantmod.OHLC)
