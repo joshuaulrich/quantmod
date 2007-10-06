@@ -5,11 +5,13 @@
 \description{
 Charting tool to create standard financial charts
 given OHLC data. Serves as the base function for
-future technical analysis additions.
+future technical analysis additions. Possible chart
+styles include candles, matches (1 pixel candles), bars,
+and lines. Chart may have white or black background.
 }
 \usage{
 chart.OHLC(x,
-           chart = c("auto", "candlesticks", "matchsticks", "bar","line"), 
+           type = c("auto", "candlesticks", "matchsticks", "bar","line"), 
            plot.volume = TRUE, 
            grid.lines = TRUE, 
            name = deparse(substitute(x)),
@@ -18,7 +20,7 @@ chart.OHLC(x,
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ an OHLC object - see details }
-  \item{chart}{ style of chart to draw }
+  \item{type}{ style of chart to draw }
   \item{plot.volume}{ display volume on chart? }
   \item{grid.lines}{ display price grid lines? }
   \item{name}{ name of chart }
@@ -33,6 +35,8 @@ time-series properties, at present limited to \code{quantmod.OHLC}
 data as returned by \code{getSymbols.yahoo}. In theory any zoo
 object conforming to OHLC conventions can be coerced to a
 \code{quantmod.OHLC} object, and thus charted.
+
+Line charts are created with close data.
 
 Future versions will allow for additional charting functions
 to be called subsequently which will allow for
