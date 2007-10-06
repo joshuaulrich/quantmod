@@ -1,6 +1,6 @@
 `chart.OHLC` <-
 function(x,
-         chart=c("auto","candlesticks","matchsticks","bar"),
+         type=c("auto","candlesticks","matchsticks","bar","line"),
          plot.volume=TRUE,
          grid.lines=TRUE,name=deparse(substitute(x)),
          xlab="time",ylab="price",bg.col="black"
@@ -10,6 +10,7 @@ function(x,
   Opens <- as.numeric(Op(x))
   Closes <- as.numeric(Cl(x))
   Volumes <- as.numeric(Vo(x))
+  if(identical(Volumes,numeric(0))) plot.volume <- FALSE
   period <- periodicity(x)
   time.scale <- "daily"
   if(period > 2) time.scale <- "weekly" 
@@ -24,7 +25,7 @@ function(x,
     fg.col <- "#666666"
   }
   chart.options <- c("auto","candlesticks","matchsticks","line","bar")
-  chart <- chart.options[pmatch(chart,chart.options)]
+  chart <- chart.options[pmatch(type,chart.options)]
   if(chart[1]=="auto") {
     chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
   }
@@ -33,16 +34,18 @@ function(x,
     width <- 3 
   } else
   if(chart[1]=="matchsticks" || chart[1]=='line') {
-    spacing <- 2
+    spacing <- 1
     width <- 1
   } else {
     stop(paste("method",chart,"is currently unimplemented"))
   }
   # calculate x values - years?
-  for(time.period in c(years,months,weeks)) {
+  for(time.period in c('years','months','weeks')) {
     bp <- breakpoints(x,by=time.period,TRUE)
-    if(length(bp) > 2) {
-      x.labels <- index(x)[bp+1]
+    if(length(bp) > 3) {
+      x.labels <- format(index(x)[bp+1],"%b %y")
+      if(time.period=='weeks')
+        x.labels <- format(index(x)[bp+1],"%b %d %Y")
       break
     }
   }
@@ -58,7 +61,7 @@ function(x,
   if(plot.volume) par(new=TRUE)
   if(grid.lines) grid(NA,NULL,col=fg.col)
   if(chart[1]=='line') {
-    lines(1:length(Closes),Closes,col='blue')
+    lines(1:length(Closes),Closes,col='blue',lwd=3)
   } else {
     for(i in 1:NROW(x)) {
       O.to.C <- c(Opens[i],Closes[i])
