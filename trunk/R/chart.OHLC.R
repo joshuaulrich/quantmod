@@ -6,6 +6,7 @@ function(x,
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          technicals=NULL,
+         line.type="l",
          xlab="time",ylab="price",theme="black"
          ) {
   if(class(x)[1]=="quantmod.OHLC") {
@@ -23,17 +24,22 @@ function(x,
   if(identical(Volumes,numeric(0))) show.vol <- FALSE
   if(is.null(time.scale)) {
     period <- periodicity(x)
-    time.scale <- "daily"
-    if(period > 2) time.scale <- "weekly" 
-    if(period > 7) time.scale <- "monthly" 
-    if(period > 31) time.scale <- "yearly" 
+    time.scale <- "days"
+    if(period > 2) time.scale <- "weeks" 
+    if(period > 7) time.scale <- "months" 
+    if(period > 31) time.scale <- "years" 
   }
+  
+  # before messing with graphics, save...
+  old <- par(c('mar','xpd','bg','col.axis','fg','fig'))
+  on.exit(par(old))
+
   if(theme=="black") {
     bg.col <- "#222222"
-    fg.col <- "#aaaaaa"
+    fg.col <- "#AAAAAA"
   }
   if(theme=="white") {
-    bg.col <- "#eeeeee"
+    bg.col <- "#EEEEEE"
     fg.col <- "#444444"
   }
 
@@ -68,8 +74,7 @@ function(x,
     }
   }
   x.range <- 1:(NROW(x)*spacing)
-  y.range <- seq(min(Lows)*.90,max(Highs)*1.10,length.out=length(x.range))
-  old <- par(c('mar','xpd','bg','col.axis','fg','fig'))
+  y.range <- seq(min(Lows)*.70,max(Highs)*1.20,length.out=length(x.range))
   if(show.vol) {
     par(fig=c(0,1,0.25,1))
     par(mar=c(1,4,4,2))
@@ -79,7 +84,7 @@ function(x,
   if(show.vol) par(new=TRUE)
   if(show.grid) grid(NA,NULL,col=fg.col)
   if(chart[1]=='line') {
-    lines(1:length(Closes),Closes,col='blue',lwd=2)
+    lines(1:length(Closes),Closes,col='blue',lwd=2,type=line.type)
   } else 
   if(chart[1]=='bars') {
     tick.size <- ifelse(NROW(x) > 100, 1, 0.5)
@@ -125,33 +130,39 @@ function(x,
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),Vols,lwd=width,col=fg.col)
     }
-    title(ylab="volume (1,000,000's)",col.lab=fg.col)
+    title(ylab="volume (1,000,000's)",
+          xlab=time.scale,col.lab=fg.col)
     axis(1,at=bp*spacing+1,labels=x.labels)
     axis(2)
+  } else {
+    # add axes label
+    title(xlab=time.scale,col.lab=fg.col)
   }
-  par(old)
+  # eventually return a chart object (a chob, in the spirit of grob)
+  # for use in subsequent calls to modify params, add indicators etc...
+  invisible(1)
 } #}}}
 
 # barchart {{{
-`barChart` <- function(x,theme="black",name=deparse(substitute(x)))
+`barChart` <- function(x,name=deparse(substitute(x)),...)
 {
-  chartSeries(x=x,theme=theme,type="bars",name=name)
+  chartSeries(x=x,type="bars",name=name,...)
 } # }}}
 
 # candleChart {{{
-`candleChart` <- function(x,theme="black",name=deparse(substitute(x)))
+`candleChart` <- function(x,name=deparse(substitute(x)),...)
 {
-  chartSeries(x=x,theme=theme,type="candlesticks",name=name)
+  chartSeries(x=x,type="candlesticks",name=name,...)
 } # }}}
 
 # matchChart {{{
-`matchChart` <- function(x,theme="black",name=deparse(substitute(x)))
+`matchChart` <- function(x,name=deparse(substitute(x)),...)
 {
-  chartSeries(x=x,theme=theme,type="matchsticks",name=name)
+  chartSeries(x=x,type="matchsticks",name=name,...)
 } #}}}
 
 # lineChart {{{
-`lineChart` <- function(x,theme="black",name=deparse(substitute(x)))
+`lineChart` <- function(x,name=deparse(substitute(x)),...)
 {
-  chartSeries(x=x,theme=theme,type="line",name=name)
+  chartSeries(x=x,type="line",name=name,...)
 } # }}}
