@@ -7,7 +7,8 @@ function(x,
          time.scale=NULL,
          technicals=NULL,
          line.type="l",
-         xlab="time",ylab="price",theme="black"
+         xlab="time",ylab="price",theme="black",
+         up.col,dn.col,color.vol=TRUE
          ) {
   UseMethod('chartSeries')
 } # }}}
@@ -22,7 +23,7 @@ function(x,
          technicals=NULL,
          line.type="l",
          xlab="time",ylab="price",theme="black",
-         up.col,dn.col
+         up.col,dn.col,color.vol=TRUE
          ) {
 #  if(class(x)[1]=='timeSeries')
 #    x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
@@ -111,9 +112,11 @@ function(x,
   if(show.vol) par(new=TRUE)
   if(show.grid) grid(NA,NULL,col=fg.col)
   if(chart[1]=='line') {
+    # plot line
     lines(1:length(Closes),Closes,col='blue',lwd=2,type=line.type)
   } else 
   if(chart[1]=='bars') {
+    # plot bars
     tick.size <- ifelse(NROW(x) > 100, 1, 0.5)
     for(i in 1:NROW(x)) {
       O.to.C <- c(Opens[i],Closes[i])
@@ -130,6 +133,7 @@ function(x,
                lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
     }
   } else {
+    # plot candlesticks or matchsticks
     for(i in 1:NROW(x)) {
       O.to.C <- c(Opens[i],Closes[i])
       L.to.H <- c(Lows[i],Highs[i])
@@ -147,21 +151,28 @@ function(x,
   
   if(show.vol) {
   # if volume is to be plotted, do so here
+    # scale volume - vol.divisor
+    max.vol <- max(Volumes)
+    vol.scale <- 100
+    if(max.vol > 10000) vol.scale <- list(1000,'1000s') 
+    if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
+    if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
+    if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
     par(new=TRUE)
     par(fig=c(0,1,0,0.3))
     par(mar=c(5,4,3,2))
-    plot(x.range,seq(min(Vo(x))/1000000,max(Vo(x))/1000000,length.out=length(x.range)),
+    plot(x.range,seq(min(Vo(x))/vol.scale[[1]],max(Vo(x))/vol.scale[[1]],
+         length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
     bar.col <- fg.col
-    color.vol <- TRUE
     for(i in 1:NROW(x)) {
-      Vols <- c(0,Volumes[i]/1000000)
+      Vols <- c(0,Volumes[i]/vol.scale[[1]])
       x.pos <- 1+spacing*(i-1)
-      if(chart[1]!='lines' & color.vol) 
-        bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
+      if(color.vol) 
+        bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
       lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
     }
-    title(ylab="volume (millions)",
+    title(ylab=paste("volume (",vol.scale[[2]],")"),
           xlab=time.scale,col.lab=fg.col)
     axis(1,at=bp*spacing+1,labels=x.labels)
     axis(2)
@@ -183,10 +194,12 @@ function(x,
          time.scale=NULL,
          technicals=NULL,
          line.type="l",
-         xlab="time",ylab="price",theme="black"
+         xlab="time",ylab="price",theme="black",
+         up.col,dn.col,color.vol=TRUE
          ) {
+  force(name) # weird scoping issue - I'll never realy know it all
   x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
-  chartSeries.zoo(x=x,type=type,show.vol=show.vol,
+  chartSeries(x=x,type=type,show.vol=show.vol,
                              show.grid=show.grid,name=name,
                              time.scale=time.scale,technicals=technicals,
                              line.type=line.type,xlab=xlab,ylab=ylab,
@@ -194,25 +207,25 @@ function(x,
 } # }}}
 
 # barchart {{{
-`barChart` <- function(x,name=deparse(substitute(x)),...)
+`barChart` <- function(x,type='bars',name=deparse(substitute(x)),...)
 {
-  chartSeries(x=x,type="bars",name=name,...)
+  chartSeries(x=x,type=type,name=name,...)
 } # }}}
 
 # candleChart {{{
-`candleChart` <- function(x,name=deparse(substitute(x)),...)
+`candleChart` <- function(x,name=deparse(substitute(x)),type="candlesticks",...)
 {
-  chartSeries(x=x,type="candlesticks",name=name,...)
+  chartSeries(x=x,type=type,name=name,...)
 } # }}}
 
 # matchChart {{{
-`matchChart` <- function(x,name=deparse(substitute(x)),...)
+`matchChart` <- function(x,name=deparse(substitute(x)),type="matchsticks",...)
 {
-  chartSeries(x=x,type="matchsticks",name=name,...)
+  chartSeries(x=x,type=type,name=name,...)
 } #}}}
 
 # lineChart {{{
-`lineChart` <- function(x,name=deparse(substitute(x)),...)
+`lineChart` <- function(x,name=deparse(substitute(x)),type="line",color.vol=FALSE,...)
 {
-  chartSeries(x=x,type="line",name=name,...)
+  chartSeries(x=x,type=type,name=name,color.vol=color.vol,...)
 } # }}}
