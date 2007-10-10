@@ -1,5 +1,5 @@
-# chartSeries {{{
-`chartSeries` <-
+# chartSeries generic {{{
+`chartSeries` <- 
 function(x,
          type=c("auto","candlesticks","matchsticks","bars","line"),
          show.vol=TRUE,
@@ -9,15 +9,35 @@ function(x,
          line.type="l",
          xlab="time",ylab="price",theme="black"
          ) {
-  if(class(x)[1]=="quantmod.OHLC") {
+  UseMethod('chartSeries')
+} # }}}
+
+# chartSeries.zoo {{{
+`chartSeries.zoo` <-
+function(x,
+         type=c("auto","candlesticks","matchsticks","bars","line"),
+         show.vol=TRUE,
+         show.grid=TRUE,name=deparse(substitute(x)),
+         time.scale=NULL,
+         technicals=NULL,
+         line.type="l",
+         xlab="time",ylab="price",theme="black",
+         up.col,dn.col
+         ) {
+#  if(class(x)[1]=='timeSeries')
+#    x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
+  if(class(x)[1]=="quantmod.OHLC" || NCOL(x) >= 5) {
+#     || (is.zoo(x) &
+#     all(suppressWarnings(
+#        grep("(Op)|(Hi)|(Lo)|(Cl)",colnames(x),ignore.case=TRUE)==1:4)))) {
+    Opens <- as.numeric(Op(x))
     Highs <- as.numeric(Hi(x))
     Lows <- as.numeric(Lo(x))
-    Opens <- as.numeric(Op(x))
     Closes <- as.numeric(Cl(x))
   } else {
-    Lows <- min(x)
-    Highs <- max(x)
-    Closes <- as.numeric(x)
+    Lows <- min(x[,1])
+    Highs <- max(x[,1])
+    Closes <- as.numeric(x[,1])
     type <- "line"
   } 
   Volumes <- as.numeric(Vo(x))
@@ -31,16 +51,20 @@ function(x,
   }
   
   # before messing with graphics, save...
-  old <- par(c('mar','xpd','bg','col.axis','fg','fig'))
+  old <- par(c('pty','mar','xpd','bg','col.axis','fg','fig'))
   on.exit(par(old))
 
   if(theme=="black") {
     bg.col <- "#222222"
     fg.col <- "#AAAAAA"
+    up.col <- ifelse(missing(up.col),"#00FF00",up.col)
+    dn.col <- ifelse(missing(dn.col),"#FF9900",dn.col)
   }
   if(theme=="white") {
-    bg.col <- "#EEEEEE"
+    bg.col <- "#FFFFFF"
     fg.col <- "#444444"
+    up.col <- ifelse(missing(up.col),"#00CC00",up.col)
+    dn.col <- ifelse(missing(dn.col),"#FF7700",dn.col)
   }
 
   # spacing requirements for chart type
@@ -73,14 +97,17 @@ function(x,
       break
     }
   }
+
   x.range <- 1:(NROW(x)*spacing)
-  y.range <- seq(min(Lows)*.70,max(Highs)*1.20,length.out=length(x.range))
+  y.range <- seq(min(Lows),max(Highs),length.out=length(x.range))
+
   if(show.vol) {
     par(fig=c(0,1,0.25,1))
     par(mar=c(1,4,4,2))
   }
   par(bg=bg.col,col.axis=fg.col,fg='#bbbbbb')
-  plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+  plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE,
+       ylim=c(min(Lows),max(Highs)))
   if(show.vol) par(new=TRUE)
   if(show.grid) grid(NA,NULL,col=fg.col)
   if(chart[1]=='line') {
@@ -94,13 +121,13 @@ function(x,
       x.pos <- 1+spacing*(i-1)
       # create full bar
       lines(c(x.pos,x.pos),L.to.H,
-            lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],"#ff9900","green"))
+            lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
       # create open tick
       segments(x.pos-tick.size,Opens[i],x.pos,Opens[i],
-               lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],"#ff9900","green"))
+               lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
       # create close tick
       segments(x.pos,Closes[i],x.pos+tick.size,Closes[i],
-               lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],"#ff9900","green"))
+               lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
     }
   } else {
     for(i in 1:NROW(x)) {
@@ -108,7 +135,7 @@ function(x,
       L.to.H <- c(Lows[i],Highs[i])
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
-      lines(c(x.pos,x.pos),O.to.C,lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],"#ff9900","green"))
+      lines(c(x.pos,x.pos),O.to.C,lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
     }
   }
   title(ylab=ylab,col.lab=fg.col)
@@ -125,12 +152,16 @@ function(x,
     par(mar=c(5,4,3,2))
     plot(x.range,seq(min(Vo(x))/1000000,max(Vo(x))/1000000,length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+    bar.col <- fg.col
+    color.vol <- TRUE
     for(i in 1:NROW(x)) {
       Vols <- c(0,Volumes[i]/1000000)
       x.pos <- 1+spacing*(i-1)
-      lines(c(x.pos,x.pos),Vols,lwd=width,col=fg.col)
+      if(chart[1]!='lines' & color.vol) 
+        bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
+      lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
     }
-    title(ylab="volume (1,000,000's)",
+    title(ylab="volume (millions)",
           xlab=time.scale,col.lab=fg.col)
     axis(1,at=bp*spacing+1,labels=x.labels)
     axis(2)
@@ -142,6 +173,25 @@ function(x,
   # for use in subsequent calls to modify params, add indicators etc...
   invisible(1)
 } #}}}
+
+# chartSeries.timeSeries {{{
+`chartSeries.timeSeries` <-
+function(x,
+         type=c("auto","candlesticks","matchsticks","bars","line"),
+         show.vol=TRUE,
+         show.grid=TRUE,name=deparse(substitute(x)),
+         time.scale=NULL,
+         technicals=NULL,
+         line.type="l",
+         xlab="time",ylab="price",theme="black"
+         ) {
+  x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
+  chartSeries.zoo(x=x,type=type,show.vol=show.vol,
+                             show.grid=show.grid,name=name,
+                             time.scale=time.scale,technicals=technicals,
+                             line.type=line.type,xlab=xlab,ylab=ylab,
+                             theme=theme)
+} # }}}
 
 # barchart {{{
 `barChart` <- function(x,name=deparse(substitute(x)),...)
