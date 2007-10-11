@@ -211,7 +211,8 @@ function(x,
       #if(color.vol) 
       #  bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
       #lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
-      rect(x.pos-spacing/4,0,x.pos+spacing/4,Vols[2],col=bar.col,border="black")
+      border.col <- ifelse(chart[1]=="candlesticks","#000000",bar.col)
+      rect(x.pos-spacing/4,0,x.pos+spacing/4,Vols[2],col=bar.col,border=border.col)
     }
     title(ylab=paste("volume (",vol.scale[[2]],")"),
           xlab=time.scale,col.lab=fg.col)
