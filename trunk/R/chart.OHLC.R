@@ -7,8 +7,9 @@ function(x,
          time.scale=NULL,
          technicals=NULL,
          line.type="l",
+         bar.type='ohlc',
          xlab="time",ylab="price",theme="black",
-         up.col,dn.col,color.vol=TRUE
+         up.col,dn.col,color.vol=TRUE,col.candles=FALSE
          ) {
   UseMethod('chartSeries')
 } # }}}
@@ -22,8 +23,9 @@ function(x,
          time.scale=NULL,
          technicals=NULL,
          line.type="l",
+         bar.type="ohlc",
          xlab="time",ylab="price",theme="black",
-         up.col,dn.col,color.vol=TRUE
+         up.col,dn.col,color.vol=TRUE,col.candles=FALSE
          ) {
 #  if(class(x)[1]=='timeSeries')
 #    x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
@@ -52,12 +54,12 @@ function(x,
   }
   
   # before messing with graphics, save...
-  old <- par(c('pty','mar','xpd','bg','col.axis','fg','fig'))
+  old <- par(c('pty','mar','xpd','bg','xaxs','las','col.axis','fg','fig'))
   on.exit(par(old))
 
   if(theme=="black") {
     bg.col <- "#222222"
-    fg.col <- "#AAAAAA"
+    fg.col <- "#666666"
     up.col <- ifelse(missing(up.col),"#00FF00",up.col)
     dn.col <- ifelse(missing(dn.col),"#FF9900",dn.col)
   }
@@ -66,6 +68,10 @@ function(x,
     fg.col <- "#444444"
     up.col <- ifelse(missing(up.col),"#00CC00",up.col)
     dn.col <- ifelse(missing(dn.col),"#FF7700",dn.col)
+  }
+  if(col.candles) {
+    up.col <- "#666666"
+    dn.col <- "#FFFFFF"
   }
 
   # spacing requirements for chart type
@@ -103,10 +109,10 @@ function(x,
   y.range <- seq(min(Lows),max(Highs),length.out=length(x.range))
 
   if(show.vol) {
-    par(fig=c(0,1,0.25,1))
-    par(mar=c(1,4,4,2))
+    par(fig=c(0,1,0.30,1))
+    par(mar=c(0,4,4,2))
   }
-  par(bg=bg.col,col.axis=fg.col,fg='#bbbbbb')
+  par(bg=bg.col,col.axis=fg.col,xaxs='r',las=2,fg='#bbbbbb')
   plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE,
        ylim=c(min(Lows),max(Highs)))
   if(show.vol) par(new=TRUE)
@@ -121,33 +127,57 @@ function(x,
     for(i in 1:NROW(x)) {
       O.to.C <- c(Opens[i],Closes[i])
       L.to.H <- c(Lows[i],Highs[i])
+      if(i > 1 & col.candles) {
+        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#666666"
+        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
+        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
+        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+      } else {
+        bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
+      }
       x.pos <- 1+spacing*(i-1)
       # create full bar
       lines(c(x.pos,x.pos),L.to.H,
-            lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
+            lwd=width,col=bar.col)
       # create open tick
-      segments(x.pos-tick.size,Opens[i],x.pos,Opens[i],
-               lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
+      if(bar.type=="ohlc") {
+        segments(x.pos-tick.size,Opens[i],x.pos,Opens[i],
+                 lwd=width,col=bar.col)
+      }
       # create close tick
       segments(x.pos,Closes[i],x.pos+tick.size,Closes[i],
-               lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
+               lwd=width,col=bar.col)
+      if(bar.type=="hlc") {
+        segments(x.pos-tick.size,Closes[i],x.pos,Closes[i],
+                 lwd=width,col=bar.col)
+      }
     }
   } else {
     # plot candlesticks or matchsticks
     for(i in 1:NROW(x)) {
       O.to.C <- c(Opens[i],Closes[i])
       L.to.H <- c(Lows[i],Highs[i])
+      if(i > 1 & col.candles) {
+        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#666666"
+        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
+        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
+        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+      } else {
+        bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
+      }
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
-      lines(c(x.pos,x.pos),O.to.C,lwd=width,col=ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col))
+      #lines(c(x.pos,x.pos),O.to.C,lwd=width,col=bar.col)
+      rect(x.pos-spacing/4,O.to.C[1],x.pos+spacing/4,O.to.C[2],col=bar.col,border="black")
     }
   }
   title(ylab=ylab,col.lab=fg.col)
   title(main=paste(name),col.main=fg.col,font.main=4)
   if(!show.vol) {
-    axis(1,at=bp*spacing+1,labels=x.labels)
+    axis(1,at=bp*spacing+1,labels=x.labels,las=1)
   }
   axis(2)
+  box(col=fg.col)
   
   if(show.vol) {
   # if volume is to be plotted, do so here
@@ -159,7 +189,7 @@ function(x,
     if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
     if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
     par(new=TRUE)
-    par(fig=c(0,1,0,0.3))
+    par(fig=c(0,1,0,0.35))
     par(mar=c(5,4,3,2))
     plot(x.range,seq(min(Vo(x))/vol.scale[[1]],max(Vo(x))/vol.scale[[1]],
          length.out=length(x.range)),
@@ -168,14 +198,26 @@ function(x,
     for(i in 1:NROW(x)) {
       Vols <- c(0,Volumes[i]/vol.scale[[1]])
       x.pos <- 1+spacing*(i-1)
-      if(color.vol) 
-        bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
-      lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
+      if(color.vol) {
+        if(i > 1 & col.candles & color.vol) {
+          if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#666666"
+          if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
+          if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
+          if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+        } else {
+          bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
+        }
+      }
+      #if(color.vol) 
+      #  bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
+      #lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
+      rect(x.pos-spacing/4,0,x.pos+spacing/4,Vols[2],col=bar.col,border="black")
     }
     title(ylab=paste("volume (",vol.scale[[2]],")"),
           xlab=time.scale,col.lab=fg.col)
-    axis(1,at=bp*spacing+1,labels=x.labels)
+    axis(1,at=bp*spacing+1,labels=x.labels,las=1)
     axis(2)
+    box(col=fg.col)
   } else {
     # add axes label
     title(xlab=time.scale,col.lab=fg.col)
