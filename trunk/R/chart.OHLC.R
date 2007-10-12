@@ -69,6 +69,12 @@ function(x,
     up.col <- ifelse(missing(up.col),"#00CC00",up.col)
     dn.col <- ifelse(missing(dn.col),"#FF7700",dn.col)
   }
+  if(theme=="grey") {
+    bg.col <- "#FFFFFF"
+    fg.col <- "#444444"
+    up.col <- ifelse(missing(up.col),"#FFFFFF",up.col)
+    dn.col <- ifelse(missing(dn.col),"#000000",dn.col)
+  }
   if(col.candles) {
     up.col <- "#666666"
     dn.col <- "#FFFFFF"
@@ -162,13 +168,15 @@ function(x,
         if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
         if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
         if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+        border.col <- "#444444"
       } else {
         bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
+        border.col <- bar.col
       }
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
       #lines(c(x.pos,x.pos),O.to.C,lwd=width,col=bar.col)
-      rect(x.pos-spacing/4,O.to.C[1],x.pos+spacing/4,O.to.C[2],col=bar.col,border="black")
+      rect(x.pos-spacing/4,O.to.C[1],x.pos+spacing/4,O.to.C[2],col=bar.col,border=border.col)
     }
   }
   title(ylab=ylab,col.lab=fg.col)
