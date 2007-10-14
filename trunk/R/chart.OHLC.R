@@ -97,7 +97,7 @@ function(x,
   if(chart[1]=="bars") {
     spacing <- 4
     width <- 3
-    if(NROW(x) > 150) width <- 1
+    if(NROW(x) > 60) width <- 1
   }
 
   # determine formatting for time-axis
@@ -114,6 +114,11 @@ function(x,
   x.range <- 1:(NROW(x)*spacing)
   y.range <- seq(min(Lows),max(Highs),length.out=length(x.range))
 
+  # determine type of technicals to draw
+  # if they need there own plot area, or
+  # are overlays.
+  # default choice is based upon 
+  
   if(show.vol) {
     par(fig=c(0,1,0.30,1))
     par(mar=c(0,4,4,2))
@@ -176,7 +181,8 @@ function(x,
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
       #lines(c(x.pos,x.pos),O.to.C,lwd=width,col=bar.col)
-      rect(x.pos-spacing/4,O.to.C[1],x.pos+spacing/4,O.to.C[2],col=bar.col,border=border.col)
+      rect(x.pos-spacing/5,O.to.C[1],x.pos+spacing/5,
+          O.to.C[2],col=bar.col,border=border.col)
     }
   }
   title(ylab=ylab,col.lab=fg.col)
