@@ -565,7 +565,96 @@ function(Symbols,env,
 
 "getSymbols.RODBC" <- function() {}
 
-"getSymbols.oanda" <- function() {}
+`getSymbols.oanda` <-
+function(Symbols,env,return.class='zoo',
+         from='2007-01-01',
+         to=Sys.Date(),
+         ...) {
+     importDefaults("getSymbols.oanda")
+     this.env <- environment()
+     for(var in names(list(...))) {
+        # import all named elements that are NON formals
+        assign(var, list(...)[[var]], this.env)
+     }
+
+     default.return.class <- return.class
+     default.from <- from
+     default.to <- to
+
+     if(missing(verbose)) verbose <- FALSE
+     oanda.URL <- "http://www.oanda.com/convert/fxhistory?lang=en&"
+     for(i in 1:length(Symbols)) {
+       return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+       return.class <- ifelse(is.null(return.class),default.return.class,
+                              return.class)
+       from <- getSymbolLookup()[[Symbols[[i]]]]$from
+       from <- ifelse(is.null(from),default.from,from)
+       to <- getSymbolLookup()[[Symbols[[i]]]]$to
+       to <- ifelse(is.null(to),default.to,to)
+   
+       if(as.Date(to)-as.Date(from) > 2000) stop("oanda limits data to 2000 days")
+       # automatically break larger requests into equal sized smaller request at some point
+       # for now just let it remain
+
+       from.date <- format(as.Date(from),"date1=%m%%2F%d%%2F%y&")
+       to.date <- format(as.Date(to),"date=%m%%2F%d%%2F%y&date_fmt=us&")
+       
+       Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
+       Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
+       currency.pair <- strsplit(toupper(Symbols[[i]]),"/")[[1]]
+       if(length(currency.pair) != 2) {
+         warning(paste("incorrectly specified currency pair",Symbols.name))
+         next
+       }
+
+       if(verbose) cat("downloading ",Symbols.name,".....")
+       con <- url(paste(oanda.URL,from.date,to.date,"exch=",currency.pair[1],
+                       "&expr2=",currency.pair[2],
+                       "&margin_fixed=0&SUBMIT=Get+Table&format=CSV&redirected=1",
+                       sep=""))
+       open(con)
+       fr <- readLines(con)
+       close(con)
+       fr <- unlist(strsplit(
+                    gsub("<PRE>|</PRE>","",fr[(grep("PRE",fr)[1]):(grep("PRE",fr)[2])]),","))
+
+       if(verbose) cat("done.\n")
+       fr <- zoo(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y"))
+       dim(fr) <- c(length(fr),1)
+       colnames(fr) <- gsub("/",".",Symbols[[i]])
+
+       if('zoo' %in% return.class) {
+         fr
+       }
+       if('ts' %in% return.class) {
+         fr <- as.ts(fr)
+       } else
+       if('data.frame' %in% return.class) {
+         fr <- as.data.frame(fr)
+       } else
+       if('its' %in% return.class) {
+         if("package:its" %in% search() || require("its", quietly=TRUE)) {
+           index(fr) <- as.POSIXct(index(fr))
+           fr <- its::as.its(fr)
+         } else {
+           warning(paste("'its' from package 'its' could not be loaded:",
+                         " 'zoo' class returned"))
+         }
+       } else 
+       if('timeSeries' %in% return.class) {
+         if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+           fr <- as.timeSeries(fr)
+         } else {
+           warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                   " 'zoo' class returned"))
+         }
+       }
+       Symbols[[i]] <-toupper(gsub('\\^|/','',Symbols[[i]])) 
+       assign(Symbols[[i]],fr,env)
+     }
+     return(Symbols)
+
+}
 
 # removeSymbols {{{
 "removeSymbols" <- 
