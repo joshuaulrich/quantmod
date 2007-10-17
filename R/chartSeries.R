@@ -9,7 +9,7 @@ function(x,
          line.type="l",
          bar.type='ohlc',
          xlab="time",ylab="price",theme="black",
-         up.col,dn.col,color.vol=TRUE,col.candles=FALSE
+         up.col,dn.col,color.vol=TRUE,col.candles=FALSE,...
          ) {
   UseMethod('chartSeries')
 } # }}}
@@ -25,7 +25,7 @@ function(x,
          line.type="l",
          bar.type="ohlc",
          xlab="time",ylab="price",theme="black",
-         up.col,dn.col,color.vol=TRUE,col.candles=FALSE
+         up.col,dn.col,color.vol=TRUE,col.candles=FALSE,...
          ) {
 #  if(class(x)[1]=='timeSeries')
 #    x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
@@ -251,8 +251,9 @@ function(x,
          time.scale=NULL,
          technicals=NULL,
          line.type="l",
+         bar.type='ohlc',
          xlab="time",ylab="price",theme="black",
-         up.col,dn.col,color.vol=TRUE
+         up.col,dn.col,color.vol=TRUE,col.candles,...
          ) {
   force(name) # weird scoping issue - I'll never realy know it all
   x <- zoo(seriesData(x),as.Date(as.character(rownames(x))))
@@ -264,7 +265,7 @@ function(x,
 } # }}}
 
 # barchart {{{
-`barChart` <- function(x,type='bars',name=deparse(substitute(x)),...)
+`barChart` <- function(x,name=deparse(substitute(x)),type='bars',...)
 {
   chartSeries(x=x,type=type,name=name,...)
 } # }}}

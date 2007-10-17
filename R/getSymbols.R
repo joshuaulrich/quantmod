@@ -5,7 +5,7 @@ function(Symbols=NULL,
          reload.Symbols=FALSE,
          verbose=FALSE,
          warnings=TRUE,
-         src=c("yahoo","MySQL","google","FRED","csv"),
+         src="yahoo",
          symbol.lookup=TRUE,
          ...)  {
       importDefaults("getSymbols")
