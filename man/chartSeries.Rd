@@ -76,11 +76,12 @@ up.col and dn.col arguments.
 col.candles implements a color coding scheme used in some
 charting applications, and follows the following rules:
 
-grey  => Open[t] < Close[t] and Open[t] < Close[t-1]
-white => Open[t] < Close[t] and Open[t] > Close[t-1]
-red   => Open[t] > Close[t] and Open[t] < Close[t-1]
-black => Open[t] > Close[t] and Open[t] > Close[t-1]
-
+\itemize{
+  \item{grey}{ => Op[t] < Cl[t] and Op[t] < Cl[t-1]}
+  \item{white}{ => Op[t] < Cl[t] and Op[t] > Cl[t-1]}
+  \item{red}{   => Op[t] > Cl[t] and Op[t] < Cl[t-1]}
+  \item{black}{ => Op[t] > Cl[t] and Op[t] > Cl[t-1]}
+}
 }
 \value{
 Returns a standard chart plus volume, if available, suitably scaled.
