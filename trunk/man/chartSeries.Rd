@@ -4,7 +4,6 @@
 \alias{candleChart}
 \alias{matchChart}
 \alias{lineChart}
-%- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Create Financial Charts }
 \description{
 Charting tool to create standard financial charts
@@ -14,7 +13,7 @@ styles include candles, matches (1 pixel candles), bars,
 and lines. Chart may have white or black background.
 }
 \usage{
-chart.OHLC(x,
+chartSeries(x,
            type = c("auto", "candlesticks", "matchsticks", "bars","line"), 
            show.vol = TRUE, 
            show.grid = TRUE, 
@@ -22,7 +21,15 @@ chart.OHLC(x,
            time.scale = NULL,
            technicals = NULL,
            line.type = "l",
-           xlab = "time", ylab = "price", bg.col = "black")
+           bar.type = "ohlc",
+           xlab = "time", ylab = "price", theme = "black",
+           up.col,dn.col,color.vol = TRUE, col.candles = FALSE,
+           ...)
+
+barChart(x,name=deparse(substitute(x)),type='bars',...)
+candleChart(x,name=deparse(substitute(x)),type='candlesticks',...)
+lineChart(x,name=deparse(substitute(x)),type='line',
+          color.vol=FALSE,...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -33,9 +40,16 @@ chart.OHLC(x,
   \item{name}{ name of chart }
   \item{time.scale}{ what is the timescale? automatically deduced }
   \item{technicals}{ a list of technical indicators and params (yet to be added) }
+  \item{line.type}{ type of line in line chart }
+  \item{bar.type}{ type of barchart - ohlc or hlc }
   \item{xlab}{ derived time scale }
   \item{ylab}{ y axis label }
   \item{theme}{ 'white' or 'black' background }
+  \item{up.col}{ up bar/candle color }
+  \item{dn.col}{ down bar/candle color }
+  \item{color.vol}{ color code volume? }
+  \item{col.candles}{ 4 color candle pattern }
+  \item{\dots}{ additional parameters }
 }
 \details{
 Currently displays standard style OHLC charts familiar
@@ -54,14 +68,38 @@ to be called subsequently which will allow for
 additional information to be display on the chart, such as
 technical indicators/studies, as well as entry and exit points
 given a particular trade strategy.
+
+line.type and bar.type allow further fine tuning of
+chart styles to user tastes, as do the addition of
+up.col and dn.col arguments.
+
+col.candles implements a color coding scheme used in some
+charting applications, and follows the following rules:
+
+grey  => Open[t] < Close[t] and Open[t] < Close[t-1]
+white => Open[t] < Close[t] and Open[t] > Close[t-1]
+red   => Open[t] > Close[t] and Open[t] < Close[t-1]
+black => Open[t] > Close[t] and Open[t] > Close[t-1]
+
 }
 \value{
 Returns a standard chart plus volume, if available, suitably scaled.
 }
 \author{ Jeffrey A. Ryan }
+\references{ Josh Ulrich - TTR package and col.candles coding }
 \note{
 Most details can be fine-tuned within the function, though the code
-does a good job of scaling and labelling axes for the user.
+does a reasonable job of scaling and labelling axes for the user.
+
+This is mostly a proof-of-concept function. It is currently being
+rewritten with S4 style constructs to better facilitate the
+addition of technical analysis indicators, as well as more
+dynamic updating for adding additional series, and rescaling.
+
+Additional motivation to add outlined candles to allow
+for scaling and advanced color coding is owed to Josh Ulrich, as
+are the base functions for the yet to be released technical analysis
+routines.
 }
 \seealso{ \code{\link{getSymbols}} }
 \examples{
