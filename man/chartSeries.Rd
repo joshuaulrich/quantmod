@@ -23,7 +23,7 @@ chartSeries(x,
            line.type = "l",
            bar.type = "ohlc",
            xlab = "time", ylab = "price", theme = "black",
-           up.col,dn.col,color.vol = TRUE, col.candles = FALSE,
+           up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
            ...)
 
 barChart(x,name=deparse(substitute(x)),type='bars',...)
@@ -48,7 +48,7 @@ lineChart(x,name=deparse(substitute(x)),type='line',
   \item{up.col}{ up bar/candle color }
   \item{dn.col}{ down bar/candle color }
   \item{color.vol}{ color code volume? }
-  \item{col.candles}{ 4 color candle pattern }
+  \item{multi.col}{ 4 color candle pattern }
   \item{\dots}{ additional parameters }
 }
 \details{
@@ -69,11 +69,11 @@ additional information to be display on the chart, such as
 technical indicators/studies, as well as entry and exit points
 given a particular trade strategy.
 
-line.type and bar.type allow further fine tuning of
+\code{line.type} and \code{bar.type} allow further fine tuning of
 chart styles to user tastes, as do the addition of
-up.col and dn.col arguments.
+\code{up.col} and \code{dn.col} arguments.
 
-col.candles implements a color coding scheme used in some
+\code{multi.col} implements a color coding scheme used in some
 charting applications, and follows the following rules:
 
 \itemize{
@@ -87,7 +87,7 @@ charting applications, and follows the following rules:
 Returns a standard chart plus volume, if available, suitably scaled.
 }
 \author{ Jeffrey A. Ryan }
-\references{ Josh Ulrich - TTR package and col.candles coding }
+\references{ Josh Ulrich - \pkg{TTR} package and multi.col coding }
 \note{
 Most details can be fine-tuned within the function, though the code
 does a reasonable job of scaling and labelling axes for the user.
@@ -95,12 +95,12 @@ does a reasonable job of scaling and labelling axes for the user.
 This is mostly a proof-of-concept function. It is currently being
 rewritten with S4 style constructs to better facilitate the
 addition of technical analysis indicators, as well as more
-dynamic updating for adding additional series, and rescaling.
+dynamic updating for adding additional series and rescaling.
 
 Additional motivation to add outlined candles to allow
 for scaling and advanced color coding is owed to Josh Ulrich, as
-are the base functions for the yet to be released technical analysis
-routines.
+are the base functions (from \pkg{TTR}) for the yet to be
+released technical analysis charting code
 }
 \seealso{ \code{\link{getSymbols}} }
 \examples{

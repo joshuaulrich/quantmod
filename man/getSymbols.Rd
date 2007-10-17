@@ -13,9 +13,8 @@ procedure.  Not a true S3 method, but methods for different
 data sources follow an S3-like naming convention. Additional 
 methods can be added by simply adhering to the convention.
 
-Current package methods include \code{getSymbols.yahoo},
-\code{getSymbols.google}, \code{getSymbols.MySQL}, and
-\code{getSymbols.FRED}.  More to come...
+Current \code{src} methods available are: yahoo, google,
+MySQL, FRED, csv, RData, and Oanda.
 }
 \usage{
 getSymbols(Symbols = NULL, 
@@ -94,12 +93,20 @@ by \code{return.class}.
 \note{
 While it is possible to load symbols as classes other
 than \code{zoo}, \pkg{quantmod} requires most, if not
-all, data to be of class \code{zoo}. The additional
+all, data to be of class \code{zoo} or inherited
+from \code{zoo} - e.g. \code{quantmod.OHLC}. The additional
 methods are meant mainly to be of use for those
 using the functionality elsewhere.
 }
 \seealso{ \code{\link{getModelData}},\code{\link{specifyModel}},
-          \code{\link{setSymbolLookup}} }
+\code{\link{setSymbolLookup}},
+\code{\link{getSymbols.csv}},
+\code{\link{getSymbols.RData}},
+\code{\link{getSymbols.oanda}},
+\code{\link{getSymbols.yahoo}},
+\code{\link{getSymbols.google}},
+\code{\link{getSymbols.FRED}},
+ }
 \examples{
 \dontrun{
 setSymbolLookup(QQQQ='yahoo',SPY='MySQL')
