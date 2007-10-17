@@ -14,8 +14,8 @@ setSymbolLookup(...)
 getSymbolLookup(Symbols=NULL)
 unsetSymbolLookup(Symbols,confirm=TRUE)
 
-saveSymbolLookup(file)
-loadSymbolLookup(file)
+saveSymbolLookup(file,dir="")
+loadSymbolLookup(file,dir="")
 }
 \arguments{
   \item{\dots}{ name=value pairs for symbol defaults }
@@ -50,8 +50,8 @@ or \code{setSymbolLookup(JAVA=list(src='yahoo'))}
 It is also possible to specify additional,
 possibly source specific, lookup details on
 a per symbol basis.  These include an alternate
-naming convention (useful for sites like yahoo where
-certain symbols are prepended with a ^ - that is, a caret
+naming convention (useful for sites like Yahoo! where
+certain non-traded symbols are prepended with a caret,
 or more correctly a curcumflex accent. In that case one would
 specify \code{setSymbolLookup(DJI=list(name="^DJI",src="yahoo"))})
 as well as passed parameters like \code{dbname} and

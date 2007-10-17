@@ -23,7 +23,7 @@ getSymbols(Symbols = NULL,
            reload.Symbols = FALSE,
            verbose = FALSE,
            warnings = TRUE,
-           src = c("yahoo", "MySQL", "google", "FRED"),
+           src = "yahoo",
            symbol.lookup = TRUE,
            ...)
 
