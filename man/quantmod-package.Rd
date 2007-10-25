@@ -6,8 +6,7 @@
 Quantitative Financial Modelling Framework
 }
 \description{
-Specify, build, trade, and analyse quantitative financial
-trading srategies
+Quantitative Financial Modelling and Trading Framework for R
 }
 \details{
 \tabular{ll}{
@@ -18,41 +17,38 @@ Date: \tab 2007-10-16\cr
 Depends: \tab zoo,Defaults\cr
 Suggests: \tab its,DBI,RMySQL,fCalendar\cr
 LazyLoad: \tab yes\cr
-License: \tab GPL 3\cr
+License: \tab GPL-3\cr
 URL: \tab http://www.quantmod.com\cr
 }
+The quantmod package for R is designed to
+assist the quantitative trader in the
+development, testing, and deployment
+of statistically based trading models.
 
-Index:
-\preformatted{
-Delt                    Calculate Percent Change
-Lag                     Lag a Time Series
-Next                    Advance a Time Series
-OHLC.Transformations    Extract and Transform quantmod.OHLC Cols
-as.quantmod.OHLC        Create Open High Low Close Object
-breakpoints             Locate Breakpoints by Date
-buildModel              Build quantmod model 
-fittedModel             quantmod Fitted Objects
-getModelData            Update model's dataset
-getSymbols              Manage Data from Multiple Sources
-getSymbols.MySQL        Retrieve Data from MySQL Database
-getSymbols.yahoo        Download OHLC Data From Yahoo!
-is.quantmod             Test If Object of Type quantmod
-modelData               Extract Dataset Created by specifyModel
-modelSignal             Extract Model Signal Object
-period.apply            Apply Function Over Specified Interval
-periodReturn            Calculate Periodic Returns
-quantmod-class          Class "quantmod"
-quantmod-package        Quantitative Financial Modelling Framework
-setSymbolLookup         Manage Symbol Lookup Table
-specifyModel            Specify Model Formula For quantmod Process
-tradeModel              Simulate Trading of Fitted quantmod Object
-weekdays.zoo            Extract Parts of a zoo Object
-weeks                   Extract Weeks of a Time Series Object
-}
-'quantmod' is a workflow tool to be used to manage the quantitative
-trading process within R. At present, much work has been done to manage
-data as well as provide a uniform interface to a wide array of modelling
-methods.
+
+\emph{What quantmod IS}
+
+A rapid prototyping environment,
+where quant traders can quickly
+and cleanly explore and build trading models.
+
+
+\emph{What quantmod is NOT}
+
+A replacement for anything statistical.
+It has no 'new' modelling routines or
+analysis tool to speak of. It does now
+offer charting not currently available
+elsewhere in R, but most everything else
+is more of a wrapper to what you already
+know and love about the langauge
+and packages you currently use.
+
+quantmod makes modelling easier by removing
+the repetitive workflow issues surrounding
+data management, modelling interfaces,
+and performance analysis. 
+
 }
 \author{
 Jeffrey A. Ryan

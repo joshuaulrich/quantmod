@@ -28,7 +28,7 @@ This should be extended to handle non-zoo objects,
 though that hasn't happened : \
 }
 \examples{
-zoo.ts <- zoo(rnorm(231),as.Date(13514:13744))
+zoo.ts <- zoo(rnorm(231),as.Date(13514:13744,origin="1970-01-01"))
 periodicity(zoo.ts)
 }
 \keyword{ utilities }

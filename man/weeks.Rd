@@ -33,7 +33,7 @@ The zoo object's index must be of class Date, or coerceable to such.
 }
 \seealso{ \code{\link{weekdays}}, \code{\link{Date}} }
 \examples{
-zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
+zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744,origin="1970-01-01"))
 weeks(zoo.data)
 years(zoo.data)
 }

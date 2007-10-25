@@ -29,7 +29,7 @@ names.
 \seealso{ \code{\link{DateTimeClasses}}, \code{\link{quarters}},
           \code{\link{weekdays}}, \code{\link{months}} }
 \examples{
-zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
+zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744,origin="1970-01-01"))
 weekdays(zoo.data)
 months(zoo.data)
 quarters(zoo.data)

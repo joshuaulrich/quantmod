@@ -31,7 +31,7 @@ A numeric vector with length INDEX
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{breakpoints}} \code{\link{apply.monthly}}}
 \examples{
-zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744))
+zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744,origin="1970-01-01"))
 bp <- breakpoints(zoo.data,by=weeks)
 period.apply(zoo.data, INDEX=bp, FUN=function(x) sd(x))
 period.apply(zoo.data, INDEX=bp, FUN=sd)                  #same
