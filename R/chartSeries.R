@@ -197,7 +197,7 @@ function(x,
   # if volume is to be plotted, do so here
     # scale volume - vol.divisor
     max.vol <- max(Volumes)
-    vol.scale <- 100
+    vol.scale <- list(100,'100s')
     if(max.vol > 10000) vol.scale <- list(1000,'1000s') 
     if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
     if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
