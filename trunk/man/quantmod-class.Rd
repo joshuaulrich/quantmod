@@ -37,8 +37,6 @@ Normally objects are created as a result of a call to \code{specifyModel}.
 No methods defined with class "quantmod" in the signature.
 }
 \author{ Jeffrey A. Ryan }
-\seealso{
-}
 \examples{
 showClass("quantmod")
 }

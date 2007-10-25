@@ -39,7 +39,7 @@ to the appropriate periods.
 \seealso{ \code{\link{breakpoints}}, \code{\link{period.apply}},
           \code{\link{to.monthly}} }
 \examples{
-zoo.ts <- zoo(rnorm(231),as.Date(13514:13744))
+zoo.ts <- zoo(rnorm(231),as.Date(13514:13744,origin="1970-01-01"))
 
 start(zoo.ts)
 end(zoo.ts)
