@@ -75,9 +75,22 @@ function(x,
     up.col <- ifelse(missing(up.col),"#FFFFFF",up.col)
     dn.col <- ifelse(missing(dn.col),"#000000",dn.col)
   }
-  if(multi.col) {
-    up.col <- "#666666"
-    dn.col <- "#FFFFFF"
+  #if(is.logical(multi.col) | length(multi.col)==4) {
+  if(missing(multi.col)) { # interpret as TRUE
+    multi.col <- FALSE
+  } else {
+    if(is.logical(multi.col) && multi.col==TRUE) {
+      multi.col <- c("#666666","#FFFFFF",
+                     "#FF0000","#000000") 
+    }
+    # add some check for length 4 colors
+    dn.up.col <- multi.col[1]
+    up.up.col <- multi.col[2]
+    dn.dn.col <- multi.col[3]
+    up.dn.col <- multi.col[4]
+    up.col <- up.up.col
+    dn.col <- dn.dn.col
+    multi.col <- TRUE
   }
 
   # spacing requirements for chart type
@@ -139,10 +152,10 @@ function(x,
       O.to.C <- c(Opens[i],Closes[i])
       L.to.H <- c(Lows[i],Highs[i])
       if(i > 1 & multi.col) {
-        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#666666"
-        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
-        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
-        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.up.col
+        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.up.col
+        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.dn.col
+        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.dn.col
       } else {
         bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
       }
@@ -169,14 +182,14 @@ function(x,
       O.to.C <- c(Opens[i],Closes[i])
       L.to.H <- c(Lows[i],Highs[i])
       if(i > 1 & multi.col) {
-        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#666666"
-        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
-        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
-        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.up.col
+        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.up.col
+        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.dn.col
+        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.dn.col
         border.col <- "#444444"
       } else {
         bar.col <- ifelse(O.to.C[1] > O.to.C[2],dn.col,up.col)
-        border.col <- bar.col
+        border.col <- ifelse(multi.col,"#444444",bar.col)
       }
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
@@ -214,10 +227,10 @@ function(x,
       x.pos <- 1+spacing*(i-1)
       if(color.vol) {
         if(i > 1 & multi.col & color.vol) {
-          if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#666666"
-          if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#FFFFFF"
-          if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- "#FF0000"
-          if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- "#000000"
+          if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.up.col
+          if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.up.col
+          if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.dn.col
+          if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.dn.col
         } else {
           bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
         }
