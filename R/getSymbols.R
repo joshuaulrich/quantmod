@@ -347,7 +347,8 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- read.csv(paste(FRED.URL,"/",
                             Symbols[[i]],"/",
                             "downloaddata/",
-                            Symbols[[i]],".csv",sep=""))
+                            Symbols[[i]],".csv",sep="",
+                            na.string="."))
        if(verbose) cat("done.\n")
        fr <- zoo(fr[,-1],as.Date(fr[,1]))
        dim(fr) <- c(NROW(fr),1)
