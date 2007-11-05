@@ -14,6 +14,7 @@ function(x,
   UseMethod('chartSeries')
 } # }}}
 
+
 # chartSeries.zoo {{{
 `chartSeries.zoo` <-
 function(x,
