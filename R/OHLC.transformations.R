@@ -231,7 +231,8 @@ function(x,period,name=NULL,...)
   if(is.null(name)) name <- deparse(substitute(x))
   if(NCOL(x)==1) {
     # for single dimension (or no?) data 
-    bp <- breakpoints(x,period,TRUE)
+    # original breakpoints(x,period,TRUE)
+    bp <- breakpoints(x,period,abbreviate=TRUE,...)
     date <- index(x)[bp]
     x.out <- period.apply(x,bp,
                function(k) c(as.numeric(first(k)),
@@ -245,7 +246,56 @@ function(x,period,name=NULL,...)
     stop("'x' must be a single column or of class 'quantmod.OHLC'")
   }
 }
-
+`to.minutes` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,minutes,name)
+}
+`to.minutes3` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,minutes3,name)
+}
+`to.minutes5` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,minutes5,name)
+}
+`to.minutes10` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,minutes10,name)
+}
+`to.minutes15` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,minutes15,name)
+}
+`to.minutes30` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,minutes30,name)
+}
+`to.hourly` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  to.period(x,hours,name)
+}
+`to.daily` <-
+function(x)
+{
+  name <- deparse(substitute(x))
+  x <- to.period(x,days,name)
+  index(x) <- as.Date(index(x))
+  return(x)
+}
 `to.weekly` <-
 function(x)
 {

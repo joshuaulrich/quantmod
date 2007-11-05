@@ -20,6 +20,8 @@ export(modelData,
     Next,
     Lag,
     to.period,
+    to.minutes,to.minutes3,to.minutes5,to.minutes10,to.minutes15,to.minutes30,
+    to.hourly,to.daily,
     to.weekly,to.monthly,to.quarterly,to.yearly,
     periodicity,
     periodReturn,
@@ -116,7 +118,12 @@ S3method(predictModel,lars)
 S3method(predictModel,rpart)
 S3method(predictModel,tree)
 S3method(predictModel,randomForest)
+export(minutes,hours,minutes3,minutes5,minutes10,minutes15,minutes30,days)
 export(weekdays.zoo,weeks,months.zoo,quarters.zoo,years)
+S3method(weeks,zoo)
+S3method(minutes,zoo)
+S3method(hours,zoo)
+S3method(days,zoo)
 S3method(weeks,zoo)
 S3method(weekdays,zoo)
 S3method(months,zoo)
