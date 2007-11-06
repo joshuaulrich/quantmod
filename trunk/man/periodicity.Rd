@@ -15,17 +15,33 @@ periodicity(x, ...)
 }
 \details{
 A simple wrapper to quickly estimate the periodicity
-of a given data. Returning a statement of the
-median number of days between observations.
+of a given data. Returning a list of the
+median number of days between observations
+as a difftime object, the numerical difference,
+and the derived scale of the data as a string. 
+
+The only list item of note is the \code{scale}.
+This is an estimate of the periodicity of the data
+in common terms - e.g. 7 day dialy data is best
+described as \sQuote{weekly}, and would be returned as
+such.
+
+Possible \code{scale} values are:
+
+\sQuote{minute},\sQuote{hourly},
+\sQuote{daily},\sQuote{weekly},
+\sQuote{monthly},\sQuote{quarterly},
+and \sQuote{yearly}.
 }
 \value{
-An object of class 'difftime'
+A list containing the \code{difftime} object,
+numeric periodicity, and common scale.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{difftime}} }
 \note{
 This should be extended to handle non-zoo objects,
-though that hasn't happened : \
+though that hasn't happened 
 }
 \examples{
 zoo.ts <- zoo(rnorm(231),as.Date(13514:13744,origin="1970-01-01"))
