@@ -1,0 +1,50 @@
+\name{minutes}
+\alias{minutes}
+\alias{hours}
+\alias{days}
+\alias{minutes.zoo}
+\alias{hours.zoo}
+\alias{days.zoo}
+\title{ Extract Minutes, Hours, or Days of a High Frequency Time Series Object }
+\description{
+Extract the minutes or hours of a day, or days since the beginning of the year 
+This function is a generic, with currently a single method implemented
+for objects of class \code{zoo}.
+}
+\usage{
+\method{minutes}{zoo}(x,k=1,...)
+
+\method{hours}{zoo}(x)
+
+\method{days}{zoo}(x)
+}
+\arguments{
+  \item{x}{ zoo object with index of class Date }
+  \item{k}{ used to identify which \dQuote{bar} obs. belongs to }
+  \item{\dots}{ additional unused arguments }
+}
+\details{
+Behaves exactly as weekdays, months and quarters from \pkg{base}
+with the obvious difference in that the method extracts the
+minutes or hours of a day, and day of the year for a given object.
+}
+\value{
+\code{minutes} returns the minute of the day as a character [0-59]
+
+\code{hours} returns the hour of the day as a character [0-23]
+
+\code{days} returns the day of the year as a character [001-366]
+}
+\author{ Jeffrey A. Ryan }
+\note{
+The zoo object's index must be of class POSIXct or POSIXlt,
+or coercible to such, and have sufficient time detail.
+}
+\seealso{ \code{\link{weekdays}}, \code{\link{Date}}, \code{\link{POSIXlt}} }
+\examples{
+zoo.data <- zoo(10,as.Date("2004-12-31 00:01:23",origin="1970-01-01"))
+minutes(zoo.data)
+hours(zoo.data)
+days(zoo.data)
+}
+\keyword{ utilities }

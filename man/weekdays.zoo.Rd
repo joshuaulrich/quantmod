@@ -2,10 +2,10 @@
 \alias{weekdays.zoo}
 \alias{months.zoo}
 \alias{quarters.zoo}
-\title{ Extract Parts of a zoo Object }
+\title{ Extract Parts of a Time Series Object }
 \description{
-Extract the weekday, month or quarter. This documents the methods
-for the zoo class.
+Extract the minute, hour, day, weekday, month or quarter. This documents the methods
+for the zoo class with an index of class \code{Date}, or coercible to such.
 }
 \usage{
 \method{weekdays}{zoo}(x,abbreviate=FALSE)
@@ -17,13 +17,15 @@ for the zoo class.
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ a zoo object with index of class \code{Date} }
+  \item{k}{ bar size for minute data }
   \item{abbreviate}{ logical. Should names be abbreviated? }
 }
 \value{
 \code{weekdays} and \code{months} return a character vector of the
-names.
+names, or for \code{abbreviate=TRUE} a character vector of month
+numbers for \code{months.zoo}.
 
-\code{quarters} returns a character vector of \code{Q1} to \code{Q4}
+\code{quarters.zoo} returns a numeric vector of \code{1} to \code{4}
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{DateTimeClasses}}, \code{\link{quarters}},

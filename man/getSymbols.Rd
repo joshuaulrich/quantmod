@@ -4,9 +4,9 @@
 \alias{removeSymbols}
 \alias{saveSymbols}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Manage Data from Multiple Sources }
+\title{ Load and Manage Data from Multiple Sources }
 \description{
-Functions to manage \code{Symbols} in
+Functions to load and manage \code{Symbols} in
 specified environment. Used by \code{\link{specifyModel}}
 to retrieve symbols specified in first step of modelling 
 procedure.  Not a true S3 method, but methods for different
@@ -15,6 +15,10 @@ methods can be added by simply adhering to the convention.
 
 Current \code{src} methods available are: yahoo, google,
 MySQL, FRED, csv, RData, and Oanda.
+
+Data is loaded silently \emph{without} user
+assignment.
+
 }
 \usage{
 getSymbols(Symbols = NULL, 
@@ -49,24 +53,45 @@ saveSymbols(Symbols = NULL,
        \item{\dots}{ additional parameters }
 }
 \details{
-\code{getSymbols} first looks to the local environment for
-matching symbols. If found, the next symbol in Symbols
-is attempted, if not found, it is skipped and a warning will
-be displayed.  Upon completion a list of
+\code{getSymbols} is a wrapper to load data from
+different sources - be them local or remote. Data is
+fetched through one of the available \code{getSymbols} methods
+and saved in the \code{env} specified - the .GlobalEnv
+by default. Data is loaded in much the same way that \code{load}
+behaves. It is assigned internally
+to a variable in the specified environment, \emph{without} the
+user explicitly assigning the returned data to a variable.
+
+The previous sentence's point warrants repeating - getSymbols is called
+for its side effects, and \emph{does not} return the data object
+loaded. The data is \sQuote{loaded} silently by the function
+into the user's environment - or an environment specified.
+
+By default the variable chosen is an \R-legal name derived
+from the symbol being loaded. It is possible, using
+\code{setSymbolLookup} to specify an alternate
+name if the default is not desired, see that function for
+details. 
+
+The result of a call to \code{getSymbols} is a new object
+or objects in the user's specified environment - with the
+environment printed upon exit.
+
+Upon completion a list of
 loaded symbols is stored in the global environment
 under the name \code{.getSymbols}.
 
 Objects loaded by \code{getSymbols} can be viewed with
 \code{showSymbols} and
 removed by a call to \code{removeSymbols}.  Additional
-retrieval methods can be
-created simply following the S3-like naming
+data loading \dQuote{methods} can be
+created simply by following the S3-like naming
 convention where getSymbols.NAME
 is used for your function NAME. See \code{getSymbols.skeleton}.
 
 \code{setDefaults(getSymbols)} can be used to
-specify defaults for all passed \code{getSymbols} arguments.
-\code{setDefaults(getSymbols.MySQL)} for arguments
+specify defaults for \code{getSymbols} arguments.
+\code{setDefaults(getSymbols.MySQL)} may be used for arguments
 specific to \code{getSymbols.MySQL}, etc.
 
 The \dQuote{sourcing} of data is managed internally
@@ -87,7 +112,8 @@ used (\sQuote{yahoo}).
 A call to getSymbols will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined
-by \code{return.class}.
+by \code{return.class}. Presently this may be \code{ts},
+\code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
 }
 \author{ Jeffrey A. Ryan }
 \note{
@@ -96,7 +122,7 @@ than \code{zoo}, \pkg{quantmod} requires most, if not
 all, data to be of class \code{zoo} or inherited
 from \code{zoo} - e.g. \code{quantmod.OHLC}. The additional
 methods are meant mainly to be of use for those
-using the functionality elsewhere.
+using the functionality outside of the \pkg{quantmod} workflow.
 }
 \seealso{ \code{\link{getModelData}},\code{\link{specifyModel}},
 \code{\link{setSymbolLookup}},

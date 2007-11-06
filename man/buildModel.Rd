@@ -6,14 +6,15 @@
 Construct and attach a fitted model of type \code{method} to \code{quantmod} object.
 }
 \usage{
-buildModel(x, training.per, method, ...)
+buildModel(x, method, training.per, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ An object of class \code{quantmod} created with \code{\link{specifyModel}} or
 an \R formula }
   \item{training.per}{ character vector representing dates in ISO 8601 format
-                       of length 2, e.g. c('1992-01-01','1992-04-01')}
+                       \dQuote{CCYY-MM-DD} or \dQuote{CCYY-MM-DD HH:MM:SS}
+                       of length 2}
   \item{method}{ A character string naming the fitting method.
                  See details section for available methods, and 
                  how to create new methods.}
@@ -28,6 +29,10 @@ randomForest[randomForest], mars[mda],
 polymars[polspline], lars[lars], rq[quantreg],
 lqs[MASS], rlm[MASS], svm[e1071], and nnet[nnet].
 
+The \code{training.per} \emph{should} match the undelying date
+format of the time-series data used in modelling. Any other style
+may not return what you expect.
+ 
 Additional methods wrappers can be created to allow for modelling 
 using custom functions.  The only requirements are for a wrapper 
 function to be constructed taking parameters \code{quantmod}, 
