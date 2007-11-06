@@ -1,6 +1,14 @@
 "getModelData" <-
 function(x,na.rm=TRUE)
 {
+    as.POSIXorDate <- function(x) {
+      if("POSIXt" %in% class(x)) {
+        return(x)
+      } else {
+        x <- as.Date(x)
+        return(x)
+      }
+    }
     model <- x
     if(!is.quantmod(model)) 
         stop(sQuote('x'),"must be of class",dQuote("quantmod"),"\n");
@@ -38,11 +46,11 @@ function(x,na.rm=TRUE)
     total.columns = NULL
     for(j in 1:length(model.symbols)) { # build single zoo object
         if(j == 1) {
-            m <- merge(zoo(as.matrix(target.data),as.Date(target.dates)))     #target columns
+            m <- merge(zoo(as.matrix(target.data),as.POSIXorDate(target.dates)))     #target columns
         } else {
             m <- merge(m,
                        zoo(as.matrix(get(model.symbols[[j]],environment())), #input columns from symbol i
-                       as.Date(index(get(model.symbols[[j]],environment()))))) 
+                       as.POSIXorDate(index(get(model.symbols[[j]],environment()))))) 
         }            
         total.columns[j] <- ncol(m)
     }

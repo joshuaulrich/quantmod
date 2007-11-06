@@ -47,11 +47,7 @@ function(x,
   Volumes <- as.numeric(Vo(x))
   if(identical(Volumes,numeric(0))) show.vol <- FALSE
   if(is.null(time.scale)) {
-    period <- periodicity(x)
-    time.scale <- "days"
-    if(period > 2) time.scale <- "weeks" 
-    if(period > 7) time.scale <- "months" 
-    if(period > 31) time.scale <- "years" 
+    time.scale <- periodicity(x)$scale
   }
   
   # before messing with graphics, save...

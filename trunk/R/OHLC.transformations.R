@@ -49,44 +49,60 @@ function(x)
 "OpCl" <-
 function(x)
 {
-    return(Delt(Op(x),Cl(x)))
+    xx <- Delt(Op(x),Cl(x))
+    colnames(xx) <- paste("OpCl",deparse(substitute(x)),sep='.')
+    xx
 }
 
 "OpOp" <-
 function(x)
 {
-    return(Delt(Op(x)))
+    xx <- Delt(Op(x))
+    colnames(xx) <- paste("OpOp",deparse(substitute(x)),sep='.')
+    xx
 }
 
 "ClCl" <-
 function(x)
 {
-    return(Delt(Cl(x)))
+    xx <- Delt(Cl(x))
+    colnames(xx) <- paste("ClCl",deparse(substitute(x)),sep='.')
+    xx
 }
 "OpLo" <-
 function(x)
 {
-    return(Delt(Op(x),Lo(x)))
+    xx <- Delt(Op(x),Lo(x))
+    colnames(xx) <- paste("OpLo",deparse(substitute(x)),sep='.')
+    xx
 }
 "OpHi" <-
 function(x)
 {
-    return(Delt(Op(x),Hi(x)))
+    xx <- Delt(Op(x),Hi(x))
+    colnames(xx) <- paste("OpHi",deparse(substitute(x)),sep='.')
+    xx
 }
 "LoHi" <-
 function(x)
 {
-    return(Delt(Lo(x),Hi(x)))
+    xx <- Delt(Lo(x),Hi(x))
+    colnames(xx) <- paste("LoHi",deparse(substitute(x)),sep='.')
+    xx
 }
 "LoCl" <-
 function(x)
 {
-    return(Delt(Lo(x),Cl(x)))
+    xx <- Delt(Lo(x),Cl(x))
+    colnames(xx) <- paste("LoCl",deparse(substitute(x)),sep='.')
+    xx
 }
 "HiCl" <-
 function(x)
 {
-    return(Delt(Hi(x),Cl(x)))
+    xx <- Delt(Hi(x),Cl(x))
+    colnames(xx) <- paste("HiCl",deparse(substitute(x)),sep='.')
+    xx
 }
 "Next" <-
 function(x,k=1)
@@ -181,6 +197,7 @@ function(x,k=1)
 "Delt" <-
 function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
 {
+    if(length(k) > 1) stop("k must be a single integer value")
     type <- match.arg(type)[1]
     if(length(x2)!=length(x1) && !is.null(x2)) stop('x1 and x2 must be of same length');
     if(is.null(x2)){
@@ -190,10 +207,12 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
         }
     }
     if(type=='log') {
-        log(x2/Lag(x1,k))
+        xx <- log(x2/Lag(x1,k))
     } else {
-        (x2-Lag(x1,k))/Lag(x1,k)
+        xx <- (x2-Lag(x1,k))/Lag(x1,k)
     }
+    colnames(xx) <- paste("Delt",k,type,sep=".")
+    xx
 }
 `to.period` <-
 function(x,period=months,...)
@@ -205,7 +224,7 @@ function(x,period=months,...)
 function(x,period,...) {
   bp <- breakpoints(x,period,TRUE)
   date <- index(x)[bp]
-  op <- as.numeric(Op(x)[bp+1][-length(bp)])
+  op <- as.numeric(Op(x))[bp+1][-length(bp)]
   hi <- period.apply(Hi(x),bp,max)
   lo <- period.apply(Lo(x),bp,min)
   cl <- as.numeric(Cl(x)[bp])
@@ -289,34 +308,47 @@ function(x)
   to.period(x,hours,name)
 }
 `to.daily` <-
-function(x)
+function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
   x <- to.period(x,days,name)
-  index(x) <- as.Date(index(x))
+  if(drop.time) 
+    index(x) <- as.Date(index(x))
   return(x)
 }
 `to.weekly` <-
-function(x)
+function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
-  to.period(x,weeks,name)
+  x <- to.period(x,weeks,name)
+  if(drop.time) 
+    index(x) <- as.Date(index(x))
+  return(x)
 }
 `to.monthly` <-
-function(x)
+function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
-  to.period(x,months,name)
+  x <- to.period(x,months,name)
+  if(drop.time) 
+    index(x) <- as.Date(index(x))
+  return(x)
 }
 `to.quarterly` <-
-function(x)
+function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
-  to.period(x,quarters,name)
+  x <- to.period(x,quarters,name)
+  if(drop.time) 
+    index(x) <- as.Date(index(x))
+  return(x)
 }
 `to.yearly` <-
-function(x)
+function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
-  to.period(x,years,name)
+  x <- to.period(x,years,name)
+  if(drop.time) 
+    index(x) <- as.Date(index(x))
+  return(x)
 }
