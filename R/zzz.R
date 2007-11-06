@@ -15,7 +15,7 @@ setClass("quantmod",representation(
                     symbols="character",
                     product="character",
                     price.levels="zoo",
-                    training.data="Date",
+                    training.data="ANY",
                     build.date="character",
                     fitted.model="ANY",
                     model.data="zoo",

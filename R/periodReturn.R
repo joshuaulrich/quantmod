@@ -85,5 +85,19 @@ function(x,from=NULL,to=NULL) {
 `periodicity` <-
 function(x,...)
 {
-  median(diff(time(x)))
+  p <- median(diff(time(x)))
+  p.numeric <- as.numeric(p)
+  units <- attr(p,'units')
+  if(units=="mins") {
+    scale <- "minute"
+    if(p.numeric > 59) scale <- "hourly" 
+  }
+  if(units=="days") {
+    scale <- "daily"
+    if(p.numeric > 1) scale <- "weekly"
+    if(p.numeric > 7) scale <- "monthly"
+    if(p.numeric > 31) scale <- "quarterly"
+    if(p.numeric > 91) scale <- "yearly"
+  }
+  list(difftime=p,periodicity=p.numeric,scale=scale)
 }
