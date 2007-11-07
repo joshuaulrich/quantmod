@@ -28,7 +28,7 @@ If volume for a period was available, the new volume will also be
 calculated.
 }
 \usage{
-to.minutes(x,k=1,...)
+to.minutes(x)
 to.minutes3(x)
 to.minutes5(x)
 to.minutes10(x)
@@ -48,7 +48,6 @@ to.period(x, period = months, ...)
   \item{x}{ OHLC type object } 
   \item{period}{ period to convert to }
   \item{drop.time}{ remove time component of POSIX datestamp (if any) }
-  \item{k}{ number of minutes per new bar }
   \item{\dots}{ additional arguments }
 }
 \details{

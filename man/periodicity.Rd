@@ -10,7 +10,7 @@ observations in days.
 periodicity(x, ...)
 }
 \arguments{
-  \item{x}{ a zoo-like object with a Date based index }
+  \item{x}{ a zoo-like object with a time based index }
   \item{\dots}{ unused }
 }
 \details{
@@ -18,7 +18,11 @@ A simple wrapper to quickly estimate the periodicity
 of a given data. Returning a list of the
 median number of days between observations
 as a difftime object, the numerical difference,
+the units of measurement,
 and the derived scale of the data as a string. 
+
+The time index currently must be of either \code{Date}
+or \code{POSIX} class.
 
 The only list item of note is the \code{scale}.
 This is an estimate of the periodicity of the data
@@ -35,13 +39,13 @@ and \sQuote{yearly}.
 }
 \value{
 A list containing the \code{difftime} object,
-numeric periodicity, and common scale.
+frequency, units, and suitable scale.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{difftime}} }
 \note{
 This should be extended to handle non-zoo objects,
-though that hasn't happened 
+though that hasn't happened. 
 }
 \examples{
 zoo.ts <- zoo(rnorm(231),as.Date(13514:13744,origin="1970-01-01"))

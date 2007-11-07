@@ -1,4 +1,4 @@
-"Op" <-
+`Op` <-
 function(x)
 {
   op <- grep('Open',colnames(x))
@@ -6,7 +6,7 @@ function(x)
     return(x[,grep('Open',colnames(x))])
 }
 
-"Hi" <-
+`Hi` <-
 function(x)
 {
   hi <- grep('High',colnames(x))
@@ -14,7 +14,7 @@ function(x)
     return(x[,grep('High',colnames(x))])
 }
 
-"Lo" <-
+`Lo` <-
 function(x)
 {
   lo <- grep('Low',colnames(x))
@@ -22,7 +22,7 @@ function(x)
     return(x[,grep('Low',colnames(x))])
 }
 
-"Cl" <-
+`Cl` <-
 function(x)
 {
   cl <- grep('Close',colnames(x))
@@ -30,7 +30,7 @@ function(x)
     return(x[,grep('Close',colnames(x))])
 }
 
-"Vo" <-
+`Vo` <-
 function(x)
 {
   vo <- grep('Volume',colnames(x))
@@ -38,7 +38,7 @@ function(x)
     return(x[,grep('Volume',colnames(x))])
 }
 
-"Ad" <-
+`Ad` <-
 function(x)
 {
   ad <- grep('Adjusted',colnames(x))
@@ -46,7 +46,7 @@ function(x)
     return(x[,grep('Adjusted',colnames(x))])
 }
 
-"OpCl" <-
+`OpCl` <-
 function(x)
 {
     xx <- Delt(Op(x),Cl(x))
@@ -54,7 +54,7 @@ function(x)
     xx
 }
 
-"OpOp" <-
+`OpOp` <-
 function(x)
 {
     xx <- Delt(Op(x))
@@ -62,54 +62,54 @@ function(x)
     xx
 }
 
-"ClCl" <-
+`ClCl` <-
 function(x)
 {
     xx <- Delt(Cl(x))
     colnames(xx) <- paste("ClCl",deparse(substitute(x)),sep='.')
     xx
 }
-"OpLo" <-
+`OpLo` <-
 function(x)
 {
     xx <- Delt(Op(x),Lo(x))
     colnames(xx) <- paste("OpLo",deparse(substitute(x)),sep='.')
     xx
 }
-"OpHi" <-
+`OpHi` <-
 function(x)
 {
     xx <- Delt(Op(x),Hi(x))
     colnames(xx) <- paste("OpHi",deparse(substitute(x)),sep='.')
     xx
 }
-"LoHi" <-
+`LoHi` <-
 function(x)
 {
     xx <- Delt(Lo(x),Hi(x))
     colnames(xx) <- paste("LoHi",deparse(substitute(x)),sep='.')
     xx
 }
-"LoCl" <-
+`LoCl` <-
 function(x)
 {
     xx <- Delt(Lo(x),Cl(x))
     colnames(xx) <- paste("LoCl",deparse(substitute(x)),sep='.')
     xx
 }
-"HiCl" <-
+`HiCl` <-
 function(x)
 {
     xx <- Delt(Hi(x),Cl(x))
     colnames(xx) <- paste("HiCl",deparse(substitute(x)),sep='.')
     xx
 }
-"Next" <-
+`Next` <-
 function(x,k=1)
 {
   UseMethod("Next")
 }
-"Next.data.frame" <-
+`Next.data.frame` <-
 function(x,k=1)
 {
     if(k<0||k!=as.integer(k)||length(k)>1) stop("k must be a non-negative integer")
@@ -119,7 +119,7 @@ function(x,k=1)
     colnames(new.x) <- "Next"
     return(new.x)
 }
-"Next.quantmod.OHLC" <-
+`Next.quantmod.OHLC` <-
 function(x,k=1)
 {
     if(k<0||k!=as.integer(k)||length(k)>1) stop("k must be a non-negative integer")
@@ -130,8 +130,8 @@ function(x,k=1)
     colnames(new.x) <- "Next"
     return(new.x)
 }
-"Next.zoo" <- Next.quantmod.OHLC
-"Next.numeric" <-
+`Next.zoo` <- Next.quantmod.OHLC
+`Next.numeric` <-
 function(x,k=1)
 {
     if(k<0||k!=as.integer(k)||length(k)>1) stop("k must be a non-negative integer")
@@ -140,12 +140,12 @@ function(x,k=1)
     colnames(new.x) <- "Next"
     return(new.x)
 }
-"Lag" <-
+`Lag` <-
 function(x,k=1)
 {
   UseMethod("Lag")
 }
-"Lag.data.frame"<-
+`Lag.data.frame`<-
 function(x,k=1)
 {
     new.x <- sapply(as.list(k), function(k.e) {
@@ -158,7 +158,7 @@ function(x,k=1)
     colnames(new.x) <- paste("Lag.",k,sep="")
     return(new.x)
 }
-"Lag.quantmod.OHLC" <-
+`Lag.quantmod.OHLC` <-
 function(x,k=1)
 {
     new.x <- sapply(as.list(k), function(k.e) {
@@ -172,9 +172,9 @@ function(x,k=1)
     colnames(new.x) <- paste("Lag.",k,sep="")
     return(new.x)
 }
-"Lag.zoo" <- Lag.quantmod.OHLC
+`Lag.zoo` <- Lag.quantmod.OHLC
 
-"Lag.numeric" <-
+`Lag.numeric` <-
 function(x,k=1)
 {
     new.x <- sapply(as.list(k), function(k.e) {
@@ -187,18 +187,17 @@ function(x,k=1)
     return(new.x)
 }
 
-"Lag.default"<-
+`Lag.default`<-
 function(x,k=1)
 {
     if(is.character(x)) stop("x must be a time series or numeric vector")
     lag(x,k)
 }
 
-"Delt" <-
+`Delt` <-
 function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
 {
-    if(length(k) > 1) stop("k must be a single integer value")
-    type <- match.arg(type)[1]
+    type <- pmatch(type[1],c('log','arithmetic'))
     if(length(x2)!=length(x1) && !is.null(x2)) stop('x1 and x2 must be of same length');
     if(is.null(x2)){
         x2 <- x1 #copy for same symbol deltas
@@ -206,6 +205,7 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
             k <- max(1,k)
         }
     }
+    dim(x2) <- NULL  # allow for multiple k matrix math to happen
     if(type=='log') {
         xx <- log(x2/Lag(x1,k))
     } else {
@@ -218,6 +218,29 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
 function(x,period=months,...)
 {
   UseMethod('to.period')
+}
+
+`to.period.timeSeries` <-
+function(x,period,...) {
+  bp <- breakpoints(x,period,TRUE)
+  date <- rownames(x)[bp]
+  op <- as.numeric(seriesData(Op(x)))[bp+1][-length(bp)]
+  hi <- period.apply(seriesData(Hi(x)),bp,max)
+  lo <- period.apply(seriesData(Lo(x)),bp,min)
+  cl <- as.numeric(seriesData(Cl(x))[bp])
+  vo <- NULL
+  has.Vo <- grep('Volume',colnames(x))
+  if(!identical(has.Vo,integer(0)))
+    vo <- period.apply(seriesData(Vo(x)),bp,sum)
+
+  ad <- NULL
+  has.Ad <- grep('Adjusted',colnames(x))
+  if(!identical(has.Ad,integer(0)))
+    ad <- as.numeric(seriesData(Ad(x))[bp])
+
+  x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
+  colnames(x.out) <- colnames(x)
+  as.timeSeries(x.out)
 }
 
 `to.period.quantmod.OHLC` <-
@@ -312,8 +335,7 @@ function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
   x <- to.period(x,days,name)
-  if(drop.time) 
-    index(x) <- as.Date(index(x))
+  if(drop.time) x <- .drop.time(x)
   return(x)
 }
 `to.weekly` <-
@@ -321,8 +343,7 @@ function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
   x <- to.period(x,weeks,name)
-  if(drop.time) 
-    index(x) <- as.Date(index(x))
+  if(drop.time) x <- .drop.time(x)
   return(x)
 }
 `to.monthly` <-
@@ -330,8 +351,7 @@ function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
   x <- to.period(x,months,name)
-  if(drop.time) 
-    index(x) <- as.Date(index(x))
+  if(drop.time) x <- .drop.time(x)
   return(x)
 }
 `to.quarterly` <-
@@ -339,8 +359,7 @@ function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
   x <- to.period(x,quarters,name)
-  if(drop.time) 
-    index(x) <- as.Date(index(x))
+  if(drop.time) x <- .drop.time(x)
   return(x)
 }
 `to.yearly` <-
@@ -348,7 +367,16 @@ function(x,drop.time=TRUE)
 {
   name <- deparse(substitute(x))
   x <- to.period(x,years,name)
-  if(drop.time) 
+  if(drop.time) x <- .drop.time(x)
+  return(x)
+}
+`.drop.time` <-
+function(x) {
+  # function to remove HHMMSS portion of time index
+  if("timeSeries" %in% class(x)) {
+    x <- as.timeSeries(zoo(seriesData(x),as.Date(rownames(x))))
+  } else {
     index(x) <- as.Date(index(x))
+  }
   return(x)
 }

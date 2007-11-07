@@ -5,7 +5,7 @@
 Apply a specified function to data over a given
 interval, where the interval is taken to be
 the data from INDEX[k] to INDEX[k+1], for
-k=1:length(INDEX).
+k=1:(length(INDEX)-1).
 }
 \usage{
 period.apply(x, INDEX, FUN, ...)
@@ -19,14 +19,17 @@ period.apply(x, INDEX, FUN, ...)
 \details{
 Similar to the rest of the apply family, calculate
 a specified functions value given a shifting set
-of data values.
+of data values. The primary difference is that it
+is that \code{period.apply} applies a function to non-overlapping
+intervals along a vector.
 
 Useful for applying arbitrary functions over
-time, as when INDEX is the result of a call
+an entire data object by an aribirtary index,
+as when INDEX is the result of a call
 to breakpoints.
 }
 \value{
-A numeric vector with length INDEX
+A vector with length of INDEX minus 1
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{breakpoints}} \code{\link{apply.monthly}}}
@@ -36,5 +39,7 @@ bp <- breakpoints(zoo.data,by=weeks)
 period.apply(zoo.data, INDEX=bp, FUN=function(x) sd(x))
 period.apply(zoo.data, INDEX=bp, FUN=sd)                  #same
 
+glue <- function(x) { paste(x,collapse='') }
+period.apply(letters,c(0,5,7,26),glue)
 }
 \keyword{ utilities }% __ONLY ONE__ keyword per line

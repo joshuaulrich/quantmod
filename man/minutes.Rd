@@ -1,5 +1,10 @@
 \name{minutes}
 \alias{minutes}
+\alias{minutes3}
+\alias{minutes5}
+\alias{minutes10}
+\alias{minutes15}
+\alias{minutes30}
 \alias{hours}
 \alias{days}
 \alias{minutes.zoo}
@@ -14,9 +19,16 @@ for objects of class \code{zoo}.
 \usage{
 \method{minutes}{zoo}(x,k=1,...)
 
-\method{hours}{zoo}(x)
+minutes(x,k=1,...)
+minutes3(x,...)
+minutes5(x,...)
+minutes10(x,...)
+minutes15(x,...)
+minutes30(x,...)
 
-\method{days}{zoo}(x)
+\method{hours}{zoo}(x,...)
+
+\method{days}{zoo}(x,...)
 }
 \arguments{
   \item{x}{ zoo object with index of class Date }
@@ -27,6 +39,13 @@ for objects of class \code{zoo}.
 Behaves exactly as weekdays, months and quarters from \pkg{base}
 with the obvious difference in that the method extracts the
 minutes or hours of a day, and day of the year for a given object.
+
+\code{minutes3},
+\code{minutes5},
+\code{minutes10},
+\code{minutes15},
+\code{minutes30} are wrappers to the appropriate minutes
+time scale.
 }
 \value{
 \code{minutes} returns the minute of the day as a character [0-59]

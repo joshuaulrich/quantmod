@@ -387,6 +387,42 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 
 "getSymbols.cache" <- function() {}
 
+# getFX {{{
+`getFX` <-
+function(Symbols,from='2007-01-01',to=Sys.Date(),
+         src=c('oanda','FRED'),
+         env=.GlobalEnv,reload.Symbols=FALSE,
+         verbose=FALSE,warning=TRUE,
+         auto.assign=TRUE,...) {
+  importDefaults("getFX")
+  src <- c('oanda','FRED')[pmatch(src,c('oanda','FRED'))[1]]
+  # parse Symbols
+  if(src[1]=="oanda") {
+    getSymbols.oanda(Symbols=Symbols,from=from,to=to,
+                     env=env,verbose=verbose,warning=warning,...)
+  } else {
+    getSymbols.FRED(Symbols=Symbols,env=env,verbose=verbose,warning=warning,...)
+  }  
+}
+#}}}
+
+# getMetals {{{
+`getMetals` <-
+function(Metals,from='2007-01-01',to=Sys.Date(),
+         base.currency="USD",env=.GlobalEnv,reload.Metals=FALSE,
+         verbose=FALSE,warning=TRUE,
+         auto.assign=TRUE,...) {
+  importDefaults("getMetals")
+}
+#}}}
+
+# getRates {{{
+`getRates` <-
+function() {
+
+}
+#}}}
+
 # getSymbols.csv {{{
 "getSymbols.csv" <-
 function(Symbols,env,
@@ -558,14 +594,39 @@ function(Symbols,env,
 }
 #}}}
 
+# getSymbols.RData {{{
 `getSymbols.RData` <- getSymbols.rda
+# }}}
 
+# getSymbols.IBrokers {{{
+"getSymbols.IBrokers" <- function() {}
+# }}}
+
+# getSymbols.RBloomberg {{{
+"getSymbols.RBloomberg" <- function() {}
+# }}}
+
+# getSymbols.url {{{
 "getSymbols.url" <- function() {}
+# }}}
 
+# getSymbols.freelunch {{{
 "getSymbols.freelunch" <- function() {}
+# }}}
 
+# getSymbols.RODBC {{{
 "getSymbols.RODBC" <- function() {}
+# }}}
 
+# getSymbols.RSQLite {{{
+"getSymbols.RSQLite" <- function() {}
+# }}}
+
+# getSymbols.ROracle {{{
+"getSymbols.ROracle" <- function() {}
+# }}}
+
+# getSymbols.oanda {{{
 `getSymbols.oanda` <-
 function(Symbols,env,return.class='zoo',
          from='2007-01-01',
@@ -655,7 +716,7 @@ function(Symbols,env,return.class='zoo',
      }
      return(Symbols)
 
-}
+}#}}}
 
 # removeSymbols {{{
 "removeSymbols" <- 
