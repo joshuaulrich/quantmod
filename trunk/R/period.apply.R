@@ -1,4 +1,4 @@
-`period.apply` <-
+`period.apply0` <-
 function(x,INDEX,FUN,...)
 {
   FUN <- match.fun(FUN);
@@ -11,7 +11,15 @@ function(x,INDEX,FUN,...)
   }
   return(y);
 }
-
+`period.apply` <-
+function(x,INDEX,FUN,...)
+{
+  FUN <- match.fun(FUN)
+  sapply(1:(length(INDEX)-1),
+    function(y) {
+      FUN(x[(INDEX[y]+1):INDEX[y+1]],...)
+    })
+}
 `apply.weekly` <-
 function(x,FUN)
 {

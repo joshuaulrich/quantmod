@@ -1,5 +1,13 @@
+`seconds` <-
+function(x,k=1,...) {
+  if(periodicity(x)$units=="mins" || periodiciy(x)$units=="secs")
+    stop("cannot find seconds of lower frequency data")
+  UseMethod("seconds")
+}
 `minutes` <-
 function(x,k=1,...) {
+  if(periodicity(x)$units=="days")
+    stop("cannot find minutes of lower frequency data")
   UseMethod("minutes")
 }
 `minutes3` <-
@@ -30,37 +38,40 @@ function(x,...) {
 function(x,...) {
   UseMethod("days")
 }
-"months" <-
+`months` <-
 function (x, abbreviate) 
 {
   UseMethod("months")
 }
-"quarters" <-
+`quarters` <-
 function (x, abbreviate) 
 {
   UseMethod("quarters")
 }
-"weekdays" <-
+`weekdays` <-
 function (x, abbreviate) 
 {
   UseMethod("weekdays")
 }
-"weeks" <-
+`weeks` <-
 function(x, abbreviate)
 {
   UseMethod("weeks")
 }
-"years" <-
+`years` <-
 function(x, abbreviate)
 { 
   UseMethod("years")
 }
+`seconds.zoo` <-
+function(x,k=1,...) {
+  m <- as.numeric(format(index(x),"%S"))
+  as.character((m %/% k)+1)
+}
 `minutes.zoo` <-
 function(x,k=1,...) {
   m <- as.numeric(format(index(x),"%M"))
-  hm <- as.numeric(format(index(x),"%H"))*60
-  m <- m + hm
-  as.character(rep(1:(length(m)/k),each=k)*k+m[1])
+  as.character((m %/% k)+1)
 }
 `hours.zoo` <-
 function(x,...) {
@@ -70,30 +81,81 @@ function(x,...) {
 function(x,...) {
   format(index(x),"%j")
 }
-"months.zoo" <-
+`days.timeSeries` <-
+function(x,...) {
+  format(as.timeDate(dimnames(x)[[1]]),"%j")
+}
+`months.zoo` <-
 function(x, abbreviate = FALSE)
 {
   format(index(x), ifelse(abbreviate, "%m", "%B"))
 }
-"quarters.zoo" <-
+`months.timeSeries` <-
 function(x, abbreviate = FALSE)
 {
-  x <- (as.POSIXlt(index(x))$mon) %/% 3;
-  return(x+1);
+  format(as.timeDate(dimnames(x)[[1]]), ifelse(abbreviate, "%m", "%B"))
+}
+`quarters.zoo` <-
+function(x, abbreviate = FALSE)
+{
+  x <- (as.POSIXlt(index(x))$mon) %/% 3
+  if(abbreviate) {
+    x <- as.character(x+1)
+  } else {
+    x <- paste("Q",x+1,sep="")
+  }
+  return(x)
+}
+`quarters.timeSeries` <-
+function(x, abbreviate = FALSE)
+{
+  x <- (as.POSIXlt(dimnames(x)[[1]])$mon) %/% 3
+  return(x+1)
 }
 
-"weekdays.zoo" <-
+`weekdays.zoo` <-
 function(x, abbreviate = FALSE)
 {
   format(index(x), ifelse(abbreviate, "%w", "%A"))
 }
-"weeks.zoo" <-
+`weekdays.timeSeries` <-
+function(x, abbreviate = FALSE)
+{
+  format(as.timeDate(dimnames(x)[[1]]), ifelse(abbreviate, "%w", "%A"))
+}
+`weeks.zoo` <-
 function(x, abbreviate = FALSE)
 {
   format(index(x),"%W")
 }
-"years.zoo" <-
+`weeks.timeSeries` <-
+function(x, abbreviate = FALSE)
+{
+  format(as.timeDate(dimnames(x)[[1]]),"%W") 
+}
+`weeks.timeDate` <-
+function(x, abbreviate = FALSE)
+{
+  format(x,"%W") 
+}
+`weeks.Date` <-
+function(x, abbreviate = FALSE)
+{
+  format(x,"%W") 
+}
+`weeks.POSIXt` <-
+function(x, abbreviate = FALSE)
+{
+  format(x,"%W") 
+}
+
+`years.zoo` <-
 function(x, abbreviate = FALSE)
 {
   format(index(x), ifelse(abbreviate, "%y", "%Y"))
+}
+`years.timeSeries` <-
+function(x, abbreviate = FALSE)
+{
+  format(as.timeDate(dimnames(x)[[1]]), ifelse(abbreviate, "%y", "%Y"))
 }

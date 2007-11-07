@@ -17,7 +17,6 @@ for the zoo class with an index of class \code{Date}, or coercible to such.
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ a zoo object with index of class \code{Date} }
-  \item{k}{ bar size for minute data }
   \item{abbreviate}{ logical. Should names be abbreviated? }
 }
 \value{
