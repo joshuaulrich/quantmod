@@ -1,9 +1,94 @@
+`seriesHi` <-
+function(x) {
+  UseMethod("seriesHi")
+}
+
+`seriesHi.default` <-
+function(x) {
+  if(!is.null(dim(x)[2])) {
+    if(dim(x)[2]==1) {
+      # a univariate series - non-numeric
+      return(x[which(max(x)==as.numeric(x))])
+    } else {
+      # a multivariate series
+      return(x[which(max(Hi(x))==as.numeric(Hi(x)))])
+    }    
+  }   
+  # a numeric vector
+  max(x,na.rm=TRUE)
+}
+
+`seriesHi.timeSeries` <-
+function(x) {
+  x.Data <- x@Data
+  if(!is.null(dim(x)[2])) {
+    if(dim(x)[2]==1) {
+      #univariate timeSeries
+      return(x[which(max(as.numeric(x.Data))==as.numeric(x.Data))])
+    } else {
+      #multivariate timeSeries
+      return(x[which(max(as.numeric(Hi(x)@Data))==as.numeric(Hi(x)@Data))])
+    }
+  }
+}
+
+`seriesHi.ts` <-
+function(x) {
+  if(!is.null(dim(x)[2])) {
+    return(x[which(max(Hi(x),na.rm=TRUE)==Hi(x)),])
+  }   
+  # a numeric vector
+  max(x,na.rm=TRUE)
+}
+`seriesLo` <-
+function(x) {
+  UseMethod("seriesLo")
+}
+
+`seriesLo.default` <-
+function(x) {
+  if(!is.null(dim(x)[2])) {
+    if(dim(x)[2]==1) {
+      # a univariate series - non-numeric
+      return(x[which(max(x)==as.numeric(x))])
+    } else {
+      # a multivariate series
+      return(x[which(max(Lo(x))==as.numeric(Lo(x)))])
+    }    
+  }   
+  # a numeric vector
+  max(x,na.rm=TRUE)
+}
+`seriesLo.timeSeries` <-
+function(x) {
+  x.Data <- x@Data
+  if(!is.null(dim(x)[2])) {
+    if(dim(x)[2]==1) {
+      #univariate timeSeries
+      return(x[which(max(as.numeric(x.Data))==as.numeric(x.Data))])
+    } else {
+      #multivariate timeSeries
+      return(x[which(max(as.numeric(Lo(x)@Data))==as.numeric(Lo(x)@Data))])
+    }
+  }
+}
+
+`seriesLo.ts` <-
+function(x) {
+  if(!is.null(dim(x)[2])) {
+    return(x[which(max(Lo(x),na.rm=TRUE)==Lo(x)),])
+  }   
+  # a numeric vector
+  max(x,na.rm=TRUE)
+}
+
 `Op` <-
 function(x)
 {
   op <- grep('Open',colnames(x))
   if(!identical(op,integer(0)))
     return(x[,grep('Open',colnames(x))])
+  NULL
 }
 
 `Hi` <-
@@ -12,6 +97,7 @@ function(x)
   hi <- grep('High',colnames(x))
   if(!identical(hi,integer(0)))
     return(x[,grep('High',colnames(x))])
+  NULL
 }
 
 `Lo` <-
@@ -20,6 +106,7 @@ function(x)
   lo <- grep('Low',colnames(x))
   if(!identical(lo,integer(0)))
     return(x[,grep('Low',colnames(x))])
+  NULL
 }
 
 `Cl` <-
@@ -28,6 +115,7 @@ function(x)
   cl <- grep('Close',colnames(x))
   if(!identical(cl,integer(0)))
     return(x[,grep('Close',colnames(x))])
+  NULL
 }
 
 `Vo` <-
@@ -36,6 +124,7 @@ function(x)
   vo <- grep('Volume',colnames(x))
   if(!identical(vo,integer(0)))
     return(x[,grep('Volume',colnames(x))])
+  NULL
 }
 
 `Ad` <-
@@ -44,6 +133,7 @@ function(x)
   ad <- grep('Adjusted',colnames(x))
   if(!identical(ad,integer(0)))
     return(x[,grep('Adjusted',colnames(x))])
+  NULL
 }
 
 `OpCl` <-
