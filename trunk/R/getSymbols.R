@@ -64,6 +64,8 @@ function(Symbols=NULL,
                                            verbose=verbose,warnings=warnings,
                                            auto.assign=auto.assign,
                                            ...))
+          if(!auto.assign)
+            return(symbols.returned)
           for(each.symbol in symbols.returned) all.symbols[[each.symbol]]=symbol.source 
         }
         req.symbols <- names(all.symbols)
@@ -260,9 +262,12 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          }
        }
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-       assign(Symbols[[i]],fr,env)
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
      }
-     return(Symbols)
+     if(auto.assign)
+       return(Symbols)
+     return(fr)
 }
 # }}}
 
@@ -339,12 +344,14 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                         " 'zoo' class returned"))
               }
             }
-            assign(Symbols[[i]],fr,env)
+            if(auto.assign)
+              assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
         }
         dbDisconnect(con)
-        return(Symbols)
-
+        if(auto.assign)
+          return(Symbols)
+        return(fr)
 }
 "getSymbols.mysql" <- getSymbols.MySQL
 # }}}
@@ -401,9 +408,12 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          }
        }
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-       assign(Symbols[[i]],fr,env)
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
      }
-     return(Symbols)
+     if(auto.assign)
+       return(Symbols)
+     return(fr)
 } #}}}
 
 "getSymbols.cache" <- function() {}
@@ -537,9 +547,12 @@ function(Symbols,env,
       }
     }
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-    assign(Symbols[[i]],fr,env)
+    if(auto.assign)
+      assign(Symbols[[i]],fr,env)
     }
-    return(Symbols)
+    if(auto.assign)
+      return(Symbols)
+    return(fr)
 }
 #}}}
 
@@ -625,9 +638,12 @@ function(Symbols,env,
       }
     }
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-    assign(Symbols[[i]],fr,env)
+    if(auto.assign)
+      assign(Symbols[[i]],fr,env)
     }
-    return(Symbols)
+    if(auto.assign)
+      return(Symbols)
+    return(fr)
 }
 #}}}
 
