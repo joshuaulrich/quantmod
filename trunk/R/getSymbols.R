@@ -7,8 +7,11 @@ function(Symbols=NULL,
          warnings=TRUE,
          src="yahoo",
          symbol.lookup=TRUE,
+         auto.assign=TRUE,
          ...)  {
       importDefaults("getSymbols")
+      if(!auto.assign && length(Symbols)>1)
+        stop("must use auto.assign=TRUE for multiple Symbols requests")
       if(symbol.lookup && missing(src)) {
         # if src is specified - override symbol.lookup
         symbols.src <- getOption('getSymbols.sources')
@@ -41,7 +44,8 @@ function(Symbols=NULL,
       if(reload.Symbols) {
         Symbols <- c(Symbols, old.Symbols)[unique(names(c(Symbols,old.Symbols)))]
       }
-
+      if(!auto.assign && length(Symbols) > 1)
+        stop("must use auto.assign=TRUE when reloading multiple Symbols")
       if(!is.null(Symbols)) {
         #group all Symbols by source
         Symbols <- as.list(unlist(lapply(unique(as.character(Symbols)),
@@ -58,12 +62,17 @@ function(Symbols=NULL,
                                            #return.class=return.class,
                                            #reload.Symbols=reload.Symbols,
                                            verbose=verbose,warnings=warnings,
+                                           auto.assign=auto.assign,
                                            ...))
           for(each.symbol in symbols.returned) all.symbols[[each.symbol]]=symbol.source 
         }
+        req.symbols <- names(all.symbols)
         all.symbols <- c(all.symbols,old.Symbols)[unique(names(c(all.symbols,old.Symbols)))]
-        assign('.getSymbols',all.symbols,env);
-        invisible(return(env))
+        if(auto.assign) {
+          assign('.getSymbols',all.symbols,env);
+          return(req.symbols)
+        }
+        #invisible(return(env))
       } else {
         warning('no Symbols specified')
       }
@@ -108,8 +117,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
-       if(verbose) cat("downloading ",Symbols.name,".....")
-       fr <- read.csv(paste(yahoo.URL,
+       if(verbose) cat("downloading ",Symbols.name,".....\n\n")
+       tmp <- tempfile()
+       download.file(paste(yahoo.URL,
                            "s=",Symbols.name,
                            "&a=",from.m,
                            "&b=",sprintf('%.2d',from.d),
@@ -119,7 +129,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                            "&f=",to.y,
                            "&g=d&q=q&y=0",
                            "&z=",Symbols.name,"&x=.csv",
-                           sep=''))
+                           sep=''),destfile=tmp,quiet=!verbose)
+       fr <- read.csv(tmp)
+       unlink(tmp)
        if(verbose) cat("done.\n")
        fr <- zoo(fr[,-1],as.Date(fr[,1]))
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
@@ -155,9 +167,12 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
          }
        }
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-       assign(Symbols[[i]],fr,env)
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
      }
-     return(Symbols)
+     if(auto.assign)
+       return(Symbols)
+     return(fr)
 }
 # }}}
 
@@ -186,8 +201,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
      for(i in 1:length(Symbols)) {
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
-       if(verbose) cat("downloading ",Symbols.name,".....")
-       fr <- read.csv(paste(google.URL,
+       if(verbose) cat("downloading ",Symbols.name,".....\n\n")
+       tmp <- tempfile()
+       download.file(paste(google.URL,
                            "q=",Symbols.name,
                            "&startdate=",month.abb[from.m],
                            "+",sprintf('%.2d',from.d),
@@ -196,7 +212,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
                            "+",sprintf('%.2d',to.d),
                            ",+",to.y,
                            "&output=csv",
-                           sep=''))
+                           sep=''),destfile=tmp,quiet=!verbose)
+       fr <- read.csv(tmp)
+       unlink(tmp)
        if(verbose) cat("done.\n")
        fr <- fr[nrow(fr):1,] #google data is backwards
        if(fix.google.bug) {
@@ -343,12 +361,15 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
      if(missing(verbose)) verbose <- FALSE
      FRED.URL <- "http://research.stlouisfed.org/fred2/series"
      for(i in 1:length(Symbols)) {
-       if(verbose) cat("downloading ",Symbols[[i]],".....")
-       fr <- read.csv(paste(FRED.URL,"/",
+       if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
+       tmp <- tempfile()
+       download.file(paste(FRED.URL,"/",
                             Symbols[[i]],"/",
                             "downloaddata/",
                             Symbols[[i]],".csv",sep=""),
-                            na.string=".")
+                            destfile=tmp,quiet=!verbose)
+       fr <- read.csv(tmp,na.string=".")
+       unlink(tmp)
        if(verbose) cat("done.\n")
        fr <- zoo(fr[,-1],as.Date(fr[,1]))
        dim(fr) <- c(NROW(fr),1)
@@ -389,19 +410,27 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 
 # getFX {{{
 `getFX` <-
-function(Symbols,from='2007-01-01',to=Sys.Date(),
+function(Currencies,from='2007-01-01',to=Sys.Date(),
          src=c('oanda','FRED'),
          env=.GlobalEnv,reload.Symbols=FALSE,
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getFX")
+  if(!auto.assign && length(Currencies) > 1)
+    stop("must use auto.assign=TRUE for multiple currency requests")
   src <- c('oanda','FRED')[pmatch(src,c('oanda','FRED'))[1]]
   # parse Symbols
+  # make symbols conform to service naming conventions
+  # e.g. USD/JPY for oanda
+  #
+  #      DEXUSJP for FRED
+  #
   if(src[1]=="oanda") {
-    getSymbols.oanda(Symbols=Symbols,from=from,to=to,
-                     env=env,verbose=verbose,warning=warning,...)
+    getSymbols.oanda(Symbols=Currencies,from=from,to=to,
+                     env=env,verbose=verbose,warning=warning,
+                     auto.assign=auto.assign,...)
   } else {
-    getSymbols.FRED(Symbols=Symbols,env=env,verbose=verbose,warning=warning,...)
+    getSymbols.FRED(Symbols=Currencies,env=env,verbose=verbose,warning=warning,...)
   }  
 }
 #}}}
@@ -413,6 +442,14 @@ function(Metals,from='2007-01-01',to=Sys.Date(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getMetals")
+  metals <- c("XAU-GOLD","XPD-PALLADIUM","XPT-PLATINUM","XAG-SILVER")
+  metals <- metals[sapply(Metals, function(x) grep(x,metals,ignore.case=TRUE))]
+  metals <- as.character(sapply(metals,
+                   function(x) {
+                     paste(strsplit(x,'-')[[1]][1],base.currency,sep="/")
+                   }))
+  getSymbols.oanda(Symbols=metals,from=from,to=to,
+                   env=env,verbose=verbose,warning=warning,...) 
 }
 #}}}
 
@@ -639,6 +676,8 @@ function(Symbols,env,return.class='zoo',
         assign(var, list(...)[[var]], this.env)
      }
 
+     if(!auto.assign && length(Symbols) > 1)
+       stop("must use auto.assign=TRUE for multiple Symbols requests")
      default.return.class <- return.class
      default.from <- from
      default.to <- to
@@ -654,7 +693,7 @@ function(Symbols,env,return.class='zoo',
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- ifelse(is.null(to),default.to,to)
    
-       if(as.Date(to)-as.Date(from) > 2000) stop("oanda limits data to 2000 days")
+       if(as.Date(to)-as.Date(from) > 1999) stop("oanda limits data to 2000 days")
        # automatically break larger requests into equal sized smaller request at some point
        # for now just let it remain
 
@@ -670,13 +709,13 @@ function(Symbols,env,return.class='zoo',
        }
 
        if(verbose) cat("downloading ",Symbols.name,".....")
-       con <- url(paste(oanda.URL,from.date,to.date,"exch=",currency.pair[1],
+       tmp <- tempfile()
+       download.file(paste(oanda.URL,from.date,to.date,"exch=",currency.pair[1],
                        "&expr2=",currency.pair[2],
                        "&margin_fixed=0&SUBMIT=Get+Table&format=CSV&redirected=1",
-                       sep=""))
-       open(con)
-       fr <- readLines(con)
-       close(con)
+                       sep=""),destfile=tmp,quiet=!verbose)
+       fr <- readLines(tmp)
+       unlink(tmp)
        fr <- unlist(strsplit(
                     gsub("<PRE>|</PRE>","",fr[(grep("PRE",fr)[1]):(grep("PRE",fr)[2])]),","))
 
@@ -712,10 +751,12 @@ function(Symbols,env,return.class='zoo',
          }
        }
        Symbols[[i]] <-toupper(gsub('\\^|/','',Symbols[[i]])) 
-       assign(Symbols[[i]],fr,env)
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
      }
-     return(Symbols)
-
+     if(auto.assign)
+       return(Symbols)
+     return(fr)
 }#}}}
 
 # removeSymbols {{{

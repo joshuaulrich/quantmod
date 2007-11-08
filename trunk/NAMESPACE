@@ -16,6 +16,7 @@ export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,
     OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
+    seriesHi,seriesLo,
     Delt,
     Next,
     Lag,
@@ -52,6 +53,8 @@ export(modelData,
     getSymbols.RData,
     getSymbols.google,
     getSymbols.oanda,
+    getFX,
+    getMetals,
     oanda.currencies,
     showSymbols,
     removeSymbols,
@@ -73,6 +76,10 @@ export(barChart)
 export(lineChart)
 export(candleChart)
 export(matchChart)
+S3method(seriesHi,default)
+S3method(seriesHi,ts)
+S3method(seriesLo,default)
+S3method(seriesLo,ts)
 S3method(chartSeries,zoo)
 S3method(chartSeries,timeSeries)
 S3method(to.period,quantmod.OHLC)
