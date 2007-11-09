@@ -1,6 +1,6 @@
 `seconds` <-
 function(x,k=1,...) {
-  if(periodicity(x)$units=="mins" || periodiciy(x)$units=="secs")
+  if(periodicity(x)$units=="mins" || periodicity(x)$units=="secs")
     stop("cannot find seconds of lower frequency data")
   UseMethod("seconds")
 }

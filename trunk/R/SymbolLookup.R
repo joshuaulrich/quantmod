@@ -39,7 +39,7 @@ function(file,dir="")
   }
   if(file.exists(file)) {
     load(file)
-    options(getSymbols.sources=lookup.list)
+    options(getSymbols.sources=get('lookup.list'))
   } else {
     stop("no SymbolLookup file exists in this directory")
   }

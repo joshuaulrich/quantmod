@@ -100,6 +100,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
      default.to <- to
 
      if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
      yahoo.URL <- "http://chart.yahoo.com/table.csv?"
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -193,6 +194,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         assign(var, list(...)[[var]], this.env)
      }
      if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
      google.URL <- "http://finance.google.com/finance/historical?"
      from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
      from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
@@ -284,6 +286,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         assign(var, list(...)[[var]], this.env)
      }
      if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
         if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
           if('package:RMySQL' %in% search() || require('RMySQL',quietly=TRUE)) {
           } else { warning(paste("package:",dQuote("RMySQL"),"cannot be loaded" )) }
@@ -366,6 +369,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
         assign(var, list(...)[[var]], this.env)
      }
      if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
      FRED.URL <- "http://research.stlouisfed.org/fred2/series"
      for(i in 1:length(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
@@ -488,6 +492,7 @@ function(Symbols,env,
   default.extension <- extension
 
   if(missing(verbose)) verbose <- FALSE
+  if(missing(auto.assign)) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -575,6 +580,7 @@ function(Symbols,env,
   default.extension <- extension
 
   if(missing(verbose)) verbose <- FALSE
+  if(missing(auto.assign)) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -699,6 +705,8 @@ function(Symbols,env,return.class='zoo',
      default.to <- to
 
      if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
+
      oanda.URL <- "http://www.oanda.com/convert/fxhistory?lang=en&"
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
