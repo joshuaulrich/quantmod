@@ -14,6 +14,8 @@
 \alias{OpLo}
 \alias{OpOp}
 \alias{Vo}
+\alias{seriesHi}
+\alias{seriesLo}
 \title{ Extract and Transform OHLC Time-Series Columns }
 \description{
 Extract (transformed) data from a suitable OHLC object.
@@ -34,6 +36,9 @@ possible to call \code{OpCl(x)}. If multiple periods
 are desired a call to the function \code{Delt} is 
 necessary.
 
+\code{seriesLo} and \code{seriesHi} will return the
+low and high, respectively, of a given series.
+
 These functions are merely to speed the model
 specification process.  All columns may also be extracted
 through standard R methods.
@@ -45,6 +50,9 @@ Lo(x)
 Cl(x)
 Vo(x)
 Ad(x)
+
+seriesHi(x)
+seriesLo(x)
 
 OpCl(x)
 ClCl(x)
@@ -69,8 +77,10 @@ section, though the exact naming convention is not as important.
 \value{
 Returns an object of the same class as the original
 series, with the appropriately column names
-if applicable.  The only exception is for \code{quantmod.OHLC}
-objects which will be returned as \code{zoo} objects.
+if applicable and/or possible.  The only exceptions are for \code{quantmod.OHLC}
+objects which will be returned as \code{zoo} objects, and calls to
+\code{seriesLo} and \code{seriesHi} which \emph{may} return a numeric
+value instead of the original object type.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{specifyModel}}  }
@@ -80,6 +90,10 @@ getSymbols('IBM',src='yahoo')
 Ad(IBM)
 Cl(IBM)
 ClCl(IBM)
+
+seriesHi(IBM)
+seriesHi(Lo(IBM))
+
 removeSymbols('IBM')
 }
 }

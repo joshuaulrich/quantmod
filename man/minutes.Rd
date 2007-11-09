@@ -59,11 +59,14 @@ time scale.
 The zoo object's index must be of class POSIXct or POSIXlt,
 or coercible to such, and have sufficient time detail.
 }
-\seealso{ \code{\link{weekdays}}, \code{\link{Date}}, \code{\link{POSIXlt}} }
+\seealso{ \code{\link{weekdays}}, \code{\link{Date}}, \code{\link{POSIXlt}},
+          \code{\link{to.minutes}} }
 \examples{
-zoo.data <- zoo(10,as.Date("2004-12-31 00:01:23",origin="1970-01-01"))
-minutes(zoo.data)
-hours(zoo.data)
-days(zoo.data)
+start.time <- as.POSIXlt("2004-12-31 00:08:30")
+minute.data <- zoo(rnorm(251),seq(start.time,start.time+15000,by=60))
+minutes(minute.data)
+minutes5(minute.data)
+hours(minute.data)
+days(minute.data)
 }
 \keyword{ utilities }
