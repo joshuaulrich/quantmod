@@ -50,14 +50,14 @@ function(x) {
   if(!is.null(dim(x)[2])) {
     if(dim(x)[2]==1) {
       # a univariate series - non-numeric
-      return(x[which(max(x)==as.numeric(x))])
+      return(x[which(min(x)==as.numeric(x))])
     } else {
       # a multivariate series
-      return(x[which(max(Lo(x))==as.numeric(Lo(x)))])
+      return(x[which(min(Lo(x))==as.numeric(Lo(x)))])
     }    
   }   
   # a numeric vector
-  max(x,na.rm=TRUE)
+  min(x,na.rm=TRUE)
 }
 `seriesLo.timeSeries` <-
 function(x) {
@@ -65,10 +65,10 @@ function(x) {
   if(!is.null(dim(x)[2])) {
     if(dim(x)[2]==1) {
       #univariate timeSeries
-      return(x[which(max(as.numeric(x.Data))==as.numeric(x.Data))])
+      return(x[which(min(as.numeric(x.Data))==as.numeric(x.Data))])
     } else {
       #multivariate timeSeries
-      return(x[which(max(as.numeric(Lo(x)@Data))==as.numeric(Lo(x)@Data))])
+      return(x[which(min(as.numeric(Lo(x)@Data))==as.numeric(Lo(x)@Data))])
     }
   }
 }
@@ -76,10 +76,10 @@ function(x) {
 `seriesLo.ts` <-
 function(x) {
   if(!is.null(dim(x)[2])) {
-    return(x[which(max(Lo(x),na.rm=TRUE)==Lo(x)),])
+    return(x[which(min(Lo(x),na.rm=TRUE)==Lo(x)),])
   }   
   # a numeric vector
-  max(x,na.rm=TRUE)
+  min(x,na.rm=TRUE)
 }
 
 `Op` <-

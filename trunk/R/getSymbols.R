@@ -140,35 +140,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
-       if('quantmod.OHLC' %in% return.class) {
-         class(fr) <- c('quantmod.OHLC','zoo')
-       } else
-       if('zoo' %in% return.class) {
-         fr
-       }
-       if('ts' %in% return.class) {
-         fr <- as.ts(fr)
-       } else
-       if('data.frame' %in% return.class) {
-         fr <- as.data.frame(fr)
-       } else
-       if('its' %in% return.class) {
-         if("package:its" %in% search() || require("its", quietly=TRUE)) {
-           index(fr) <- as.POSIXct(index(fr))
-           fr <- its::as.its(fr)
-         } else {
-           warning(paste("'its' from package 'its' could not be loaded:",
-                         " 'zoo' class returned"))
-         }
-       } else 
-       if('timeSeries' %in% return.class) {
-         if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
-           fr <- as.timeSeries(fr)
-         } else {
-           warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
-                   " 'zoo' class returned"))
-         }
-       }
+       fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
@@ -234,35 +206,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
-       if('quantmod.OHLC' %in% return.class) {
-         class(fr) <- c('quantmod.OHLC','zoo')
-       } else
-       if('zoo' %in% return.class) {
-         fr
-       }
-       if('ts' %in% return.class) {
-         fr <- as.ts(fr)
-       } else
-       if('data.frame' %in% return.class) {
-         fr <- as.data.frame(fr)
-       } else
-       if('its' %in% return.class) {
-         if("package:its" %in% search() || require("its", quietly=TRUE)) {
-           index(fr) <- as.POSIXct(index(fr))
-           fr <- its::as.its(fr)
-         } else {
-           warning(paste("'its' from package 'its' could not be loaded:",
-                         " 'zoo' class returned"))
-         }
-       } else 
-       if('timeSeries' %in% return.class) {
-         if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
-           fr <- as.timeSeries(fr)
-         } else {
-           warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
-                   " 'zoo' class returned"))
-         }
-       }
+       fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
@@ -271,6 +215,100 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        return(Symbols)
      return(fr)
 }
+# }}}
+
+# getSymbols.SQLite {{{
+"getSymbols.SQLite" <- function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
+                               db.fields=c('row_names','Open','High',
+                                           'Low','Close','Volume','Adjusted'),
+                               field.names = NULL,
+                               dbname=NULL,
+                               POSIX = TRUE,
+                               ...) {
+     importDefaults("getSymbols.SQLite")
+     this.env <- environment()
+     for(var in names(list(...))) {
+        # import all named elements that are NON formals
+        assign(var, list(...)[[var]], this.env)
+     }
+     if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
+        if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
+          if('package:RSQLite' %in% search() || require('RSQLite',quietly=TRUE)) {
+          } else { warning(paste("package:",dQuote("RSQLite"),"cannot be loaded" )) }
+        } else {
+          stop(paste("package:",dQuote('DBI'),"cannot be loaded."))
+        }
+        drv <- dbDriver("SQLite")
+        con <- dbConnect(drv,dbname=dbname)
+        db.Symbols <- dbListTables(con)
+        if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
+          missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
+                warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
+                Symbols <- Symbols[Symbols %in% db.Symbols]
+        }
+        for(i in 1:length(Symbols)) {
+            if(verbose) {
+                cat(paste('Loading ',Symbols[[i]],
+                    paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),
+                    sep=''))
+            }
+            query <- paste("SELECT ",
+                           paste(db.fields,collapse=','),
+                           " FROM ",Symbols[[i]],
+                           " ORDER BY row_names")
+            rs <- dbSendQuery(con, query)
+            fr <- fetch(rs, n=-1)
+            #fr <- data.frame(fr[,-1],row.names=fr[,1])
+            if(POSIX) {
+              d <- as.numeric(fr[,1])
+              class(d) <- c("POSIXt","POSIXct")
+              fr <- zoo(fr[,-1],order.by=d)
+            } else {
+              fr <- zoo(fr[,-1],order.by=as.Date(as.numeric(fr[,1])))
+            }
+            colnames(fr) <- paste(Symbols[[i]],
+                                  c('Open','High','Low','Close','Volume','Adjusted'),
+                                  sep='.')
+            if('quantmod.OHLC' %in% return.class) {
+              class(fr) <- c('quantmod.OHLC','zoo')
+            } else
+            if('zoo' %in% return.class) {
+              fr
+            } else
+            if('ts' %in% return.class) {
+              fr <- as.ts(fr)
+            } else
+            if('data.frame' %in% return.class) {
+              fr <- as.data.frame(fr)
+            } else
+            if('its' %in% return.class) {
+              if("package:its" %in% search() || require("its", quietly=TRUE)) {
+                index(fr) <- as.POSIXct(index(fr))
+                fr <- its::as.its(fr)
+              } else {
+                warning(paste("'its' from package 'its' could not be loaded:",
+                        " 'zoo' class returned"))
+              }
+            } else 
+            if('timeSeries' %in% return.class) {
+              if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+                fr <- as.timeSeries(fr)
+              } else {
+                warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+                        " 'zoo' class returned"))
+              }
+            }
+            if(auto.assign)
+              assign(Symbols[[i]],fr,env)
+            if(verbose) cat('done\n')
+        }
+        dbDisconnect(con)
+        if(auto.assign)
+          return(Symbols)
+        return(fr)
+}
+"getSymbols.sqlite" <- getSymbols.SQLite
 # }}}
 
 # getSymbols.MySQL {{{
@@ -318,35 +356,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
-            if('quantmod.OHLC' %in% return.class) {
-              class(fr) <- c('quantmod.OHLC','zoo')
-            } else
-            if('zoo' %in% return.class) {
-              fr
-            } else
-            if('ts' %in% return.class) {
-              fr <- as.ts(fr)
-            } else
-            if('data.frame' %in% return.class) {
-              fr <- as.data.frame(fr)
-            } else
-            if('its' %in% return.class) {
-              if("package:its" %in% search() || require("its", quietly=TRUE)) {
-                index(fr) <- as.POSIXct(index(fr))
-                fr <- its::as.its(fr)
-              } else {
-                warning(paste("'its' from package 'its' could not be loaded:",
-                        " 'zoo' class returned"))
-              }
-            } else 
-            if('timeSeries' %in% return.class) {
-              if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
-                fr <- as.timeSeries(fr)
-              } else {
-                warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
-                        " 'zoo' class returned"))
-              }
-            }
+            fr <- convert.time.series(fr=fr,return.class=return.class)
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
@@ -425,34 +435,33 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 # getFX {{{
 `getFX` <-
 function(Currencies,from='2007-01-01',to=Sys.Date(),
-         src=c('oanda','FRED'),
-         env=.GlobalEnv,reload.Symbols=FALSE,
+         env=.GlobalEnv,
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getFX")
   if(!auto.assign && length(Currencies) > 1)
     stop("must use auto.assign=TRUE for multiple currency requests")
-  src <- c('oanda','FRED')[pmatch(src,c('oanda','FRED'))[1]]
+  #src <- c('oanda','FRED')[pmatch(src,c('oanda','FRED'))[1]]
   # parse Symbols
   # make symbols conform to service naming conventions
   # e.g. USD/JPY for oanda
   #
   #      DEXUSJP for FRED
   #
-  if(src[1]=="oanda") {
-    getSymbols.oanda(Symbols=Currencies,from=from,to=to,
-                     env=env,verbose=verbose,warning=warning,
-                     auto.assign=auto.assign,...)
-  } else {
-    getSymbols.FRED(Symbols=Currencies,env=env,verbose=verbose,warning=warning,...)
-  }  
+  #if(src[1]=="oanda") {
+  getSymbols.oanda(Symbols=Currencies,from=from,to=to,
+                   env=env,verbose=verbose,warning=warning,
+                   auto.assign=auto.assign,...)
+  #} else {
+  #  getSymbols.FRED(Symbols=Currencies,env=env,verbose=verbose,warning=warning,...)
+  #}  
 }
 #}}}
 
 # getMetals {{{
 `getMetals` <-
 function(Metals,from='2007-01-01',to=Sys.Date(),
-         base.currency="USD",env=.GlobalEnv,reload.Metals=FALSE,
+         base.currency="USD",env=.GlobalEnv,
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getMetals")
@@ -462,7 +471,7 @@ function(Metals,from='2007-01-01',to=Sys.Date(),
                    function(x) {
                      paste(strsplit(x,'-')[[1]][1],base.currency,sep="/")
                    }))
-  getSymbols.oanda(Symbols=metals,from=from,to=to,
+  getSymbols.oanda(Symbols=metals,from=from,to=to,auto.assign=auto.assign,
                    env=env,verbose=verbose,warning=warning,...) 
 }
 #}}}
@@ -747,20 +756,38 @@ function(Symbols,env,return.class='zoo',
        fr <- zoo(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y"))
        dim(fr) <- c(length(fr),1)
        colnames(fr) <- gsub("/",".",Symbols[[i]])
+       fr <- convert.time.series(fr=fr,return.class=return.class)
+       Symbols[[i]] <-toupper(gsub('\\^|/','',Symbols[[i]])) 
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
+     }
+     if(auto.assign)
+       return(Symbols)
+     return(fr)
+}#}}}
 
+# convert.time.series {{{
+`convert.time.series` <- function(fr,return.class) {
+       if('quantmod.OHLC' %in% return.class) {
+         class(fr) <- c('quantmod.OHLC','zoo')
+         return(fr)
+       } else
        if('zoo' %in% return.class) {
-         fr
+         return(fr)
        }
        if('ts' %in% return.class) {
          fr <- as.ts(fr)
+         return(fr)
        } else
        if('data.frame' %in% return.class) {
          fr <- as.data.frame(fr)
+         return(fr)
        } else
        if('its' %in% return.class) {
          if("package:its" %in% search() || require("its", quietly=TRUE)) {
            index(fr) <- as.POSIXct(index(fr))
            fr <- its::as.its(fr)
+           return(fr)
          } else {
            warning(paste("'its' from package 'its' could not be loaded:",
                          " 'zoo' class returned"))
@@ -769,18 +796,12 @@ function(Symbols,env,return.class='zoo',
        if('timeSeries' %in% return.class) {
          if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
            fr <- as.timeSeries(fr)
+           return(fr)
          } else {
            warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
                    " 'zoo' class returned"))
          }
        }
-       Symbols[[i]] <-toupper(gsub('\\^|/','',Symbols[[i]])) 
-       if(auto.assign)
-         assign(Symbols[[i]],fr,env)
-     }
-     if(auto.assign)
-       return(Symbols)
-     return(fr)
 }#}}}
 
 # removeSymbols {{{
