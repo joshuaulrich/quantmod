@@ -91,7 +91,8 @@ function(x,i,j,drop=TRUE,...)
     j <- 1:original.cols
   } else {
     x <- x[i=i,j=j,drop=drop,...]
-    dim(x) <- c(length(i),length(j))
+    if(is.null(dim(x)))
+      dim(x) <- c(NROW(x),NCOL(x))
     if(ncol(x)==original.cols)
       class(x) <- c("quantmod.OHLC","zoo")
   }
