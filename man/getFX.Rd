@@ -8,9 +8,7 @@ Download exchange rates or metals prices from oanda.
 \usage{
 getFX(Currencies,
       from = "2007-01-01", to = Sys.Date(),
-      src = c("oanda", "FRED"),
       env = .GlobalEnv,
-      reload.Symbols = FALSE,
       verbose = FALSE,
       warning = TRUE,
       auto.assign = TRUE, ...)
@@ -20,9 +18,7 @@ getFX(Currencies,
   \item{Currencies}{ Currency pairs expressed as \sQuote{CUR/CUR} }
   \item{from}{ start date expressed in ISO CCYY-MM-DD format }
   \item{to}{ end date expressed in ISO CCYY-MM-DD format }
-  \item{src}{ from \sQuote{oanda} or \sQuote{FRED} (not implemented yet) }
   \item{env}{ which environment should they be loaded into }
-  \item{reload.Currencies}{ should all previously loaded currencies be reloaded }
   \item{verbose}{ be verbose }
   \item{warning}{ show warnings }
   \item{auto.assign}{ use auto.assign }
