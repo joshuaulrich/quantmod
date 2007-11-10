@@ -1,5 +1,6 @@
 \name{getSymbols.MySQL}
 \alias{getSymbols.MySQL}
+\alias{getSymbols.mysql}
 \title{ Retrieve Data from MySQL Database }
 \description{
 Fetch data from MySQL database.  As with other
@@ -42,7 +43,7 @@ Meant to be called internally by \code{getSymbols} (see also)
 
 One of a few currently defined methods for loading data for
 use with \pkg{quantmod}. Its use requires the packages
-\pkg{DBI} and \pkg{RMySQL}, along with a running
+\pkg{DBI} and \pkg{MySQL}, along with a running
 MySQL database with tables corresponding to the
 \code{Symbol} name.
 

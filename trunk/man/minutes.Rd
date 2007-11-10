@@ -1,5 +1,6 @@
 \name{minutes}
 \alias{minutes}
+\alias{seconds}
 \alias{minutes3}
 \alias{minutes5}
 \alias{minutes10}
@@ -7,6 +8,7 @@
 \alias{minutes30}
 \alias{hours}
 \alias{days}
+\alias{seconds.zoo}
 \alias{minutes.zoo}
 \alias{hours.zoo}
 \alias{days.zoo}
@@ -17,6 +19,10 @@ This function is a generic, with currently a single method implemented
 for objects of class \code{zoo}.
 }
 \usage{
+\method{seconds}{zoo}(x,k=1,...)
+
+seconds(x,k=1,...)
+
 \method{minutes}{zoo}(x,k=1,...)
 
 minutes(x,k=1,...)
