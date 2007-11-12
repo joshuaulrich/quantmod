@@ -9,7 +9,7 @@ c     jeff _dot_ ryan _at_ quantmod _dot_ com
 c
 c     Distributed under GPL-3
 c
-      subroutine toperiod(bp,lbp,ia,lia,nri,nci,hasvol,hasadj,ret)
+      subroutine ohlcz(bp,lbp,ia,lia,nri,nci,ret)
 c     Usage:
 c      
 c     bp   index of breakpoints
@@ -21,9 +21,8 @@ c     nci  number of columns in input array
 c     ret  return array of values
 c
       integer lbp,lia,nci,nri
-      integer hi,lo,cl,vo,ad
-      integer bp(lbp),pos,hasvol,hasadj
-      double precision o(lbp),h(lbp),l(lbp),c(lbp),a(lbp),v(lbp)
+      integer bp(lbp),pos
+      double precision o(lbp),h(lbp),l(lbp),c(lbp)
       double precision ia(lia), ret(*)
 
 c
@@ -33,21 +32,7 @@ c
 c
 c     data must be OHLC or value,volume
 c     offsets if incoming OHLC data
-      if(nci .gt. 1) then 
-        hi = 1
-        lo = 2
-        cl = 3
-        vo = 4
-        ad = 5
-      else
-        hi = 0
-        lo = 0
-        cl = 0
-        vo = 1
-        ad = 0
-      endif
        
-
       do 10 i=1,(lbp-1)
 c      
 c     step through each period of bp
@@ -61,21 +46,17 @@ c         if first obs. in bp period take
 c         as opening value, and initialize
 c         high and lows
             o(i) = ia(j)
-            h(i) = ia(j+hi*nri)
-            l(i) = ia(j+lo*nri)
-c           test if volume is in series before assigning
-            if(hasvol .eq. 1) v(i) = 0.0D0
+            h(i) = ia(j)
+            l(i) = ia(j)
           endif
 c
 c         check if each value is a new high or low and inc.vol
-          h(i) = max(h(i),ia(j+hi*nri))
-          l(i) = min(l(i),ia(j+lo*nri))
-          if(hasvol .eq. 1) v(i) = v(i) + ia(j+vo*nri)
+          h(i) = max(h(i),ia(j))
+          l(i) = min(l(i),ia(j))
            
           if(j .eq. bp(i+1)) then
 c           if last obs. in bp period take as close and adj
-            c(i) = ia(j+cl*nri)  
-            if(hasadj .eq. 1) a(i) = ia(j+ad*nri)  
+            c(i) = ia(j)  
           endif
 
    20   continue
@@ -87,13 +68,11 @@ c
         ret(pos+1) = h(i)
         ret(pos+2) = l(i)
         ret(pos+3) = c(i)
-        if(hasvol .eq. 1) ret(pos+4) = v(i)
-        if(hasadj .eq. 1) ret(pos+5) = a(i)
 
 c
 c       increment position by nci
 c
-        pos = (i * (4+hasvol+hasadj)) +1
+        pos = (i * 4) +1
 
    10 continue
       end
