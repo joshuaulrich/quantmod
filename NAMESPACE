@@ -12,6 +12,7 @@ importFrom(stats,residuals)
 importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
+export(qa.f,ohlcz)
 export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,
