@@ -103,5 +103,15 @@ function(x,...)
     if(p.numeric > 31) scale <- "quarterly"
     if(p.numeric > 91) scale <- "yearly"
   }
-  list(difftime=p,frequency=p.numeric,units=units,scale=scale)
+  xx <- list(difftime=p,frequency=p.numeric,
+             start=index(first(x)),end=index(last(x)),units=units,scale=scale)
+  class(xx) <- 'periodicity'
+  xx
+}
+
+`print.periodicity` <-
+function(x,...)
+{
+  x.freq <- ifelse(x$scale %in% c("minute","seconds"),x$frequency,'')
+  cat(x.freq,x$scale,'periodicity from',paste(x$start),'to',paste(x$end),'\n')
 }
