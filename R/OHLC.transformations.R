@@ -81,59 +81,120 @@ function(x) {
   # a numeric vector
   min(x,na.rm=TRUE)
 }
+`is.OHLC` <-
+function(x)
+{
+  all(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x))
+}
+`has.OHLC` <-
+function(x,which=FALSE)
+{
+  if(which) {
+    c(has.Op(x,1),has.Hi(x,1),has.Lo(x,1),has.Cl(x,1))
+  } else {
+    c(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x))
+  }
+}
 
 `Op` <-
 function(x)
 {
-  op <- grep('Open',colnames(x))
-  if(!identical(op,integer(0)))
+  if(has.Op(x))
     return(x[,grep('Open',colnames(x))])
   NULL
+}
+
+`has.Op` <-
+function(x,which=FALSE)
+{
+  loc <- grep('Open',colnames(x))
+  if(!identical(loc,integer(0)))
+    return(ifelse(which,loc,TRUE))
+  ifelse(which,loc,FALSE)
 }
 
 `Hi` <-
 function(x)
 {
-  hi <- grep('High',colnames(x))
-  if(!identical(hi,integer(0)))
+  if(has.Hi(x))
     return(x[,grep('High',colnames(x))])
   NULL
+}
+
+`has.Hi` <-
+function(x,which=FALSE)
+{
+  loc <- grep('High',colnames(x))
+  if(!identical(loc,integer(0)))
+    return(ifelse(which,loc,TRUE))
+  ifelse(which,loc,FALSE)
 }
 
 `Lo` <-
 function(x)
 {
-  lo <- grep('Low',colnames(x))
-  if(!identical(lo,integer(0)))
+  if(has.Lo(x))
     return(x[,grep('Low',colnames(x))])
   NULL
+}
+
+`has.Lo` <-
+function(x,which=FALSE)
+{
+  loc <- grep('Low',colnames(x))
+  if(!identical(loc,integer(0)))
+    return(ifelse(which,loc,TRUE))
+  ifelse(which,loc,FALSE)
 }
 
 `Cl` <-
 function(x)
 {
-  cl <- grep('Close',colnames(x))
-  if(!identical(cl,integer(0)))
+  if(has.Cl(x))
     return(x[,grep('Close',colnames(x))])
   NULL
+}
+`has.Cl` <-
+function(x,which=FALSE)
+{
+  loc <- grep('Close',colnames(x))
+  if(!identical(loc,integer(0)))
+    return(ifelse(which,loc,TRUE))
+  ifelse(which,loc,FALSE)
 }
 
 `Vo` <-
 function(x)
 {
-  vo <- grep('Volume',colnames(x))
-  if(!identical(vo,integer(0)))
+  #vo <- grep('Volume',colnames(x))
+  #if(!identical(vo,integer(0)))
+  if(has.Vo(x))
     return(x[,grep('Volume',colnames(x))])
   NULL
+}
+`has.Vo` <-
+function(x,which=FALSE)
+{
+  loc <- grep('Volume',colnames(x))
+  if(!identical(loc,integer(0)))
+    return(ifelse(which,loc,TRUE))
+  ifelse(which,loc,FALSE)
 }
 
 `Ad` <-
 function(x)
 {
-  ad <- grep('Adjusted',colnames(x))
-  if(!identical(ad,integer(0)))
+  if(has.Ad(x))
     return(x[,grep('Adjusted',colnames(x))])
   NULL
+}
+`has.Ad` <-
+function(x,which=FALSE)
+{
+  loc <- grep('Adjusted',colnames(x))
+  if(!identical(loc,integer(0)))
+    return(ifelse(which,loc,TRUE))
+  ifelse(which,loc,FALSE)
 }
 
 `OpCl` <-
@@ -336,43 +397,78 @@ function(x,period,...) {
 `to.period.quantmod.OHLC` <-
 function(x,period,...) {
   bp <- breakpoints(x,period,TRUE)
-  date <- index(x)[bp]
-  op <- as.numeric(Op(x))[bp+1][-length(bp)]
-  hi <- period.apply(Hi(x),bp,max)
-  lo <- period.apply(Lo(x),bp,min)
-  cl <- as.numeric(Cl(x)[bp])
-  vo <- NULL
-  has.Vo <- grep('Volume',colnames(x))
-  if(!identical(has.Vo,integer(0)))
-    vo <- period.apply(Vo(x),bp,sum)
 
-  ad <- NULL
-  has.Ad <- grep('Adjusted',colnames(x))
-  if(!identical(has.Ad,integer(0)))
-    ad <- as.numeric(Ad(x)[bp])
+  tz <- as.double(as.matrix(x))
+  hasvol <- ifelse(has.Vo(x), 1, 0)
+  hasadj <- ifelse(has.Ad(x), 1, 0)
+  q <- .Fortran("ohlcq", bp = as.integer(bp), lbp = as.integer(length(bp)), 
+      ia = as.double(tz), lia = as.integer(length(tz)), nri = as.integer(NROW(x)), 
+      nci = as.integer(NCOL(x)), hasvol = as.integer(hasvol), 
+      hasadj = as.integer(hasadj), ret = as.double(rep(0, (length(bp) - 
+          1) * (NCOL(x)))), PACKAGE = "quantmod")
+  tz <- zoo(matrix(q$ret, nc = (4 + hasvol + hasadj), byrow = TRUE), 
+      index(x)[bp[-1]])
+  cnames <- c("Open", "High", "Low", "Close")
+  if (hasvol == 1) 
+      cnames <- c(cnames, "Volume")
+  if (hasadj == 1) 
+      cnames <- c(cnames, "Adjusted")
+  name <- deparse(substitute(x))
+  tz <- as.quantmod.OHLC(tz, col.names = cnames, name = name)
+  tz
 
-  x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
-  colnames(x.out) <- colnames(x)
-  class(x.out) <- class(x)
-  x.out
+#    date <- index(x)[bp]
+#    op <- as.numeric(Op(x))[bp+1][-length(bp)]
+#    hi <- period.apply(Hi(x),bp,max)
+#    lo <- period.apply(Lo(x),bp,min)
+#    cl <- as.numeric(Cl(x)[bp])
+#    vo <- NULL
+#    has.Vo <- grep('Volume',colnames(x))
+#    if(!identical(has.Vo,integer(0)))
+#      vo <- period.apply(Vo(x),bp,sum)
+#  
+#    ad <- NULL
+#    has.Ad <- grep('Adjusted',colnames(x))
+#    if(!identical(has.Ad,integer(0)))
+#      ad <- as.numeric(Ad(x)[bp])
+#  
+#    x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
+#    colnames(x.out) <- colnames(x)
+#    class(x.out) <- class(x)
+#    x.out
 }
 
 `to.period.zoo` <-
 function(x,period,name=NULL,...)
 {
   if(is.null(name)) name <- deparse(substitute(x))
+  if(is.OHLC(x)) {
+    return(to.period.quantmod.OHLC(x=x,period=period,name=name,...))
+  }
   if(NCOL(x)==1) {
-    # for single dimension (or no?) data 
-    # original breakpoints(x,period,TRUE)
-    bp <- breakpoints(x,period,abbreviate=TRUE,...)
-    date <- index(x)[bp]
-    x.out <- period.apply(x,bp,
-               function(k) c(as.numeric(first(k)),
-                             max(k),min(k),as.numeric(last(k))))
-    x.zoo <- zoo(matrix(x.out,ncol=4,byrow=TRUE),date)
-    colnames(x.zoo) <- paste(name,c("Open","High","Low","Close"),sep='.')
-    class(x.zoo) <- c('quantmod.OHLC','zoo')
-    x.zoo
+    #### for single dimension (or no?) data 
+    #### original breakpoints(x,period,TRUE)
+    #bp <- breakpoints(x,period,abbreviate=TRUE,...)
+    #date <- index(x)[bp]
+    #x.out <- period.apply(x,bp,
+    #           function(k) c(as.numeric(first(k)),
+    #                         max(k),min(k),as.numeric(last(k))))
+    #x.zoo <- zoo(matrix(x.out,ncol=4,byrow=TRUE),date)
+    #colnames(x.zoo) <- paste(name,c("Open","High","Low","Close"),sep='.')
+    #class(x.zoo) <- c('quantmod.OHLC','zoo')
+    #x.zoo
+
+    bp <- breakpoints(x, period, TRUE)
+    tz <- as.double(as.matrix(x))
+    q <- .Fortran("ohlcz", bp = as.integer(bp), lbp = as.integer(length(bp)), 
+        ia = as.double(tz), lia = as.integer(length(tz)), nri = as.integer(NROW(x)), 
+        nci = as.integer(NCOL(x)), ret = as.double(rep(0, (length(bp) - 
+            1) * 4)), PACKAGE = "quantmod")
+    tz <- zoo(matrix(q$ret, nc = 4, byrow = TRUE), index(x)[bp[-1]])
+    colnames(tz) = c("Open", "High", "Low", "Close")
+    class(tz) <- c("quantmod.OHLC", "zoo")
+    tz
+
   }
   else {
     stop("'x' must be a single column or of class 'quantmod.OHLC'")
