@@ -12,12 +12,14 @@ importFrom(stats,residuals)
 importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
-export(qa.f,ohlcz)
+export(qa.f,ohlcz,ohlcq)
+export(period.prod,period.sum,period.max,period.min)
 export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,
     OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
     seriesHi,seriesLo,
+    is.OHLC,has.Op,has.Cl,has.Hi,has.Lo,has.Vo,has.Ad,has.OHLC,
     Delt,
     Next,
     Lag,
@@ -84,6 +86,7 @@ S3method(seriesLo,default)
 S3method(seriesLo,ts)
 S3method(chartSeries,zoo)
 S3method(chartSeries,timeSeries)
+S3method(print,periodicity)
 S3method(to.period,quantmod.OHLC)
 S3method(to.period,zoo)
 S3method(to.period,timeSeries)
