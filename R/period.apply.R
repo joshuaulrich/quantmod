@@ -55,12 +55,12 @@ function(x,...)
 }
 
 `first.default` <-
-function(x,...)
+function(x,n=1,...)
 {
   if(is.null(dim(x))) {
-    x[1]
+    x[1:n]
   } else {
-    x[1,]
+    x[1:n,]
   }
 }
 
@@ -71,12 +71,12 @@ function(x,...)
 }
 
 `last.default` <-
-function(x,...)
+function(x,n=1,...)
 {
   if(is.null(dim(x))) {
-    x[NROW(x)]
+    x[(NROW(x)-n+1):NROW(x)]
   } else {
-    x[NROW(x),]
+    x[(NROW(x)-n+1):NROW(x),]
   }
 }
 
@@ -84,6 +84,9 @@ function(x,...)
 function(x,n=1,...)
 {
   if(is.character(n)) {
+    if(!inherits(index(x),'POSIXt') && !inherits(index(x),'Date'))
+      stop(paste('subsetting by date is only possible with objects having',
+           'time based indexes'))
     # n period set
     np <- strsplit(n," ",fixed=TRUE)[[1]]
     if(length(np) > 2 || length(np) < 1)
@@ -96,6 +99,9 @@ function(x,n=1,...)
     if(rpu == sp$unit) {
       n <- rpf    
     } else {
+      # if singular - add an s to make it work
+      if(substr(rpu,length(strsplit(rpu,'')[[1]]),length(strsplit(rpu,'')[[1]])) != 's')
+        rpu <- paste(rpu,'s',sep='')
       u.list <- list(secs=4,seconds=4,mins=3,minutes=3,hours=2,days=1,
                      weeks=1,months=1,quarters=1,years=1)
       dt.options <- c('seconds','secs','minutes','mins','hours','days',
@@ -109,9 +115,17 @@ function(x,n=1,...)
              "to resolve",rpu,"from",sp$scale,"data"))
       }
       bp <- breakpoints(x,dt,TRUE)
-      if(rpf > length(bp)-1) rpf <- length(bp)-1
-      n <- bp[length(bp)-rpf]+1
-      return(x[n:NROW(x)])
+      if(rpf > length(bp)-1) {
+        rpf <- length(bp)-1
+        warning("requested length is greater than original")
+      }
+      if(rpf > 0) {
+        n <- bp[length(bp)-rpf]+1
+        return(x[n:NROW(x)])
+      } else {
+        n <- bp[length(bp)+rpf]
+        return(x[1:n])
+      }
     }
   }
   if(length(n) != 1) stop("n must be of length 1")
@@ -126,6 +140,9 @@ function(x,n=1,...)
 {
   if(is.character(n)) {
     # n period set
+    if(!inherits(index(x),'POSIXt') && !inherits(index(x),'Date'))
+      stop(paste('subsetting by date is only possible with objects having',
+           'time based indexes'))
     np <- strsplit(n," ",fixed=TRUE)[[1]]
     if(length(np) > 2 || length(np) < 1)
       stop(paste("incorrectly specified",sQuote("n"),sep=" "))
@@ -137,6 +154,9 @@ function(x,n=1,...)
     if(rpu == sp$unit) {
       n <- rpf    
     } else {
+      # if singular - add an s to make it work
+      if(substr(rpu,length(strsplit(rpu,'')[[1]]),length(strsplit(rpu,'')[[1]])) != 's')
+        rpu <- paste(rpu,'s',sep='')
       u.list <- list(secs=4,seconds=4,mins=3,minutes=3,hours=2,days=1,
                      weeks=1,months=1,quarters=1,years=1)
       dt.options <- c('seconds','secs','minutes','mins','hours','days',
@@ -150,15 +170,23 @@ function(x,n=1,...)
              "to resolve",rpu,"from",sp$scale,"data"))
       }
       bp <- breakpoints(x,dt,TRUE)
-      if(rpf > length(bp)-1) rpf <- length(bp)-1
-      n <- bp[rpf+1]
-      return(x[1:n])
+      if(rpf > length(bp)-1) {
+        rpf <- length(bp)-1
+        warning("requested length is greater than original")
+      }
+      if(rpf > 0) {
+        n <- bp[rpf+1]
+        return(x[1:n])
+      } else {
+        n <- bp[-rpf+1]+1
+        return(x[n:NROW(x)])
+      }      
     }
   }
   if(length(n) != 1) stop("n must be of length 1")
   if(n > 0) {
     x[1:n]
   } else {
-    x[((NROW(x)-n+1):NROW(x)),]
+    x[(-n+1):NROW(x)]
   }
 }

@@ -4,11 +4,19 @@ function(x,k=1,...) {
     stop("cannot find seconds of lower frequency data")
   UseMethod("seconds")
 }
+`nseconds` <-
+function(x) {
+  length(breakpoints(x,seconds,TRUE))-1
+}
 `minutes` <-
 function(x,k=1,...) {
   if(periodicity(x)$units=="days")
     stop("cannot find minutes of lower frequency data")
   UseMethod("minutes")
+}
+`nminutes` <-
+function(x) {
+  length(breakpoints(x,minutes,TRUE))-1
 }
 `minutes3` <-
 function(x,...) {
@@ -34,34 +42,62 @@ function(x,...) {
 function(x,...) {
   UseMethod("hours")
 }
+`nhours` <-
+function(x) {
+  length(breakpoints(x,hours,TRUE))-1
+}
 `days` <-
 function(x,...) {
   UseMethod("days")
+}
+`ndays` <-
+function(x) {
+  length(breakpoints(x,days,TRUE))-1
 }
 `months` <-
 function (x, abbreviate) 
 {
   UseMethod("months")
 }
+`nmonths` <-
+function(x) {
+  length(breakpoints(x,months,TRUE))-1
+}
 `quarters` <-
 function (x, abbreviate) 
 {
   UseMethod("quarters")
+}
+`nquarters` <-
+function(x) {
+  length(breakpoints(x,quarters,TRUE))-1
 }
 `weekdays` <-
 function (x, abbreviate) 
 {
   UseMethod("weekdays")
 }
+`nweekdays` <-
+function(x) {
+  length(breakpoints(x,weekdays,TRUE))-1
+}
 `weeks` <-
 function(x, abbreviate)
 {
   UseMethod("weeks")
 }
+`nweeks` <-
+function(x) {
+  length(breakpoints(x,weeks,TRUE))-1
+}
 `years` <-
 function(x, abbreviate)
 { 
   UseMethod("years")
+}
+`nyears` <-
+function(x) {
+  length(breakpoints(x,years,TRUE))-1
 }
 `seconds.zoo` <-
 function(x,k=1,...) {
