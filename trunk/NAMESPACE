@@ -12,7 +12,7 @@ importFrom(stats,residuals)
 importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
-export(qa.f,ohlcz,ohlcq)
+export(ohlcz,ohlcq)
 export(period.prod,period.sum,period.max,period.min)
 export(modelData,
     modelSignal,
@@ -27,6 +27,7 @@ export(modelData,
     to.minutes,to.minutes3,to.minutes5,to.minutes10,to.minutes15,to.minutes30,
     to.hourly,to.daily,
     to.weekly,to.monthly,to.quarterly,to.yearly,
+    nseconds,nminutes,nhours,ndays,nweekdays,nweeks,nmonths,nquarters,nyears,
     periodicity,
     periodReturn,
     dailyReturn,weeklyReturn,monthlyReturn,quarterlyReturn,annualReturn,
