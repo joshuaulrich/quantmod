@@ -403,7 +403,7 @@ function(x,period,...) {
   hasadj <- ifelse(has.Ad(x), 1, 0)
   q <- .Fortran("ohlcq", bp = as.integer(bp), lbp = as.integer(length(bp)), 
       ia = as.double(tz), lia = as.integer(length(tz)), nri = as.integer(NROW(x)), 
-      nci = as.integer(NCOL(x)), hasvol = as.integer(hasvol), 
+      hasvol = as.integer(hasvol), 
       hasadj = as.integer(hasadj), ret = as.double(rep(0, (length(bp) - 
           1) * (NCOL(x)))), PACKAGE = "quantmod")
   tz <- zoo(matrix(q$ret, nc = (4 + hasvol + hasadj), byrow = TRUE), 
@@ -462,8 +462,7 @@ function(x,period,name=NULL,...)
     tz <- as.double(as.matrix(x))
     q <- .Fortran("ohlcz", bp = as.integer(bp), lbp = as.integer(length(bp)), 
         ia = as.double(tz), lia = as.integer(length(tz)), nri = as.integer(NROW(x)), 
-        nci = as.integer(NCOL(x)), ret = as.double(rep(0, (length(bp) - 
-            1) * 4)), PACKAGE = "quantmod")
+        ret = as.double(rep(0, (length(bp) - 1) * 4)), PACKAGE = "quantmod")
     tz <- zoo(matrix(q$ret, nc = 4, byrow = TRUE), index(x)[bp[-1]])
     colnames(tz) = c("Open", "High", "Low", "Close")
     class(tz) <- c("quantmod.OHLC", "zoo")

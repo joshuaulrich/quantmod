@@ -20,7 +20,6 @@ function(x,INDEX) {
   xx <- as.double(as.matrix(x))
   q <- .Fortran('psumz',bp=as.integer(bp),lbp=as.integer(length(bp)),
                 ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),nci=as.integer(NCOL(x)),
                 ret=as.double(rep(0,(length(bp)-1)))
                 ,PACKAGE='quantmod')
   tz <- zoo(matrix(q$ret,nc=1,byrow=TRUE),index(x)[bp[-1]])
@@ -34,7 +33,6 @@ function(x,INDEX) {
   xx <- as.double(as.matrix(x))
   q <- .Fortran('pprodz',bp=as.integer(bp),lbp=as.integer(length(bp)),
                 ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),nci=as.integer(NCOL(x)),
                 ret=as.double(rep(0,(length(bp)-1)))
                 ,PACKAGE='quantmod')
   tz <- zoo(matrix(q$ret,nc=1,byrow=TRUE),index(x)[bp[-1]])
@@ -47,7 +45,6 @@ function(x,INDEX) {
   xx <- as.double(as.matrix(x))
   q <- .Fortran('pmaxz',bp=as.integer(bp),lbp=as.integer(length(bp)),
                 ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),nci=as.integer(NCOL(x)),
                 ret=as.double(rep(0,(length(bp)-1)))
                 ,PACKAGE='quantmod')
   tz <- zoo(matrix(q$ret,nc=1,byrow=TRUE),index(x)[bp[-1]])
@@ -60,7 +57,6 @@ function(x,INDEX) {
   xx <- as.double(as.matrix(x))
   q <- .Fortran('pminz',bp=as.integer(bp),lbp=as.integer(length(bp)),
                 ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),nci=as.integer(NCOL(x)),
                 ret=as.double(rep(0,(length(bp)-1)))
                 ,PACKAGE='quantmod')
   tz <- zoo(matrix(q$ret,nc=1,byrow=TRUE),index(x)[bp[-1]])
@@ -78,7 +74,7 @@ function(x,by)
   hasadj <- has.Ad(x)
   q <- .Fortran('ohlcq',bp=as.integer(bp),lbp=as.integer(length(bp)),
                 ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),nci=as.integer(NCOL(x)),
+                nri=as.integer(NROW(x)),
                 hasvol=as.integer(hasvol),hasadj=as.integer(hasadj),
                 ret=as.double(rep(0,(length(bp)-1)*(NCOL(x))))
                 ,PACKAGE='quantmod')
@@ -101,7 +97,6 @@ function(x,by)
   xx <- as.double(as.matrix(x))
   q <- .Fortran('ohlcz',bp=as.integer(bp),lbp=as.integer(length(bp)),
                 ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),nci=as.integer(NCOL(x)),
                 ret=as.double(rep(0,(length(bp)-1)*4))
                 ,PACKAGE='quantmod')
   tz <- zoo(matrix(q$ret,nc=4,byrow=TRUE),index(x)[bp[-1]])

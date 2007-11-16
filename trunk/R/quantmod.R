@@ -96,6 +96,7 @@ function(x,i,j,drop=TRUE,...)
     if(ncol(x)==original.cols)
       class(x) <- c("quantmod.OHLC","zoo")
   }
-  colnames(x) <- original.names[j]
+  if(!is.null(dim(x)))
+    colnames(x) <- original.names[j]
   x
 }

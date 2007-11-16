@@ -114,7 +114,8 @@ function(x,...)
 {
   x.freq <- ifelse(x$scale %in% c("minute","seconds"),x$frequency,'')
   if(x.freq == '') {
-  cat(paste(x$scale,'periodicity from',x$start,'to',
+  cap.scale <- paste(toupper(substring(x$scale,1,1)),substring(x$scale,2),sep='')
+  cat(paste(cap.scale,'periodicity from',x$start,'to',
             x$end,'\n',sep=' '))
   } else {
   cat(paste(x.freq,x$scale,'periodicity from',x$start,'to',
