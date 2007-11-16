@@ -15,7 +15,9 @@ periodicity(x, ...)
 }
 \details{
 A simple wrapper to quickly estimate the periodicity
-of a given data. Returning a list of the
+of a given data. Returning an object of type \code{periodicity}.
+
+This calculates the
 median number of days between observations
 as a difftime object, the numerical difference,
 the units of measurement,
@@ -38,7 +40,7 @@ Possible \code{scale} values are:
 and \sQuote{yearly}.
 }
 \value{
-A list containing the \code{difftime} object,
+An object containing a list containing the \code{difftime} object,
 frequency, units, and suitable scale.
 }
 \author{ Jeffrey A. Ryan }
