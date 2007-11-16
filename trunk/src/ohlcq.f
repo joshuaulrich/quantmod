@@ -9,7 +9,7 @@ c     jeff _dot_ ryan _at_ quantmod _dot_ com
 c
 c     Distributed under GPL-3
 c
-      subroutine ohlcq(bp,lbp,ia,lia,nri,nci,hasvol,hasadj,ret)
+      subroutine ohlcq(bp,lbp,ia,lia,nri,hasvol,hasadj,ret)
 c     Usage:
 c      
 c     bp   index of breakpoints
@@ -17,10 +17,9 @@ c     lbp  length of breakpoints index
 c     ia   input array of double precision
 c     lia  length of ia vector
 c     nri  number of rows in input array
-c     nci  number of columns in input array
 c     ret  return array of values
 c
-      integer lbp,lia,nci,nri
+      integer lbp,lia,nri
       integer hi,lo,cl,vo,ad
       integer bp(lbp),pos,hasvol,hasadj
       double precision o(lbp),h(lbp),l(lbp),c(lbp),a(lbp),v(lbp)
@@ -82,7 +81,7 @@ c
         if(hasadj .eq. 1) ret(pos+5) = a(i)
 
 c
-c       increment position by nci
+c       increment position 
 c
         pos = (i * (4+hasvol+hasadj)) +1
 
