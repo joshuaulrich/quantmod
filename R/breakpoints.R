@@ -7,7 +7,8 @@ function(x,by=c(weekdays,weeks,months,quarters,years),...) {
 #    stop("by must be weekdays,weeks,months,quarters, or years");
   by <- match.fun(by);
   breaks <- which(diff(as.numeric(by(x,...))) != 0);
-  nr <- ifelse(inherits(x,'POSIXt'),NROW(x[[1]]),NROW(x))
+#  nr <- ifelse(inherits(x,'POSIXt'),NROW(x[[1]]),NROW(x))
+  nr <- NROW(x)
   breaks <- c(0,breaks,nr);
   return(breaks);
 }
