@@ -27,9 +27,6 @@ c
 c     pos keeps track of location in col-major array
 c
       pos = 1
-c
-c     data must be OHLC or value,volume
-c     offsets if incoming OHLC data
        
       do 10 i=1,(lbp-1)
 c      
@@ -38,7 +35,7 @@ c
         do 20 j=(bp(i)+1),bp(i+1)
           if(j .eq. (bp(i)+1)) ps(i) = ia(j)
 c
-c       step through each obs. and note values
+c         step through each obs. and note values
           ps(i) = max(ps(i),ia(j))
 
    20   continue
