@@ -15,6 +15,7 @@ function(x,by=months,from=NULL,to=NULL) {
   returns <- ((adj.x.period - adj.start)/adj.start)
   returns <- zoo(returns,index(as.zoo(x.period)))
   returns <- subset(returns,index(returns) >= from & index(returns) <= to)
+  class(returns) <- c('periodReturn','zoo')
   return(returns)
 }
 `periodReturn.zoo` <-
@@ -31,6 +32,7 @@ function(x,by=months,from=NULL,to=NULL) {
   returns <- ((adj.x.period - adj.start)/adj.start)
   returns <- zoo(returns,index(as.zoo(x.period)))
   returns <- subset(returns,index(returns) >= from & index(returns) <= to)
+  class(returns) <- c('periodReturn','zoo')
   return(returns)
 }
 `periodReturn.quantmodResults` <-
@@ -79,7 +81,15 @@ function(x,from=NULL,to=NULL) {
     periodReturn(x,by=years,from,to)
   )
   colnames(all.ret) <- c('daily','weekly','monthly','quarterly','annual')
+  class(all.ret) <- c("periodReturn","zoo")
   all.ret
+}
+
+`barplot.periodReturn` <-
+function(x,...)
+{
+  class(x) <- 'zoo'
+  barplot(x,col=ifelse(x > 0,3,8))
 }
 
 `periodicity` <-
