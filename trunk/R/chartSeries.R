@@ -205,9 +205,12 @@ function(x,
       }
       x.pos <- 1+spacing*(i-1)
       lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
-      #lines(c(x.pos,x.pos),O.to.C,lwd=width,col=bar.col)
-      rect(x.pos-spacing/5,O.to.C[1],x.pos+spacing/5,
-          O.to.C[2],col=bar.col,border=border.col)
+      if(chart[1]=='matchsticks') {
+        lines(c(x.pos,x.pos),O.to.C,lwd=width,col=bar.col)
+      } else {
+        rect(x.pos-spacing/5,O.to.C[1],x.pos+spacing/5,
+             O.to.C[2],col=bar.col,border=border.col)
+      }
     }
   }
   title(ylab=ylab,col.lab=fg.col)
