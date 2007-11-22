@@ -145,8 +145,8 @@ function(x,
   # default choice is based upon 
   
   if(show.vol) {
-    par(fig=c(0,1,0.30,1))
-    par(mar=c(0,4,4,2))
+    layout(matrix(c(1,2),2,1,byrow=TRUE),1,c(2,1),respect=FALSE)
+    par(mar=c(0,4,3,3))
   }
   par(bg=bg.col,col.axis=fg.col,xaxs='r',las=2,fg='#bbbbbb')
   plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE,
@@ -216,6 +216,7 @@ function(x,
   title(ylab=ylab,col.lab=fg.col)
   title(main=paste(name),col.main=fg.col,font.main=4)
   if(!show.vol) {
+    axis(1,at=1:NROW(x)*spacing+1,labels=FALSE,col="#444444")
     axis(1,at=bp*spacing+1,labels=x.labels,las=1)
   }
   axis(2)
@@ -230,9 +231,7 @@ function(x,
     if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
     if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
     if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
-    par(new=TRUE)
-    par(fig=c(0,1,0,0.35))
-    par(mar=c(5,4,3,2))
+    par(mar=c(3,4,0,3))
     plot(x.range,seq(min(Vo(x))/vol.scale[[1]],max(Vo(x))/vol.scale[[1]],
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
@@ -258,6 +257,7 @@ function(x,
     }
     title(ylab=paste("volume (",vol.scale[[2]],")"),
           xlab=time.scale,col.lab=fg.col)
+    axis(1,at=1:NROW(x)*spacing+1,labels=FALSE,col="#444444")
     axis(1,at=bp*spacing+1,labels=x.labels,las=1)
     axis(2)
     box(col=fg.col)
@@ -267,6 +267,7 @@ function(x,
   }
   # eventually return a chart object (a chob, in the spirit of grob)
   # for use in subsequent calls to modify params, add indicators etc...
+  layout(matrix(1))
   invisible(1)
 } #}}}
 
