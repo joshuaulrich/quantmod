@@ -462,7 +462,7 @@ function(x,period,name=NULL,...)
     bp <- breakpoints(x, period, TRUE)
     tz <- as.double(as.matrix(x))
     q <- .Fortran("ohlcz", bp = as.integer(bp), lbp = as.integer(length(bp)), 
-        ia = as.double(tz), lia = as.integer(length(tz)), nri = as.integer(NROW(x)), 
+        ia = as.double(tz), lia = as.integer(length(tz)), 
         ret = as.double(rep(0, (length(bp) - 1) * 4)), PACKAGE = "quantmod")
     tz <- zoo(matrix(q$ret, nc = 4, byrow = TRUE), index(x)[bp[-1]])
     colnames(tz) = c("Open", "High", "Low", "Close")
