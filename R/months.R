@@ -1,7 +1,5 @@
 `seconds` <-
 function(x,k=1,...) {
-  if(periodicity(x)$units=="mins" || periodicity(x)$units=="secs")
-    stop("cannot find seconds of lower frequency data")
   UseMethod("seconds")
 }
 `nseconds` <-
@@ -10,8 +8,6 @@ function(x) {
 }
 `minutes` <-
 function(x,k=1,...) {
-  if(periodicity(x)$units=="days")
-    stop("cannot find minutes of lower frequency data")
   UseMethod("minutes")
 }
 `nminutes` <-
