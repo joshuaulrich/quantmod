@@ -366,13 +366,14 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
     xx
 }
 `to.period` <-
-function(x,period=months,...)
+function(x,period=months,name,...)
 {
   UseMethod('to.period')
 }
 
 `to.period.timeSeries` <-
-function(x,period,...) {
+function(x,period,name,...) {
+  if(missing(name)) name <- deparse(substitute(x))
   bp <- breakpoints(x,period,TRUE)
   date <- rownames(x)[bp]
   op <- as.numeric(seriesData(Op(x)))[bp+1][-length(bp)]
@@ -395,7 +396,7 @@ function(x,period,...) {
 }
 
 `to.period.quantmod.OHLC` <-
-function(x,period,...) {
+function(x,period,name,...) {
   bp <- breakpoints(x,period,TRUE)
 
   tz <- as.double(as.matrix(x))
@@ -413,7 +414,7 @@ function(x,period,...) {
       cnames <- c(cnames, "Volume")
   if (hasadj == 1) 
       cnames <- c(cnames, "Adjusted")
-  name <- deparse(substitute(x))
+  if(missing(name)) name <- deparse(substitute(x))
   tz <- as.quantmod.OHLC(tz, col.names = cnames, name = name)
   tz
 
