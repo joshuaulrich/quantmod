@@ -1,4 +1,5 @@
 \name{apply.monthly}
+\alias{apply.daily}
 \alias{apply.weekly}
 \alias{apply.monthly}
 \alias{apply.quarterly}
@@ -10,6 +11,7 @@ Apply a specified function to each distinct period in a given
 time series object.
 }
 \usage{
+apply.daily(x, FUN)
 apply.weekly(x, FUN)
 apply.monthly(x, FUN)
 apply.quarterly(x, FUN)

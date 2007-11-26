@@ -20,6 +20,12 @@ function(x,INDEX,FUN,...)
       FUN(x[(INDEX[y]+1):INDEX[y+1]],...)
     })
 }
+`apply.daily` <-
+function(x,FUN)
+{
+  bp <- breakpoints(x,days)
+  period.apply(x,bp,FUN)
+}
 `apply.weekly` <-
 function(x,FUN)
 {
@@ -30,7 +36,7 @@ function(x,FUN)
 `apply.monthly` <-
 function(x,FUN)
 {
-  bp <- breakpoints(x,months)
+  bp <- breakpoints(x,months,TRUE)
   period.apply(x,bp,FUN)
 }
 
