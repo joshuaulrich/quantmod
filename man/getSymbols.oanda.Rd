@@ -26,7 +26,7 @@ getSymbols.oanda(Symbols,
 \arguments{
   \item{Symbols}{ a character vector specifying the names
 of each symbol to be loaded - expressed as a currency pair.
-(e.g. U.S. Dollars per Euro would be expressed as
+(e.g. U.S. Dollar to Euro rate would be expressed as
 a string \dQuote{USD/EUR}. The naming convention follows from
 Oanda.com, and a table of possible values is
 available by calling \code{oanda.currencies} }
@@ -48,6 +48,11 @@ fail with a warning that the limit has been exceeded.
 environment one object for each 'Symbol' specified, with class
 defined  by 'return.class'. Presently this may be 'ts', 'its',
 'zoo', 'quantmod.OHLC', or 'timeSeries'.
+}
+\note{
+Oanda rates are quoted as one unit of base currency to the
+equivelant amount of foreign
+currency.
 }
 \references{ Oanda.com \url{http://www.oanda.com} }
 \author{ Jeffrey A. Ryan }

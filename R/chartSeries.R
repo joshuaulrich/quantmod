@@ -60,6 +60,7 @@ function(x,
     type <- "line"
   } 
   Volumes <- as.numeric(Vo(x))
+  
   if(identical(Volumes,numeric(0))) show.vol <- FALSE
   if(is.null(time.scale)) {
     time.scale <- periodicity(x)$scale
