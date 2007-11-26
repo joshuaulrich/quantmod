@@ -14,6 +14,8 @@ importFrom(stats,anova)
 importFrom(zoo,as.zoo)
 #export(ohlcz,ohlcq)
 export(period.prod,period.sum,period.max,period.min)
+export(.chob,write.chob,get.chob)
+
 export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,
@@ -37,6 +39,7 @@ export(modelData,
 #    loadModels,
 	period.apply,
     apply.weekly,
+    apply.daily,
     apply.monthly,
     apply.quarterly,
     apply.yearly,
