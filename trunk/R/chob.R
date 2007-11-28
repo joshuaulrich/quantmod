@@ -1,7 +1,7 @@
-`.chob` <- list()
+`.chob` <- list(NULL)
 
 `write.chob` <-
-function(x)
+function(x,pos)
 {
   env <- as.environment("package:quantmod")
   environment(x) <- env
@@ -9,8 +9,9 @@ function(x)
   if(locked)
     unlockBinding('.chob',env)
   orig.chob <- get.chob()
-  x <- c(orig.chob,x)
-  assign('.chob',x,env)
+  if(missing(pos)) pos <- length(orig.chob)+1
+  orig.chob[[pos]] <- x
+  assign('.chob',orig.chob,env)
   if(locked) {
     ow <- options("warn")
     on.exit(options(ow))
@@ -32,7 +33,7 @@ function()
 function(n)
 {
   if(missing(n)) {
-    x <- list()  
+    x <- list(NULL)  
   } else {
     x <- get.chob()[-n]
   }
@@ -65,7 +66,11 @@ setClass("chob",
            windows="numeric",
            xrange="numeric",
            yrange="numeric",
-           length="numeric"
+           length="numeric",
+           color.vol="logical",multi.col="logical",
+           spacing="numeric",width="numeric",
+           bp="numeric",x.labels="character",
+           colors="ANY",time.scale="ANY"
          )
 )
 
@@ -73,8 +78,15 @@ setClass("chobTA",
          representation(
             new="logical",
             TA.values="ANY",
-            name="character"
+            name="character",
+            params="ANY"
          )
 )
 
-##setMethod("show","chob",function(object) { plot.chob(object) })
+setMethod("show","chobTA",function(object) { 
+    chob <- get.chob()[[dev.cur()]]
+    TA <- chob@passed.args$TA
+    chob@passed.args$TA <- c(TA,object)
+    do.call('cS2',chob@passed.args)
+  }
+)
