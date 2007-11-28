@@ -29,7 +29,6 @@ function(x,
   UseMethod('chartSeries0')
 } # }}}
 
-
 # chartSeries.zoo {{{
 `chartSeries.zoo` <-
 function(x,
@@ -288,9 +287,117 @@ function(x,
          xlab="time",ylab="price",theme="black",
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
+  if(is.OHLC(x)) {
+    Opens <- as.numeric(Op(x))
+    Highs <- as.numeric(Hi(x))
+    Lows <- as.numeric(Lo(x))
+    Closes <- as.numeric(Cl(x))
+  } else {
+    Lows <- min(x[,1])
+    Highs <- max(x[,1])
+    Closes <- as.numeric(x[,1])
+    type <- "line"
+  } 
+  if(has.Vo(x)) {
+    Volumes <- as.numeric(Vo(x))
+  } else show.vol <- FALSE
+  
+  if(is.null(time.scale)) {
+    time.scale <- periodicity(x)$scale
+  }
+
+  if(theme=="black") {
+    bg.col <- "#222222"
+    fg.col <- "#666666"
+    up.col <- ifelse(missing(up.col),"#00FF00",up.col)
+    dn.col <- ifelse(missing(dn.col),"#FF9900",dn.col)
+  }
+  if(theme=="white") {
+    bg.col <- "#FFFFFF"
+    fg.col <- "#444444"
+    up.col <- ifelse(missing(up.col),"#00CC00",up.col)
+    dn.col <- ifelse(missing(dn.col),"#FF7700",dn.col)
+  }
+  if(theme=="grey") {
+    bg.col <- "#FFFFFF"
+    fg.col <- "#444444"
+    up.col <- ifelse(missing(up.col),"#FFFFFF",up.col)
+    dn.col <- ifelse(missing(dn.col),"#000000",dn.col)
+  }
+  #if(is.logical(multi.col) | length(multi.col)==4) {
+  if(missing(multi.col)) { # interpret as FALSE
+    multi.col <- FALSE
+    dn.up.col <- up.col
+    up.up.col <- up.col
+    dn.dn.col <- dn.col
+    up.dn.col <- dn.col
+  } else {
+    if(is.logical(multi.col) && multi.col==TRUE) {
+      multi.col <- c("#666666","#FFFFFF",
+                     "#FF0000","#000000") 
+    }
+    # add some check for length 4 colors
+    dn.up.col <- multi.col[1]
+    up.up.col <- multi.col[2]
+    dn.dn.col <- multi.col[3]
+    up.dn.col <- multi.col[4]
+    up.col <- up.up.col
+    dn.col <- dn.dn.col
+    multi.col <- TRUE
+  }
+
+  # spacing requirements for chart type
+  chart.options <- c("auto","candlesticks","matchsticks","line","bars")
+  chart <- chart.options[pmatch(type,chart.options)]
+  if(chart[1]=="auto") {
+    chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
+  }
+  if(chart[1]=="candlesticks") {
+    spacing <- 4
+    width <- 3 
+  } else
+  if(chart[1]=="matchsticks" || chart[1]=='line') {
+    spacing <- 1
+    width <- 1
+  } else 
+  if(chart[1]=="bars") {
+    spacing <- 4
+    width <- 3
+    if(NROW(x) > 60) width <- 1
+  }
+
+  # determine formatting for time-axis
+  for(time.period in c('years','months','weeks')) {
+    bp <- breakpoints(x,by=time.period,TRUE)
+    if(length(bp) > 3) {
+      x.labels <- format(index(x)[bp+1],"%b %y")
+      if(time.period=='weeks')
+        x.labels <- format(index(x)[bp+1],"%b %d %Y")
+      break
+    }
+  }
   chob <- new("chob")
   chob@call <- match.call(expand=TRUE)
-  chob@device <- NULL
+
+  chob@xrange <- c(1,NROW(x))
+  if(is.OHLC(x)) {
+    chob@yrange <- c(min(Lo(x)),max(Hi(x)))
+  } else chob@yrange <- range(x)
+  
+
+
+  chob@color.vol <- color.vol
+  chob@multi.col <- multi.col
+  chob@spacing <- spacing
+  chob@width <- width
+  chob@bp <- bp
+  chob@x.labels <- x.labels
+  chob@colors <- list(fg.col=fg.col,bg.col=bg.col,up.col=up.col,dn.col=dn.col,
+                      dn.up.col=dn.up.col,up.up.col=up.up.col,
+                      dn.dn.col=dn.dn.col,up.dn.col=up.dn.col)
+  chob@time.scale <- time.scale
+
+  chob@length <- NROW(x)
 
   chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
   if(show.vol) TA <- c(addVo(),TA)
@@ -298,38 +405,117 @@ function(x,
 
   if(!is.null(TA)) {
     chob@windows <- length(which(sapply(TA,function(x) x@new)))+1
+    chob@passed.args$show.vol <- any(sapply(TA,function(x) x@name=="chartVo"))
   } else chob@windows <- 1
 
-  chob@xrange <- c(0,NROW(x))
-  if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x)),max(Hi(x)))
-  } else chob@yrange <- range(x)
-  chob@length <- NROW(x)
-# chartSeries here
-# get dev #
-# remove item mathing dev-1
-# unist(.Devices)[-1] != ""
-# use append in write.chob to position based on dev.cur
-# write 
-  write.chob(chob)
-  return(chob)
+  # draw the chart
+  do.call('chartSeries',chob@passed.args)
+
+  chob@device <- as.numeric(dev.cur())
+
+  write.chob(chob,chob@device)
+  invisible(chob)
 } #}}}
 
+# chartVo {{{
+`chartVo` <-
+function(x) {
+  # if volume is to be plotted, do so here
+    # scale volume - vol.divisor
+    Opens <- x@TA.values[,1]
+    Closes <- x@TA.values[,2]
+    Volumes <- x@TA.values[,3]
+
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    max.vol <- max(Volumes)
+    vol.scale <- list(100,'100s')
+    if(max.vol > 10000) vol.scale <- list(1000,'1000s') 
+    if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
+    if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
+    if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
+    par(mar=c(3,4,0,3))
+    plot(x.range,seq(min(Volumes)/vol.scale[[1]],max(Volumes)/vol.scale[[1]],
+         length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    bar.col <- x@params$colors$fg.col
+    for(i in 1:length(Volumes)) {
+      Vols <- c(0,Volumes[i]/vol.scale[[1]])
+      x.pos <- 1+spacing*(i-1)
+      if(x@params$color.vol) {
+        dn.up.col <- x@params$colors$dn.up.col
+        up.up.col <- x@params$colors$up.up.col
+        dn.dn.col <- x@params$colors$dn.dn.col
+        up.dn.col <- x@params$colors$up.dn.col
+        up.col <- x@params$colors$up.col
+        dn.col <- x@params$colors$dn.col
+
+        if(i > 1 & multi.col & color.vol) {
+          if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.up.col
+          if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.up.col
+          if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.dn.col
+          if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.dn.col
+        } else {
+          bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
+        }
+      }
+      #if(color.vol) 
+      #  bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
+      #lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
+      border.col <- ifelse(x@params$multi.col,"#000000",bar.col)
+      rect(x.pos-spacing/4,0,x.pos+spacing/4,Vols[2],col=bar.col,border=border.col)
+    }
+    title(ylab=paste("volume (",vol.scale[[2]],")"),
+          xlab=x@params$colors$time.scale,col.lab=x@params$colors$fg.col)
+    axis(1,at=1:length(Volumes)*spacing+1,labels=FALSE,col="#444444")
+    axis(1,at=x@params$bp*spacing+1,labels=x@params$x.labels,las=1)
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addVo {{{
 `addVo` <- function(x) {
   if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
     lchob <- get('chob',env=sys.frames()[[1]])
   } else {
-    if(dev.cur()==1) stop()
-    lchob <- get.chob()[[dev.cur()-1]]
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    #which is the current device; is it in the chob list?
+    current.chob <- which(unlist(sapply(gchob,
+                                 function(x) {
+                                   if(!is.null(x)) x@device==as.numeric(dev.cur())
+                                 })))+1
+    if(identical(current.chob,numeric(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
   }
-  x <- eval(lchob@passed.args$x)
+  x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
-  chobTA@TA.values <- as.numeric(Vo(x))
+  chobTA@TA.values <- x[,c(1,4,5)]
   chobTA@name <- "chartVo"
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale)
   return(chobTA)
-}
+} # }}}
 
+
+# addMA {{{
 `addMA` <- function(x) {
   #if(exists('chob',env=sys.frames()[[1]])) {
   #  lchob <- get('chob',env=sys.frames()[[1]])
@@ -340,7 +526,7 @@ function(x,
   chobTA@TA.values <- as.numeric(Vo(x))
   chobTA@name <- "chartVo"
   return(chobTA)
-}
+} # }}}
 
 # newChob {{{
 `newChob` <-
