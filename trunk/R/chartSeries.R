@@ -442,7 +442,7 @@ function(x) {
     if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
     if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
     if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
-    par(mar=c(3,4,0,3))
+    par(mar=c(2,4,0,3))
     plot(x.range,seq(min(Volumes)/vol.scale[[1]],max(Volumes)/vol.scale[[1]],
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
@@ -473,10 +473,11 @@ function(x) {
       border.col <- ifelse(x@params$multi.col,"#000000",bar.col)
       rect(x.pos-spacing/4,0,x.pos+spacing/4,Vols[2],col=bar.col,border=border.col)
     }
-    title(ylab=paste("volume (",vol.scale[[2]],")"),
-          xlab=x@params$colors$time.scale,col.lab=x@params$colors$fg.col)
-    axis(1,at=1:length(Volumes)*spacing+1,labels=FALSE,col="#444444")
-    axis(1,at=x@params$bp*spacing+1,labels=x@params$x.labels,las=1)
+    title(ylab=paste("volume (",vol.scale[[2]],")"))
+    #title(ylab=paste("volume (",vol.scale[[2]],")"),
+    #      xlab=x@params$colors$time.scale,col.lab=x@params$colors$fg.col)
+    #axis(1,at=1:length(Volumes)*spacing+1,labels=FALSE,col="#444444")
+    #axis(1,at=x@params$bp*spacing+1,labels=x@params$x.labels,las=1)
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -499,11 +500,12 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    par(mar=c(3,4,0,3))
+    par(mar=c(2,4,0,3))
     smi <- SMI(cbind(Highs,Lows,Closes),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
                ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
     plot(smi[,1],col='blue',lwd=2,axes=FALSE,ann=FALSE,type='l')
     lines(smi[,2],col='white',lty='dotted',type='l')
+    title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
