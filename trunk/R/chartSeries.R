@@ -409,7 +409,8 @@ function(x,
   } else chob@windows <- 1
 
   # draw the chart
-  do.call('chartSeries',chob@passed.args)
+  #do.call('chartSeries',chob@passed.args)
+  do.call('chartSeries.chob',list(chob))
 
   chob@device <- as.numeric(dev.cur())
 
@@ -480,6 +481,33 @@ function(x) {
     box(col=x@params$colors$fg.col)
 } # }}}
 
+# chartSMI {{{
+`chartSMI` <-
+function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
+  # if volume is to be plotted, do so here
+    # scale volume - vol.divisor
+    Highs <- x@TA.values[,1]
+    Lows <- x@TA.values[,2]
+    Closes <- x@TA.values[,3]
+
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    par(mar=c(3,4,0,3))
+    smi <- SMI(cbind(Highs,Lows,Closes),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
+               ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
+    plot(smi[,1],col='blue',lwd=2,axes=FALSE,ann=FALSE,type='l')
+    lines(smi[,2],col='white',lty='dotted',type='l')
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
 # addVo {{{
 `addVo` <- function(x) {
   if(exists('chob',env=sys.frames()[[1]])) {
@@ -490,16 +518,22 @@ function(x) {
     #protect against NULL device or windows not drawn to yet
     if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
     #which is the current device; is it in the chob list?
-    current.chob <- which(unlist(sapply(gchob,
+    #current.chob <- which(unlist(sapply(gchob,
+    #                             function(x) {
+    #                               if(!is.null(x)) x@device==as.numeric(dev.cur())
+    #                             })))+1
+    current.chob <- which(sapply(gchob,
                                  function(x) {
-                                   if(!is.null(x)) x@device==as.numeric(dev.cur())
-                                 })))+1
-    if(identical(current.chob,numeric(0))) stop("no current plot")
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
     lchob <- gchob[[current.chob]]
   }
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
+
   chobTA@TA.values <- x[,c(1,4,5)]
   chobTA@name <- "chartVo"
   chobTA@params <- list(xrange=lchob@xrange,
@@ -514,6 +548,45 @@ function(x) {
   return(chobTA)
 } # }}}
 
+# addSMI {{{
+`addSMI` <- function(x) {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    #which is the current device; is it in the chob list?
+    #current.chob <- which(unlist(sapply(gchob,
+    #                             function(x) {
+    #                               if(!is.null(x)) x@device==as.numeric(dev.cur())
+    #                             })))+1
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  chobTA@TA.values <- x[,2:4] # HLC
+  chobTA@name <- "chartSMI"
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale)
+  return(chobTA)
+} #}}}
 
 # addMA {{{
 `addMA` <- function(x) {

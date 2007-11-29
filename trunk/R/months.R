@@ -1,3 +1,18 @@
+`options.expiry` <-
+function(x) {
+  # the 3rd friday of month
+  which(format(index(x),"%d") > 14 &
+        format(index(x),"%d") < 22 &
+        format(index(x),"%u")==5)
+}
+`futures.expiry` <-
+function(x) {
+  # the last 3rd friday of quarter
+  which(format(index(x),"%d") > 14 &
+        format(index(x),"%d") < 22 &
+        format(index(x),"%u")==5 &
+        as.numeric(months(x,TRUE)) %in% c(3,6,9,12))
+}
 `seconds` <-
 function(x,k=1,...) {
   UseMethod("seconds")

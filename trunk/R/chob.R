@@ -62,12 +62,16 @@ setClass("chob",
          representation(
            device="ANY",
            call="call",
+           name="character",
            passed.args="ANY",
            windows="numeric",
            xrange="numeric",
            yrange="numeric",
            length="numeric",
            color.vol="logical",multi.col="logical",
+           show.vol="logical",show.grid="logical",
+           line.type="character",bar.type="character",
+           xlab="character",ylab="character",
            spacing="numeric",width="numeric",
            bp="numeric",x.labels="character",
            colors="ANY",time.scale="ANY"
@@ -84,9 +88,13 @@ setClass("chobTA",
 )
 
 setMethod("show","chobTA",function(object) { 
-    chob <- get.chob()[[dev.cur()]]
-    TA <- chob@passed.args$TA
-    chob@passed.args$TA <- c(TA,object)
-    do.call('cS2',chob@passed.args)
+    lchob <- get.chob()[[dev.cur()]]
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,object)
+    lchob@windows <- lchob@windows + ifelse(object@new,1,0)
+    #write.chob(chob,dev.cur())
+    #do.call('cS2',chob@passed.args)
+    do.call('chartSeries.chob',list(lchob))
+    #str(chob@passed.args)
   }
 )
