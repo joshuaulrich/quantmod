@@ -15,7 +15,7 @@ importFrom(zoo,as.zoo)
 #export(ohlcz,ohlcq)
 export(period.prod,period.sum,period.max,period.min)
 export(.chob,write.chob,get.chob,release.chob)
-export(newChob,cS2,addVo)
+export(newChob,cS2,addVo,addSMI)
 
 export(modelData,
     modelSignal,
@@ -26,6 +26,7 @@ export(modelData,
     Delt,
     Next,
     Lag,
+    options.expiry,futures.expiry,
     to.period,
     to.minutes,to.minutes3,to.minutes5,to.minutes10,to.minutes15,to.minutes30,
     to.hourly,to.daily,
