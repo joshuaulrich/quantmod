@@ -80,6 +80,8 @@ setClass("chob",
 
 setClass("chobTA",
          representation(
+            call="call",
+            on="ANY",
             new="logical",
             TA.values="ANY",
             name="character",

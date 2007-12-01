@@ -407,9 +407,11 @@ function(x,
     chob@windows <- length(which(sapply(TA,function(x) x@new)))+1
     chob@passed.args$show.vol <- any(sapply(TA,function(x) x@name=="chartVo"))
   } else chob@windows <- 1
+  
+  # re-evaluate the TA list, as it will be using stale data,
+  chob@passed.args$TA <- sapply(TA, function(x) eval(x@call))
 
   # draw the chart
-  #do.call('chartSeries',chob@passed.args)
   do.call('chartSeries.chob',list(chob))
 
   chob@device <- as.numeric(dev.cur())
@@ -423,6 +425,7 @@ function(x,
 function(x) {
   # if volume is to be plotted, do so here
     # scale volume - vol.divisor
+    if(class(x) != "chobTA") stop("chartVo requires a suitable chobTA object")
     Opens <- x@TA.values[,1]
     Closes <- x@TA.values[,2]
     Volumes <- x@TA.values[,3]
@@ -442,7 +445,7 @@ function(x) {
     if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
     if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
     if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
-    par(mar=c(2,4,0,3))
+    #par(mar=c(2,4,0,3))
     plot(x.range,seq(min(Volumes)/vol.scale[[1]],max(Volumes)/vol.scale[[1]],
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
@@ -500,11 +503,13 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    par(mar=c(2,4,0,3))
+    #par(mar=c(2,4,0,3))
     smi <- SMI(cbind(Highs,Lows,Closes),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
                ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
-    plot(smi[,1],col='blue',lwd=2,axes=FALSE,ann=FALSE,type='l')
-    lines(smi[,2],col='white',lty='dotted',type='l')
+    plot(x.range,seq(min(smi[,1]*.975),max(smi[,1]*1.05),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    lines(seq(1,length(x.range),by=spacing),smi[,1],col='blue',lwd=2,type='l')
+    lines(seq(1,length(x.range),by=spacing),smi[,2],col='white',lwd=2,lty='dotted',type='l')
     title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -538,6 +543,7 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
 
   chobTA@TA.values <- x[,c(1,4,5)]
   chobTA@name <- "chartVo"
+  chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
                         colors=lchob@colors,
                         color.vol=lchob@color.vol,
@@ -578,6 +584,7 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
 
   chobTA@TA.values <- x[,2:4] # HLC
   chobTA@name <- "chartSMI"
+  chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
                         colors=lchob@colors,
                         color.vol=lchob@color.vol,
