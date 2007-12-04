@@ -383,7 +383,10 @@ function(x,
 #  #  }
 #  #}
   ticks <- function(x,gt=2,lt=20) {
-      FUNS <-c('nseconds','nminutes','nhours',
+      nminutes15 <- function(x) {
+          length(breakpoints(x,minutes15,TRUE))-1
+        }
+      FUNS <-c('nseconds','nminutes','nminutes15','nhours',
             'ndays','nweeks','nmonths',
             'nyears')
       is <-sapply(FUNS[7:1],
@@ -393,14 +396,16 @@ function(x,
       bp
     }
   bp <- ticks(x)
-  x.labels <- format(index(x)[bp+1],"%b %Y")
+  # format the scale
+  x.labels <- format(index(x)[bp+1],"%n%b%n%Y")
   if(time.scale=='weekly' | time.scale=='daily')
-    x.labels <- format(index(x)[bp+1],"%b %d %Y")
+    x.labels <- format(index(x)[bp+1],"%b %d%n%Y")
   if(time.scale=='minute')
-    x.labels <- format(index(x)[bp+1],"%b %d %H:%M")
+    x.labels <- format(index(x)[bp+1],"%b %d%n%H:%M")
  
   chob <- new("chob")
   chob@call <- match.call(expand=TRUE)
+  chob@name <- name
 
   chob@xrange <- c(1,NROW(x))
   if(is.OHLC(x)) {
@@ -432,7 +437,7 @@ function(x,
   } else chob@windows <- 1
   
   # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(TA, function(x) eval(x@call))
+  chob@passed.args$TA <- sapply(TA, function(x) { eval(x@call) } )
 
   # draw the chart
   do.call('chartSeries.chob',list(chob))
@@ -472,6 +477,7 @@ function(x) {
     plot(x.range,seq(min(Volumes)/vol.scale[[1]],max(Volumes)/vol.scale[[1]],
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col="#333333")
     bar.col <- x@params$colors$fg.col
     for(i in 1:length(Volumes)) {
       Vols <- c(0,Volumes[i]/vol.scale[[1]])
@@ -510,7 +516,7 @@ function(x) {
 
 # chartSMI {{{
 `chartSMI` <-
-function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
+function(x) {
   # if volume is to be plotted, do so here
     # scale volume - vol.divisor
     Highs <- x@TA.values[,1]
@@ -526,20 +532,22 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
+    param <- x@params$param; ma.type <- x@params$ma.type
     #par(mar=c(2,4,0,3))
     smi <- SMI(cbind(Highs,Lows,Closes),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
                ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
     plot(x.range,seq(min(smi[,1]*.975),max(smi[,1]*1.05),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    lines(seq(1,length(x.range),by=spacing),smi[,1],col='blue',lwd=2,type='l')
-    lines(seq(1,length(x.range),by=spacing),smi[,2],col='white',lwd=2,lty='dotted',type='l')
+    grid(NA,NULL,col="#333333")
+    lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
+    lines(seq(1,length(x.range),by=spacing),smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
     title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
 
 # addVo {{{
-`addVo` <- function(x) {
+`addVo` <- function() {
   if(exists('chob',env=sys.frames()[[1]])) {
     if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
     lchob <- get('chob',env=sys.frames()[[1]])
@@ -580,7 +588,7 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
 } # }}}
 
 # addSMI {{{
-`addSMI` <- function(x) {
+`addSMI` <- function(param=c(5,3,3,3),ma.type=c('EMA','EMA','EMA')) {
   if(exists('chob',env=sys.frames()[[1]])) {
     if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
     lchob <- get('chob',env=sys.frames()[[1]])
@@ -616,21 +624,96 @@ function(x,param=c(5,3,3,3),ma.type=c("EMA","EMA","EMA")) {
                         width=lchob@width,
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale)
+                        time.scale=lchob@time.scale,
+                        param=param,ma.type=ma.type)
   return(chobTA)
 } #}}}
 
 # addMA {{{
-`addMA` <- function(x) {
-  #if(exists('chob',env=sys.frames()[[1]])) {
-  #  lchob <- get('chob',env=sys.frames()[[1]])
-  #} else lchob <- get.chob()[[dev.cur()-1]]
-  x <- get('x',env=sys.frames()[[1]])
+`addMA` <- function(n=10,wilder=FALSE,from.fig=1,with.col=Cl,overlay=TRUE) {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    #which is the current device; is it in the chob list?
+    #current.chob <- which(unlist(sapply(gchob,
+    #                             function(x) {
+    #                               if(!is.null(x)) x@device==as.numeric(dev.cur())
+    #                             })))+1
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
   chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-  chobTA@TA.values <- as.numeric(Vo(x))
-  chobTA@name <- "chartVo"
+  chobTA@new <- !overlay
+
+  # get the appropriate data - from the approp. src
+  if(from.fig==1) {
+    x <- as.matrix(eval(lchob@passed.args$x))
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    # get values from TA...
+    target.TA <- eval(lchob@passed.args$TA[from.fig-1])[[1]]
+    x <- as.matrix(target.TA@TA.values)
+    if(missing(with.col)) {
+      warning('missing "with.col" argument')
+      invisible(return())
+    }
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+    x.tmp <- x.tmp/1000000
+  }
+  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@name <- "chartMA"
+  chobTA@call <- match.call()
+  chobTA@on <- from.fig # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,wilder=wilder)
   return(chobTA)
+} # }}}
+# chartMA {{{
+`chartMA` <-
+function(x) {
+  # if volume is to be plotted, do so here
+    # scale volume - vol.divisor
+
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    ma <- EMA(x@TA.values,n=x@params$n,wilder=x@params$wilder)
+    if(x@new) {
+      par(new=TRUE)
+      plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+           type='n',axes=FALSE,ann=FALSE)
+      title(ylab=paste('EMA(',paste(x@params$n,collapse=','),')',sep=''))
+      axis(2)
+      box(col=x@params$colors$fg.col)
+    }
+    lines(seq(1,length(x.range),by=spacing),ma,col='#0033CC',lwd=1,type='l')
 } # }}}
 
 # newChob {{{
