@@ -278,10 +278,10 @@ function(x,
 `cS2` <-
 function(x,
          type=c("auto","candlesticks","matchsticks","bars","line"),
-         show.vol=TRUE,
+         show.vol=FALSE,
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
-         TA=NULL,
+         TA=c(addVo()),
          line.type="l",
          bar.type="ohlc",
          xlab="time",ylab="price",theme="black",
@@ -367,15 +367,38 @@ function(x,
   }
 
   # determine formatting for time-axis
-  for(time.period in c('years','months','weeks')) {
-    bp <- breakpoints(x,by=time.period,TRUE)
-    if(length(bp) > 3) {
-      x.labels <- format(index(x)[bp+1],"%b %y")
-      if(time.period=='weeks')
-        x.labels <- format(index(x)[bp+1],"%b %d %Y")
-      break
+  #for(time.period in c('years','months','weeks','days','minutes')) {
+#    time.choices <- list(yearly='years',monthly='months',
+#                         weekly='weeks',daily='days',
+#                         hourly='hours',minute='minutes')
+#    time.period <- time.choices[[time.scale]]
+#    bp <- breakpoints(x,by=time.period,TRUE)
+#  #  if(length(bp) > 3) {
+#      x.labels <- format(index(x)[bp+1],"%b %y")
+#      if(time.period=='weeks' | time.period=='days')
+#        x.labels <- format(index(x)[bp+1],"%b %d %Y")
+#      if(time.period=='minutes')
+#        x.labels <- format(index(x)[bp+1],"%H:%M")
+#  #    break
+#  #  }
+#  #}
+  ticks <- function(x,gt=2,lt=20) {
+      FUNS <-c('nseconds','nminutes','nhours',
+            'ndays','nweeks','nmonths',
+            'nyears')
+      is <-sapply(FUNS[7:1],
+                  function(y) { do.call(y,list(x)) })
+      cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
+      bp <- breakpoints(x,cl,TRUE)
+      bp
     }
-  }
+  bp <- ticks(x)
+  x.labels <- format(index(x)[bp+1],"%b %Y")
+  if(time.scale=='weekly' | time.scale=='daily')
+    x.labels <- format(index(x)[bp+1],"%b %d %Y")
+  if(time.scale=='minute')
+    x.labels <- format(index(x)[bp+1],"%b %d %H:%M")
+ 
   chob <- new("chob")
   chob@call <- match.call(expand=TRUE)
 
