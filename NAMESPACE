@@ -17,6 +17,7 @@ export(period.prod,period.sum,period.max,period.min)
 export(.chob,write.chob,get.chob,release.chob)
 export(newChob,cS2,addVo,addSMI)
 export(addMA)
+export(setTA)
 export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,
