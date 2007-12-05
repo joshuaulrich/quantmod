@@ -1,3 +1,7 @@
+`setTA` <- function(...) {
+  as.character(match.call()[-1])
+}
+
 # chartSeries generic {{{
 `chartSeries` <- 
 function(x,
@@ -276,7 +280,7 @@ function(x,
 
 # cS2 {{{
 `cS2` <-
-function(x,
+function(x,debug=FALSE,
          type=c("auto","candlesticks","matchsticks","bars","line"),
          show.vol=FALSE,
          show.grid=TRUE,name=deparse(substitute(x)),
@@ -389,7 +393,7 @@ function(x,
       FUNS <-c('nseconds','nminutes','nminutes15','nhours',
             'ndays','nweeks','nmonths',
             'nyears')
-      is <-sapply(FUNS[7:1],
+      is <-sapply(FUNS[8:1],
                   function(y) { do.call(y,list(x)) })
       cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
       bp <- breakpoints(x,cl,TRUE)
@@ -428,16 +432,25 @@ function(x,
   chob@length <- NROW(x)
 
   chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
-  if(show.vol) TA <- c(addVo(),TA)
-  chob@passed.args$TA <- TA
-
+  #if(show.vol) TA <- c(addVo(),TA)
   if(!is.null(TA)) {
-    chob@windows <- length(which(sapply(TA,function(x) x@new)))+1
-    chob@passed.args$show.vol <- any(sapply(TA,function(x) x@name=="chartVo"))
+    if(is.character(TA)) TA <- as.list(TA)
+    chob@passed.args$TA <- list()
+    for(ta in 1:length(TA)) {
+      if(is.character(TA[[ta]])) {
+        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]))
+      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]])
+    }
+#  }
+
+#  if(!is.null(chob@passed.args$TA)) {
+    chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
+    chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
   } else chob@windows <- 1
   
+if(debug) return(str(chob))
   # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(TA, function(x) { eval(x@call) } )
+  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
 
   # draw the chart
   do.call('chartSeries.chob',list(chob))
@@ -467,20 +480,15 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    max.vol <- max(Volumes)
-    vol.scale <- list(100,'100s')
-    if(max.vol > 10000) vol.scale <- list(1000,'1000s') 
-    if(max.vol > 100000) vol.scale <- list(10000,'10,000s')
-    if(max.vol > 1000000) vol.scale <- list(100000,'100,000s')
-    if(max.vol > 10000000) vol.scale <- list(1000000,'millions')
+    vol.scale <- x@params$vol.scale
     #par(mar=c(2,4,0,3))
-    plot(x.range,seq(min(Volumes)/vol.scale[[1]],max(Volumes)/vol.scale[[1]],
+    plot(x.range,seq(min(Volumes),max(Volumes),
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col="#333333")
     bar.col <- x@params$colors$fg.col
     for(i in 1:length(Volumes)) {
-      Vols <- c(0,Volumes[i]/vol.scale[[1]])
+      Vols <- c(0,Volumes[i])
       x.pos <- 1+spacing*(i-1)
       if(x@params$color.vol) {
         dn.up.col <- x@params$colors$dn.up.col
@@ -549,12 +557,15 @@ function(x) {
 # addVo {{{
 `addVo` <- function() {
   if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop('only chob in GlobalEnv!')
     lchob <- get('chob',env=sys.frames()[[1]])
   } else {
     gchob <- get.chob()
     #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    if(dev.cur()==1 || length(gchob) < dev.cur()) {
+      # create a default chob to work with: must match requirements of call
+      return(invisible(NULL))
+    } else {
     #which is the current device; is it in the chob list?
     #current.chob <- which(unlist(sapply(gchob,
     #                             function(x) {
@@ -567,12 +578,25 @@ function(x) {
                                  }))
     if(identical(current.chob,integer(0))) stop("no current plot")
     lchob <- gchob[[current.chob]]
+    }
   }
   x <- as.matrix(eval(lchob@passed.args$x))
+  Volumes <- x[,5]
+  max.vol <- max(Volumes)
+  vol.scale <- list(100, "100s")
+  if (max.vol > 10000) 
+    vol.scale <- list(1000, "1000s")
+  if (max.vol > 1e+05) 
+    vol.scale <- list(10000, "10,000s")
+  if (max.vol > 1e+06) 
+    vol.scale <- list(1e+05, "100,000s")
+  if (max.vol > 1e+07) 
+    vol.scale <- list(1e+06, "millions")
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  chobTA@TA.values <- x[,c(1,4,5)]
+  chobTA@TA.values <- cbind(x[,c(1,4)],Volumes/vol.scale[[1]])
   chobTA@name <- "chartVo"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -582,6 +606,7 @@ function(x) {
                         spacing=lchob@spacing,
                         width=lchob@width,
                         bp=lchob@bp,
+                        vol.scale=vol.scale,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale)
   return(chobTA)
@@ -630,14 +655,16 @@ function(x) {
 } #}}}
 
 # addMA {{{
-`addMA` <- function(n=10,wilder=FALSE,from.fig=1,with.col=Cl,overlay=TRUE) {
+`addMA` <- function(n=10,wilder=FALSE,from.fig=1,with.col=Cl,overlay=TRUE,col='blue') {
   if(exists('chob',env=sys.frames()[[1]])) {
     if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
     lchob <- get('chob',env=sys.frames()[[1]])
   } else {
     gchob <- get.chob()
     #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    if(dev.cur()==1 || length(gchob) < dev.cur()) {
+      return(invisible(NULL))
+    } else {
     #which is the current device; is it in the chob list?
     #current.chob <- which(unlist(sapply(gchob,
     #                             function(x) {
@@ -650,6 +677,7 @@ function(x) {
                                  }))
     if(identical(current.chob,integer(0))) stop("no current plot")
     lchob <- gchob[[current.chob]]
+    }
   }
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -662,7 +690,8 @@ function(x) {
     } else x.tmp <- x[,with.col]
   } else {
     # get values from TA...
-    target.TA <- eval(lchob@passed.args$TA[from.fig-1])[[1]]
+    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
+    target.TA <- eval(lchob@passed.args$TA[which.TA][from.fig-1])[[1]]
     x <- as.matrix(target.TA@TA.values)
     if(missing(with.col)) {
       warning('missing "with.col" argument')
@@ -671,8 +700,8 @@ function(x) {
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
-    x.tmp <- x.tmp/1000000
   }
+
   chobTA@TA.values <- x.tmp # single numeric vector
   chobTA@name <- "chartMA"
   chobTA@call <- match.call()
@@ -686,7 +715,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        n=n,wilder=wilder)
+                        ma.col=col,n=n,wilder=wilder)
   return(chobTA)
 } # }}}
 # chartMA {{{
@@ -713,7 +742,7 @@ function(x) {
       axis(2)
       box(col=x@params$colors$fg.col)
     }
-    lines(seq(1,length(x.range),by=spacing),ma,col='#0033CC',lwd=1,type='l')
+    lines(seq(1,length(x.range),by=spacing),ma,col=x@params$ma.col,lwd=1,type='l')
 } # }}}
 
 # newChob {{{
