@@ -16,7 +16,7 @@ importFrom(zoo,as.zoo)
 export(period.prod,period.sum,period.max,period.min)
 export(.chob,write.chob,get.chob,release.chob)
 export(newChob,cS2,addVo,addSMI)
-export(addMA)
+export(addMA,addExpiry)
 export(setTA)
 export(modelData,
     modelSignal,
