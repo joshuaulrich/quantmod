@@ -42,12 +42,13 @@ to.monthly(x,drop.time=TRUE)
 to.quarterly(x,drop.time=TRUE)
 to.yearly(x,drop.time=TRUE)
 
-to.period(x, period = months, ...)
+to.period(x, period = months, name, ...)
 }
 \arguments{
   \item{x}{ OHLC type object } 
   \item{period}{ period to convert to }
   \item{drop.time}{ remove time component of POSIX datestamp (if any) }
+  \item{name}{ override column names }
   \item{\dots}{ additional arguments }
 }
 \details{

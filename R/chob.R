@@ -54,7 +54,7 @@ function(n)
 
 
 `print.chob` <-
-function(x)
+function(x,...)
 {
 #  plot.chob(x)
 }
