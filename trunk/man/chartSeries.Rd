@@ -4,6 +4,7 @@
 \alias{candleChart}
 \alias{matchChart}
 \alias{lineChart}
+\alias{cS2}  %remove before final push
 \title{ Create Financial Charts }
 \description{
 Charting tool to create standard financial charts

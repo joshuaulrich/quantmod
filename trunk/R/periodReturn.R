@@ -85,12 +85,12 @@ function(x,from=NULL,to=NULL) {
   all.ret
 }
 
-`barplot.periodReturn` <-
-function(x,...)
-{
-  class(x) <- 'zoo'
-  barplot(x,col=ifelse(x > 0,3,8))
-}
+#`barplot.periodReturn` <-
+#function(x,...)
+#{
+#  class(x) <- 'zoo'
+#  barplot(x,col=ifelse(x > 0,3,8))
+#}
 
 `periodicity` <-
 function(x,...)
