@@ -19,17 +19,18 @@ or Date classes.
 first(x,...)
 last(x,...)
 
-\method{first}{default}(x,n=1,...)
+\method{first}{default}(x,n=1,keep=FALSE,...)
 
-\method{last}{default}(x,n=1,...)
+\method{last}{default}(x,n=1,keep=FALSE,...)
 
-\method{first}{zoo}(x,n=1,...)
+\method{first}{zoo}(x,n=1,keep=FALSE,...)
 
-\method{last}{zoo}(x,n=1,...)
+\method{last}{zoo}(x,n=1,keep=FALSE,...)
 }
 \arguments{
   \item{x}{ 1 or 2 dimensional data object }
   \item{n}{ number of periods to return }
+  \item{keep}{ should removed values be kept? }
   \item{\dots}{ additional args - unused }
 }
 \details{

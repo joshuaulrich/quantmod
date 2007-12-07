@@ -61,12 +61,28 @@ function(x,...)
 }
 
 `first.default` <-
-function(x,n=1,...)
+function(x,n=1,keep=FALSE,...)
 {
   if(is.null(dim(x))) {
-    x[1:n]
+    if(n > 0) {
+      xx <- x[1:n]
+      if(keep) xx <- structure(xx,keep=x[(-(-n)+1):NROW(x)])
+      xx
+    } else {
+      xx <- x[(-n+1):NROW(x)]
+      if(keep) xx <- structure(xx,keep=x[1:(-n)])
+      xx
+    }
   } else {
-    x[1:n,]
+    if(n > 0) {
+      xx <- x[1:n,]
+      if(keep) xx <- structure(xx,keep=x[(-(-n)+1):NROW(x),])
+      xx
+    } else {
+      xx <- x[(-n+1):NROW(x),]
+      if(keep) xx <- structure(xx,keep=x[1:(-n),])
+      xx
+    }
   }
 }
 
@@ -77,17 +93,33 @@ function(x,...)
 }
 
 `last.default` <-
-function(x,n=1,...)
+function(x,n=1,keep=FALSE,...)
 {
   if(is.null(dim(x))) {
-    x[(NROW(x)-n+1):NROW(x)]
+    if(n > 0) {
+      xx <- x[(NROW(x)-n+1):NROW(x)]
+      if(keep) xx <- structure(xx,keep=x[1:(NROW(x)+(-n))])
+      xx
+    } else {
+      xx <- x[1:(NROW(x)+n)]
+      if(keep) structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x))])
+      xx
+    }
   } else {
-    x[(NROW(x)-n+1):NROW(x),]
+    if(n > 0) {
+      xx <- x[(NROW(x)-n+1):NROW(x),]
+      if(keep) xx <- structure(xx,keep=x[1:(NROW(x)+(-n)),])
+      xx
+    } else {
+      xx <- x[1:(NROW(x)+n),]
+      if(keep) structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x)),])
+      xx
+    }
   }
 }
 
 `last.zoo` <-
-function(x,n=1,...)
+function(x,n=1,keep=FALSE,...)
 {
   if(is.character(n)) {
     if(!inherits(index(x),'POSIXt') && !inherits(index(x),'Date'))
@@ -136,13 +168,17 @@ function(x,n=1,...)
   }
   if(length(n) != 1) stop("n must be of length 1")
   if(n > 0) {
-    x[((NROW(x)-n+1):NROW(x))]
+    xx <- x[((NROW(x)-n+1):NROW(x))]
+    if(keep) xx <- structure(xx,keep=x[1:(NROW(x)+(-n))])
+    xx
   } else {
-    x[1:(NROW(x)+n)]
+    xx <- x[1:(NROW(x)+n)]
+    if(keep) xx <- structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x))])
+    xx
   }
 }
 `first.zoo` <-
-function(x,n=1,...)
+function(x,n=1,keep=FALSE,...)
 {
   if(is.character(n)) {
     # n period set
@@ -182,17 +218,25 @@ function(x,n=1,...)
       }
       if(rpf > 0) {
         n <- bp[rpf+1]
-        return(x[1:n])
+        xx <- (x[1:n])
+        if(keep) xx <- structure(xx,keep=x[(bp[-(-rpf)+1]+1):NROW(x)])
+        return(xx)
       } else {
         n <- bp[-rpf+1]+1
-        return(x[n:NROW(x)])
+        xx <- (x[n:NROW(x)])
+        if(keep) xx <- structure(xx,keep=x[1:(bp[-rpf+1])])
+        return(xx)
       }      
     }
   }
   if(length(n) != 1) stop("n must be of length 1")
   if(n > 0) {
-    x[1:n]
+    xx <- x[1:n]
+    if(keep) xx <- structure(xx,keep=x[(-(-n)+1):NROW(x)])
+    xx
   } else {
-    x[(-n+1):NROW(x)]
+    xx <- x[(-n+1):NROW(x)]
+    if(keep) xx <- structure(xx,keep=x[1:(-n)])
+    xx
   }
 }
