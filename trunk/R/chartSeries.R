@@ -313,18 +313,21 @@ function(x,debug=FALSE,
   if(theme=="black") {
     bg.col <- "#222222"
     fg.col <- "#666666"
+    grid.col <- "#333333"
     up.col <- ifelse(missing(up.col),"#00FF00",up.col)
     dn.col <- ifelse(missing(dn.col),"#FF9900",dn.col)
   }
   if(theme=="white") {
     bg.col <- "#FFFFFF"
     fg.col <- "#444444"
+    grid.col <- "#333333"
     up.col <- ifelse(missing(up.col),"#00CC00",up.col)
     dn.col <- ifelse(missing(dn.col),"#FF7700",dn.col)
   }
   if(theme=="grey") {
     bg.col <- "#FFFFFF"
     fg.col <- "#444444"
+    grid.col <- "#333333"
     up.col <- ifelse(missing(up.col),"#FFFFFF",up.col)
     dn.col <- ifelse(missing(dn.col),"#000000",dn.col)
   }
@@ -407,7 +410,8 @@ function(x,debug=FALSE,
   chob@width <- width
   chob@bp <- bp
   chob@x.labels <- x.labels
-  chob@colors <- list(fg.col=fg.col,bg.col=bg.col,up.col=up.col,dn.col=dn.col,
+  chob@colors <- list(fg.col=fg.col,bg.col=bg.col,grid.col=grid.col,
+                      up.col=up.col,dn.col=dn.col,
                       dn.up.col=dn.up.col,up.up.col=up.up.col,
                       dn.dn.col=dn.dn.col,up.dn.col=up.dn.col)
   chob@time.scale <- time.scale
