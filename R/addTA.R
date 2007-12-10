@@ -178,6 +178,73 @@ function(x) {
     box(col=x@params$colors$fg.col)
 } # }}}
 
+# addRSI {{{
+`addRSI` <- function(n=14,type='EMA',wilder=TRUE) {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  n.up <- n[1]; n.dn <- ifelse(length(n) > 1,n[2],n[1])
+  type.up <- type[1]; type.dn <- ifelse(length(type) > 1,type[2],type[1])
+  wilder.up <- wilder[1]; wilder.dn <- ifelse(length(wilder) > 1,wilder[2],wilder[1])
+
+  rsi <- RSI(Cl(x),ma.up=list(type.up,n=n.up,wilder=wilder.up),
+                   ma.down=list(type.dn,n=n.dn,wilder=wilder.dn))
+  chobTA@TA.values <- rsi
+  chobTA@name <- "chartRSI"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n.up=n.up,n.dn=n.dn,type.up=type.up,type.dn=type.dn,
+                        wilder.up=wilder.up,wilder.dn=wilder.dn)
+  return(chobTA)
+} #}}}
+# chartRSI {{{
+`chartRSI` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    param <- x@params$param; ma.type <- x@params$ma.type
+    rsi <- x@TA.values
+    plot(x.range,seq(min(rsi*.975,na.rm=TRUE),max(rsi*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col="#333333")
+    lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
+    lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
+    #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
 # addBBands {{{
 `addBBands` <- function(n=20,ma='SMA',sd=2,on=1) {
   if(exists('chob',env=sys.frames()[[1]])) {
@@ -393,6 +460,19 @@ function(x) {
       abline(v=x@TA.values[ex]*spacing,lty=x@params$lty,col=x@params$col)
     }
 } # }}}
+
+`RSI` <-
+function (price, ma.up = list("EMA", n = 14, wilder = TRUE), 
+    ma.down = ma.up) 
+{
+    up <- momentum(price, n = 1)
+    dn <- ifelse(up < 0, abs(up), 0)
+    up <- ifelse(up > 0, up, 0)
+    mavg.up <- do.call(ma.up[[1]], c(list(up), ma.up[-1]))
+    mavg.dn <- do.call(ma.down[[1]], c(list(dn), ma.down[-1]))
+    rsi <- 100 * mavg.up/(mavg.up + mavg.dn)
+    return(rsi)
+}
 
 
 `EMA` <-
