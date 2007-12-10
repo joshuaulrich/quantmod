@@ -20,7 +20,7 @@ export(cS2,addVo,addMA,addExpiry)
 export(addSMI)
 export(addRSI)
 export(addBBands)
-export(EMA)
+export(EMA,RSI)
 #export(setTA)
 export(modelData,
     modelSignal,
