@@ -102,7 +102,7 @@ function(x,n=1,keep=FALSE,...)
       xx
     } else {
       xx <- x[1:(NROW(x)+n)]
-      if(keep) structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x))])
+      if(keep) xx <- structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x))])
       xx
     }
   } else {
@@ -112,7 +112,7 @@ function(x,n=1,keep=FALSE,...)
       xx
     } else {
       xx <- x[1:(NROW(x)+n),]
-      if(keep) structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x)),])
+      if(keep) xx <- structure(xx,keep=x[((NROW(x)-(-n)+1):NROW(x)),])
       xx
     }
   }
@@ -159,10 +159,14 @@ function(x,n=1,keep=FALSE,...)
       }
       if(rpf > 0) {
         n <- bp[length(bp)-rpf]+1
-        return(x[n:NROW(x)])
+        xx <- x[n:NROW(x)]
+        if(keep) xx <- structure(xx,keep=x[1:(bp[length(bp)+(-rpf)])])
+        return(xx)
       } else {
         n <- bp[length(bp)+rpf]
-        return(x[1:n])
+        xx <- x[1:n]
+        if(keep) xx <- structure(xx,keep=x[(bp[length(bp)-(-rpf)]+1):NROW(x)])
+        return(xx)
       }
     }
   }

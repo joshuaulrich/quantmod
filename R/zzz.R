@@ -32,7 +32,7 @@ setClass("quantmodReturn",representation(
                     accuracy="zoo",
                     directional.accuracy="list",
                     dist.of.returns="list",
-                    returnsBy="zoo"
+                    returnsBy="ANY"
                     )
         );
 setClass("quantmodResults",representation(

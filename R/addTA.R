@@ -1,4 +1,3 @@
-
 # chartVo {{{
 `chartVo` <-
 function(x) {
@@ -126,11 +125,6 @@ function(x) {
     gchob <- get.chob()
     #protect against NULL device or windows not drawn to yet
     if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    #which is the current device; is it in the chob list?
-    #current.chob <- which(unlist(sapply(gchob,
-    #                             function(x) {
-    #                               if(!is.null(x)) x@device==as.numeric(dev.cur())
-    #                             })))+1
     current.chob <- which(sapply(gchob,
                                  function(x) {
                                    ifelse(class(x)=="chob" &&
@@ -143,7 +137,9 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  chobTA@TA.values <- x[,2:4] # HLC
+  smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
+             ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
+  chobTA@TA.values <- smi
   chobTA@name <- "chartSMI"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -161,12 +157,6 @@ function(x) {
 # chartSMI {{{
 `chartSMI` <-
 function(x) {
-  # if volume is to be plotted, do so here
-    # scale volume - vol.divisor
-    Highs <- x@TA.values[,1]
-    Lows <- x@TA.values[,2]
-    Closes <- x@TA.values[,3]
-
     spacing <- x@params$spacing
     width <- x@params$width
 
@@ -177,10 +167,8 @@ function(x) {
     color.vol <- x@params$color.vol
 
     param <- x@params$param; ma.type <- x@params$ma.type
-    #par(mar=c(2,4,0,3))
-    smi <- SMI(cbind(Highs,Lows,Closes),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
-               ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
-    plot(x.range,seq(min(smi[,1]*.975),max(smi[,1]*1.05),length.out=length(x.range)),
+    smi <- x@TA.values
+    plot(x.range,seq(min(smi[,1]*.975,na.rm=TRUE),max(smi[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col="#333333")
     lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
@@ -190,8 +178,68 @@ function(x) {
     box(col=x@params$colors$fg.col)
 } # }}}
 
+# addBBands {{{
+`addBBands` <- function(n=20,ma='SMA',sd=2,on=1) {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- FALSE
+
+
+  x <- as.matrix(eval(lchob@passed.args$x))
+
+  bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=list(FUN='sd',n=sd))
+  chobTA@TA.values <- bb
+  chobTA@name <- "chartBBands"
+  chobTA@call <- match.call()
+  chobTA@on <- on
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,ma=ma,sd=sd)
+  return(chobTA)
+zo} #}}}
+# chartBBands {{{
+`chartBBands` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    param <- x@params$param; ma.type <- x@params$ma.type
+    bb <- x@TA.values
+    lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
+    lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
+    lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
+} # }}}
+
 # addMA {{{
-`addMA` <- function(n=10,wilder=FALSE,from.fig=1,with.col=Cl,overlay=TRUE,col='blue') {
+`addMA` <- function(n=10,wilder=FALSE,on=1,with.col=Cl,overlay=TRUE,col='blue') {
   if(exists('chob',env=sys.frames()[[1]])) {
     if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
     lchob <- get('chob',env=sys.frames()[[1]])
@@ -201,11 +249,6 @@ function(x) {
     if(dev.cur()==1 || length(gchob) < dev.cur()) {
       return(invisible(NULL))
     } else {
-    #which is the current device; is it in the chob list?
-    #current.chob <- which(unlist(sapply(gchob,
-    #                             function(x) {
-    #                               if(!is.null(x)) x@device==as.numeric(dev.cur())
-    #                             })))+1
     current.chob <- which(sapply(gchob,
                                  function(x) {
                                    ifelse(class(x)=="chob" &&
@@ -219,7 +262,7 @@ function(x) {
   chobTA@new <- !overlay
 
   # get the appropriate data - from the approp. src
-  if(from.fig==1) {
+  if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
@@ -227,7 +270,7 @@ function(x) {
   } else {
     # get values from TA...
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][from.fig-1])[[1]]
+    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
     x <- as.matrix(target.TA@TA.values)
     if(missing(with.col)) {
       warning('missing "with.col" argument')
@@ -241,7 +284,7 @@ function(x) {
   chobTA@TA.values <- x.tmp # single numeric vector
   chobTA@name <- "chartMA"
   chobTA@call <- match.call()
-  chobTA@on <- from.fig # used for deciding when to draw...
+  chobTA@on <- on # used for deciding when to draw...
   chobTA@params <- list(xrange=lchob@xrange,
                         colors=lchob@colors,
                         color.vol=lchob@color.vol,
@@ -350,3 +393,22 @@ function(x) {
       abline(v=x@TA.values[ex]*spacing,lty=x@params$lty,col=x@params$col)
     }
 } # }}}
+
+
+`EMA` <-
+function (x, n = 10, wilder = FALSE) 
+{
+    x <- as.vector(x)
+    NAs <- ifelse(any(is.na(x)),length(which(is.na(x))),0)
+    x <- na.omit(x)
+    ema <- rep(NA, NROW(x))
+    if (wilder) 
+        ratio <- 1/n
+    else ratio <- 2/(n + 1)
+    ema[n] <- mean(x[1:n])
+    for (i in (n + 1):NROW(x)) {
+        ema[i] <- x[i] * ratio + ema[i - 1] * (1 - ratio)
+    }
+    return(c(rep(NA,NAs),ema))
+}
+

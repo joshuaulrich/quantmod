@@ -25,7 +25,7 @@ function(x)
   plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
   chart = "candlesticks"
-  grid(NA,NULL,col=x@colors$fg.col)
+  grid(NA,NULL,col=x@colors$grid.col)
    for(i in 1:x@length) {
       O.to.C <- c(Opens[i],Closes[i])
       L.to.H <- c(Lows[i],Highs[i])
