@@ -18,6 +18,8 @@ export(period.prod,period.sum,period.max,period.min)
 export(.chob)
 export(cS2,addVo,addMA,addExpiry)
 export(addSMI)
+export(addBBands)
+export(EMA)
 #export(setTA)
 export(modelData,
     modelSignal,
