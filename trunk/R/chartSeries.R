@@ -3,20 +3,20 @@
 }
 
 # chartSeries generic {{{
-`chartSeries` <- 
-function(x,
-         type=c("auto","candlesticks","matchsticks","bars","line"),
-         show.vol=TRUE,
-         show.grid=TRUE,name=deparse(substitute(x)),
-         time.scale=NULL,
-         technicals=NULL,
-         line.type="l",
-         bar.type='ohlc',
-         xlab="time",ylab="price",theme="black",
-         up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
-         ) {
-  UseMethod('chartSeries')
-} # }}}
+#`chartSeries` <- 
+#function(x,
+#         type=c("auto","candlesticks","matchsticks","bars","line"),
+#         show.vol=TRUE,
+#         show.grid=TRUE,name=deparse(substitute(x)),
+#         time.scale=NULL,
+#         technicals=NULL,
+#         line.type="l",
+#         bar.type='ohlc',
+#         xlab="time",ylab="price",theme="black",
+#         up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
+#         ) {
+#  UseMethod('chartSeries')
+#} # }}}
 # chartSeries0 generic WORKING {{{
 `chartSeries0` <- 
 function(x,
@@ -278,11 +278,10 @@ function(x,
   invisible(1)
 } #}}}
 
-# cS2 {{{
-`cS2` <-
+# chartSeries {{{
+`chartSeries` <-
 function(x,debug=FALSE,
          type=c("auto","candlesticks","matchsticks","bars","line"),
-         show.vol=FALSE,
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
@@ -419,25 +418,24 @@ function(x,debug=FALSE,
   chob@length <- NROW(x)
 
   chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
-  #if(show.vol) TA <- c(addVo(),TA)
   if(!is.null(TA)) {
+
+    # important to force eval of _current_ chob, not saved chob
+    thisEnv <- environment()
     if(is.character(TA)) TA <- as.list(TA)
     chob@passed.args$TA <- list()
     for(ta in 1:length(TA)) {
       if(is.character(TA[[ta]])) {
-        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]))
-      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]])
+        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
+      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
     }
-#  }
-
-#  if(!is.null(chob@passed.args$TA)) {
     chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
     chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
   } else chob@windows <- 1
   
-if(debug) return(str(chob))
+  #if(debug) return(str(chob))
   # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
+  #chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
 
   # draw the chart
   do.call('chartSeries.chob',list(chob))

@@ -26,49 +26,37 @@ function(x)
 
   chart = "candlesticks"
   grid(NA,NULL,col=x@colors$grid.col)
-   for(i in 1:x@length) {
-      O.to.C <- c(Opens[i],Closes[i])
-      L.to.H <- c(Lows[i],Highs[i])
-      if(i > 1 & x@multi.col) {
-        if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- x@colors$dn.up.col
-        if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- x@colors$up.up.col
-        if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- x@colors$dn.dn.col
-        if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- x@colors$up.dn.col
-        border.col <- "#444444"
-      } else {
-        bar.col <- ifelse(O.to.C[1] > O.to.C[2],x@colors$dn.col,x@colors$up.col)
-        border.col <- ifelse(x@multi.col,"#444444",bar.col)
-      }    
-      x.pos <- 1+x@spacing*(i-1)
-      lines(c(x.pos,x.pos),L.to.H,lwd=1,col="#666666") # full range grey line
-      if(chart[1]=='matchsticks') {
-        lines(c(x.pos,x.pos),O.to.C,lwd=x@width,col=bar.col)
-      } else {
-        rect(x.pos-x@spacing/5,O.to.C[1],x.pos+x@spacing/5,
-             O.to.C[2],col=bar.col,border=border.col)
-      }    
-    }    
+
+  # a vector of x positions
+  x.pos <- 1+x@spacing*(1:x@length-1)
+
+
+  # create a vector of colors
+  if(x@multi.col) {
+    last.Closes <- as.numeric(quantmod::Lag(Closes))
+    last.Closes[1] <- Closes[1]
+    bar.col <- ifelse(Opens < Closes,
+                      ifelse(Opens > last.Closes,
+                             x@colors$dn.up.col,
+                             x@colors$up.up.col),
+                      ifelse(Opens < last.Closes,
+                             x@colors$dn.dn.col,
+                             x@colors$up.dn.col))
+  } else {
+    bar.col <- ifelse(Opens < Closes,x@colors$up.col,x@colors$dn.col)
+  }
+
+  # draw HL lines
+  rect(x.pos,Lows,x.pos,Highs,border="#666666")
+
+  # draw OC candles
+  rect(x.pos-x@spacing/5,Opens,x.pos+x@spacing/5,Closes,
+       col=bar.col,border=bar.col)
+  
   axis(2)
   box(col=x@colors$fg.col)
 
-  # add any TA/windows if available
-# if(x@windows > 1 | length(x@passed.args$TA) > 0) {
-#   #for(i in 2:x@windows) {
-#   for(i in 1:(length(x@passed.args$TA))) {
-#     par(mar=c(0,4,0,3))
-#     if(length(x@passed.args$TA) != i) {
-#       do.call(x@passed.args$TA[[i]]@name,list(x@passed.args$TA[[i]]))
-#     } else {
-#       # reconfigure margins for last window only
-#       par(mar=c(4,4,0,3))
-#       do.call(x@passed.args$TA[[i]]@name,list(x@passed.args$TA[[i]]))
-#     }
-#   }
-# }
-
- 
-  # draw any overlays to figure 1 here...
- 
+  # TA calculation and drawing loops
   if(x@windows > 1 | length(x@passed.args$TA) > 0) {
     for(i in 1:x@windows) {
       # draw all overlays needed for figure 'i' on plot

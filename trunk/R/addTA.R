@@ -1,63 +1,3 @@
-# chartVo {{{
-`chartVo` <-
-function(x) {
-  # if volume is to be plotted, do so here
-    # scale volume - vol.divisor
-    if(class(x) != "chobTA") stop("chartVo requires a suitable chobTA object")
-    Opens <- x@TA.values[,1]
-    Closes <- x@TA.values[,2]
-    Volumes <- x@TA.values[,3]
-
-    spacing <- x@params$spacing
-    width <- x@params$width
-
-    x.range <- x@params$xrange
-    x.range <- seq(x.range[1],x.range[2]*spacing)
-
-    multi.col <- x@params$multi.col
-    color.vol <- x@params$color.vol
-
-    vol.scale <- x@params$vol.scale
-    #par(mar=c(2,4,0,3))
-    plot(x.range,seq(min(Volumes),max(Volumes),
-         length.out=length(x.range)),
-         type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#333333")
-    bar.col <- x@params$colors$fg.col
-    for(i in 1:length(Volumes)) {
-      Vols <- c(0,Volumes[i])
-      x.pos <- 1+spacing*(i-1)
-      if(x@params$color.vol) {
-        dn.up.col <- x@params$colors$dn.up.col
-        up.up.col <- x@params$colors$up.up.col
-        dn.dn.col <- x@params$colors$dn.dn.col
-        up.dn.col <- x@params$colors$up.dn.col
-        up.col <- x@params$colors$up.col
-        dn.col <- x@params$colors$dn.col
-
-        if(i > 1 & multi.col & color.vol) {
-          if(Opens[i] < Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.up.col
-          if(Opens[i] < Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.up.col
-          if(Opens[i] > Closes[i] & Opens[i] < Closes[i-1]) bar.col <- dn.dn.col
-          if(Opens[i] > Closes[i] & Opens[i] > Closes[i-1]) bar.col <- up.dn.col
-        } else {
-          bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
-        }
-      }
-      #if(color.vol) 
-      #  bar.col <- ifelse(Opens[i] > Closes[i],dn.col,up.col)
-      #lines(c(x.pos,x.pos),Vols,lwd=width,col=bar.col)
-      border.col <- ifelse(x@params$multi.col,"#000000",bar.col)
-      rect(x.pos-spacing/4,0,x.pos+spacing/4,Vols[2],col=bar.col,border=border.col)
-    }
-    title(ylab=paste("volume (",vol.scale[[2]],")"))
-    #title(ylab=paste("volume (",vol.scale[[2]],")"),
-    #      xlab=x@params$colors$time.scale,col.lab=x@params$colors$fg.col)
-    #axis(1,at=1:length(Volumes)*spacing+1,labels=FALSE,col="#444444")
-    #axis(1,at=x@params$bp*spacing+1,labels=x@params$x.labels,las=1)
-    axis(2)
-    box(col=x@params$colors$fg.col)
-} # }}}
 # addVo {{{
 `addVo` <- function() {
   if(exists('chob',env=sys.frames()[[1]])) {
@@ -115,6 +55,51 @@ function(x) {
                         time.scale=lchob@time.scale)
   return(chobTA)
 } # }}}
+# chartVo {{{
+`chartVo` <-
+function(x) {
+  # if volume is to be plotted, do so here
+    # scale volume - vol.divisor
+    if(class(x) != "chobTA") stop("chartVo requires a suitable chobTA object")
+    Opens <- x@TA.values[,1]
+    Closes <- x@TA.values[,2]
+    Volumes <- x@TA.values[,3]
+
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    vol.scale <- x@params$vol.scale
+    plot(x.range,seq(min(Volumes),max(Volumes),
+         length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col="#303030")
+    x.pos <- 1 + spacing * (1:length(Volumes) - 1)
+    if (x@params$multi.col) {
+      last.Closes <- as.numeric(quantmod::Lag(Closes))
+      last.Closes[1] <- Closes[1]
+      bar.col <- ifelse(Opens < Closes, 
+                        ifelse(Opens > last.Closes, 
+                               x@params$colors$dn.up.col,
+                               x@params$colors$up.up.col),
+                        ifelse(Opens < last.Closes,
+                               x@params$colors$dn.dn.col,
+                               x@params$colors$up.dn.col))
+    } else {
+      bar.col <- ifelse(Opens < Closes, x@params$colors$up.col, x@params$colors$dn.col)
+    }
+
+    rect(x.pos-spacing/5,0,x.pos+spacing/5,Volumes,
+         col=bar.col,border=bar.col)
+    title(ylab=paste("volume (",vol.scale[[2]],")"))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
 
 # addSMI {{{
 `addSMI` <- function(param=c(5,3,3,3),ma.type=c('EMA','EMA','EMA')) {
@@ -170,7 +155,7 @@ function(x) {
     smi <- x@TA.values
     plot(x.range,seq(min(smi[,1]*.975,na.rm=TRUE),max(smi[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#333333")
+    grid(NA,NULL,col="#303030")
     lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
     title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
@@ -237,9 +222,68 @@ function(x) {
     rsi <- x@TA.values
     plot(x.range,seq(min(rsi*.975,na.rm=TRUE),max(rsi*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#333333")
+    grid(NA,NULL,col="#303030")
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
+    #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addROC {{{
+`addROC` <- function(n=1,type=c('discrete','continuous'),col='red') {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  roc <- ROC(Cl(x),n=n,type=type,na=NA)
+  chobTA@TA.values <- roc
+  chobTA@name <- "chartROC"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,type=type,col=col)
+  return(chobTA)
+} #}}}
+# chartROC {{{
+`chartROC` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    #param <- x@params$param; ma.type <- x@params$ma.type
+    roc <- x@TA.values
+    plot(x.range,seq(min(roc*.975,na.rm=TRUE),max(roc*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col="#303030")
+    lines(seq(1,length(x.range),by=spacing),roc,col=x@params$col,lwd=2,type='l')
     #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -303,6 +347,84 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
     lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
     lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
+} # }}}
+
+# addMACD {{{
+`addMACD` <- function(fast=12,slow=26,signal=9,type='EMA',histogram=TRUE,col) {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+    MACD <- 
+    function (x,fast=12,slow=26,signal=9,type='EMA') 
+    {
+        if(length(type) != 3) type <- rep(type[1],3) 
+        oscillator <- oscillator(x, list(type[1], n = fast), list(type[2], 
+            n = slow), list(type[3], n = signal))
+        return(oscillator)
+    }
+
+  col <- if(missing(col)) col <- c('#999999','#777777',
+                              '#BBBBBB','#FF0000')
+
+  macd <- MACD(Cl(x),fast=fast,slow=slow,signal=signal,type=type)
+  
+  chobTA@TA.values <- macd
+  chobTA@name <- "chartMACD"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,histo=histogram
+                        )
+  return(chobTA)
+} #}}}
+# chartMACD {{{
+`chartMACD` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    col <- x@params$col
+    macd <- x@TA.values
+    macd.min <- min(macd[,1],macd[,2],macd[,1]-macd[,2],na.rm=TRUE)
+    macd.max <- max(macd[,1],macd[,2],macd[,1]-macd[,2],na.rm=TRUE)
+    plot(x.range,seq(macd.min*.975,macd.max*1.05,length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col="#303030")
+    if(x@params$histo) {
+      x.pos <- 1 + spacing * (1:NROW(macd) -1)
+      cols <- ifelse((macd[,1]-macd[,2]) > 0, col[1],col[2])
+      rect(x.pos - spacing/5,0,x.pos + spacing/5, macd[,1]-macd[,2],
+           col=cols,border=cols)
+    } 
+    lines(seq(1,length(x.range),by=spacing),macd[,1],col=col[3],lwd=2)
+    lines(seq(1,length(x.range),by=spacing),macd[,2],col=col[4],lwd=1,lty='dotted')
+    #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
 } # }}}
 
 # addMA {{{
