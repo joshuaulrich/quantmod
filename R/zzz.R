@@ -2,7 +2,7 @@
   cat("quantmod: Quantitative Financial Modelling Framework\n\n")
   cat("Version 0.2-9\n")
   cat("http://www.quantmod.com\n\n")
-  library.dynam("quantmod",pkg,lib)
+#  library.dynam("quantmod",pkg,lib)
 }
 
 setOldClass("zoo");
