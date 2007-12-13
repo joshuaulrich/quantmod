@@ -341,7 +341,7 @@ function(x,debug=FALSE,
 # candleChart {{{
 `candleChart` <-
 function(x,debug=FALSE,
-         type='candle'
+         type='candle',
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
