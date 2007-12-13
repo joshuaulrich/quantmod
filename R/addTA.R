@@ -43,6 +43,7 @@
   chobTA@TA.values <- cbind(x[,c(1,4)],Volumes/vol.scale[[1]])
   chobTA@name <- "chartVo"
   chobTA@call <- match.call()
+  
   chobTA@params <- list(xrange=lchob@xrange,
                         colors=lchob@colors,
                         color.vol=lchob@color.vol,
@@ -53,6 +54,7 @@
                         vol.scale=vol.scale,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale)
+  chobTA@params$thin <- ifelse(lchob@type %in% c('bars','matchsticks'),TRUE,FALSE)
   return(chobTA)
 } # }}}
 # chartVo {{{
@@ -95,9 +97,13 @@ function(x) {
                         x@params$colors$up.col,
                         x@params$colors$dn.col)
     }
-
-    rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
-         col=bar.col,border="#666666")
+    if(x@params$thin) {
+      # plot thin volume bars if appropriate
+      segments(x.pos,0,x.pos,Volumes,col=bar.col)
+    } else {
+      rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
+           col=bar.col,border="#666666")
+    }
     title(ylab=paste("volume (",vol.scale[[2]],")"))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -123,7 +129,6 @@ function(x) {
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
-
   smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
              ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
   chobTA@TA.values <- smi

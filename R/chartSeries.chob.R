@@ -54,10 +54,16 @@ function(x)
       if(x@type=='candlesticks') {
         rect(x.pos-x@spacing/3,Opens,x.pos+x@spacing/3,Closes,
              col=bar.col,border="#666666")
-      } else segments(x.pos,Opens,x.pos,Highs,col=bar.col)
-    } else {
+      } else segments(x.pos,Opens,x.pos,Closes,col=bar.col)
+    } else 
+    if(x@type == 'line') {
+      lines(x.pos,Closes,col='blue',type=x@line.type)
+    } else {  # bars
+      # draw vertical HL
       segments(x.pos,Lows,x.pos,Highs,col=bar.col)
+      # draw CLOSE notch
       segments(x.pos,Closes,x.pos+x@spacing/6,Closes,col=bar.col)
+      # draw OPEN notch if OHLC, else extend CLOSE
       if(x@bar.type=='hlc') {
         segments(x.pos-x@spacing/6,Closes,x.pos,Closes,col=bar.col)
       } else segments(x.pos-x@spacing/6,Opens,x.pos,Opens,col=bar.col)
