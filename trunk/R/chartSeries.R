@@ -1,7 +1,3 @@
-`setTA` <- function(...) {
-  as.character(match.call()[-1])
-}
-
 # chartSeries {{{
 `chartSeries` <-
 function(x,debug=FALSE,
@@ -130,6 +126,8 @@ function(x,debug=FALSE,
 
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
+  chob@bar.type <- bar.type
+  chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
   chob@bp <- bp
@@ -298,6 +296,8 @@ function(x,debug=FALSE,
 
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
+  chob@bar.type <- bar.type
+  chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
   chob@bp <- bp
@@ -466,6 +466,8 @@ function(x,debug=FALSE,
 
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
+  chob@bar.type <- bar.type
+  chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
   chob@bp <- bp
