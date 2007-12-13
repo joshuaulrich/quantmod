@@ -46,13 +46,23 @@ function(x)
     bar.col <- ifelse(Opens < Closes,x@colors$up.col,x@colors$dn.col)
   }
 
-  # draw HL lines
-  rect(x.pos,Lows,x.pos,Highs,border="#666666")
-
-  # draw OC candles
-  rect(x.pos-x@spacing/5,Opens,x.pos+x@spacing/5,Closes,
-       col=bar.col,border=bar.col)
   
+    if(x@type %in% c('candlesticks','matchsticks')) {
+      # draw HL lines
+      segments(x.pos,Lows,x.pos,Highs,col="#666666")
+      # draw OC candles
+      if(x@type=='candlesticks') {
+        rect(x.pos-x@spacing/3,Opens,x.pos+x@spacing/3,Closes,
+             col=bar.col,border="#666666")
+      } else segments(x.pos,Opens,x.pos,Highs,col=bar.col)
+    } else {
+      segments(x.pos,Lows,x.pos,Highs,col=bar.col)
+      segments(x.pos,Closes,x.pos+x@spacing/6,Closes,col=bar.col)
+      if(x@bar.type=='hlc') {
+        segments(x.pos-x@spacing/6,Closes,x.pos,Closes,col=bar.col)
+      } else segments(x.pos-x@spacing/6,Opens,x.pos,Opens,col=bar.col)
+    }    
+
   axis(2)
   box(col=x@colors$fg.col)
 

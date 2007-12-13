@@ -78,7 +78,7 @@ function(x) {
     plot(x.range,seq(min(Volumes),max(Volumes),
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#303030")
+    grid(NA,NULL,col=x@params$colors$grid.col)
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
     if (x@params$multi.col) {
       last.Closes <- as.numeric(quantmod::Lag(Closes))
@@ -91,11 +91,13 @@ function(x) {
                                x@params$colors$dn.dn.col,
                                x@params$colors$up.dn.col))
     } else {
-      bar.col <- ifelse(Opens < Closes, x@params$colors$up.col, x@params$colors$dn.col)
+      bar.col <- ifelse(Opens < Closes, 
+                        x@params$colors$up.col,
+                        x@params$colors$dn.col)
     }
 
-    rect(x.pos-spacing/5,0,x.pos+spacing/5,Volumes,
-         col=bar.col,border=bar.col)
+    rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
+         col=bar.col,border="#666666")
     title(ylab=paste("volume (",vol.scale[[2]],")"))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -155,7 +157,7 @@ function(x) {
     smi <- x@TA.values
     plot(x.range,seq(min(smi[,1]*.975,na.rm=TRUE),max(smi[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#303030")
+    grid(NA,NULL,col=x@params$colors$grid.col)
     lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
     title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
@@ -222,7 +224,7 @@ function(x) {
     rsi <- x@TA.values
     plot(x.range,seq(min(rsi*.975,na.rm=TRUE),max(rsi*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#303030")
+    grid(NA,NULL,col=x@params$colors$grid.col)
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
     #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
@@ -282,7 +284,7 @@ function(x) {
     roc <- x@TA.values
     plot(x.range,seq(min(roc*.975,na.rm=TRUE),max(roc*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#303030")
+    grid(NA,NULL,col=x@params$colors$grid.col)
     lines(seq(1,length(x.range),by=spacing),roc,col=x@params$col,lwd=2,type='l')
     #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
     axis(2)
@@ -413,7 +415,7 @@ function(x) {
     macd.max <- max(macd[,1],macd[,2],macd[,1]-macd[,2],na.rm=TRUE)
     plot(x.range,seq(macd.min*.975,macd.max*1.05,length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col="#303030")
+    grid(NA,NULL,col=x@params$colors$grid.col)
     if(x@params$histo) {
       x.pos <- 1 + spacing * (1:NROW(macd) -1)
       cols <- ifelse((macd[,1]-macd[,2]) > 0, col[1],col[2])
