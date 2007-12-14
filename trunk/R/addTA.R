@@ -1,3 +1,20 @@
+`setTA` <-
+function(type=c('chartSeries','barChart','candleChart')) {
+  if('chartSeries' %in% type) setDefaults(chartSeries,TA=listTA())
+  if('barChart' %in% type) setDefaults(barChart,TA=listTA())
+  if('candleChart' %in% type) setDefaults(candleChart,TA=listTA())
+}
+`unsetTA` <-
+function(type=c('chartSeries','barChart','candleChart')) {
+  if('chartSeries' %in% type) setDefaults(chartSeries,TA=NULL)
+  if('barChart' %in% type) setDefaults(barChart,TA=NULL)
+  if('candleChart' %in% type) setDefaults(candleChart,TA=NULL)
+}
+
+`saveTA` <- function() {}
+`loadTA` <- function() {}
+`removeTA` <- function() {}
+
 `listTA` <-
 function(dev) {
   if(missing(dev)) dev <- dev.cur()
