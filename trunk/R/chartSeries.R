@@ -20,9 +20,11 @@ function(x,debug=FALSE,
     Highs <- max(x[,1])
     Closes <- as.numeric(x[,1])
     type <- "line"
+    color.vol <- FALSE
   } 
   if(has.Vo(x)) {
     Volumes <- as.numeric(Vo(x))
+    show.vol <- TRUE
   } else show.vol <- FALSE
   
   if(is.null(time.scale)) {
@@ -126,6 +128,7 @@ function(x,debug=FALSE,
 
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
+  chob@show.vol <- show.vol
   chob@bar.type <- bar.type
   chob@line.type <- line.type
   chob@spacing <- spacing
@@ -170,8 +173,7 @@ function(x,debug=FALSE,
 } #}}}
 # barChart {{{
 `barChart` <-
-function(x,debug=FALSE,
-         type='bars',
+function(x,
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
@@ -180,6 +182,7 @@ function(x,debug=FALSE,
          xlab="time",ylab="price",theme="black",
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
+  type <- 'bars'
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
     Highs <- as.numeric(Hi(x))
@@ -190,9 +193,11 @@ function(x,debug=FALSE,
     Highs <- max(x[,1])
     Closes <- as.numeric(x[,1])
     type <- "line"
+    color.vol <- FALSE
   } 
   if(has.Vo(x)) {
     Volumes <- as.numeric(Vo(x))
+    show.vol <- TRUE
   } else show.vol <- FALSE
   
   if(is.null(time.scale)) {
@@ -296,6 +301,7 @@ function(x,debug=FALSE,
 
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
+  chob@show.vol <- show.vol
   chob@bar.type <- bar.type
   chob@line.type <- line.type
   chob@spacing <- spacing
@@ -340,8 +346,7 @@ function(x,debug=FALSE,
 } #}}}
 # candleChart {{{
 `candleChart` <-
-function(x,debug=FALSE,
-         type='candle',
+function(x,
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
@@ -350,6 +355,7 @@ function(x,debug=FALSE,
          xlab="time",ylab="price",theme="black",
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
+  type <- 'candlesticks'
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
     Highs <- as.numeric(Hi(x))
@@ -360,9 +366,11 @@ function(x,debug=FALSE,
     Highs <- max(x[,1])
     Closes <- as.numeric(x[,1])
     type <- "line"
+    color.vol <- FALSE
   } 
   if(has.Vo(x)) {
     Volumes <- as.numeric(Vo(x))
+    show.vol <- TRUE
   } else show.vol <- FALSE
   
   if(is.null(time.scale)) {
@@ -466,6 +474,7 @@ function(x,debug=FALSE,
 
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
+  chob@show.vol <- show.vol
   chob@bar.type <- bar.type
   chob@line.type <- line.type
   chob@spacing <- spacing
