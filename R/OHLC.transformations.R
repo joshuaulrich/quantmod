@@ -357,7 +357,7 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
         }
     }
     dim(x2) <- NULL  # allow for multiple k matrix math to happen
-    if(type=='log') {
+    if(type==1) {
         xx <- log(x2/Lag(x1,k))
     } else {
         xx <- (x2-Lag(x1,k))/Lag(x1,k)

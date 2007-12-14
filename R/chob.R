@@ -53,10 +53,14 @@ function(n)
 }
 
 
-`print.chob` <-
-function(x,...)
+`plot.chobTA` <-
+function(x,y,...)
 {
-#  plot.chob(x)
+    lchob <- get.chob()[[dev.cur()]]
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,x)
+    lchob@windows <- lchob@windows + ifelse(x@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
 }
 setClass("chob",
          representation(
@@ -90,14 +94,14 @@ setClass("chobTA",
          )
 )
 
-setMethod("show","chobTA",function(object) { 
-    lchob <- get.chob()[[dev.cur()]]
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,object)
-    lchob@windows <- lchob@windows + ifelse(object@new,1,0)
-    #write.chob(chob,dev.cur())
-    #do.call('cS2',chob@passed.args)
-    do.call('chartSeries.chob',list(lchob))
-    #str(chob@passed.args)
-  }
-)
+#setMethod("show","chobTA",function(object) { 
+#    lchob <- get.chob()[[dev.cur()]]
+#    TA <- lchob@passed.args$TA
+#    lchob@passed.args$TA <- c(TA,object)
+#    lchob@windows <- lchob@windows + ifelse(object@new,1,0)
+#    #write.chob(chob,dev.cur())
+#    #do.call('cS2',chob@passed.args)
+#    do.call('chartSeries.chob',list(lchob))
+#    #str(chob@passed.args)
+#  }
+#)

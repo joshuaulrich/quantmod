@@ -1,3 +1,9 @@
+`listTA` <-
+function(dev) {
+  if(missing(dev)) dev <- dev.cur()
+  sapply(get.chob()[[dev]]@passed.args$TA,function(x) x@call)
+}
+
 # addVo {{{
 `addVo` <- function() {
   if(exists('chob',env=sys.frames()[[1]])) {
@@ -24,6 +30,7 @@
     lchob <- gchob[[current.chob]]
     }
   }
+  if(!lchob@show.vol) return()
   x <- as.matrix(eval(lchob@passed.args$x))
   Volumes <- x[,5]
   max.vol <- max(Volumes)
@@ -55,7 +62,16 @@
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale)
   chobTA@params$thin <- ifelse(lchob@type %in% c('bars','matchsticks'),TRUE,FALSE)
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+  #return(chobTA)
 } # }}}
 # chartVo {{{
 `chartVo` <-
@@ -82,6 +98,9 @@ function(x) {
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
+    if(!x@params$color.vol) {
+      bar.col <- "blue"
+    } else
     if (x@params$multi.col) {
       last.Closes <- as.numeric(quantmod::Lag(Closes))
       last.Closes[1] <- Closes[1]
@@ -144,7 +163,15 @@ function(x) {
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
                         param=param,ma.type=ma.type)
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
 } #}}}
 # chartSMI {{{
 `chartSMI` <-
@@ -211,7 +238,15 @@ function(x) {
                         time.scale=lchob@time.scale,
                         n.up=n.up,n.dn=n.dn,type.up=type.up,type.dn=type.dn,
                         wilder.up=wilder.up,wilder.dn=wilder.dn)
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
 } #}}}
 # chartRSI {{{
 `chartRSI` <-
@@ -271,7 +306,15 @@ function(x) {
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
                         n=n,type=type,col=col)
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
 } #}}}
 # chartROC {{{
 `chartROC` <-
@@ -335,8 +378,16 @@ function(x) {
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
                         n=n,ma=ma,sd=sd)
-  return(chobTA)
-zo} #}}}
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
 # chartBBands {{{
 `chartBBands` <-
 function(x) {
@@ -403,7 +454,15 @@ function(x) {
                         time.scale=lchob@time.scale,
                         col=col,histo=histogram
                         )
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
 } #}}}
 # chartMACD {{{
 `chartMACD` <-
@@ -491,7 +550,15 @@ function(x) {
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
                         ma.col=col,n=n,wilder=wilder)
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
 } # }}}
 # chartMA {{{
 `chartMA` <-
@@ -571,7 +638,15 @@ function(x) {
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
                         col=col,lty=lty)
-  return(chobTA)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
 } # }}}
 # chartExpiry {{{
 `chartExpiry` <-
