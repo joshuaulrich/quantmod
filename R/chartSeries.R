@@ -1,6 +1,6 @@
 # chartSeries {{{
 `chartSeries` <-
-function(x,debug=FALSE,
+function(x,
          type=c("auto","candlesticks","matchsticks","bars","line"),
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
