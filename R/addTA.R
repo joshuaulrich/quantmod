@@ -88,7 +88,6 @@ function(dev) {
   } else {
    return(chobTA)
   } 
-  #return(chobTA)
 } # }}}
 # chartVo {{{
 `chartVo` <-
@@ -138,7 +137,7 @@ function(x) {
       segments(x.pos,0,x.pos,Volumes,col=bar.col)
     } else {
       rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
-           col=bar.col,border="#666666")
+           col=bar.col,border=x@params$colors$border)
     }
     title(ylab=paste("volume (",vol.scale[[2]],")"))
     axis(2)
@@ -380,7 +379,7 @@ function(x) {
 
   x <- as.matrix(eval(lchob@passed.args$x))
 
-  bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=list(FUN='sd',n=sd))
+  bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=sd)
   chobTA@TA.values <- bb
   chobTA@name <- "chartBBands"
   chobTA@call <- match.call()

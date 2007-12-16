@@ -60,11 +60,11 @@ function(x)
   
     if(x@type %in% c('candlesticks','matchsticks')) {
       # draw HL lines
-      segments(x.pos,Lows,x.pos,Highs,col="#666666")
+      segments(x.pos,Lows,x.pos,Highs,col=x@colors$border)
       # draw OC candles
       if(x@type=='candlesticks') {
         rect(x.pos-x@spacing/3,Opens,x.pos+x@spacing/3,Closes,
-             col=bar.col,border="#666666")
+             col=bar.col,border=x@colors$border)
       } else segments(x.pos,Opens,x.pos,Closes,col=bar.col)
     } else {  # bars
       # draw vertical HL
@@ -100,9 +100,10 @@ function(x)
   }
 
   # draw the final x labels
-  title(xlab=x@colors$time.scale,col.lab=x@colors$fg.col)
-  axis(1,at=1:x@length*x@spacing+1,labels=FALSE,col="#333333")
-  axis(1,at=x@bp*x@spacing+1,labels=x@x.labels,las=1,lwd=1,mgp=c(3,2,0))
+  #title(xlab=x@colors$time.scale,col.lab=x@colors$fg.col)
+  axis(1,at=1:x@length*x@spacing+1,labels=FALSE,col=x@colors$minor.tick)
+  axis(1,at=x@bp*x@spacing+1,labels=x@x.labels,las=1,lwd=1,mgp=c(3,2,0),
+       col=x@colors$major.tick)
 
   # resave new chob object - just in case of any changes
   write.chob(x,dev.cur())
