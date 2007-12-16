@@ -25,7 +25,7 @@ export(addROC)
 export(addMACD)
 export(addBBands)
 #export(EMA,RSI)
-#export(setTA)
+export(setTA,unsetTA)
 export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,

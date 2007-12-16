@@ -1,3 +1,4 @@
+# chartSeries.chob {{{
 `chartSeries.chob` <-
 function(x)
 {
@@ -107,4 +108,4 @@ function(x)
   write.chob(x,dev.cur())
   # reset layout of page
   layout(matrix(1))
-}
+}#}}}

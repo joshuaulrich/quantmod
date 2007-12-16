@@ -11,7 +11,7 @@ function(type=c('chartSeries','barChart','candleChart')) {
   if('candleChart' %in% type) setDefaults(candleChart,TA=NULL)
 }
 
-`saveTA` <- function() {}
+`saveTA` <- function(name,file) {}
 `loadTA` <- function() {}
 `removeTA` <- function() {}
 
