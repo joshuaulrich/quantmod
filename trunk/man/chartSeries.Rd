@@ -30,7 +30,6 @@ chartSeries(x,
 \arguments{
   \item{x}{ an OHLC object - see details }
   \item{type}{ style of chart to draw }
-  \item{show.vol}{ display volume on chart? }
   \item{show.grid}{ display price grid lines? }
   \item{name}{ name of chart }
   \item{time.scale}{ what is the timescale? automatically deduced }
