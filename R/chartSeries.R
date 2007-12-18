@@ -10,6 +10,7 @@ function(x,
          xlab="time",ylab="price",theme="black",
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
+  if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
     Highs <- as.numeric(Hi(x))
@@ -31,33 +32,9 @@ function(x,
     time.scale <- periodicity(x)$scale
   }
 
-  if(!is.character(theme) & !is(theme,'chart.theme')) stop("improper chart theme")
-  if(is.character(theme)) theme <- getTheme(theme)
+  if(is.character(theme)) theme <- chartTheme(theme)
   if(!missing(up.col)) theme$colors$up.col <- up.col 
   if(!missing(dn.col)) theme$colors$dn.col <- dn.col 
-
-#  if(theme=="black") {
-#    bg.col <- "#222222"
-#    fg.col <- "#666666"
-#    grid.col <- "#303030"
-#    up.col <- ifelse(missing(up.col),"#00FF00",up.col)
-#    dn.col <- ifelse(missing(dn.col),"#FF9900",dn.col)
-#  }
-#  if(theme=="white") {
-#    bg.col <- "#FFFFFF"
-#    fg.col <- "#444444"
-#    grid.col <- "#D0D0D0"
-#    up.col <- ifelse(missing(up.col),"#00CC00",up.col)
-#    dn.col <- ifelse(missing(dn.col),"#FF7700",dn.col)
-#  }
-#  if(theme=="grey") {
-#    bg.col <- "#FFFFFF"
-#    fg.col <- "#444444"
-#    grid.col <- "#D0D0D0"
-#    up.col <- ifelse(missing(up.col),"#FFFFFF",up.col)
-#    dn.col <- ifelse(missing(dn.col),"#000000",dn.col)
-#  }
-#  #if(is.logical(multi.col) | length(multi.col)==4) {
   if(missing(multi.col) | !multi.col) { # interpret as FALSE
     multi.col <- FALSE
     theme$colors$dn.up.col <- theme$colors$up.col
@@ -65,9 +42,6 @@ function(x,
     theme$colors$dn.dn.col <- theme$colors$dn.col
     theme$colors$up.dn.col <- theme$colors$dn.col
   } else {
-#    if(is.logical(multi.col) && multi.col==TRUE) {
-#      multi.col <- as.character(theme$multi.col)
-#    } 
     if(is.character(multi.col)) {
       # add some check for length 4 colors
       theme$colors$dn.up.col <- multi.col[1]
@@ -141,10 +115,6 @@ function(x,
   chob@width <- width
   chob@bp <- bp
   chob@x.labels <- x.labels
-#  chob@colors <- list(fg.col=fg.col,bg.col=bg.col,grid.col=grid.col,
-#                      up.col=up.col,dn.col=dn.col,
-#                      dn.up.col=dn.up.col,up.up.col=up.up.col,
-#                      dn.dn.col=dn.dn.col,up.dn.col=up.dn.col)
   chob@colors <- theme$colors
   chob@time.scale <- time.scale
 
@@ -525,14 +495,18 @@ function(x,
   invisible(chob)
 } #}}}
 
-`chart.theme` <- structure(list('white'=
+# .chart.theme {{{
+`.chart.theme` <- structure(list('white'=
                       list(colors=
                            list(fg.col="#888888",bg.col="#FFFFFF",
                                 grid.col="#CCCCCC",border="#666666",
-                                up.col="#00CC00",dn.col="#FF7700",
                                 minor.tick="#CCCCCC",major.tick="#888888",
+                                up.col="#00CC00",dn.col="#FF7700",
                                 dn.up.col="#888888",up.up.col="#FFFFFF",
-                                dn.dn.col="#FF0000",up.dn.col="#000000"
+                                dn.dn.col="#FF0000",up.dn.col="#000000",
+                                up.border="#666666",dn.border="#666666",
+                                dn.up.border="#666666",up.up.border="#666666",
+                                dn.dn.border="#666666",up.dn.border="#666666"
                                 ),
                            TA=list()
                           ),
@@ -540,17 +514,41 @@ function(x,
                       list(colors=
                            list(fg.col="#666666",bg.col="#222222",
                                 grid.col="#303030",border="#666666",
-                                up.col="#00FF00",dn.col="#FF9900",
                                 minor.tick="#CCCCCC",major.tick="#AAAAAA",
+                                up.col="#00FF00",dn.col="#FF9900",
                                 dn.up.col="#888888",up.up.col="#FFFFFF",
-                                dn.dn.col="#FF0000",up.dn.col="#000000"
+                                dn.dn.col="#FF0000",up.dn.col="#000000",
+                                up.border="#666666",dn.border="#666666",
+                                dn.up.border="#666666",up.up.border="#666666",
+                                dn.dn.border="#666666",up.dn.border="#666666"
+                                ),
+                           TA=list()
+                          ),
+                      'beige'=
+                      list(colors=
+                           list(fg.col="#888888",bg.col="#F5F5D0",
+                                grid.col="#CCCCCC",border="#666666",
+                                minor.tick="#CCCCCC",major.tick="#AAAAAA",
+                                up.col="#00FF00",dn.col="#AA0000",
+                                dn.up.col="#888888",up.up.col="#FFFFFF",
+                                dn.dn.col="#FF0000",up.dn.col="#000000",
+                                up.border="#666666",dn.border="#666666",
+                                dn.up.border="#666666",up.up.border="#666666",
+                                dn.dn.border="#666666",up.dn.border="#666666"
                                 ),
                            TA=list()
                           )
                      ), class='chart.theme')
+# }}}
 
-
-
-`getTheme` <- function(theme='black') {
-  structure(chart.theme[[theme]],class='chart.theme')
-}
+# chartTheme {{{
+`chartTheme` <- function(theme='black',...) {
+  ctheme <- get(".chart.theme",as.environment("package:quantmod"))
+  attr(ctheme,".Environment") <- NULL
+  current.theme <- ctheme[[theme]]
+  ll <- list(...)
+  for(i in names(ll)) {
+    if(i %in% names(current.theme$colors)) current.theme$colors[[i]] <- ll[[i]]
+  }
+  return(structure(current.theme,class='chart.series'))
+}#}}}
