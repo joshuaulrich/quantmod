@@ -21,7 +21,7 @@ Current technical indicators include:
   \item{addSMI}{add Stochastic Momentum Index}
   \item{addExpiry}{add options or futures expiration lines}
   \item{addADX}{add Welles Wilder's Directional Movement Indicator}
-  \item{addWPR}{add Williams Percentage R}}
+  \item{addWPR}{add Williams Percentage R}
   \item{addSAR}{add Parabolic SAR}
   \item{addVert}{add vertical line}
   \item{addHoriz}{add horizontal line}
