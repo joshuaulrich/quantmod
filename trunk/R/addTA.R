@@ -21,30 +21,7 @@ function(dev) {
 
 # addVo {{{
 `addVo` <- function() {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop('only chob in GlobalEnv!')
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) {
-      # create a default chob to work with: must match requirements of call
-      return(invisible(NULL))
-    } else {
-    #which is the current device; is it in the chob list?
-    #current.chob <- which(unlist(sapply(gchob,
-    #                             function(x) {
-    #                               if(!is.null(x)) x@device==as.numeric(dev.cur())
-    #                             })))+1
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-    }
-  }
+   lchob <- get.current.chob() 
   if(!lchob@show.vol) return()
   x <- as.matrix(eval(lchob@passed.args$x))
   Volumes <- x[,5]
@@ -143,27 +120,15 @@ function(x) {
 } # }}}
 
 # addSMI {{{
-`addSMI` <- function(param=c(5,3,3,3),ma.type=c('EMA','EMA','EMA')) {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+`addSMI` <- function(n=13,slow=25,fast=2,signal=9,ma.type='EMA') {
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
-  smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=param[1],ma.slow=list(ma.type[1],n=param[2]),
-             ma.fast=list(ma.type[2],n=param[3]),ma.sig=list(ma.type[3],n=param[4]))
+  if(length(ma.type) !=3)
+    ma.type <- rep(ma.type[1],3)
+  smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=n,ma.slow=list(ma.type[1],n=slow),
+             ma.fast=list(ma.type[2],n=fast),ma.sig=list(ma.type[3],n=signal))
   chobTA@TA.values <- smi
   chobTA@name <- "chartSMI"
   chobTA@call <- match.call()
@@ -176,7 +141,8 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        param=param,ma.type=ma.type)
+                        n=n,slow=slow,fast=fast,signal=signal,
+                        ma.type=ma.type)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
@@ -199,35 +165,20 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    param <- x@params$param; ma.type <- x@params$ma.type
     smi <- x@TA.values
     plot(x.range,seq(min(smi[,1]*.975,na.rm=TRUE),max(smi[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
     lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
-    title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
 
 # addWPR {{{
 `addWPR` <- function(n=14) {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
@@ -280,21 +231,7 @@ function(x) {
 
 # addRSI {{{
 `addRSI` <- function(n=14,type='EMA',wilder=TRUE) {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
@@ -355,21 +292,7 @@ function(x) {
 
 # addROC {{{
 `addROC` <- function(n=1,type=c('discrete','continuous'),col='red') {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
@@ -422,21 +345,7 @@ function(x) {
 
 # addBBands {{{
 `addBBands` <- function(n=20,ma='SMA',sd=2,on=1) {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- FALSE
@@ -490,21 +399,7 @@ function(x) {
 
 # addSAR {{{
 `addSAR` <- function(accel=c(0.02,0.2),col='blue') {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- FALSE
@@ -555,21 +450,7 @@ function(x) {
 
 # addMACD {{{
 `addMACD` <- function(fast=12,slow=26,signal=9,type='EMA',histogram=TRUE,col) {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-  }
+  lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
@@ -639,26 +520,9 @@ function(x) {
     box(col=x@params$colors$fg.col)
 } # }}}
 
-# addMA {{{
-`addMA` <- function(n=10,wilder=FALSE,on=1,with.col=Cl,overlay=TRUE,col='blue') {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) {
-      return(invisible(NULL))
-    } else {
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-    }
-  }
+# addEMA {{{
+`addEMA` <- function(n=10,wilder=FALSE,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+  lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
 
@@ -683,7 +547,7 @@ function(x) {
   }
 
   chobTA@TA.values <- x.tmp # single numeric vector
-  chobTA@name <- "chartMA"
+  chobTA@name <- "chartEMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
   chobTA@params <- list(xrange=lchob@xrange,
@@ -695,7 +559,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        ma.col=col,n=n,wilder=wilder)
+                        col=col,n=n,wilder=wilder,ratio=ratio)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
@@ -706,12 +570,9 @@ function(x) {
    return(chobTA)
   } 
 } # }}}
-# chartMA {{{
-`chartMA` <-
+# chartEMA {{{
+`chartEMA` <-
 function(x) {
-  # if volume is to be plotted, do so here
-    # scale volume - vol.divisor
-
     spacing <- x@params$spacing
     width <- x@params$width
 
@@ -721,12 +582,414 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    if(length(x@params$n) < length(x@params$ma.col)) {
+    if(length(x@params$n) < length(x@params$col)) {
       colors <- 3:10
-    } else colors <- x@params$ma.col
+    } else colors <- x@params$col
  
     for(li in 1:length(x@params$n)) {
-      ma <- EMA(x@TA.values,n=x@params$n[li],wilder=x@params$wilder)
+      ma <- EMA(x@TA.values,n=x@params$n[li],wilder=x@params$wilder,
+                ratio=x@params$ratio)
+      if(x@new) {
+        par(new=TRUE)
+        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+             type='n',axes=FALSE,ann=FALSE)
+        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        axis(2)
+        box(col=x@params$colors$fg.col)
+      }
+      lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+    }
+} # }}}
+
+# addSMA {{{
+`addSMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+  # get the appropriate data - from the approp. src
+  if(on==1) {
+    x <- as.matrix(eval(lchob@passed.args$x))
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    # get values from TA...
+    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
+    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+    x <- as.matrix(target.TA@TA.values)
+    if(missing(with.col)) {
+      warning('missing "with.col" argument')
+      invisible(return())
+    }
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  }
+
+  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@name <- "chartSMA"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartSMA {{{
+`chartSMA` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    if(length(x@params$n) < length(x@params$col)) {
+      colors <- 3:10
+    } else colors <- x@params$col
+ 
+    for(li in 1:length(x@params$n)) {
+      ma <- SMA(x@TA.values,n=x@params$n[li])
+      if(x@new) {
+        par(new=TRUE)
+        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+             type='n',axes=FALSE,ann=FALSE)
+        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        axis(2)
+        box(col=x@params$colors$fg.col)
+      }
+      lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+    }
+} # }}}
+
+# addWMA {{{
+`addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+  # get the appropriate data - from the approp. src
+  if(on==1) {
+    x <- as.matrix(eval(lchob@passed.args$x))
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    # get values from TA...
+    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
+    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+    x <- as.matrix(target.TA@TA.values)
+    if(missing(with.col)) {
+      warning('missing "with.col" argument')
+      invisible(return())
+    }
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  }
+
+  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@name <- "chartWMA"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,n=n,wts=wts)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartWMA {{{
+`chartWMA` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    if(length(x@params$n) < length(x@params$col)) {
+      colors <- 3:10
+    } else colors <- x@params$col
+ 
+    for(li in 1:length(x@params$n)) {
+      ma <- WMA(x@TA.values,n=x@params$n[li],wts=x@params$wts)
+      if(x@new) {
+        par(new=TRUE)
+        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+             type='n',axes=FALSE,ann=FALSE)
+        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        axis(2)
+        box(col=x@params$colors$fg.col)
+      }
+      lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+    }
+} # }}}
+
+# addDEMA {{{
+`addDEMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+  # get the appropriate data - from the approp. src
+  if(on==1) {
+    x <- as.matrix(eval(lchob@passed.args$x))
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    # get values from TA...
+    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
+    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+    x <- as.matrix(target.TA@TA.values)
+    if(missing(with.col)) {
+      warning('missing "with.col" argument')
+      invisible(return())
+    }
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  }
+
+  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@name <- "chartDEMA"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartDEMA {{{
+`chartDEMA` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    if(length(x@params$n) < length(x@params$col)) {
+      colors <- 3:10
+    } else colors <- x@params$col
+ 
+    for(li in 1:length(x@params$n)) {
+      ma <- DEMA(x@TA.values,n=x@params$n[li])
+      if(x@new) {
+        par(new=TRUE)
+        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+             type='n',axes=FALSE,ann=FALSE)
+        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        axis(2)
+        box(col=x@params$colors$fg.col)
+      }
+      lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+    }
+} # }}}
+
+# addEVWMA {{{
+`addEVWMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+  # get the appropriate data - from the approp. src
+  if(on==1) {
+    x <- as.matrix(eval(lchob@passed.args$x))
+    if(is.function(with.col)) {
+      x.tmp <- cbind(do.call(with.col,list(x)),Vo(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    # get values from TA...
+    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
+    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+    x <- as.matrix(target.TA@TA.values)
+    if(missing(with.col)) {
+      warning('missing "with.col" argument')
+      invisible(return())
+    }
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  }
+  if(!has.Vo(x)) return()
+
+  chobTA@TA.values <- cbind(x.tmp,Vo(x)) # Price + Volume
+  chobTA@name <- "chartEVWMA"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartEVWMA {{{
+`chartEVWMA` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    if(length(x@params$n) < length(x@params$col)) {
+      colors <- 3:10
+    } else colors <- x@params$col
+ 
+    for(li in 1:length(x@params$n)) {
+      ma <- EVWMA(x@TA.values[,1],x@TA.values[,2],n=x@params$n[li])
+      if(x@new) {
+        par(new=TRUE)
+        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+             type='n',axes=FALSE,ann=FALSE)
+        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        axis(2)
+        box(col=x@params$colors$fg.col)
+      }
+      lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+    }
+} # }}}
+
+# addZLEMA {{{
+`addZLEMA` <- function(n=10,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+  # get the appropriate data - from the approp. src
+  if(on==1) {
+    x <- as.matrix(eval(lchob@passed.args$x))
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    # get values from TA...
+    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
+    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+    x <- as.matrix(target.TA@TA.values)
+    if(missing(with.col)) {
+      warning('missing "with.col" argument')
+      invisible(return())
+    }
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  }
+
+  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@name <- "chartZLEMA"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,n=n,ratio=ratio)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartZLEMA {{{
+`chartZLEMA` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    if(length(x@params$n) < length(x@params$col)) {
+      colors <- 3:10
+    } else colors <- x@params$col
+ 
+    for(li in 1:length(x@params$n)) {
+      ma <- ZLEMA(x@TA.values,n=x@params$n[li],ratio=x@params$ratio)
       if(x@new) {
         par(new=TRUE)
         plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
@@ -741,25 +1004,7 @@ function(x) {
 
 # addExpiry {{{
 `addExpiry` <- function(type='options',lty='dotted',col='blue') {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
-    lchob <- get('chob',env=sys.frames()[[1]])
-  } else {
-    gchob <- get.chob()
-    #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) {
-      return(invisible(NULL))
-    } else {
-    #which is the current device; is it in the chob list?
-    current.chob <- which(sapply(gchob,
-                                 function(x) {
-                                   ifelse(class(x)=="chob" &&
-                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
-                                 }))
-    if(identical(current.chob,integer(0))) stop("no current plot")
-    lchob <- gchob[[current.chob]]
-    }
-  }
+  lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- FALSE
 
@@ -811,7 +1056,27 @@ function(x) {
     }
 } # }}}
 
-`RSI` <-
+# get.current.chob {{{
+`get.current.chob` <- function() {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  return(lchob)
+} #}}}
+
+`zzzRSI` <-
 function (price, ma.up = list("EMA", n = 14, wilder = TRUE), 
     ma.down = ma.up) 
 {
@@ -825,7 +1090,7 @@ function (price, ma.up = list("EMA", n = 14, wilder = TRUE),
 }
 
 
-`EMA` <-
+`zzzEMA` <-
 function (x, n = 10, wilder = FALSE) 
 {
     x <- as.vector(x)
