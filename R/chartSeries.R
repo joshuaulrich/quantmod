@@ -7,7 +7,7 @@ function(x,
          TA=c(addVo()),
          line.type="l",
          bar.type="ohlc",
-         xlab="time",ylab="price",theme="black",
+         xlab="time",ylab="price",theme=chartTheme("black"),
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
   if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
