@@ -1,25 +1,23 @@
+# setTA {{{
 `setTA` <-
 function(type=c('chartSeries','barChart','candleChart')) {
   if('chartSeries' %in% type) setDefaults(chartSeries,TA=listTA())
   if('barChart' %in% type) setDefaults(barChart,TA=listTA())
   if('candleChart' %in% type) setDefaults(candleChart,TA=listTA())
-}
+}# }}}
+# unsetTA {{{
 `unsetTA` <-
 function(type=c('chartSeries','barChart','candleChart')) {
   if('chartSeries' %in% type) setDefaults(chartSeries,TA=NULL)
   if('barChart' %in% type) setDefaults(barChart,TA=NULL)
   if('candleChart' %in% type) setDefaults(candleChart,TA=NULL)
-}
-
-`saveTA` <- function(name,file) {}
-`loadTA` <- function() {}
-`removeTA` <- function() {}
-
+}# }}}
+# listTA {{{
 `listTA` <-
 function(dev) {
   if(missing(dev)) dev <- dev.cur()
   sapply(get.chob()[[dev]]@passed.args$TA,function(x) x@call)
-}
+} # }}}
 
 # addVo {{{
 `addVo` <- function() {
@@ -209,6 +207,73 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
     title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addWPR {{{
+`addWPR` <- function(n=14) {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+  wpr <- WPR(cbind(Hi(x),Lo(x),Cl(x)),n=n)
+  chobTA@TA.values <- as.numeric(wpr)
+  chobTA@name <- "chartWPR"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartWPR {{{
+`chartWPR` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    wpr <- x@TA.values
+    plot(x.range,seq(min(wpr*.975,na.rm=TRUE),max(wpr*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+    lines(seq(1,length(x.range),by=spacing),wpr,col='#0033CC',lwd=2,type='l')
+    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -421,6 +486,71 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
     lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
     lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
+} # }}}
+
+# addSAR {{{
+`addSAR` <- function(accel=c(0.02,0.2),col='blue') {
+  if(exists('chob',env=sys.frames()[[1]])) {
+    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    lchob <- get('chob',env=sys.frames()[[1]])
+  } else {
+    gchob <- get.chob()
+    #protect against NULL device or windows not drawn to yet
+    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    current.chob <- which(sapply(gchob,
+                                 function(x) {
+                                   ifelse(class(x)=="chob" &&
+                                   x@device==as.numeric(dev.cur()),TRUE,FALSE)
+                                 }))
+    if(identical(current.chob,integer(0))) stop("no current plot")
+    lchob <- gchob[[current.chob]]
+  }
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- FALSE
+
+
+  x <- as.matrix(eval(lchob@passed.args$x))
+
+  sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)
+  chobTA@TA.values <- sar
+  chobTA@name <- "chartSAR"
+  chobTA@call <- match.call()
+  chobTA@on <- 1
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        accel=accel,col=col)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartSAR {{{
+`chartSAR` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    sar <- x@TA.values
+    points(seq(1,length(x.range),by=spacing),sar,col=x@params$col,cex=0.5)
 } # }}}
 
 # addMACD {{{

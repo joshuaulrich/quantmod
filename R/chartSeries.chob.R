@@ -29,11 +29,10 @@ function(x)
   on.exit(par(old.par))
 
   par(bg=x@colors$bg.col,col.axis=x@colors$fg.col,
-      xaxs='r',las=2,fg="#BBBBBB")
+      xaxs='r',las=2,fg=x@colors$fg.col)
   if(x@windows > 1) par(mar=c(0,4,3,3))
   plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
-  chart = "candlesticks"
   grid(NA,NULL,col=x@colors$grid.col)
 
   # a vector of x positions
@@ -42,35 +41,46 @@ function(x)
   if(x@type=='line') {
     lines(x.pos,Closes,col='blue',type=x@line.type)
   } else {
-  # create a vector of colors
-  if(x@multi.col) {
-    last.Closes <- as.numeric(quantmod::Lag(Closes))
-    last.Closes[1] <- Closes[1]
-    bar.col <- ifelse(Opens < Closes,
-                      ifelse(Opens > last.Closes,
-                             x@colors$dn.up.col,
-                             x@colors$up.up.col),
-                      ifelse(Opens < last.Closes,
-                             x@colors$dn.dn.col,
-                             x@colors$up.dn.col))
-  } else {
-    bar.col <- ifelse(Opens < Closes,x@colors$up.col,x@colors$dn.col)
-  }
-
-  
+    # create a vector of colors
+    if(x@multi.col) {
+      last.Closes <- as.numeric(quantmod::Lag(Closes))
+      last.Closes[1] <- Closes[1]
+      # create vector of appropriate bar colors
+      bar.col <- ifelse(Opens < Closes,
+                        ifelse(Opens > last.Closes,
+                               x@colors$dn.up.col,
+                               x@colors$up.up.col),
+                        ifelse(Opens < last.Closes,
+                               x@colors$dn.dn.col,
+                               x@colors$up.dn.col))
+      # create vector of appropriate border colors
+      bar.border <- ifelse(Opens < Closes,
+                           ifelse(Opens > last.Closes,
+                                  x@colors$dn.up.border,
+                                  x@colors$up.up.border),
+                           ifelse(Opens < last.Closes,
+                                  x@colors$dn.dn.border,
+                                  x@colors$up.dn.border))
+    } else {
+      bar.col <- ifelse(Opens < Closes,x@colors$up.col,x@colors$dn.col)
+      bar.border <- ifelse(Opens < Closes,x@colors$up.border,x@colors$dn.border)
+    }
     if(x@type %in% c('candlesticks','matchsticks')) {
       # draw HL lines
       segments(x.pos,Lows,x.pos,Highs,col=x@colors$border)
+
       # draw OC candles
       if(x@type=='candlesticks') {
         rect(x.pos-x@spacing/3,Opens,x.pos+x@spacing/3,Closes,
-             col=bar.col,border=x@colors$border)
+             col=bar.col,border=bar.border)
       } else segments(x.pos,Opens,x.pos,Closes,col=bar.col)
-    } else {  # bars
+    } else {  # draw HLC or OHLC bars
       # draw vertical HL
       segments(x.pos,Lows,x.pos,Highs,col=bar.col)
+
       # draw CLOSE notch
       segments(x.pos,Closes,x.pos+x@spacing/6,Closes,col=bar.col)
+
       # extend CLOSE to left side if HLC, else draw OPEN notch
       if(x@bar.type=='hlc') {
         segments(x.pos-x@spacing/6,Closes,x.pos,Closes,col=bar.col)
