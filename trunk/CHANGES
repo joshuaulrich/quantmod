@@ -30,7 +30,7 @@ NEW FUNCTIONALITY
   in applying technical indicators and overlays
 
 - addTA functions.  New charting tools to add technicals to
-  charts dynamically
+  charts dynamically.  More on the way
 
 - listTA, setTA, unsetTA to handle default TA args
 
@@ -44,3 +44,5 @@ NEW FUNCTIONALITY
 - getSymbols.RSQLite support.  Still very clunky.
 
 - getFX and getMetals for direct download of those types
+
+- added documentation and fixed documentation
