@@ -455,11 +455,11 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-    MACD <- 
+    macd <- 
     function (x,fast=12,slow=26,signal=9,type='EMA') 
     {
         if(length(type) != 3) type <- rep(type[1],3) 
-        oscillator <- oscillator(x, list(type[1], n = fast), list(type[2], 
+        oscillator <- MACD(x, list(type[1], n = fast), list(type[2], 
             n = slow), list(type[3], n = signal))
         return(oscillator)
     }
@@ -467,7 +467,7 @@ function(x) {
   col <- if(missing(col)) col <- c('#999999','#777777',
                               '#BBBBBB','#FF0000')
 
-  macd <- MACD(Cl(x),fast=fast,slow=slow,signal=signal,type=type)
+  macd <- macd(Cl(x),fast=fast,slow=slow,signal=signal,type=type)
   
   chobTA@TA.values <- macd
   chobTA@name <- "chartMACD"
@@ -602,7 +602,7 @@ function(x) {
 } # }}}
 
 # addSMA {{{
-`addSMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+`addSMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='brown') {
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -682,7 +682,7 @@ function(x) {
 } # }}}
 
 # addWMA {{{
-`addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+`addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='green') {
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -762,7 +762,7 @@ function(x) {
 } # }}}
 
 # addDEMA {{{
-`addDEMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+`addDEMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='pink') {
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -842,7 +842,7 @@ function(x) {
 } # }}}
 
 # addEVWMA {{{
-`addEVWMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+`addEVWMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='yellow') {
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -923,7 +923,7 @@ function(x) {
 } # }}}
 
 # addZLEMA {{{
-`addZLEMA` <- function(n=10,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+`addZLEMA` <- function(n=10,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='red') {
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
