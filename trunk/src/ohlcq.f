@@ -19,7 +19,10 @@ c     lia  length of ia vector
 c     nri  number of rows in input array
 c     ret  return array of values
 c
+      implicit none
+
       integer lbp,lia,nri
+      integer i,j
       integer hi,lo,cl,vo,ad
       integer bp(lbp),pos,hasvol,hasadj
       double precision o(lbp),h(lbp),l(lbp),c(lbp),a(lbp),v(lbp)
