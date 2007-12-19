@@ -33,24 +33,24 @@ function(x,
   }
 
   if(is.character(theme)) theme <- chartTheme(theme)
-  if(!missing(up.col)) theme$colors$up.col <- up.col 
-  if(!missing(dn.col)) theme$colors$dn.col <- dn.col 
+  if(!missing(up.col)) theme$up.col <- up.col 
+  if(!missing(dn.col)) theme$dn.col <- dn.col 
   if(missing(multi.col) | !multi.col) { # interpret as FALSE
     multi.col <- FALSE
-    theme$colors$dn.up.col <- theme$colors$up.col
-    theme$colors$up.up.col <- theme$colors$up.col
-    theme$colors$dn.dn.col <- theme$colors$dn.col
-    theme$colors$up.dn.col <- theme$colors$dn.col
+    theme$dn.up.col <- theme$up.col
+    theme$up.up.col <- theme$up.col
+    theme$dn.dn.col <- theme$dn.col
+    theme$up.dn.col <- theme$dn.col
   } else {
     if(is.character(multi.col)) {
       # add some check for length 4 colors
-      theme$colors$dn.up.col <- multi.col[1]
-      theme$colors$up.up.col <- multi.col[2]
-      theme$colors$dn.dn.col <- multi.col[3]
-      theme$colors$up.dn.col <- multi.col[4]
+      theme$dn.up.col <- multi.col[1]
+      theme$up.up.col <- multi.col[2]
+      theme$dn.dn.col <- multi.col[3]
+      theme$up.dn.col <- multi.col[4]
     }
-    theme$colors$up.col <- theme$colors$up.up.col
-    theme$colors$dn.col <- theme$colors$dn.dn.col
+    theme$up.col <- theme$up.up.col
+    theme$dn.col <- theme$dn.dn.col
     multi.col <- TRUE
   }
 
@@ -115,7 +115,7 @@ function(x,
   chob@width <- width
   chob@bp <- bp
   chob@x.labels <- x.labels
-  chob@colors <- theme$colors
+  chob@colors <- theme
   chob@time.scale <- time.scale
 
   chob@length <- NROW(x)
@@ -497,7 +497,6 @@ function(x,
 
 # .chart.theme {{{
 `.chart.theme` <- structure(list('white'=
-                      list(colors=
                            list(fg.col="#888888",bg.col="#FFFFFF",
                                 grid.col="#CCCCCC",border="#666666",
                                 minor.tick="#CCCCCC",major.tick="#888888",
@@ -508,10 +507,7 @@ function(x,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666"
                                 ),
-                           TA=list()
-                          ),
                       'black'=
-                      list(colors=
                            list(fg.col="#666666",bg.col="#222222",
                                 grid.col="#303030",border="#666666",
                                 minor.tick="#303030",major.tick="#AAAAAA",
@@ -522,10 +518,7 @@ function(x,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666"
                                 ),
-                           TA=list()
-                          ),
                       'beige'=
-                      list(colors=
                            list(fg.col="#888888",bg.col="#F5F5D0",
                                 grid.col="#CCCCCC",border="#666666",
                                 minor.tick="#CCCCCC",major.tick="#AAAAAA",
@@ -535,9 +528,7 @@ function(x,
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666"
-                                ),
-                           TA=list()
-                          )
+                                )
                      ), class='chart.theme')
 # }}}
 
@@ -548,7 +539,8 @@ function(x,
   current.theme <- ctheme[[theme]]
   ll <- list(...)
   for(i in names(ll)) {
-    if(i %in% names(current.theme$colors)) current.theme$colors[[i]] <- ll[[i]]
+    current.theme[[i]] <- ll[[i]]
   }
-  return(structure(current.theme,class='chart.series'))
+  return(structure(current.theme,class='chart.theme'))
 }#}}}
+
