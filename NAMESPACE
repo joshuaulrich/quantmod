@@ -28,7 +28,6 @@ export(addWPR)
 export(addSAR)
 export(addMACD)
 export(addBBands)
-#export(EMA,RSI)
 export(modelData,
     modelSignal,
     Op,Lo,Hi,Cl,Vo,Ad,

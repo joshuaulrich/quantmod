@@ -1,4 +1,4 @@
-0.2-9
+0.3-0
 
 BUG FIXES
 - Fixed factor bug in getSymbols.FRED.  Thanks to Josh Ulrich
@@ -17,7 +17,7 @@ MODIFICATIONS
 - getSymbols now returns a character array of symbol names
   written to environment.
 
-- getSymbols incliddes new arg - auto.assign.  If set to FALSE
+- getSymbols includes new arg - auto.assign.  If set to FALSE
   will behave like standard R functions and simply return
   loaded object.  Requires user assignment via '<-'
 
@@ -41,7 +41,7 @@ NEW FUNCTIONALITY
   for opposite behavior.  Additional _keep_ arg will assign
   removed data to an attribute _keep_ with the object
 
-- getSymbols.RSQLite support.  Still very clunky.
+- getSymbols.SQLite support.  Still very clunky - though that is SQLite.
 
 - getFX and getMetals for direct download of those types
 

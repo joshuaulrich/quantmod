@@ -16,14 +16,14 @@ addMACD(fast = 12, slow = 26, signal = 9, type = "EMA", histogram = TRUE, col)
   \item{col}{ colors to use for lines (optional) }
 }
 \details{
-See 'oscillator' and 'MACD' in \pkg{TTR} for specific
+See and 'MACD' in \pkg{TTR} for specific
 details and implementation references.
 }
 \value{
 A MACD indicator will be draw in a new window on the
 current chart.  A chobTA object will be returned silently.
 }
-\references{ see MACD and oscillator in \pkg{TTR} written by Josh Ulrich}
+\references{ see MACD in \pkg{TTR} written by Josh Ulrich}
 \author{Jeffrey A. Ryan }
 \seealso{ \code{\link{addTA}} }
 \examples{

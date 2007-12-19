@@ -121,6 +121,9 @@ function(x) {
 
 # addSMI {{{
 `addSMI` <- function(n=13,slow=25,fast=2,signal=9,ma.type='EMA') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
@@ -128,7 +131,8 @@ function(x) {
   if(length(ma.type) !=3)
     ma.type <- rep(ma.type[1],3)
   smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=n,ma.slow=list(ma.type[1],n=slow),
-             ma.fast=list(ma.type[2],n=fast),ma.sig=list(ma.type[3],n=signal))
+             ma.fast=list(ma.type[2],n=fast),
+             ma.sig=list(ma.type[3],n=signal))
   chobTA@TA.values <- smi
   chobTA@name <- "chartSMI"
   chobTA@call <- match.call()
@@ -178,11 +182,16 @@ function(x) {
 
 # addWPR {{{
 `addWPR` <- function(n=14) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
+
   wpr <- WPR(cbind(Hi(x),Lo(x),Cl(x)),n=n)
+
   chobTA@TA.values <- as.numeric(wpr)
   chobTA@name <- "chartWPR"
   chobTA@call <- match.call()
@@ -231,6 +240,9 @@ function(x) {
 
 # addRSI {{{
 `addRSI` <- function(n=14,type='EMA',wilder=TRUE) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
@@ -241,7 +253,7 @@ function(x) {
   wilder.up <- wilder[1]; wilder.dn <- ifelse(length(wilder) > 1,wilder[2],wilder[1])
 
   rsi <- RSI(Cl(x),ma.up=list(type.up,n=n.up,wilder=wilder.up),
-                   ma.down=list(type.dn,n=n.dn,wilder=wilder.dn))
+                     ma.down=list(type.dn,n=n.dn,wilder=wilder.dn))
   chobTA@TA.values <- rsi
   chobTA@name <- "chartRSI"
   chobTA@call <- match.call()
@@ -292,6 +304,9 @@ function(x) {
 
 # addROC {{{
 `addROC` <- function(n=1,type=c('discrete','continuous'),col='red') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
@@ -345,6 +360,9 @@ function(x) {
 
 # addBBands {{{
 `addBBands` <- function(n=20,ma='SMA',sd=2,on=1) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
@@ -354,6 +372,7 @@ function(x) {
   x <- as.matrix(eval(lchob@passed.args$x))
 
   bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=sd)
+
   chobTA@TA.values <- bb
   chobTA@name <- "chartBBands"
   chobTA@call <- match.call()
@@ -399,6 +418,9 @@ function(x) {
 
 # addSAR {{{
 `addSAR` <- function(accel=c(0.02,0.2),col='blue') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
@@ -408,6 +430,7 @@ function(x) {
   x <- as.matrix(eval(lchob@passed.args$x))
 
   sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)
+
   chobTA@TA.values <- sar
   chobTA@name <- "chartSAR"
   chobTA@call <- match.call()
@@ -450,6 +473,9 @@ function(x) {
 
 # addMACD {{{
 `addMACD` <- function(fast=12,slow=26,signal=9,type='EMA',histogram=TRUE,col) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
@@ -522,6 +548,9 @@ function(x) {
 
 # addEMA {{{
 `addEMA` <- function(n=10,wilder=FALSE,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='blue') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -603,6 +632,9 @@ function(x) {
 
 # addSMA {{{
 `addSMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='brown') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -683,6 +715,9 @@ function(x) {
 
 # addWMA {{{
 `addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='green') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -763,6 +798,9 @@ function(x) {
 
 # addDEMA {{{
 `addDEMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='pink') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -843,6 +881,9 @@ function(x) {
 
 # addEVWMA {{{
 `addEVWMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='yellow') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
@@ -924,6 +965,9 @@ function(x) {
 
 # addZLEMA {{{
 `addZLEMA` <- function(n=10,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='red') {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
