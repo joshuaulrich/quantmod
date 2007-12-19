@@ -11,18 +11,18 @@
 Add one or more moving averages to a chart.
 }
 \usage{
-addSMA(n = 10, on = 1, with.col = Cl, overlay = TRUE, col = "blue")
+addSMA(n = 10, on = 1, with.col = Cl, overlay = TRUE, col = "brown")
 
 addEMA(n = 10, wilder = FALSE, ratio=NULL, on = 1,
        with.col = Cl, overlay = TRUE, col = "blue")
 
-addWMA(n = 10, wts=1:n, on = 1, with.col = Cl, overlay = TRUE, col = "blue")
+addWMA(n = 10, wts=1:n, on = 1, with.col = Cl, overlay = TRUE, col = "green")
 
-addDEMA(n = 10, on = 1, with.col = Cl, overlay = TRUE, col = "blue")
+addDEMA(n = 10, on = 1, with.col = Cl, overlay = TRUE, col = "pink")
 
-addEVWMA(n = 10, on = 1, with.col = Cl, overlay = TRUE, col = "blue")
+addEVWMA(n = 10, on = 1, with.col = Cl, overlay = TRUE, col = "yellow")
 
-addZLEMA(n = 10, ratio=NULL, on = 1, with.col = Cl, overlay = TRUE, col = "blue")
+addZLEMA(n = 10, ratio=NULL, on = 1, with.col = Cl, overlay = TRUE, col = "red")
 }
 \arguments{
   \item{n}{ periods to average over }
