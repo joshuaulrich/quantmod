@@ -58,11 +58,11 @@ export(modelData,
     apply.yearly,
     first,
     last,
-#	returnBy,
 	breakpoints,
 	specifyModel,
 	getModelData,
 #    predictModel,
+    getQuote,
     getSymbols,
     getSymbols.MySQL,
     getSymbols.SQLite,
@@ -101,8 +101,6 @@ S3method(seriesHi,default)
 S3method(seriesHi,ts)
 S3method(seriesLo,default)
 S3method(seriesLo,ts)
-#S3method(chartSeries,zoo)
-#S3method(chartSeries,timeSeries)
 S3method(print,periodicity)
 S3method(to.period,quantmod.OHLC)
 S3method(to.period,zoo)
@@ -131,7 +129,6 @@ S3method(residuals,quantmod)
 S3method(resid,quantmod)
 S3method(anova,quantmod)
 S3method(plot,quantmod)
-#S3method(print,chob)
 S3method(plot,chobTA)
 S3method(plot,quantmodResults)
 S3method(as.zoo,data.frame)
