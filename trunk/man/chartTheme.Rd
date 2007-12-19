@@ -22,16 +22,16 @@ a pre-built theme in-place, or copy the theme to a new
 variable for use in subsequent charting calls.
 
 Internally a chart.theme object is nothing more than
-a list of values organized by chart components.
+a list of values organized by chart components. The primary
+purpose of this is to facilitate minor modification on
+the fly, as well as provide a template for larger changes.
 
 Setting style arguments for TA calls via chartTheme requires
-the user to pass the styles as name=value pairs within a list named
-for the TA call in question.  See examples for assistance.
+the user to pass the styles as name=value pairs with a name
+containing the TA call in question.  See examples for assistance.
 
 Current components that may be modified with appropriate
 values:
-\itemize{
-\item{color:}{Color defaults}
 \itemize{
   \item{fg.col}{foreground color}
   \item{bg.col}{background color}
@@ -52,8 +52,6 @@ values:
   \item{dn.dn.border}{down after down bar/candle border color}
   \item{dn.up.border}{down after up bar/candle border color}
 }
-\item{TA:}{Possible TA style defaults}
-}
 }
 \value{
 A chart.theme object
@@ -66,7 +64,7 @@ chartTheme('white')
 chartTheme('white',up.col='blue',dn.col='red')
 
 # A TA example
-chartTheme(addRSI=list(col='red'))
+chartTheme(addRSI.col='red')
 
 str(chartTheme())
 }

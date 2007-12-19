@@ -89,8 +89,10 @@ function(x) {
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
-    if(!x@params$color.vol) {
-      bar.col <- "blue"
+    if(!x@params$color.vol | !is.null(x@params$colors$Vo.bar.col)) {
+      bar.col <- ifelse(!is.null(x@params$colors$Vo.bar.col),
+                        x@params$colors$Vo.bar.col,
+                        x@params$colors$border)
     } else
     if (x@params$multi.col) {
       last.Closes <- as.numeric(quantmod::Lag(Closes))
@@ -107,12 +109,16 @@ function(x) {
                         x@params$colors$up.col,
                         x@params$colors$dn.col)
     }
+
+    # if border=NULL use color of bar
+    border.col <- ifelse(is.null(x@params$colors$border),bar.col,x@params$colors$border)
+
     if(x@params$thin) {
       # plot thin volume bars if appropriate
       segments(x.pos,0,x.pos,Volumes,col=bar.col)
     } else {
       rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
-           col=bar.col,border=x@params$colors$border)
+           col=bar.col,border=border.col)
     }
     title(ylab=paste("volume (",vol.scale[[2]],")"))
     axis(2)

@@ -67,7 +67,7 @@ function(x)
     }
     if(x@type %in% c('candlesticks','matchsticks')) {
       # draw HL lines
-      segments(x.pos,Lows,x.pos,Highs,col=x@colors$border)
+      segments(x.pos,Lows,x.pos,Highs,col=bar.border)
 
       # draw OC candles
       if(x@type=='candlesticks') {
