@@ -18,7 +18,10 @@ c     ia   input array of double precision
 c     lia  length of ia vector
 c     ret  return array of values
 c
+      implicit none
+
       integer lbp,lia
+      integer i,j
       integer bp(lbp),pos
       double precision o(lbp),h(lbp),l(lbp),c(lbp)
       double precision ia(lia), ret(*)
