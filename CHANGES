@@ -45,4 +45,6 @@ NEW FUNCTIONALITY
 
 - getFX and getMetals for direct download of those types
 
+- getQuote downloads Last,Change,Open,High,Low,Volume from Yahoo
+
 - added documentation and fixed documentation
