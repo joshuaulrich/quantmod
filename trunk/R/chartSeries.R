@@ -514,7 +514,7 @@ function(x,
                       list(colors=
                            list(fg.col="#666666",bg.col="#222222",
                                 grid.col="#303030",border="#666666",
-                                minor.tick="#CCCCCC",major.tick="#AAAAAA",
+                                minor.tick="#303030",major.tick="#AAAAAA",
                                 up.col="#00FF00",dn.col="#FF9900",
                                 dn.up.col="#888888",up.up.col="#FFFFFF",
                                 dn.dn.col="#FF0000",up.dn.col="#000000",

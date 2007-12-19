@@ -1,8 +1,7 @@
 ".onLoad" <- function(lib,pkg) {
   cat("quantmod: Quantitative Financial Modelling Framework\n\n")
-  cat("Version 0.2-9\n")
+  cat("Version 0.3-0\n")
   cat("http://www.quantmod.com\n\n")
-#  library.dynam("quantmod",pkg,lib)
 }
 
 setOldClass("zoo");
