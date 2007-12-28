@@ -257,8 +257,8 @@ function(x,
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
   chob@show.vol <- show.vol
-  chob@bar.type <- bar.type
-  chob@line.type <- line.type
+ # chob@bar.type <- bar.type
+ # chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
   chob@bp <- bp
@@ -407,7 +407,7 @@ function(x,
   chob@multi.col <- multi.col
   chob@show.vol <- show.vol
   chob@bar.type <- bar.type
-  chob@line.type <- line.type
+  #chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
   chob@bp <- bp
@@ -555,7 +555,7 @@ function(x,
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
   chob@show.vol <- show.vol
-  chob@bar.type <- bar.type
+  #chob@bar.type <- bar.type
   chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
