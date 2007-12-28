@@ -35,8 +35,8 @@ function(quantmod,training.data,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('rq','quantreg')) {
-    r <- rq(quantmod@model.formula,data=training.data,...)
-    #r <- do.call('rq',list(quantmod@model.formula,data=training.data,...))
+    #r <- rq(quantmod@model.formula,data=training.data,...)
+    r <- do.call('rq',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=r,
                 "inputs"=attr(terms(r),"term.labels"))) 
   }
@@ -47,7 +47,8 @@ function(quantmod,training.data,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('lqs','MASS')) {
-    lq <- lqs(quantmod@model.formula,data=training.data,...)
+    #lq <- lqs(quantmod@model.formula,data=training.data,...)
+    lq <- do.call('lqs',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=lq,
                 "inputs"=attr(terms(lq),"term.labels"))) 
   }
@@ -58,7 +59,8 @@ function(quantmod,training.data,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('lqs','MASS')) {
-    rl <- rlm(quantmod@model.formula,data=training.data,...)
+    #rl <- rlm(quantmod@model.formula,data=training.data,...)
+    rl <- do.call('rlm',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=rl,
                 "inputs"=attr(terms(rl),"term.labels"))) 
   }
@@ -69,7 +71,8 @@ function(quantmod,training.data,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('nnet','nnet')) {
-	nn <- nnet(quantmod@model.formula,data=training.data,...)
+	#nn <- nnet(quantmod@model.formula,data=training.data,...)
+    nn <- do.call('nnet',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=nn,
                 "inputs"=attr(terms(nn),"term.labels"))) 
   }
@@ -86,7 +89,8 @@ function(object,data,...)
 `buildModel.ppr` <-
 function(quantmod,training.data,...)
 {
-	p <- ppr(quantmod@model.formula,data=training.data,...)
+	#p <- ppr(quantmod@model.formula,data=training.data,...)
+    p <- do.call('ppr',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=p,
                 "inputs"=attr(terms(p),"term.labels"))) 
 }
@@ -98,7 +102,8 @@ function(quantmod,training.data,...)
   if(is.method.available('mars','mda')) {
 	x <- training.data[,-1]
 	y <- training.data[,1]
-	m <- mars(x=x,y=y,...)
+	#m <- mars(x=x,y=y,...)
+    m <- do.call('mars',list(x=x,y=y,...))
 	return(list("fitted"=m,
                 "inputs"=colnames(x))) 
   }
@@ -119,7 +124,8 @@ function(quantmod,training.data,...)
   if(is.method.available('polymars','polspline')) {
 	responses <- training.data[,1]
 	predictors <- training.data[,-1]
-	m <- polymars(responses,predictors,...)
+	#m <- polymars(responses,predictors,...)
+    m <- do.call('polymars',list(responses,predictors,...))
 	return(list("fitted"=m,
                 "inputs"=colnames(predictors))) 
   }
@@ -140,7 +146,8 @@ function(quantmod,training.data,...)
   if(is.method.available('lars','lars')) {
 	x <- training.data[,-1]
 	y <- training.data[,1]
-	m <- lars(x=x,y=y,...)
+	#m <- lars(x=x,y=y,...)
+    m <- do.call('lars',list(x=x,y=y,...))
 	return(list("fitted"=m,
                 "inputs"=colnames(x))) 
   }
@@ -160,7 +167,8 @@ function(object,data,lars.s,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('rpart','rpart')) {
-	rp <- rpart(quantmod@model.formula,data=training.data,...);
+	#rp <- rpart(quantmod@model.formula,data=training.data,...);
+    rp <- do.call('rpart',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
   }
@@ -179,7 +187,8 @@ function(object,data,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('tree','tree')) {
-	rp <- tree(quantmod@model.formula,data=training.data,...);
+	#rp <- tree(quantmod@model.formula,data=training.data,...);
+    rp <- do.call('tree',list(quantmod@model.formula,data=training.data,...))
 	return(list("fitted"=rp,
                 "inputs"=attr(terms(rp),"term.labels"))); 
   }
@@ -198,7 +207,8 @@ function(object,data,...)
 function(quantmod,training.data,...)
 {
   if(is.method.available('randomForest','randomForest')) {
-    rp <- randomForest(quantmod@model.formula,data=training.data,...)
+    #rp <- randomForest(quantmod@model.formula,data=training.data,...)
+    rp <- do.call('randomForest',list(quantmod@model.formula,data=training.data,...))
     return(list("fitted"=rp,
             "inputs"=attr(terms(rp),"term.labels"))) 
   }
@@ -215,10 +225,9 @@ function(object,data,...)
 `buildModel.svm` <-
 function(quantmod,training.data,...)
 {
-#  if(length(try(library(e1071),FALSE))==1)
-#    stop("Required package 'e1071' for method 'svm' was not found\n")
   if(is.method.available('svm','e1071')) {
-    rp <- svm(formula(quantmod),data=training.data,...)
+    #rp <- svm(formula(quantmod),data=training.data,...)
+    rp <- do.call('svm',list(formula(quantmod),data=training.data,...))
     return(list('fitted'=rp,attr(terms(rp),'term.labels')))
   }
 }
