@@ -14,7 +14,7 @@ function(x,row.date=TRUE,...)
 {
     #really need to test order - ???how?
     if(row.date) {
-        zoo(x,as.Date(rownames(x)),...)
+        zoo(x,as.Date(rownames(x),origin='1970-01-01'),...)
     }
     else {
         zoo(x,rownames(x),...)
