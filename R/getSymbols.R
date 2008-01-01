@@ -395,32 +395,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
        dim(fr) <- c(NROW(fr),1)
        colnames(fr) <- as.character(toupper(Symbols[[i]]))
-       if('zoo' %in% return.class) {
-         fr
-       }
-       if('ts' %in% return.class) {
-         fr <- as.ts(fr)
-       } else
-       if('data.frame' %in% return.class) {
-         fr <- as.data.frame(fr)
-       } else
-       if('its' %in% return.class) {
-         if("package:its" %in% search() || require("its", quietly=TRUE)) {
-           index(fr) <- as.POSIXct(index(fr))
-           fr <- its::as.its(fr)
-         } else {
-           warning(paste("'its' from package 'its' could not be loaded:",
-                         " 'zoo' class returned"))
-         }
-       } else 
-       if('timeSeries' %in% return.class) {
-         if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
-           fr <- as.timeSeries(fr)
-         } else {
-           warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
-                   " 'zoo' class returned"))
-         }
-       }
+       fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
@@ -785,8 +760,8 @@ function(Symbols,env,return.class='zoo',
        } else
        if('its' %in% return.class) {
          if("package:its" %in% search() || require("its", quietly=TRUE)) {
-           index(fr) <- as.POSIXct(as.character(index(fr)))
-           fr <- its::as.its(fr)
+           fr.dates <- as.POSIXct(as.character(index(fr)))
+           fr <- its::its(coredata(fr),fr.dates)
            return(fr)
          } else {
            warning(paste("'its' from package 'its' could not be loaded:",
