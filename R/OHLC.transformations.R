@@ -562,10 +562,10 @@ function(x) {
   if("timeSeries" %in% class(x)) {
     if("package:fCalendar" %in% search() || require("fCalendar",
         quietly=TRUE)) {
-      x <- as.timeSeries(zoo(seriesData(x),as.Date(rownames(x))))
+      x <- as.timeSeries(zoo(seriesData(x),as.Date(rownames(x),origin='1970-01-01')))
     }
   } else {
-    index(x) <- as.Date(index(x))
+    index(x) <- as.Date(index(x),origin='1970-01-01')
   }
   return(x)
 }

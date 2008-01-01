@@ -5,7 +5,7 @@ function(x,na.rm=TRUE)
       if("POSIXt" %in% class(x)) {
         return(x)
       } else {
-        x <- as.Date(x)
+        x <- as.Date(x,origin='1970-01-01')
         return(x)
       }
     }

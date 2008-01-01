@@ -111,12 +111,12 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- ifelse(is.null(to),default.to,to)
    
-       from.y <- as.numeric(strsplit(as.character(as.Date(from)),'-',)[[1]][1])
-       from.m <- as.numeric(strsplit(as.character(as.Date(from)),'-',)[[1]][2])-1
-       from.d <- as.numeric(strsplit(as.character(as.Date(from)),'-',)[[1]][3])
-       to.y <- as.numeric(strsplit(as.character(as.Date(to)),'-',)[[1]][1])
-       to.m <- as.numeric(strsplit(as.character(as.Date(to)),'-',)[[1]][2])-1
-       to.d <- as.numeric(strsplit(as.character(as.Date(to)),'-',)[[1]][3])
+       from.y <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][1])
+       from.m <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][2])-1
+       from.d <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][3])
+       to.y <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][1])
+       to.m <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][2])-1
+       to.d <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][3])
        
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
@@ -136,7 +136,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- read.csv(tmp)
        unlink(tmp)
        if(verbose) cat("done.\n")
-       fr <- zoo(fr[,-1],as.Date(fr[,1]))
+       fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
@@ -195,14 +195,14 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- fr[nrow(fr):1,] #google data is backwards
        if(fix.google.bug) {
          bad.dates <- c('29-Dec-04','30-Dec-04','31-Dec-04')
-         if(as.Date(from) < as.Date("2003-12-28") &&
-            as.Date(to) > as.Date("2003-12-30")) {
+         if(as.Date(from,origin='1970-01-01') < as.Date("2003-12-28",origin='1970-01-01') &&
+            as.Date(to,origin='1970-01-01') > as.Date("2003-12-30",origin='1970-01-01')) {
            dup.dates <- which(fr[,1] %in% bad.dates)[(1:3)]
            fr <- fr[-dup.dates,]
            warning("google duplicate bug - missing Dec 28,29,30 of 2003")
          }
        }
-       fr <- zoo(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y")))
+       fr <- zoo(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'))
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
@@ -265,7 +265,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
               class(d) <- c("POSIXt","POSIXct")
               fr <- zoo(fr[,-1],order.by=d)
             } else {
-              fr <- zoo(fr[,-1],order.by=as.Date(as.numeric(fr[,1])))
+              fr <- zoo(fr[,-1],order.by=as.Date(as.numeric(fr[,1]),origin='1970-01-01'))
             }
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
@@ -352,7 +352,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
             rs <- dbSendQuery(con, query)
             fr <- fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
-            fr <- zoo(fr[,-1],order.by=as.Date(fr[,1]))
+            fr <- zoo(fr[,-1],order.by=as.Date(fr[,1],origin='1970-01-01'))
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
@@ -392,7 +392,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- read.csv(tmp,na.string=".")
        unlink(tmp)
        if(verbose) cat("done.\n")
-       fr <- zoo(fr[,-1],as.Date(fr[,1]))
+       fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
        dim(fr) <- c(NROW(fr),1)
        colnames(fr) <- as.character(toupper(Symbols[[i]]))
        if('zoo' %in% return.class) {
@@ -527,7 +527,7 @@ function(Symbols,env,
     fr <- read.csv(sym.file)
     if(verbose)  
       cat("done.\n")
-    fr <- zoo(fr[,-1],as.Date(fr[,1]))
+    fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
     colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
                           c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
@@ -617,7 +617,7 @@ function(Symbols,env,
     assign('fr',get(local.name))
     if(verbose)  
       cat("done.\n")
-    if(!is.zoo(fr)) fr <- zoo(fr[,-1],as.Date(fr[,1]))
+    if(!is.zoo(fr)) fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
     colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),col.names,sep='.')
     if('quantmod.OHLC' %in% return.class) {
       class(fr) <- c('quantmod.OHLC','zoo')
@@ -726,12 +726,12 @@ function(Symbols,env,return.class='zoo',
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- ifelse(is.null(to),default.to,to)
    
-       if(as.Date(to)-as.Date(from) > 1999) stop("oanda limits data to 2000 days")
+       if(as.Date(to,origin='1970-01-01')-as.Date(from,origin='1970-01-01') > 1999) stop("oanda limits data to 2000 days")
        # automatically break larger requests into equal sized smaller request at some point
        # for now just let it remain
 
-       from.date <- format(as.Date(from),"date1=%m%%2F%d%%2F%y&")
-       to.date <- format(as.Date(to),"date=%m%%2F%d%%2F%y&date_fmt=us&")
+       from.date <- format(as.Date(from,origin='1970-01-01'),"date1=%m%%2F%d%%2F%y&")
+       to.date <- format(as.Date(to,origin='1970-01-01'),"date=%m%%2F%d%%2F%y&date_fmt=us&")
        
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
@@ -753,7 +753,7 @@ function(Symbols,env,return.class='zoo',
                     gsub("<PRE>|</PRE>","",fr[(grep("PRE",fr)[1]):(grep("PRE",fr)[2])]),","))
 
        if(verbose) cat("done.\n")
-       fr <- zoo(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y"))
+       fr <- zoo(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y",origin='1970-01-01'))
        dim(fr) <- c(length(fr),1)
        colnames(fr) <- gsub("/",".",Symbols[[i]])
        fr <- convert.time.series(fr=fr,return.class=return.class)
@@ -785,7 +785,7 @@ function(Symbols,env,return.class='zoo',
        } else
        if('its' %in% return.class) {
          if("package:its" %in% search() || require("its", quietly=TRUE)) {
-           index(fr) <- as.POSIXct(index(fr))
+           index(fr) <- as.POSIXct(as.character(index(fr)))
            fr <- its::as.its(fr)
            return(fr)
          } else {
