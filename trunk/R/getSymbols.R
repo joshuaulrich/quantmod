@@ -709,11 +709,11 @@ function(Symbols,env,return.class='zoo',
          }
        } else 
        if('timeSeries' %in% return.class) {
-         if("package:fCalendar" %in% search() || require("fCalendar",quietly=TRUE)) {
+         if("package:fSeries" %in% search() || require("fSeries",quietly=TRUE)) {
            fr <- as.timeSeries(fr)
            return(fr)
          } else {
-           warning(paste("'timeSeries' from package 'fCalendar' could not be loaded:",
+           warning(paste("'timeSeries' from package 'fSeries' could not be loaded:",
                    " 'zoo' class returned"))
          }
        }
