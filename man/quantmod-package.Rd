@@ -12,10 +12,10 @@ Quantitative Financial Modelling and Trading Framework for R
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.3-0\cr
-Date: \tab 2007-12-18\cr
-Depends: \tab zoo,Defaults\cr
-Suggests: \tab its,DBI,RMySQL,fCalendar\cr
+Version: \tab 0.3-1\cr
+Date: \tab 2007-01-07\cr
+Depends: \tab xts,Defaults\cr
+Suggests: \tab DBI,RMySQL,TTR\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL-3\cr
 URL: \tab http://www.quantmod.com\cr
