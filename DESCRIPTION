@@ -5,7 +5,7 @@ Version: 0.3-0
 Date: 2007-12-18
 Author: Jeffrey A. Ryan
 Depends: zoo,Defaults
-Suggests: its,DBI,RMySQL,fCalendar,RSQLite,TTR
+Suggests: its,DBI,RMySQL,fSeries,RSQLite,TTR
 Maintainer: Jeffrey A. Ryan <jeff.a.ryan@gmail.com>
 Description: Specify, build, trade, and analyse quantitative financial trading srategies
 LazyLoad: yes
