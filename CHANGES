@@ -1,3 +1,12 @@
+0.3-1
+
+BUG FIXES
+- new depends - on CRAN and R-Forge package xts for time-series handling internally
+
+- options.expiry and futures.expiry now use universal %w to check weekdays
+
+- Rmetrics change resulted in as.timeSeries moving to fSeries.  New suggest and assoc. changes
+
 0.3-0
 
 BUG FIXES
