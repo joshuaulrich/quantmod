@@ -560,7 +560,7 @@ function(x,drop.time=TRUE)
 function(x) {
   # function to remove HHMMSS portion of time index
   if("timeSeries" %in% class(x)) {
-    if("package:fCalendar" %in% search() || require("fCalendar",
+    if("package:fSeries" %in% search() || require("fSeries",
         quietly=TRUE)) {
       x <- as.timeSeries(zoo(seriesData(x),as.Date(rownames(x),origin='1970-01-01')))
     }
