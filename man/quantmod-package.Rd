@@ -15,7 +15,7 @@ Type: \tab Package\cr
 Version: \tab 0.3-1\cr
 Date: \tab 2007-01-07\cr
 Depends: \tab xts,Defaults\cr
-Suggests: \tab DBI,RMySQL,TTR\cr
+Suggests: \tab DBI,RMySQL,TTR,fSeries,its\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL-3\cr
 URL: \tab http://www.quantmod.com\cr
