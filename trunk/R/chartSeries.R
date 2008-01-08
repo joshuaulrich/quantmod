@@ -101,8 +101,8 @@ function(x,
 
   chob@xrange <- c(1,NROW(x))
   if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x)),max(Hi(x)))
-  } else chob@yrange <- range(x)
+    chob@yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
+  } else chob@yrange <- range(x,na.rm=TRUE)
   
 
 
