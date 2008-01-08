@@ -7,6 +7,9 @@ BUG FIXES
 
 - Rmetrics change resulted in as.timeSeries moving to fSeries.  New suggest and assoc. changes
 
+MODIFICATIONS
+- Added ability to plot series with missing values (like those in a 'ts' series)
+
 0.3-0
 
 BUG FIXES
