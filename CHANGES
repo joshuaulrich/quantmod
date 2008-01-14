@@ -9,6 +9,7 @@ BUG FIXES
 
 MODIFICATIONS
 - Added ability to plot series with missing values (like those in a 'ts' series)
+  Volume with missing obs. is still broken - to be fixed in 0.3-2
 
 0.3-0
 
