@@ -11,6 +11,7 @@ function(x,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
   if(!is.xts(x)) x <- as.xts(x)
+  indexClass(x) <- "POSIXct"
   #if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
@@ -206,6 +207,7 @@ function(x,
   # spacing requirements for chart type
   chart.options <- c("auto","candlesticks","matchsticks","line","bars")
   chart <- chart.options[pmatch(type,chart.options)]
+  chart <- 'bars'
   if(chart[1]=="auto") {
     chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
   }
