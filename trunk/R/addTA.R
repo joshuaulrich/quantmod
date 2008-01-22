@@ -141,7 +141,7 @@ function(x) {
 #            ma.sig=list(ma.type[3],n=signal))
 
   smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)), n=n, nFast=fast,
-             nSlow=slow, nSig=sig, maType=ma.type)
+             nSlow=slow, nSig=signal, maType=ma.type)
 
   chobTA@TA.values <- smi
   chobTA@name <- "chartSMI"

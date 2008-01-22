@@ -10,7 +10,8 @@ function(x,
          xlab="time",ylab="price",theme=chartTheme("black"),
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
-  if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
+  if(!is.xts(x)) x <- as.xts(x)
+  #if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
     Highs <- as.numeric(Hi(x))
