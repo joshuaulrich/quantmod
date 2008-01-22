@@ -66,7 +66,7 @@ The zoo object's index must be of class POSIXct or POSIXlt,
 or coercible to such, and have sufficient time detail.
 }
 \seealso{ \code{\link{weekdays}}, \code{\link{Date}}, \code{\link{POSIXlt}},
-          \code{\link{to.minutes}} }
+           }
 \examples{
 start.time <- as.POSIXlt("2004-12-31 00:08:30")
 minute.data <- zoo(rnorm(251),seq(start.time,start.time+15000,by=60))
