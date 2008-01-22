@@ -22,7 +22,7 @@ sum.
 A numeric vector of products per period.
 }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{period.apply}}, \code{\link{period.sum}},
+\seealso{ \code{\link{period.sum}},
           \code{\link{period.min}}, \code{\link{period.max}} }
 \examples{
 period.prod(c(1,1,4,2,2,6,7,8,-1,20),c(0,3,5,8,10))

@@ -47,8 +47,8 @@ and \code{unclass(periodicity(x))}.
 The number of observations for the period type specified
 }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{breakpoints}}, \code{\link{days}},
-          \code{\link{weeks}}, \code{\link{weekdays}}, \code{\link{periodicity}} }
+\seealso{ \code{\link{days}},
+          \code{\link{weeks}}, \code{\link{weekdays}} }
 \examples{
 \dontrun{
 getSymbols("QQQQ")

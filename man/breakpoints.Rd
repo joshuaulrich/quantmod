@@ -41,7 +41,6 @@ The last value in the returned vector \emph{most likely}
 does not mark the end of the specified period,
 rather it marks the end of the data.
 }
-\seealso{ \code{\link{period.apply}} calculate values for each interval }
 \examples{
 zoo.data <- zoo(rnorm(31)+10,as.Date(13514:13744,origin="1970-01-01"))
 breakpoints(zoo.data,by=weeks)

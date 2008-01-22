@@ -22,7 +22,7 @@ prod.
 A numeric vector of minimums per period.
 }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{period.apply}}, \code{\link{period.sum}},
+\seealso{ \code{\link{period.sum}},
           \code{\link{period.max}}, \code{\link{period.prod}} }
 \examples{
 period.min(c(1,1,4,2,2,6,7,8,-1,20),c(0,3,5,8,10))
