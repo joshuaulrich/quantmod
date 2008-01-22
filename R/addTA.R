@@ -247,6 +247,74 @@ function(x) {
     box(col=x@params$colors$fg.col)
 } # }}}
 
+# addADX {{{
+`addADX` <- function(n=14, maType="EMA", wilder=TRUE) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
+
+  chobTA@TA.values <- adx
+  chobTA@name <- "chartADX"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,maType=maType,wilder=wilder)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartADX {{{
+`chartADX` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    adx <- x@TA.values
+    plot(x.range,seq(min(adx[,4]*.975,na.rm=TRUE),
+         max(adx[,4]*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+    # draw DIp
+    lines(seq(1,length(x.range),by=spacing),adx[,1],col='green',lwd=1,type='l')
+    # draw DIn
+    lines(seq(1,length(x.range),by=spacing),adx[,2],col='red',lwd=1,type='l')
+    # draw ADX
+    lines(seq(1,length(x.range),by=spacing),adx[,4],col='blue',lwd=2,type='l')
+
+    # draw upper and lower guidelines
+    abline(h=20,col='#666666',lwd=1,lty='dotted')
+    abline(h=40,col='#666666',lwd=1,lty='dotted')
+    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
 # addRSI {{{
 `addRSI` <- function(n=14,type='EMA',wilder=TRUE) {
 
