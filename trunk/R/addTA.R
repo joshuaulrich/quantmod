@@ -136,9 +136,13 @@ function(x) {
   chobTA@new <- TRUE
   if(length(ma.type) !=3)
     ma.type <- rep(ma.type[1],3)
-  smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=n,ma.slow=list(ma.type[1],n=slow),
-             ma.fast=list(ma.type[2],n=fast),
-             ma.sig=list(ma.type[3],n=signal))
+# smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=n,ma.slow=list(ma.type[1],n=slow),
+#            ma.fast=list(ma.type[2],n=fast),
+#            ma.sig=list(ma.type[3],n=signal))
+
+  smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)), n=n, nFast=fast,
+             nSlow=slow, nSig=sig, maType=ma.type)
+
   chobTA@TA.values <- smi
   chobTA@name <- "chartSMI"
   chobTA@call <- match.call()
@@ -258,8 +262,9 @@ function(x) {
   type.up <- type[1]; type.dn <- ifelse(length(type) > 1,type[2],type[1])
   wilder.up <- wilder[1]; wilder.dn <- ifelse(length(wilder) > 1,wilder[2],wilder[1])
 
-  rsi <- RSI(Cl(x),ma.up=list(type.up,n=n.up,wilder=wilder.up),
-                     ma.down=list(type.dn,n=n.dn,wilder=wilder.dn))
+# rsi <- RSI(Cl(x),ma.up=list(type.up,n=n.up,wilder=wilder.up),
+#                    ma.down=list(type.dn,n=n.dn,wilder=wilder.dn))
+  rsi <- RSI(Cl(x),n=n,maType=type,wilder=wilder)
   chobTA@TA.values <- rsi
   chobTA@name <- "chartRSI"
   chobTA@call <- match.call()
@@ -377,8 +382,9 @@ function(x) {
 
   x <- as.matrix(eval(lchob@passed.args$x))
 
-  bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=sd)
-
+#  bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=sd)
+  bb <- BBands(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=ma,sd=sd)
+  
   chobTA@TA.values <- bb
   chobTA@name <- "chartBBands"
   chobTA@call <- match.call()
@@ -487,19 +493,20 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-    macd <- 
-    function (x,fast=12,slow=26,signal=9,type='EMA') 
-    {
-        if(length(type) != 3) type <- rep(type[1],3) 
-        oscillator <- MACD(x, list(type[1], n = fast), list(type[2], 
-            n = slow), list(type[3], n = signal))
-        return(oscillator)
-    }
+#    macd <- 
+#    function (x,fast=12,slow=26,signal=9,type='EMA') 
+#    {
+#        if(length(type) != 3) type <- rep(type[1],3) 
+#        oscillator <- MACD(x, list(type[1], n = fast), list(type[2], 
+#            n = slow), list(type[3], n = signal))
+#        return(oscillator)
+#    }
 
   col <- if(missing(col)) col <- c('#999999','#777777',
                               '#BBBBBB','#FF0000')
 
-  macd <- macd(Cl(x),fast=fast,slow=slow,signal=signal,type=type)
+#  macd <- macd(Cl(x),fast=fast,slow=slow,signal=signal,type=type)
+  macd <- MACD(Cl(x),nFast=fast,nSlow=slow,nSig=signal,maType=type)
   
   chobTA@TA.values <- macd
   chobTA@name <- "chartMACD"
