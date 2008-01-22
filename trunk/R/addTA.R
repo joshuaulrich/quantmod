@@ -134,8 +134,7 @@ function(x) {
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
-  if(length(ma.type) !=3)
-    ma.type <- rep(ma.type[1],3)
+
 # smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=n,ma.slow=list(ma.type[1],n=slow),
 #            ma.fast=list(ma.type[2],n=fast),
 #            ma.sig=list(ma.type[3],n=signal))
