@@ -51,7 +51,7 @@ function(Symbols,src='yahoo') {
                 Symbols,
                 "&f=sl1d1t1c1ohgv&e=.csv",sep=""),
                 dest=tmp,quiet=TRUE)
-  sq <- as.list(read.table(file=tmp,sep=',',stringsAsFactors=FALSE))
+  sq <- read.table(file=tmp,sep=',',stringsAsFactors=FALSE)
   unlink(tmp)
   Qposix <- (paste(sub('(.+)/(.+)/(....)','\\3/\\1/\\2',sq[,3]),
                              sq[,4]))
