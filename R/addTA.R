@@ -179,12 +179,27 @@ function(x) {
     color.vol <- x@params$color.vol
 
     smi <- x@TA.values
-    plot(x.range,seq(min(smi[,1]*.975,na.rm=TRUE),max(smi[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
+    plot(x.range,
+         seq(min(smi[,1]*.975,na.rm=TRUE),
+             max(smi[,1]*1.05,na.rm=TRUE),
+             length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+
     grid(NA,NULL,col=x@params$colors$grid.col)
-    lines(seq(1,length(x.range),by=spacing),smi[,1],col='#0033CC',lwd=2,type='l')
-    lines(seq(1,length(x.range),by=spacing),smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
-    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+
+    COLOR <- "#0033CC"
+
+    lines(seq(1,length(x.range),by=spacing),
+          smi[,1],col='#0033CC',lwd=2,type='l')
+    lines(seq(1,length(x.range),by=spacing),
+          smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
+
+    text(c(0,50), max(smi[,1], na.rm = TRUE), paste("Stochastic Momentum Index (",
+         paste(x@params$n,x@params$fast,x@params$slow,x@params$signal,sep=','), 
+        "):  ", sprintf("%.3f",last(smi[,1])), sep = ""), 
+        col = COLOR, 
+        pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -238,10 +253,288 @@ function(x) {
 
     n <- x@params$n
     wpr <- x@TA.values
-    plot(x.range,seq(min(wpr*.975,na.rm=TRUE),max(wpr*1.05,na.rm=TRUE),length.out=length(x.range)),
+    plot(x.range,
+         seq(min(wpr*.975,na.rm=TRUE),max(wpr*1.05,na.rm=TRUE),
+         length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    COLOR <- "#0033CC"
+
+    lines(seq(1,length(x.range),by=spacing),wpr,col=COLOR,lwd=2,type='l')
+
+    text(0,max(wpr,na.rm=TRUE),
+         paste("Williams %R (",x@params$n,"):  ",sprintf("%.3f",last(wpr)),sep=""),
+         col=COLOR,pos=4)
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addCMF {{{
+`addCMF` <- function(n=20) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  cmf <- CMF(cbind(Hi(x),Lo(x),Cl(x)),Vo(x),n=n)
+
+  chobTA@TA.values <- cmf
+  chobTA@name <- "chartCMF"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartCMF {{{
+`chartCMF` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    cmf <- x@TA.values
+    plot(x.range,seq(min(cmf*.975,na.rm=TRUE),
+         max(cmf*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
-    lines(seq(1,length(x.range),by=spacing),wpr,col='#0033CC',lwd=2,type='l')
+
+    COLOR <- "#0033CC"
+
+    abline(h=0,col="#999999")
+    lines(seq(1,length(x.range),by=spacing),cmf,col=COLOR,lwd=2,type='l')
+
+    text(0, max(cmf, na.rm = TRUE), paste("Chaiken Money Flow(", x@params$n, 
+        "):  ", sprintf("%.3f",last(cmf)), sep = ""), col = COLOR, 
+        pos = 4)
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addCMO {{{
+`addCMO` <- function(n=14) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  #  needs to accept any arguments for x, not just close
+
+  cmo <- CMO(Cl(x),n=n)
+
+  chobTA@TA.values <- cmo
+  chobTA@name <- "chartCMO"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartCMO {{{
+`chartCMO` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    cmo <- x@TA.values
+    plot(x.range,seq(min(cmo*.975,na.rm=TRUE),
+         max(cmo*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    COLOR="#0033CC"
+
+    abline(h=0,col="#999999")
+    lines(seq(1,length(x.range),by=spacing),cmo,col=COLOR,lwd=2,type='l')
+
+    text(0, max(cmo, na.rm = TRUE), paste("Chande Momentum Osc (", x@params$n, 
+        "):  ", sprintf("%.3f",last(cmo)), sep = ""), col = COLOR, 
+        pos = 4)
+
+    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addMomentum {{{
+`addMomentum` <- function(n=1) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  #  needs to accept any arguments for x, not just close
+
+  mom <- momentum(Cl(x),n=n)
+
+  chobTA@TA.values <- mom
+  chobTA@name <- "chartMomentum"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartMomentum {{{
+`chartMomentum` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    mom <- x@TA.values
+    plot(x.range,seq(min(mom*.975,na.rm=TRUE),
+         max(mom*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    COLOR <- "#0033CC"
+
+    lines(seq(1,length(x.range),by=spacing),mom,col=COLOR,lwd=2,type='l')
+
+    text(0, max(mom, na.rm = TRUE), paste("Momentum (", x@params$n, 
+        "):  ", sprintf("%.2f",last(mom)), sep = ""), col = COLOR, 
+        pos = 4)
+
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addCCI {{{
+`addCCI` <- function(n=20, maType="SMA", c=0.015) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  cci <- CCI(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,c=c)
+
+  chobTA@TA.values <- cci
+  chobTA@name <- "chartCCI"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,maType=maType,c=c)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartCCI {{{
+`chartCCI` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    cci <- x@TA.values
+    plot(x.range,seq(min(cci*.975,na.rm=TRUE),
+         max(cci*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    # draw CCI
+    lines(seq(1,length(x.range),by=spacing),cci,col='red',lwd=1,type='l')
+
+    # draw upper and lower guidelines
+    abline(h=100,col='#666666',lwd=1,lty='dotted')
+    abline(h=-100,col='#666666',lwd=1,lty='dotted')
     #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -310,6 +603,194 @@ function(x) {
     # draw upper and lower guidelines
     abline(h=20,col='#666666',lwd=1,lty='dotted')
     abline(h=40,col='#666666',lwd=1,lty='dotted')
+    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addATR {{{
+`addATR` <- function(n=14, maType="EMA", wilder=TRUE) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
+
+  chobTA@TA.values <- atr
+  chobTA@name <- "chartATR"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,maType=maType,wilder=wilder)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartATR {{{
+`chartATR` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    atr <- x@TA.values
+    plot(x.range,seq(min(atr[,2]*.975,na.rm=TRUE),
+         max(atr[,2]*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    # draw ADX
+    lines(seq(1,length(x.range),by=spacing),atr[,2],col='blue',lwd=2,type='l')
+
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addTRIX {{{
+`addTRIX` <- function(n=20, signal=9, maType="EMA", percent=TRUE) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+
+  trix <- TRIX(Cl(x),n=n,nSig=signal,maType=maType,percent=percent)
+
+  chobTA@TA.values <- trix
+  chobTA@name <- "chartTRIX"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,signal=signal,maType=maType,percent=percent)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartTRIX {{{
+`chartTRIX` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    trix <- x@TA.values
+    plot(x.range,seq(min(trix[,1]*.975,na.rm=TRUE),
+         max(trix[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+    # draw TRIX
+    lines(seq(1,length(x.range),by=spacing),trix[,1],col='green',lwd=1,type='l')
+    # draw Signal
+    lines(seq(1,length(x.range),by=spacing),trix[,2],col='#999999',lwd=1,type='l')
+
+    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
+
+# addDPO {{{
+`addDPO` <- function(n=10, maType="EMA", shift=n/2+1, percent=FALSE) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+ 
+  # should really allow for _any_ series to be used, like MA (FIXME)
+
+  dpo <- DPO(Cl(x),n=n,maType=maType,shift=shift,percent=percent)
+
+  chobTA@TA.values <- dpo
+  chobTA@name <- "chartDPO"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,maType=maType,shift=shift,percent=percent)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartDPO {{{
+`chartDPO` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    n <- x@params$n
+    dpo <- x@TA.values
+    plot(x.range,seq(min(dpo*.975,na.rm=TRUE),
+         max(dpo*1.05,na.rm=TRUE),length.out=length(x.range)),
+         type='n',axes=FALSE,ann=FALSE)
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    # draw DPO
+    lines(seq(1,length(x.range),by=spacing),dpo,col='green',lwd=1,type='l')
+
     #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -624,6 +1105,79 @@ function(x) {
     #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
+} # }}}
+
+# addLines {{{
+`addLines` <- function(x,h,v,on=1,overlay=TRUE,col='blue') {
+ 
+  if(missing(x)) x <- NULL
+  if(missing(h)) h <- NULL
+  if(missing(v)) v <- NULL
+
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+  chobTA@TA.values <- NULL # single numeric vector
+  chobTA@name <- "chartLines"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        col=col,h=h,x=x,v=v)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartLines {{{
+`chartLines` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+ 
+    if(!is.null(x@params$x)) {
+      # draw lines given positions specified in x
+
+    }
+    if(!is.null(x@params$h)) {
+      # draw horizontal lines given positions specified in h
+      if(length(x@params$h) > length(x@params$col)) {
+        colors <- 3:10
+      } else colors <- x@params$col
+      for(li in 1:length(x@params$h)) {
+        lines(seq(1,length(x.range),by=spacing),
+              rep(x@params$h[li],length(x.range)/spacing), col=colors[li])
+      }
+    }
+    if(!is.null(x@params$v)) {
+      # draw vertical lines given positions specified in v
+      if(length(x@params$v) > length(x@params$col)) {
+        colors <- 3:10
+      } else colors <- x@params$col
+      for(li in 1:length(x@params$v)) {
+        abline(v=x@params$v[li]*spacing,col=colors[li])
+      }
+    }
+
 } # }}}
 
 # addEMA {{{
