@@ -1,5 +1,12 @@
 \name{addTA}
 \alias{addTA}
+\alias{addTRIX}
+\alias{addATR}
+\alias{addCCI}
+\alias{addCMF}
+\alias{addDPO}
+\alias{addCMO}
+\alias{addMomentum}
 
 \title{ Add Technical Indicator to Chart } 
 \description{
