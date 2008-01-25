@@ -325,20 +325,27 @@ function(x) {
 
     n <- x@params$n
     cmf <- x@TA.values
-    plot(x.range,seq(min(cmf*.975,na.rm=TRUE),
-         max(cmf*1.05,na.rm=TRUE),length.out=length(x.range)),
+
+    y.range <- seq(-max(abs(cmf), na.rm = TRUE), max(abs(cmf), 
+                   na.rm = TRUE), length.out = length(x.range)) * 1.05
+
+    plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
-    COLOR <- "#0033CC"
+    COLOR <- "green"
 
     abline(h=0,col="#999999")
     lines(seq(1,length(x.range),by=spacing),cmf,col=COLOR,lwd=2,type='l')
 
     text(0, max(cmf, na.rm = TRUE)*.9,
-         paste("Chaiken Money Flow(", x@params$n, "):  ",
-         sprintf("%.3f",last(cmf)), sep = ""), col = COLOR, 
-         pos = 4)
+         paste("Chaiken Money Flow (", x@params$n,"):", sep = ""), 
+        pos = 4)
+
+    text(0, max(cmf, na.rm = TRUE)*.9,
+        paste("\n\n\n",sprintf("%.3f",last(cmf)), sep = ""), col = COLOR, 
+        pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
