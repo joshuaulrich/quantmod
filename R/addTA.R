@@ -120,6 +120,11 @@ function(x) {
       rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
            col=bar.col,border=border.col)
     }
+
+    text(0, max(Volumes, na.rm = TRUE)*.9, paste("Last: ",
+         last(Volumes)*vol.scale[[1]], sep = ""), 
+         pos = 4)
+
     title(ylab=paste("volume (",vol.scale[[2]],")"))
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -194,7 +199,7 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),
           smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
 
-    text(c(0,50), max(smi[,1], na.rm = TRUE), paste("Stochastic Momentum Index (",
+    text(0, max(smi[,1], na.rm = TRUE)*.9, paste("Stochastic Momentum Index (",
          paste(x@params$n,x@params$fast,x@params$slow,x@params$signal,sep=','), 
         "):  ", sprintf("%.3f",last(smi[,1])), sep = ""), 
         col = COLOR, 
@@ -264,7 +269,7 @@ function(x) {
 
     lines(seq(1,length(x.range),by=spacing),wpr,col=COLOR,lwd=2,type='l')
 
-    text(0,max(wpr,na.rm=TRUE),
+    text(0,max(wpr,na.rm=TRUE)*.9,
          paste("Williams %R (",x@params$n,"):  ",sprintf("%.3f",last(wpr)),sep=""),
          col=COLOR,pos=4)
     axis(2)
@@ -330,9 +335,10 @@ function(x) {
     abline(h=0,col="#999999")
     lines(seq(1,length(x.range),by=spacing),cmf,col=COLOR,lwd=2,type='l')
 
-    text(0, max(cmf, na.rm = TRUE), paste("Chaiken Money Flow(", x@params$n, 
-        "):  ", sprintf("%.3f",last(cmf)), sep = ""), col = COLOR, 
-        pos = 4)
+    text(0, max(cmf, na.rm = TRUE)*.9,
+         paste("Chaiken Money Flow(", x@params$n, "):  ",
+         sprintf("%.3f",last(cmf)), sep = ""), col = COLOR, 
+         pos = 4)
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -388,21 +394,27 @@ function(x) {
 
     n <- x@params$n
     cmo <- x@TA.values
-    plot(x.range,seq(min(cmo*.975,na.rm=TRUE),
-         max(cmo*1.05,na.rm=TRUE),length.out=length(x.range)),
+
+    y.range <- seq(-max(abs(cmo), na.rm = TRUE), max(abs(cmo), 
+                   na.rm = TRUE), length.out = length(x.range)) * 1.05
+
+    plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR="#0033CC"
 
-    abline(h=0,col="#999999")
+    abline(h=0,col="#666666",lwd=1,lty='dotted')
     lines(seq(1,length(x.range),by=spacing),cmo,col=COLOR,lwd=2,type='l')
 
-    text(0, max(cmo, na.rm = TRUE), paste("Chande Momentum Osc (", x@params$n, 
-        "):  ", sprintf("%.3f",last(cmo)), sep = ""), col = COLOR, 
+    text(0, max(cmo, na.rm = TRUE)*.9,
+         paste("Chande Momentum Osc (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    text(0, max(cmo, na.rm = TRUE)*.9,
+        paste("\n\n\n",sprintf("%.3f",last(cmo)), sep = ""), col = COLOR, 
+        pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -458,18 +470,25 @@ function(x) {
 
     n <- x@params$n
     mom <- x@TA.values
-    plot(x.range,seq(min(mom*.975,na.rm=TRUE),
-         max(mom*1.05,na.rm=TRUE),length.out=length(x.range)),
+
+    y.range <- seq(-max(abs(mom),na.rm=TRUE),max(abs(mom),na.rm=TRUE),
+                   length.out=length(x.range)) * 1.05
+    plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR <- "#0033CC"
 
+    abline(h=0,col="#666666",lwd=1,lty='dotted')
+
     lines(seq(1,length(x.range),by=spacing),mom,col=COLOR,lwd=2,type='l')
 
-    text(0, max(mom, na.rm = TRUE), paste("Momentum (", x@params$n, 
-        "):  ", sprintf("%.2f",last(mom)), sep = ""), col = COLOR, 
-        pos = 4)
+    text(0, max(abs(mom), na.rm = TRUE)*.9,
+         paste("Momentum (", x@params$n, "):"),pos=4)
+
+    text(0, max(abs(mom), na.rm = TRUE)*.9,
+         paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
+         col = COLOR, pos = 4)
 
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -524,18 +543,36 @@ function(x) {
 
     n <- x@params$n
     cci <- x@TA.values
-    plot(x.range,seq(min(cci*.975,na.rm=TRUE),
-         max(cci*1.05,na.rm=TRUE),length.out=length(x.range)),
+
+    y.range <- seq(-max(abs(cci),na.rm=TRUE),
+                   max(abs(cci),na.rm=TRUE),
+                   length.out=length(x.range))*1.05
+    plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
+
+    usr <- par('usr')
+
+    # set xx to the full width of the window
+    xx <- seq(usr[1],usr[2]+width,by=spacing)
+
+    # draw shading in -100:100 y-range 
+    polygon(c(xx,rev(xx)),c(rep(100,length(xx)),rep(-100,length(xx))),col="#282828")
 
     # draw CCI
     lines(seq(1,length(x.range),by=spacing),cci,col='red',lwd=1,type='l')
 
-    # draw upper and lower guidelines
-    abline(h=100,col='#666666',lwd=1,lty='dotted')
-    abline(h=-100,col='#666666',lwd=1,lty='dotted')
-    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    # draw dotted guide line at 0
+    abline(h=0,col='#666666',lwd=1,lty='dotted')
+
+    # add indicator name and last value
+    text(0, max(abs(cci), na.rm = TRUE)*.9,
+         paste("Commodity Channel Index (", x@params$n, ",",
+         x@params$c,"):",sep=''),pos=4)
+    text(0, max(abs(cci), na.rm = TRUE)*.9 - par('cex'),
+         paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
+         pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
