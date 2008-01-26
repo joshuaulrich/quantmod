@@ -121,9 +121,9 @@ function(x) {
            col=bar.col,border=border.col)
     }
 
-    text(0, par('usr')[4]*.95, "Volume:",pos=4)
+    text(0, par('usr')[4]*.8, "Volume:",pos=4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("\n\n\n",last(Volumes)*vol.scale[[1]], sep = ""), 
          pos = 4,col=last(bar.col))
 
@@ -201,17 +201,17 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),
           smi[,2],col=SIGNAL,lwd=1,lty='dotted',type='l')
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Stochastic Momentum Index (",
          paste(x@params$n,x@params$fast,x@params$slow,x@params$signal,sep=','),
          "):", sep = ""), 
          pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[,1])), sep = ""), col = COLOR, 
         pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\n\n\nSignal: ",
               sprintf("%.3f",last(smi[,2])), sep = ""), col = SIGNAL, 
         pos = 4)
@@ -282,11 +282,11 @@ function(x) {
 
     lines(seq(1,length(x.range),by=spacing),wpr,col=COLOR,lwd=1,type='l')
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Williams %R (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\n",sprintf("%.3f",last(wpr)), sep = ""), col = COLOR, 
         pos = 4)
 
@@ -360,11 +360,11 @@ function(x) {
 
     abline(h=0,col="#999999")
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Chaiken Money Flow (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\n",sprintf("%.3f",last(cmf)), sep = ""), 
         col = ifelse(last(cmf) > 0,x@params$colors$up.col,x@params$colors$dn.col), 
         pos = 4)
@@ -437,11 +437,11 @@ function(x) {
     abline(h=0,col="#666666",lwd=1,lty='dotted')
     lines(seq(1,length(x.range),by=spacing),cmo,col=COLOR,lwd=1,type='l')
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Chande Momentum Oscillator (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\n",sprintf("%.3f",last(cmo)), sep = ""), col = COLOR, 
         pos = 4)
 
@@ -513,10 +513,10 @@ function(x) {
 
     lines(seq(1,length(x.range),by=spacing),mom,col=COLOR,lwd=2,type='l')
 
-    text(0, par('usr')[4]*.95, 
+    text(0, par('usr')[4]*.8, 
          paste("Momentum (", x@params$n, "):"),pos=4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
          col = COLOR, pos = 4)
 
@@ -601,10 +601,10 @@ function(x) {
     abline(h=0,col='#666666',lwd=1,lty='dotted')
 
     # add indicator name and last value
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Commodity Channel Index (", x@params$n, ",",
          x@params$c,"):",sep=''),pos=4)
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
          pos = 4)
 
@@ -935,11 +935,11 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Relative Strength Index (", x@params$n,"):", sep = ""), 
          pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("\n\n\n",sprintf("%.3f",last(rsi)), sep = ""), col = '#0033CC', 
          pos = 4)
 
@@ -1184,16 +1184,16 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),macd[,1],col=col[3],lwd=1)
     lines(seq(1,length(x.range),by=spacing),macd[,2],col=col[4],lwd=1,lty='dotted')
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
          paste("Moving Average Convergence Divergence (",
          paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""), 
          pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\nMACD: ",sprintf("%.3f",last(macd[,1])), sep = ""),
         col = col[3],pos = 4)
 
-    text(0, par('usr')[4]*.95,
+    text(0, par('usr')[4]*.8,
         paste("\n\n\n\n\nSignal: ",sprintf("%.3f",last(macd[,2])), sep = ""),
         col = col[4],pos = 4)
 
