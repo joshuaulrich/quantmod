@@ -121,11 +121,12 @@ function(x) {
            col=bar.col,border=border.col)
     }
 
-    text(0, max(Volumes, na.rm = TRUE)*.9, paste("Last: ",
-         last(Volumes)*vol.scale[[1]], sep = ""), 
-         pos = 4)
+    text(0, par('usr')[4]*.95, "Volume:",pos=4)
 
-    title(ylab=paste("volume (",vol.scale[[2]],")"))
+    text(0, par('usr')[4]*.95,
+         paste("\n\n\n",last(Volumes)*vol.scale[[1]], sep = ""), 
+         pos = 4,col=last(bar.col))
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -184,25 +185,35 @@ function(x) {
     color.vol <- x@params$color.vol
 
     smi <- x@TA.values
-    plot(x.range,
-         seq(min(smi[,1]*.975,na.rm=TRUE),
-             max(smi[,1]*1.05,na.rm=TRUE),
-             length.out=length(x.range)),
-         type='n',axes=FALSE,ann=FALSE)
+
+    y.range <- seq(-max(abs(smi[,1]), na.rm = TRUE), max(abs(smi[,1]), 
+                   na.rm = TRUE), length.out = length(x.range)) * 1.05
+
+    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR <- "#0033CC"
+    SIGNAL <- "#BFCFFF"
 
     lines(seq(1,length(x.range),by=spacing),
-          smi[,1],col='#0033CC',lwd=2,type='l')
+          smi[,1],col=COLOR,lwd=1,type='l')
     lines(seq(1,length(x.range),by=spacing),
-          smi[,2],col='#BFCFFF',lwd=1,lty='dotted',type='l')
+          smi[,2],col=SIGNAL,lwd=1,lty='dotted',type='l')
 
-    text(0, max(smi[,1], na.rm = TRUE)*.9, paste("Stochastic Momentum Index (",
-         paste(x@params$n,x@params$fast,x@params$slow,x@params$signal,sep=','), 
-        "):  ", sprintf("%.3f",last(smi[,1])), sep = ""), 
-        col = COLOR, 
+    text(0, par('usr')[4]*.95,
+         paste("Stochastic Momentum Index (",
+         paste(x@params$n,x@params$fast,x@params$slow,x@params$signal,sep=','),
+         "):", sep = ""), 
+         pos = 4)
+
+    text(0, par('usr')[4]*.95,
+        paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[,1])), sep = ""), col = COLOR, 
+        pos = 4)
+
+    text(0, par('usr')[4]*.95,
+        paste("\n\n\n\n\nSignal: ",
+              sprintf("%.3f",last(smi[,2])), sep = ""), col = SIGNAL, 
         pos = 4)
 
     axis(2)
@@ -258,20 +269,27 @@ function(x) {
 
     n <- x@params$n
     wpr <- x@TA.values
-    plot(x.range,
-         seq(min(wpr*.975,na.rm=TRUE),max(wpr*1.05,na.rm=TRUE),
-         length.out=length(x.range)),
-         type='n',axes=FALSE,ann=FALSE)
+
+    y.range <- seq(-max(abs(wpr), na.rm = TRUE), max(abs(wpr), 
+                   na.rm = TRUE), length.out = length(x.range)) * 1.05
+
+    # create appropriately scaled empty plot area
+    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR <- "#0033CC"
 
-    lines(seq(1,length(x.range),by=spacing),wpr,col=COLOR,lwd=2,type='l')
+    lines(seq(1,length(x.range),by=spacing),wpr,col=COLOR,lwd=1,type='l')
 
-    text(0,max(wpr,na.rm=TRUE)*.9,
-         paste("Williams %R (",x@params$n,"):  ",sprintf("%.3f",last(wpr)),sep=""),
-         col=COLOR,pos=4)
+    text(0, par('usr')[4]*.95,
+         paste("Williams %R (", x@params$n,"):", sep = ""), 
+        pos = 4)
+
+    text(0, par('usr')[4]*.95,
+        paste("\n\n\n",sprintf("%.3f",last(wpr)), sep = ""), col = COLOR, 
+        pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -333,17 +351,22 @@ function(x) {
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
-    COLOR <- "green"
+    xx <- seq(1,length(x.range),by=spacing)
+    cmf.positive <- ifelse(cmf >= 0,cmf,0)
+    cmf.negative <- ifelse(cmf <  0,cmf,0)
+
+    polygon(c(xx,rev(xx)),c(cmf.positive,rep(0,length(cmf))),col=x@params$colors$up.col)
+    polygon(c(xx,rev(xx)),c(cmf.negative,rep(0,length(cmf))),col=x@params$colors$dn.col)
 
     abline(h=0,col="#999999")
-    lines(seq(1,length(x.range),by=spacing),cmf,col=COLOR,lwd=2,type='l')
 
-    text(0, max(cmf, na.rm = TRUE)*.9,
+    text(0, par('usr')[4]*.95,
          paste("Chaiken Money Flow (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, max(cmf, na.rm = TRUE)*.9,
-        paste("\n\n\n",sprintf("%.3f",last(cmf)), sep = ""), col = COLOR, 
+    text(0, par('usr')[4]*.95,
+        paste("\n\n\n",sprintf("%.3f",last(cmf)), sep = ""), 
+        col = ifelse(last(cmf) > 0,x@params$colors$up.col,x@params$colors$dn.col), 
         pos = 4)
 
     axis(2)
@@ -412,13 +435,13 @@ function(x) {
     COLOR="#0033CC"
 
     abline(h=0,col="#666666",lwd=1,lty='dotted')
-    lines(seq(1,length(x.range),by=spacing),cmo,col=COLOR,lwd=2,type='l')
+    lines(seq(1,length(x.range),by=spacing),cmo,col=COLOR,lwd=1,type='l')
 
-    text(0, max(cmo, na.rm = TRUE)*.9,
-         paste("Chande Momentum Osc (", x@params$n,"):", sep = ""), 
+    text(0, par('usr')[4]*.95,
+         paste("Chande Momentum Oscillator (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, max(cmo, na.rm = TRUE)*.9,
+    text(0, par('usr')[4]*.95,
         paste("\n\n\n",sprintf("%.3f",last(cmo)), sep = ""), col = COLOR, 
         pos = 4)
 
@@ -490,10 +513,10 @@ function(x) {
 
     lines(seq(1,length(x.range),by=spacing),mom,col=COLOR,lwd=2,type='l')
 
-    text(0, max(abs(mom), na.rm = TRUE)*.9,
+    text(0, par('usr')[4]*.95, 
          paste("Momentum (", x@params$n, "):"),pos=4)
 
-    text(0, max(abs(mom), na.rm = TRUE)*.9,
+    text(0, par('usr')[4]*.95,
          paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
          col = COLOR, pos = 4)
 
@@ -560,11 +583,16 @@ function(x) {
 
     usr <- par('usr')
 
-    # set xx to the full width of the window
-    xx <- seq(usr[1],usr[2]+width,by=spacing)
-
     # draw shading in -100:100 y-range 
-    polygon(c(xx,rev(xx)),c(rep(100,length(xx)),rep(-100,length(xx))),col="#282828")
+    rect(usr[1],-100,usr[2],100,col="#282828")
+
+    # fill upper and lower areas
+    xx <- seq(1,length(x.range),by=spacing)
+    cci.above <- ifelse(cci >=  100,cci, 100)
+    cci.below <- ifelse(cci <= -100,cci,-100)
+    
+    polygon(c(xx,rev(xx)),c(cci.above,rep(100,length(xx))),col="red")
+    polygon(c(xx,rev(xx)),c(cci.below,rep(-100,length(xx))),col="red")
 
     # draw CCI
     lines(seq(1,length(x.range),by=spacing),cci,col='red',lwd=1,type='l')
@@ -573,10 +601,10 @@ function(x) {
     abline(h=0,col='#666666',lwd=1,lty='dotted')
 
     # add indicator name and last value
-    text(0, max(abs(cci), na.rm = TRUE)*.9,
+    text(0, par('usr')[4]*.95,
          paste("Commodity Channel Index (", x@params$n, ",",
          x@params$c,"):",sep=''),pos=4)
-    text(0, max(abs(cci), na.rm = TRUE)*.9 - par('cex'),
+    text(0, par('usr')[4]*.95,
          paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
          pos = 4)
 
@@ -869,6 +897,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
+                        n=n,
                         n.up=n.up,n.dn=n.dn,type.up=type.up,type.dn=type.dn,
                         wilder.up=wilder.up,wilder.dn=wilder.dn)
   if(is.null(sys.call(-1))) {
@@ -895,12 +924,25 @@ function(x) {
 
     param <- x@params$param; ma.type <- x@params$ma.type
     rsi <- x@TA.values
-    plot(x.range,seq(min(rsi*.975,na.rm=TRUE),max(rsi*1.05,na.rm=TRUE),length.out=length(x.range)),
-         type='n',axes=FALSE,ann=FALSE)
+
+    y.range <- seq(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05,
+                   length.out=length(x.range))
+
+    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+
     grid(NA,NULL,col=x@params$colors$grid.col)
+
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
-    #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
+
+    text(0, par('usr')[4]*.95,
+         paste("Relative Strength Index (", x@params$n,"):", sep = ""), 
+         pos = 4)
+
+    text(0, par('usr')[4]*.95,
+         paste("\n\n\n",sprintf("%.3f",last(rsi)), sep = ""), col = '#0033CC', 
+         pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -1085,19 +1127,9 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-#    macd <- 
-#    function (x,fast=12,slow=26,signal=9,type='EMA') 
-#    {
-#        if(length(type) != 3) type <- rep(type[1],3) 
-#        oscillator <- MACD(x, list(type[1], n = fast), list(type[2], 
-#            n = slow), list(type[3], n = signal))
-#        return(oscillator)
-#    }
-
   col <- if(missing(col)) col <- c('#999999','#777777',
                               '#BBBBBB','#FF0000')
 
-#  macd <- macd(Cl(x),fast=fast,slow=slow,signal=signal,type=type)
   macd <- MACD(Cl(x),nFast=fast,nSlow=slow,nSig=signal,maType=type)
   
   chobTA@TA.values <- macd
@@ -1110,6 +1142,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
+                        fast=fast,slow=slow,signal=signal,
                         col=col,histo=histogram
                         )
   if(is.null(sys.call(-1))) {
@@ -1133,20 +1166,37 @@ function(x) {
 
     col <- x@params$col
     macd <- x@TA.values
-    macd.min <- min(macd[,1],macd[,2],macd[,1]-macd[,2],na.rm=TRUE)
-    macd.max <- max(macd[,1],macd[,2],macd[,1]-macd[,2],na.rm=TRUE)
-    plot(x.range,seq(macd.min*.975,macd.max*1.05,length.out=length(x.range)),
-         type='n',axes=FALSE,ann=FALSE)
+
+    y.range <- seq(-max(abs(macd),na.rm=TRUE),max(abs(macd),na.rm=TRUE),
+                   length.out=length(x.range)) * 1.05
+
+    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+
     grid(NA,NULL,col=x@params$colors$grid.col)
+
     if(x@params$histo) {
       x.pos <- 1 + spacing * (1:NROW(macd) -1)
       cols <- ifelse((macd[,1]-macd[,2]) > 0, col[1],col[2])
       rect(x.pos - spacing/5,0,x.pos + spacing/5, macd[,1]-macd[,2],
            col=cols,border=cols)
     } 
-    lines(seq(1,length(x.range),by=spacing),macd[,1],col=col[3],lwd=2)
+
+    lines(seq(1,length(x.range),by=spacing),macd[,1],col=col[3],lwd=1)
     lines(seq(1,length(x.range),by=spacing),macd[,2],col=col[4],lwd=1,lty='dotted')
-    #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
+
+    text(0, par('usr')[4]*.95,
+         paste("Moving Average Convergence Divergence (",
+         paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""), 
+         pos = 4)
+
+    text(0, par('usr')[4]*.95,
+        paste("\n\n\nMACD: ",sprintf("%.3f",last(macd[,1])), sep = ""),
+        col = col[3],pos = 4)
+
+    text(0, par('usr')[4]*.95,
+        paste("\n\n\n\n\nSignal: ",sprintf("%.3f",last(macd[,2])), sep = ""),
+        col = col[4],pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -1797,35 +1847,3 @@ function(x) {
   }
   return(lchob)
 } #}}}
-
-`zzzRSI` <-
-function (price, ma.up = list("EMA", n = 14, wilder = TRUE), 
-    ma.down = ma.up) 
-{
-    up <- momentum(price, n = 1)
-    dn <- ifelse(up < 0, abs(up), 0)
-    up <- ifelse(up > 0, up, 0)
-    mavg.up <- do.call(ma.up[[1]], c(list(up), ma.up[-1]))
-    mavg.dn <- do.call(ma.down[[1]], c(list(dn), ma.down[-1]))
-    rsi <- 100 * mavg.up/(mavg.up + mavg.dn)
-    return(rsi)
-}
-
-
-`zzzEMA` <-
-function (x, n = 10, wilder = FALSE) 
-{
-    x <- as.vector(x)
-    NAs <- ifelse(any(is.na(x)),length(which(is.na(x))),0)
-    x <- na.omit(x)
-    ema <- rep(NA, NROW(x))
-    if (wilder) 
-        ratio <- 1/n
-    else ratio <- 2/(n + 1)
-    ema[n] <- mean(x[1:n])
-    for (i in (n + 1):NROW(x)) {
-        ema[i] <- x[i] * ratio + ema[i - 1] * (1 - ratio)
-    }
-    return(c(rep(NA,NAs),ema))
-}
-
