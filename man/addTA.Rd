@@ -6,6 +6,7 @@
 \alias{addCMF}
 \alias{addDPO}
 \alias{addCMO}
+\alias{addLines}
 \alias{addMomentum}
 
 \title{ Add Technical Indicator to Chart } 
@@ -20,18 +21,30 @@ All technical functionality is via the \pkg{TTR} package.
 
 Current technical indicators include:
 \itemize{
-  \item{addVo:}{add Volume if available}
+  \item{addADX}{add Welles Wilder's Directional Movement Indicator}
+  \item{addATR}{add Average True Range}
   \item{addBBands:}{add Bollinger Bands}
+  \item{addCCI}{add Commodity Channel Index}
+  \item{addCMF}{add Chaiken Money Flow}
+  \item{addCMO}{add Chande Momentum Oscillator}
+  \item{addDEMA}{add Double Exponential Moving Average}
+  \item{addDPO}{add Detrended Price Oscillator}
+  \item{addEMA}{add Exponential Moving Average}
+  \item{addEVWMA}{add Exponential Volume Weighted Moving Average}
+  \item{addExpiry}{add options or futures expiration lines}
+  \item{addLines}{add line(s)}
   \item{addMACD:}{add Moving Average Convergence Divergence}
+  \item{addMomentum}{add Momentum}
   \item{addROC:}{add Rate of Change}
   \item{addRSI}{add Relative Strength Indicator}
-  \item{addSMI}{add Stochastic Momentum Index}
-  \item{addExpiry}{add options or futures expiration lines}
-  \item{addADX}{add Welles Wilder's Directional Movement Indicator}
-  \item{addWPR}{add Williams Percentage R}
   \item{addSAR}{add Parabolic SAR}
-  \item{addVert}{add vertical line}
-  \item{addHoriz}{add horizontal line}
+  \item{addSMA}{add Simple Moving Average}
+  \item{addSMI}{add Stochastic Momentum Index}
+  \item{addTRIX}{add Triple Smoothed Exponential Oscillator}
+  \item{addVo:}{add Volume if available}
+  \item{addWMA}{add Weighted Moving Average}
+  \item{addWPR}{add Williams Percent R}
+  \item{addZLEMA}{add ZLEMA}
 }
 See the individual functions for specific implementation and argument details.  Details
 of the underlying TTR implementations can be found in \pkg{TTR}.
