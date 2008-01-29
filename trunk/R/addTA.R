@@ -121,9 +121,9 @@ function(x) {
            col=bar.col,border=border.col)
     }
 
-    text(0, par('usr')[4]*.8, "Volume:",pos=4)
+    text(0, max(Volumes,na.rm=TRUE) * .9, "Volume:",pos=4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, max(Volumes,na.rm=TRUE) * .9,
          paste("\n\n\n",last(Volumes)*vol.scale[[1]], sep = ""), 
          pos = 4,col=last(bar.col))
 
@@ -201,17 +201,17 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),
           smi[,2],col=SIGNAL,lwd=1,lty='dotted',type='l')
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range) * .9,
          paste("Stochastic Momentum Index (",
          paste(x@params$n,x@params$fast,x@params$slow,x@params$signal,sep=','),
          "):", sep = ""), 
          pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[,1])), sep = ""), col = COLOR, 
         pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
         paste("\n\n\n\n\nSignal: ",
               sprintf("%.3f",last(smi[,2])), sep = ""), col = SIGNAL, 
         pos = 4)
@@ -282,11 +282,11 @@ function(x) {
 
     lines(seq(1,length(x.range),by=spacing),wpr,col=COLOR,lwd=1,type='l')
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("Williams %R (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
         paste("\n\n\n",sprintf("%.3f",last(wpr)), sep = ""), col = COLOR, 
         pos = 4)
 
@@ -360,11 +360,11 @@ function(x) {
 
     abline(h=0,col="#999999")
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("Chaiken Money Flow (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
         paste("\n\n\n",sprintf("%.3f",last(cmf)), sep = ""), 
         col = ifelse(last(cmf) > 0,x@params$colors$up.col,x@params$colors$dn.col), 
         pos = 4)
@@ -437,11 +437,11 @@ function(x) {
     abline(h=0,col="#666666",lwd=1,lty='dotted')
     lines(seq(1,length(x.range),by=spacing),cmo,col=COLOR,lwd=1,type='l')
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("Chande Momentum Oscillator (", x@params$n,"):", sep = ""), 
         pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
         paste("\n\n\n",sprintf("%.3f",last(cmo)), sep = ""), col = COLOR, 
         pos = 4)
 
@@ -513,10 +513,10 @@ function(x) {
 
     lines(seq(1,length(x.range),by=spacing),mom,col=COLOR,lwd=2,type='l')
 
-    text(0, par('usr')[4]*.8, 
+    text(0, last(y.range)*.9, 
          paste("Momentum (", x@params$n, "):"),pos=4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
          col = COLOR, pos = 4)
 
@@ -601,10 +601,10 @@ function(x) {
     abline(h=0,col='#666666',lwd=1,lty='dotted')
 
     # add indicator name and last value
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("Commodity Channel Index (", x@params$n, ",",
          x@params$c,"):",sep=''),pos=4)
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
          pos = 4)
 
@@ -935,11 +935,11 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("Relative Strength Index (", x@params$n,"):", sep = ""), 
          pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("\n\n\n",sprintf("%.3f",last(rsi)), sep = ""), col = '#0033CC', 
          pos = 4)
 
@@ -1004,7 +1004,7 @@ function(x) {
 } # }}}
 
 # addBBands {{{
-`addBBands` <- function(n=20,ma='SMA',sd=2,on=1) {
+`addBBands` <- function(n=20,ma='SMA',sd=2,on=-1) {
 
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
@@ -1016,7 +1016,6 @@ function(x) {
 
   x <- as.matrix(eval(lchob@passed.args$x))
 
-#  bb <- bollingerBands(cbind(Hi(x),Lo(x),Cl(x)),ma=list(ma,n=n),sd=sd)
   bb <- BBands(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=ma,sd=sd)
   
   chobTA@TA.values <- bb
@@ -1057,9 +1056,24 @@ function(x) {
 
     param <- x@params$param; ma.type <- x@params$ma.type
     bb <- x@TA.values
-    lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
-    lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
-    lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
+    if(x@on[1] > 0) {
+      lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
+      lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
+      #lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
+    } else {
+      xx <- seq(1,length(x.range),by=spacing)
+      polygon(c(xx,rev(xx)), c(bb[,1],rev(bb[,3])),col='#282828',border=NA)
+      lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
+      lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
+      #lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
+    }
+   
+    # return the text to be pasted
+    invisible(list(text=paste("Bollinger Bands (",
+                   paste(x@params$n,x@params$sd,sep=","),") [Upper/Lower]: ",
+                   sprintf("%.3f",last(bb[,3])),"/",
+                   sprintf("%.3f",last(bb[,1])), sep = ""), col = 'red')) 
+
 } # }}}
 
 # addSAR {{{
@@ -1184,17 +1198,17 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),macd[,1],col=col[3],lwd=1)
     lines(seq(1,length(x.range),by=spacing),macd[,2],col=col[4],lwd=1,lty='dotted')
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
          paste("Moving Average Convergence Divergence (",
          paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""), 
          pos = 4)
 
-    text(0, par('usr')[4]*.8,
+    text(0, last(y.range)*.9,
         paste("\n\n\nMACD: ",sprintf("%.3f",last(macd[,1])), sep = ""),
         col = col[3],pos = 4)
 
-    text(0, par('usr')[4]*.8,
-        paste("\n\n\n\n\nSignal: ",sprintf("%.3f",last(macd[,2])), sep = ""),
+    text(0, last(y.range)*.9,
+        paste("\n\n\n\n\n\nSignal: ",sprintf("%.3f",last(macd[,2])), sep = ""),
         col = col[4],pos = 4)
 
     axis(2)
@@ -1303,7 +1317,15 @@ function(x) {
     } else x.tmp <- x[,with.col]
   }
 
-  chobTA@TA.values <- x.tmp # single numeric vector
+  ma.tmp <- NULL
+
+  for(i in 1:length(n)) {
+    ma <- EMA(x.tmp,n=n[i],wilder=wilder[1],
+              ratio=ratio[1])
+    ma.tmp <- cbind(ma.tmp,ma)     
+  }
+
+  chobTA@TA.values <- ma.tmp 
   chobTA@name <- "chartEMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -1339,13 +1361,15 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    if(length(x@params$n) < length(x@params$col)) {
+    if(length(x@params$n) != length(x@params$col)) {
       colors <- 3:10
-    } else colors <- x@params$col
+    } else colors <- x@params$col 
  
+    chart.key <- list()
+
     for(li in 1:length(x@params$n)) {
-      ma <- EMA(x@TA.values,n=x@params$n[li],wilder=x@params$wilder,
-                ratio=x@params$ratio)
+      ma <- x@TA.values[,li]
+
       if(x@new) {
         par(new=TRUE)
         plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
@@ -1355,7 +1379,14 @@ function(x) {
         box(col=x@params$colors$fg.col)
       }
       lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+      chart.key[[li]] <- list(text=paste("EMA (",
+                   paste(x@params$n[li],sep=","),"): ",
+                   sprintf("%.3f",last(ma)),
+                   sep = ""), col = colors[li]) 
+
     }
+    invisible(chart.key)
+
 } # }}}
 
 # addSMA {{{

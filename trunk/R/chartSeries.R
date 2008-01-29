@@ -2,7 +2,7 @@
 `chartSeries` <-
 function(x,
          type=c("auto","candlesticks","matchsticks","bars","line"),
-         show.grid=TRUE,name=deparse(substitute(x)),
+         show.grid=TRUE,name=NULL,
          time.scale=NULL,
          TA=c(addVo()),
          line.type="l",
@@ -99,6 +99,7 @@ function(x,
  
   chob <- new("chob")
   chob@call <- match.call(expand=TRUE)
+  if(is.null(name)) name <- as.character(match.call()$x)
   chob@name <- name
   chob@type <- chart[1]
 
