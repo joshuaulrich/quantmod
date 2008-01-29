@@ -141,11 +141,11 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-# smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)),n=n,ma.slow=list(ma.type[1],n=slow),
-#            ma.fast=list(ma.type[2],n=fast),
-#            ma.sig=list(ma.type[3],n=signal))
+  xx <- if(is.OHLC(x)) {
+    cbind(Hi(x),Lo(x),Cl(x))
+  } else x 
 
-  smi <- SMI(cbind(Hi(x),Lo(x),Cl(x)), n=n, nFast=fast,
+  smi <- SMI(xx, n=n, nFast=fast,
              nSlow=slow, nSig=signal, maType=ma.type)
 
   chobTA@TA.values <- smi
@@ -230,7 +230,11 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  wpr <- WPR(cbind(Hi(x),Lo(x),Cl(x)),n=n)
+  xx <- if(is.OHLC(x)) {
+    cbind(Hi(x),Lo(x),Cl(x))
+  } else x 
+
+  wpr <- WPR(x,n=n)
 
   chobTA@TA.values <- as.numeric(wpr)
   chobTA@name <- "chartWPR"
@@ -304,7 +308,11 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  cmf <- CMF(cbind(Hi(x),Lo(x),Cl(x)),Vo(x),n=n)
+  xx <- if(is.OHLC(x)) {
+    cbind(Hi(x),Lo(x),Cl(x))
+  } else stop("CMF only applicaple to HLC series")
+
+  cmf <- CMF(xx,Vo(x),n=n)
 
   chobTA@TA.values <- cmf
   chobTA@name <- "chartCMF"
@@ -385,7 +393,11 @@ function(x) {
 
   #  needs to accept any arguments for x, not just close
 
-  cmo <- CMO(Cl(x),n=n)
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  cmo <- CMO(xx,n=n)
 
   chobTA@TA.values <- cmo
   chobTA@name <- "chartCMO"
@@ -461,7 +473,11 @@ function(x) {
 
   #  needs to accept any arguments for x, not just close
 
-  mom <- momentum(Cl(x),n=n)
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  mom <- momentum(xx,n=n)
 
   chobTA@TA.values <- mom
   chobTA@name <- "chartMomentum"
@@ -534,7 +550,11 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  cci <- CCI(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,c=c)
+  xx <- if(is.OHLC(x)) {
+    cbind(Hi(x),Lo(x),Cl(x))
+  } else x 
+
+  cci <- CCI(xx,n=n,maType=maType,c=c)
 
   chobTA@TA.values <- cci
   chobTA@name <- "chartCCI"
@@ -622,6 +642,8 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
+  if(!is.OHLC(x)) stop("only applicable to HLC series")
+
   adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
 
   chobTA@TA.values <- adx
@@ -690,6 +712,8 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
+  if(!is.OHLC(x)) stop("only applicable to HLC series")
+
   atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
 
   chobTA@TA.values <- atr
@@ -751,7 +775,11 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  trix <- TRIX(Cl(x),n=n,nSig=signal,maType=maType,percent=percent)
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
 
   chobTA@TA.values <- trix
   chobTA@name <- "chartTRIX"
@@ -816,7 +844,11 @@ function(x) {
  
   # should really allow for _any_ series to be used, like MA (FIXME)
 
-  dpo <- DPO(Cl(x),n=n,maType=maType,shift=shift,percent=percent)
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)
 
   chobTA@TA.values <- dpo
   chobTA@name <- "chartDPO"
@@ -878,13 +910,12 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  n.up <- n[1]; n.dn <- ifelse(length(n) > 1,n[2],n[1])
-  type.up <- type[1]; type.dn <- ifelse(length(type) > 1,type[2],type[1])
-  wilder.up <- wilder[1]; wilder.dn <- ifelse(length(wilder) > 1,wilder[2],wilder[1])
 
-# rsi <- RSI(Cl(x),ma.up=list(type.up,n=n.up,wilder=wilder.up),
-#                    ma.down=list(type.dn,n=n.dn,wilder=wilder.dn))
-  rsi <- RSI(Cl(x),n=n,maType=type,wilder=wilder)
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  rsi <- RSI(xx,n=n,maType=type,wilder=wilder)
   chobTA@TA.values <- rsi
   chobTA@name <- "chartRSI"
   chobTA@call <- match.call()
@@ -897,9 +928,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        n=n,
-                        n.up=n.up,n.dn=n.dn,type.up=type.up,type.dn=type.dn,
-                        wilder.up=wilder.up,wilder.dn=wilder.dn)
+                        n=n, wilder=wilder,maType=type)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
@@ -957,7 +986,12 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  roc <- ROC(Cl(x),n=n,type=type,na=NA)
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  roc <- ROC(xx,n=n,type=type,na=NA)
+
   chobTA@TA.values <- roc
   chobTA@name <- "chartROC"
   chobTA@call <- match.call()
@@ -1016,7 +1050,11 @@ function(x) {
 
   x <- as.matrix(eval(lchob@passed.args$x))
 
-  bb <- BBands(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=ma,sd=sd)
+  xx <- if(is.OHLC(x)) {
+    cbind(Hi(x),Lo(x),Cl(x))
+  } else x 
+
+  bb <- BBands(xx,n=n,maType=ma,sd=sd)
   
   chobTA@TA.values <- bb
   chobTA@name <- "chartBBands"
@@ -1089,6 +1127,8 @@ function(x) {
 
   x <- as.matrix(eval(lchob@passed.args$x))
 
+  if(!is.OHLC(x)) stop("SAR requires HL series") 
+
   sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)
 
   chobTA@TA.values <- sar
@@ -1144,7 +1184,9 @@ function(x) {
   col <- if(missing(col)) col <- c('#999999','#777777',
                               '#BBBBBB','#FF0000')
 
-  xx <- ifelse(is.OHLC(x),Cl(x),x[,1])
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
 
   macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
   
@@ -1299,9 +1341,13 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
 
+
   # get the appropriate data - from the approp. src
   if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
+
+    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1309,11 +1355,11 @@ function(x) {
     # get values from TA...
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
     target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+
     x <- as.matrix(target.TA@TA.values)
-    if(missing(with.col)) {
-      warning('missing "with.col" argument')
-      invisible(return())
-    }
+
+    if(missing(with.col)) with.col <- 1
+      
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
