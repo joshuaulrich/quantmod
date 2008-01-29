@@ -1144,7 +1144,9 @@ function(x) {
   col <- if(missing(col)) col <- c('#999999','#777777',
                               '#BBBBBB','#FF0000')
 
-  macd <- MACD(Cl(x),nFast=fast,nSlow=slow,nSig=signal,maType=type)
+  xx <- ifelse(is.OHLC(x),Cl(x),x[,1])
+
+  macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
   
   chobTA@TA.values <- macd
   chobTA@name <- "chartMACD"
