@@ -2,16 +2,23 @@
 `chartSeries.chob` <-
 function(x)
 {
+  old.par  <- par(c('pty','mar','xpd','bg','xaxs','las','col.axis','fg'))
+  on.exit(par(old.par))
+
   # layout page
   if(x@windows == 1) {
     layout(matrix(1))
   } else {
-    layout(matrix(1:x@windows,x@windows,1,byrow=TRUE),1,c(3,rep(1,x@windows-2),1.45),respect=FALSE)
+    layout(matrix(1:x@windows,x@windows,1,byrow=TRUE),
+                  1,c(3,rep(1,x@windows-2),1.45),
+           respect=FALSE)
+    if(x@windows > 1) par(mar=c(0,4,3,3))
   }
 
   x.range <- 1:(x@xrange[2]*x@spacing)
   y.range <- seq(x@yrange[1],x@yrange[2],length.out=length(x.range))
  
+  # get current values of series to be charted
   xx <- eval(x@passed.args$x)
   
   if(is.OHLC(xx)) {
@@ -20,19 +27,30 @@ function(x)
     Lows <- as.numeric(Lo(xx))
     Closes <- as.numeric(Cl(xx))
   } else {
+    # if not OHLC, assume univariate series
     Lows <- min(xx[,1])
     Highs <- max(xx[,1])
     Closes <- as.numeric(xx[,1])
   }
 
-  old.par  <- par(c('pty','mar','xpd','bg','xaxs','las','col.axis','fg'))
-  on.exit(par(old.par))
-
   par(bg=x@colors$bg.col,col.axis=x@colors$fg.col,
       xaxs='r',las=2,fg=x@colors$fg.col)
-  if(x@windows > 1) par(mar=c(0,4,3,3))
+
+  # create scale of main plot window
   plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
+  # check for any underlay TA indicators that need to be drawn here:
+  main.key <- list() # main.key stores text to be added after all drawing by text()
+  if (length(x@passed.args$TA) > 0) {
+    underlay.TA <- which(sapply(x@passed.args$TA,
+                         function(x) identical(x@on, as.numeric(-1))))
+    for (j in underlay.TA) {
+      tmp.x <- x@passed.args$TA[[j]]
+      main.key[[length(main.key)+1]] <- do.call(x@passed.args$TA[[j]]@name, list(tmp.x))
+    }
+  }
+
+  # add gridlines _under_ main series
   grid(NA,NULL,col=x@colors$grid.col)
 
   # a vector of x positions
@@ -93,12 +111,28 @@ function(x)
 
   # TA calculation and drawing loops
   if(x@windows > 1 | length(x@passed.args$TA) > 0) {
+
     for(i in 1:x@windows) {
       # draw all overlays needed for figure 'i' on plot
       overlay.TA <- which(sapply(x@passed.args$TA,function(x) identical(x@on,as.numeric(i))))
       for(j in overlay.TA) {
-        do.call(x@passed.args$TA[[j]]@name,list(x@passed.args$TA[[j]]))
+        # call draws TA and returns the text to add to the chart
+        overlay.text <- do.call(x@passed.args$TA[[j]]@name,list(x@passed.args$TA[[j]]))
+        main.key <- c(main.key,overlay.text)
       }
+
+      if(i == 1) {
+        # add indicator key to main chart
+        if(length(main.key) > 0) {
+          for(indicator in 1:length(main.key)) {
+            text(0,max(Closes,na.rm=TRUE),
+                 paste(paste(rep("\n\n\n",indicator),collapse=''),main.key[[indicator]][['text']],sep=''),
+                 pos=4, col=main.key[[indicator]][['col']]
+                )
+          }
+        }
+      }
+
       if(x@windows >= i+1) {
         # if there are more windows to draw...draw the next one
         next.new.TA <- which(sapply(x@passed.args$TA,function(x) x@new))[i]
