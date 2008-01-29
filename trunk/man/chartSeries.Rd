@@ -17,7 +17,7 @@ and lines. Chart may have white or black background.
 chartSeries(x,
            type = c("auto", "candlesticks", "matchsticks", "bars","line"), 
            show.grid = TRUE, 
-           name = deparse(substitute(x)),
+           name = NULL,
            time.scale = NULL,
            TA = c(addVo()),
            line.type = "l",
