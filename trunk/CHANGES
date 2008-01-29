@@ -3,7 +3,27 @@
 BUG FIXES
 - matched broken TTR calls, aligned arguments between packages
 
-0.3-1
+- 'name' of chart was being evaluated somewhere in the process,
+  resulting in the object becoming a string. Fixed in this release.
+
+MODIFICATIONS
+- continuing the move of time-series functionality to the 'xts' package
+
+- added new TTR functions to addTA.
+
+- added underlay charting to main area (BBands) as well as much
+  more advanced shading and labeling.
+
+- chartSeries converts incoming 'x' argument to xts object for
+  more universal handling.  Not fully sorted out - but better than
+  before.
+  
+  - new subset argument to allow for xts-style subsetting
+
+NEW FUNCTIONALITY
+- new TTR functions - ATR, CCI, CMF, CMO, DPO, Lines, Momentum, TRIX
+
+0.3-1 ***********************************************************************
 
 BUG FIXES
 - new depends - on CRAN and R-Forge package xts for time-series handling internally
@@ -16,7 +36,8 @@ MODIFICATIONS
 - Added ability to plot series with missing values (like those in a 'ts' series)
   Volume with missing obs. is still broken - to be fixed in 0.3-2
 
-0.3-0
+
+0.3-0 **********************************************************************
 
 BUG FIXES
 - Fixed factor bug in getSymbols.FRED.  Thanks to Josh Ulrich
