@@ -890,17 +890,50 @@ function(x) {
 
     n <- x@params$n
     dpo <- x@TA.values
-    plot(x.range,seq(min(dpo*.975,na.rm=TRUE),
-         max(dpo*1.05,na.rm=TRUE),length.out=length(x.range)),
+
+    y.range <- seq(-max(abs(dpo), na.rm = TRUE), max(abs(dpo), 
+                   na.rm = TRUE), length.out = length(x.range)) * 1.05
+
+    plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
-    # draw DPO
-    lines(seq(1,length(x.range),by=spacing),dpo,col='green',lwd=1,type='l')
+    xx <- seq(1,length(x.range),by=spacing)
 
-    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+    dpo.tmp <- dpo
+    dpo.tmp[is.na(dpo)] <- 0
+    dpo.positive <- ifelse(dpo.tmp >= 0,dpo.tmp,0)
+    dpo.negative <- ifelse(dpo.tmp <  0,dpo.tmp,0)
+
+    polygon(c(xx,rev(xx)),c(dpo.positive,rep(0,length(dpo))),col=x@params$colors$up.col)
+    polygon(c(xx,rev(xx)),c(dpo.negative,rep(0,length(dpo))),col=x@params$colors$dn.col)
+
+    abline(h=0,col="#999999")
+
+    text(0, last(y.range)*.9,
+         paste("De-trended Price Oscillator (", x@params$n,"):", sep = ""), 
+        pos = 4)
+
+    text(0, last(y.range)*.9,
+        paste("\n\n\n",sprintf("%.3f",last(na.omit(dpo))), sep = ""), 
+        col = ifelse(last(dpo) > 0,x@params$colors$up.col,x@params$colors$dn.col), 
+        pos = 4)
+
     axis(2)
     box(col=x@params$colors$fg.col)
+
+#    y.range <- seq(-max(abs(dpo), na.rm = TRUE), max(abs(dpo), 
+#        na.rm = TRUE), length.out = length(x.range)) * 1.05
+#    plot(x.range, y.range, type = "n", axes = FALSE, ann = FALSE)
+#
+#    grid(NA,NULL,col=x@params$colors$grid.col)
+#
+#    # draw DPO
+#    lines(seq(1,length(x.range),by=spacing),dpo,col='green',lwd=1,type='l')
+#
+#    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
+#    axis(2)
+#    box(col=x@params$colors$fg.col)
 } # }}}
 
 # addRSI {{{
@@ -1110,10 +1143,91 @@ function(x) {
     }
    
     # return the text to be pasted
-    invisible(list(text=paste("Bollinger Bands (",
+    txt <- list()
+    txt[[1]] <- list(text=paste("Bollinger Bands (",
                    paste(x@params$n,x@params$sd,sep=","),") [Upper/Lower]: ",
                    sprintf("%.3f",last(bb[,3])),"/",
-                   sprintf("%.3f",last(bb[,1])), sep = ""), col = 'red')) 
+                   sprintf("%.3f",last(bb[,1])), sep = ""), col = 'red') 
+
+    invisible(txt)
+
+} # }}}
+
+# addEnvelope {{{
+`addEnvelope` <- function(n=20,p=2.5,maType='SMA',...,on=1) {
+
+  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  lchob <- get.current.chob()
+  x <- as.matrix(eval(lchob@passed.args$x))
+  chobTA <- new("chobTA")
+  chobTA@new <- FALSE
+
+  x <- as.matrix(eval(lchob@passed.args$x))
+
+  xx <- if(is.OHLC(x)) {
+    Cl(x)
+  } else x 
+
+  ma <- do.call(maType,list(xx,n=n,...))
+  mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))
+  
+  chobTA@TA.values <- mae
+  chobTA@name <- "chartEnvelope"
+  chobTA@call <- match.call()
+  chobTA@on <- on
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        time.scale=lchob@time.scale,
+                        n=n,p=p,maType=maType)
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} #}}}
+# chartEnvelope {{{
+`chartEnvelope` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    mae <- x@TA.values
+    if(x@on[1] > 0) {
+      lines(seq(1,length(x.range),by=spacing),mae[,1],col='blue',lwd=1,lty='dotted')
+      lines(seq(1,length(x.range),by=spacing),mae[,3],col='blue',lwd=1,lty='dotted')
+      #lines(seq(1,length(x.range),by=spacing),mae[,2],col='grey',lwd=1,lty='dotted')
+    } else {
+      xx <- seq(1,length(x.range),by=spacing)
+      polygon(c(xx,rev(xx)), c(mae[,1],rev(mae[,3])),col='#282828',border=NA)
+      lines(seq(1,length(x.range),by=spacing),mae[,1],col='blue',lwd=1,lty='dotted')
+      lines(seq(1,length(x.range),by=spacing),mae[,3],col='blue',lwd=1,lty='dotted')
+      #lines(seq(1,length(x.range),by=spacing),mae[,2],col='grey',lwd=1,lty='dotted')
+    }
+   
+    # return the text to be pasted
+    txt <- list()
+    txt[[1]] <- list(text=paste("Moving Ave. Envelope (",
+                   paste(x@params$n,x@params$p,sep=","),") [Upper/Lower]: ",
+                   sprintf("%.3f",last(mae[,3])),"/",
+                   sprintf("%.3f",last(mae[,1])), sep = ""), col = 'blue') 
+    invisible(txt)
 
 } # }}}
 

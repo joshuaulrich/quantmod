@@ -46,7 +46,9 @@ function(x)
                          function(x) identical(x@on, as.numeric(-1))))
     for (j in underlay.TA) {
       tmp.x <- x@passed.args$TA[[j]]
-      main.key[[length(main.key)+1]] <- do.call(x@passed.args$TA[[j]]@name, list(tmp.x))
+      main.key <- c(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x)))
+      #main.key <- lapply(list(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x))),unlist)
+      #main.key[[length(main.key)+1]] <- do.call(x@passed.args$TA[[j]]@name, list(tmp.x))
     }
   }
 
@@ -119,6 +121,8 @@ function(x)
         # call draws TA and returns the text to add to the chart
         overlay.text <- do.call(x@passed.args$TA[[j]]@name,list(x@passed.args$TA[[j]]))
         main.key <- c(main.key,overlay.text)
+        #main.key <- lapply(list(main.key,overlay.text),unlist)
+        #main.key[[length(main.key)+1]] <- overlay.text
       }
 
       if(i == 1) {
