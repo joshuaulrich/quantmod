@@ -369,7 +369,7 @@ function(x) {
     abline(h=0,col="#999999")
 
     text(0, last(y.range)*.9,
-         paste("Chaiken Money Flow (", x@params$n,"):", sep = ""), 
+         paste("Chaikin Money Flow (", x@params$n,"):", sep = ""), 
         pos = 4)
 
     text(0, last(y.range)*.9,
