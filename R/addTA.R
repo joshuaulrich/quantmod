@@ -817,17 +817,20 @@ function(x) {
     color.vol <- x@params$color.vol
 
     n <- x@params$n
+
     trix <- x@TA.values
+
     plot(x.range,seq(min(trix[,1]*.975,na.rm=TRUE),
          max(trix[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+
     grid(NA,NULL,col=x@params$colors$grid.col)
+
     # draw TRIX
     lines(seq(1,length(x.range),by=spacing),trix[,1],col='green',lwd=1,type='l')
     # draw Signal
     lines(seq(1,length(x.range),by=spacing),trix[,2],col='#999999',lwd=1,type='l')
 
-    #title(ylab=paste('SMI(',paste(param,collapse=','),')',sep=''))
     axis(2)
     box(col=x@params$colors$fg.col)
 } # }}}
@@ -1449,6 +1452,9 @@ function(x) {
   # get the appropriate data - from the approp. src
   if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
+
+    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1456,17 +1462,22 @@ function(x) {
     # get values from TA...
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
     target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+
     x <- as.matrix(target.TA@TA.values)
-    if(missing(with.col)) {
-      warning('missing "with.col" argument')
-      invisible(return())
-    }
+
+    if(missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
   }
+  ma.tmp <- NULL
+  for(i in 1:length(n)) {
+    ma <- SMA(x.tmp,n=n[i])
+    ma.tmp <- cbind(ma.tmp,ma)
+  }
 
-  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@TA.values <- ma.tmp # single numeric vector
   chobTA@name <- "chartSMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -1502,12 +1513,14 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    if(length(x@params$n) < length(x@params$col)) {
-      colors <- 3:10
+    if(length(x@params$n) != length(x@params$col)) {
+      colors <- c(4:10,3)
     } else colors <- x@params$col
- 
+
+    chart.key <- list() 
+
     for(li in 1:length(x@params$n)) {
-      ma <- SMA(x@TA.values,n=x@params$n[li])
+      ma <- x@TA.values[,li]
       if(x@new) {
         par(new=TRUE)
         plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
@@ -1517,7 +1530,11 @@ function(x) {
         box(col=x@params$colors$fg.col)
       }
       lines(seq(1,length(x.range),by=spacing),ma,col=colors[li],lwd=1,type='l')
+      chart.key[[li]] <- list(text = paste("SMA (", paste(x@params$n[li], 
+            sep = ","), "): ", sprintf("%.3f", last(ma)), sep = ""), 
+            col = colors[li])
     }
+    invisible(chart.key)
 } # }}}
 
 # addWMA {{{
@@ -1532,6 +1549,9 @@ function(x) {
   # get the appropriate data - from the approp. src
   if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
+
+    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1540,10 +1560,9 @@ function(x) {
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
     target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
     x <- as.matrix(target.TA@TA.values)
-    if(missing(with.col)) {
-      warning('missing "with.col" argument')
-      invisible(return())
-    }
+
+    if(missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1615,6 +1634,9 @@ function(x) {
   # get the appropriate data - from the approp. src
   if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
+
+    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1623,10 +1645,9 @@ function(x) {
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
     target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
     x <- as.matrix(target.TA@TA.values)
-    if(missing(with.col)) {
-      warning('missing "with.col" argument')
-      invisible(return())
-    }
+
+    if(missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1698,6 +1719,9 @@ function(x) {
   # get the appropriate data - from the approp. src
   if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
+
+    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- cbind(do.call(with.col,list(x)),Vo(x))
     } else x.tmp <- x[,with.col]
@@ -1706,10 +1730,9 @@ function(x) {
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
     target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
     x <- as.matrix(target.TA@TA.values)
-    if(missing(with.col)) {
-      warning('missing "with.col" argument')
-      invisible(return())
-    }
+
+    if(missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1782,6 +1805,9 @@ function(x) {
   # get the appropriate data - from the approp. src
   if(on==1) {
     x <- as.matrix(eval(lchob@passed.args$x))
+
+    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
@@ -1789,6 +1815,9 @@ function(x) {
     # get values from TA...
     which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
     target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
+
+    if(missing(with.col)) with.col <- 1
+
     x <- as.matrix(target.TA@TA.values)
     if(missing(with.col)) {
       warning('missing "with.col" argument')
