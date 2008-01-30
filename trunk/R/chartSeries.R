@@ -85,7 +85,6 @@ function(x,
       is <-sapply(FUNS[8:1],
                   function(y) { do.call(y,list(x)) })
       cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
- #     bp <- breakpoints(x,cl,TRUE)
       bp <- endpoints(x,cl)
       bp
     }
