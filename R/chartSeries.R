@@ -2,6 +2,7 @@
 `chartSeries` <-
 function(x,
          type=c("auto","candlesticks","matchsticks","bars","line"),
+         subset=NULL,
          show.grid=TRUE,name=NULL,
          time.scale=NULL,
          TA=c(addVo()),
@@ -11,8 +12,9 @@ function(x,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
   if(!is.xts(x)) x <- as.xts(x)
+
   indexClass(x) <- "POSIXct"
-  #if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
+
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
     Highs <- as.numeric(Hi(x))
@@ -105,7 +107,7 @@ function(x,
   chob@xrange <- c(1,NROW(x))
   if(is.OHLC(x)) {
     chob@yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
-  } else chob@yrange <- range(x,na.rm=TRUE)
+  } else chob@yrange <- range(x[,1],na.rm=TRUE)
   
 
 
