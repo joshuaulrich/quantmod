@@ -1,3 +1,14 @@
+#
+#  At present all TA functionality is in this file
+#  most calls the related function in the TTR package
+#  
+
+# addTA {{{
+`addTA` <-
+function(ta,...) {
+  plot(do.call(paste('add',ta,sep=''),list(...)))
+}#}}}
+
 # setTA {{{
 `setTA` <-
 function(type=c('chartSeries','barChart','candleChart')) {
@@ -24,7 +35,7 @@ function(dev) {
    lchob <- get.current.chob() 
   if(!lchob@show.vol) return()
   x <- as.matrix(eval(lchob@passed.args$x))
-  Volumes <- x[,5]
+  Volumes <- Vo(x)
   max.vol <- max(Volumes)
   vol.scale <- list(100, "100s")
   if (max.vol > 10000) 
@@ -35,11 +46,38 @@ function(dev) {
     vol.scale <- list(1e+05, "100,000s")
   if (max.vol > 1e+07) 
     vol.scale <- list(1e+06, "millions")
+  
+  if(lchob@color.vol & is.OHLC(x)) {
+    # calculate colors for bars, if applicable.
+    Opens  <- Op(x)
+    Closes <- Cl(x)
+    if(lchob@multi.col) {
+      # colored bars - 4 color
+      last.Closes <- as.numeric(Lag(Closes))
+      last.Closes[1] <- Closes[1]
+      bar.col <- ifelse(Opens < Closes,
+                        ifelse(Opens > last.Closes,
+                               lchob@colors$dn.up.col,
+                               lchob@colors$up.up.col),
+                        ifelse(Opens < last.Closes,
+                               lchob@colors$dn.dn.col,
+                               lchob@colors$up.dn.col))
+    } else {
+      # colored bars - 2 color
+      bar.col <- ifelse(Opens < Closes,
+                        lchob@colors$up.col,
+                        lchob@colors$dn.col)
+    }
+      # 1 color bars
+  } else bar.col <- ifelse(!is.null(lchob@colors$Vo.bar.col),
+                           lchob@colors$Vo.bar.col,lchob@colors$border)
+  border.col <- ifelse(is.null(lchob@colors$border),
+                       bar.col,lchob@colors$border)
 
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  chobTA@TA.values <- cbind(x[,c(1,4)],Volumes/vol.scale[[1]])
+  chobTA@TA.values <- Volumes/vol.scale[[1]]
   chobTA@name <- "chartVo"
   chobTA@call <- match.call()
   
@@ -52,8 +90,11 @@ function(dev) {
                         bp=lchob@bp,
                         vol.scale=vol.scale,
                         x.labels=lchob@x.labels,
+                        bar.col=bar.col,border.col=border.col,
                         time.scale=lchob@time.scale)
+
   chobTA@params$thin <- ifelse(lchob@type %in% c('bars','matchsticks'),TRUE,FALSE)
+
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
@@ -70,9 +111,9 @@ function(x) {
   # if volume is to be plotted, do so here
     # scale volume - vol.divisor
     if(class(x) != "chobTA") stop("chartVo requires a suitable chobTA object")
-    Opens <- x@TA.values[,1]
-    Closes <- x@TA.values[,2]
-    Volumes <- x@TA.values[,3]
+#    Opens <- x@TA.values[,1]
+#    Closes <- x@TA.values[,2]
+    Volumes <- x@TA.values
 
     spacing <- x@params$spacing
     width <- x@params$width
@@ -89,29 +130,32 @@ function(x) {
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
-    if(!x@params$color.vol | !is.null(x@params$colors$Vo.bar.col)) {
-      bar.col <- ifelse(!is.null(x@params$colors$Vo.bar.col),
-                        x@params$colors$Vo.bar.col,
-                        x@params$colors$border)
-    } else
-    if (x@params$multi.col) {
-      last.Closes <- as.numeric(quantmod::Lag(Closes))
-      last.Closes[1] <- Closes[1]
-      bar.col <- ifelse(Opens < Closes, 
-                        ifelse(Opens > last.Closes, 
-                               x@params$colors$dn.up.col,
-                               x@params$colors$up.up.col),
-                        ifelse(Opens < last.Closes,
-                               x@params$colors$dn.dn.col,
-                               x@params$colors$up.dn.col))
-    } else {
-      bar.col <- ifelse(Opens < Closes, 
-                        x@params$colors$up.col,
-                        x@params$colors$dn.col)
-    }
+#    if(!x@params$color.vol | !is.null(x@params$colors$Vo.bar.col)) {
+#      bar.col <- ifelse(!is.null(x@params$colors$Vo.bar.col),
+#                        x@params$colors$Vo.bar.col,
+#                        x@params$colors$border)
+#    } else
+#    if (x@params$multi.col) {
+#      last.Closes <- as.numeric(quantmod::Lag(Closes))
+#      last.Closes[1] <- Closes[1]
+#      bar.col <- ifelse(Opens < Closes, 
+#                        ifelse(Opens > last.Closes, 
+#                               x@params$colors$dn.up.col,
+#                               x@params$colors$up.up.col),
+#                        ifelse(Opens < last.Closes,
+#                               x@params$colors$dn.dn.col,
+#                               x@params$colors$up.dn.col))
+#    } else {
+#      bar.col <- ifelse(Opens < Closes, 
+#                        x@params$colors$up.col,
+#                        x@params$colors$dn.col)
+#    }
+#
+#    # if border=NULL use color of bar
+#    border.col <- ifelse(is.null(x@params$colors$border),bar.col,x@params$colors$border)
 
-    # if border=NULL use color of bar
-    border.col <- ifelse(is.null(x@params$colors$border),bar.col,x@params$colors$border)
+    bar.col <- x@params$bar.col
+    border.col <- x@params$border.col
 
     if(x@params$thin) {
       # plot thin volume bars if appropriate
@@ -143,10 +187,17 @@ function(x) {
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
-  } else x 
+  } else if(is.null(dim(x)) {
+    x
+  } else {
+    x[,1] 
+  }
 
   smi <- SMI(xx, n=n, nFast=fast,
              nSlow=slow, nSig=signal, maType=ma.type)
+
+# subset here
+# smi <- smi[lchob@sindex]
 
   chobTA@TA.values <- smi
   chobTA@name <- "chartSMI"
@@ -184,6 +235,14 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
+# subset thinking ...
+#
+# could subset the TA.values here (or in addSMI more likely)
+# this way the calculation is performed on the entire set, but
+# the smaller view is printed.
+# 
+#   smi <- x@TA.values[x@sindex] ???
+#
     smi <- x@TA.values
 
     y.range <- seq(-max(abs(smi[,1]), na.rm = TRUE), max(abs(smi[,1]), 
@@ -234,7 +293,7 @@ function(x) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
-  wpr <- WPR(x,n=n)
+  wpr <- WPR(xx,n=n)
 
   chobTA@TA.values <- as.numeric(wpr)
   chobTA@name <- "chartWPR"

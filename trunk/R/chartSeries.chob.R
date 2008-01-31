@@ -87,6 +87,20 @@ function(x)
     }
     if(x@type %in% c('candlesticks','matchsticks')) {
       # draw HL lines
+
+# in progress thinking...
+# if subsetting is allowed, keep x.pos based on length of output
+#  _but_ subset the y-values with the index corresponding to the
+# desired sub-range
+#
+# most likely found with something like:
+#  sindex <- which(index(x) %in% index(x)[subset])
+#
+#  the default subset should be set to :: (the whole thing...)
+#
+#  so the following would read:
+#     segments(x.pos,Lows[sindex],x.pos,Highs[sindex],col=bar.border)
+
       segments(x.pos,Lows,x.pos,Highs,col=bar.border)
 
       # draw OC candles

@@ -35,6 +35,7 @@ FUNCTIONALITY:
 
 
 CHARTS:
+  - add /demo script
 
   - add addHolidays/Weekends function to add in missing data with NA
 
@@ -51,14 +52,16 @@ CHARTS:
   - multiple series in one line chart, or in one window - possibly
     mchartSeries, mbarChart, mlineChart, mcandleChart plus multiple
     series normal command interpretation
+     ** OR **
+    partition device in n-regions and have chartSeries.chob check
 
   - HSV color schemes from vcd or colorbrewer
 
   - finish TA integration with TTR
 
-  - additional charting tools, like seriesHi, seriesLo, lines, points,...
+  x additional charting tools, like seriesHi, seriesLo, lines, points,...
 
-  - allow for indicators to be drawn under series - BBands, Envelopes...
+  x allow for indicators to be drawn under series - BBands, Envelopes...
 
   - performance charts:
     - periodReturn
