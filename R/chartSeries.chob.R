@@ -48,8 +48,6 @@ function(x)
     for (j in underlay.TA) {
       tmp.x <- x@passed.args$TA[[j]]
       main.key <- c(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x)))
-      #main.key <- lapply(list(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x))),unlist)
-      #main.key[[length(main.key)+1]] <- do.call(x@passed.args$TA[[j]]@name, list(tmp.x))
     }
   }
 
@@ -160,6 +158,7 @@ function(x)
         do.call(x@passed.args$TA[[next.new.TA]]@name,list(x@passed.args$TA[[next.new.TA]]))
       }
     }
+
   }
 
   # draw the final x labels
@@ -167,6 +166,8 @@ function(x)
   axis(1,at=1:x@length*x@spacing+1,labels=FALSE,col=x@colors$minor.tick)
   axis(1,at=x@bp*x@spacing+1,labels=x@x.labels,las=1,lwd=1,mgp=c(3,2,0),
        col=x@colors$major.tick)
+
+  title(x@name)
 
   # resave new chob object - just in case of any changes
   write.chob(x,dev.cur())
