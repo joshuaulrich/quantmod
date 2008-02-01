@@ -123,8 +123,6 @@ function(x) {
   # if volume is to be plotted, do so here
     # scale volume - vol.divisor
     if(class(x) != "chobTA") stop("chartVo requires a suitable chobTA object")
-#    Opens <- x@TA.values[,1]
-#    Closes <- x@TA.values[,2]
     Volumes <- x@TA.values
 
     spacing <- x@params$spacing
@@ -142,29 +140,6 @@ function(x) {
          type='n',axes=FALSE,ann=FALSE)
     grid(NA,NULL,col=x@params$colors$grid.col)
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
-#    if(!x@params$color.vol | !is.null(x@params$colors$Vo.bar.col)) {
-#      bar.col <- ifelse(!is.null(x@params$colors$Vo.bar.col),
-#                        x@params$colors$Vo.bar.col,
-#                        x@params$colors$border)
-#    } else
-#    if (x@params$multi.col) {
-#      last.Closes <- as.numeric(quantmod::Lag(Closes))
-#      last.Closes[1] <- Closes[1]
-#      bar.col <- ifelse(Opens < Closes, 
-#                        ifelse(Opens > last.Closes, 
-#                               x@params$colors$dn.up.col,
-#                               x@params$colors$up.up.col),
-#                        ifelse(Opens < last.Closes,
-#                               x@params$colors$dn.dn.col,
-#                               x@params$colors$up.dn.col))
-#    } else {
-#      bar.col <- ifelse(Opens < Closes, 
-#                        x@params$colors$up.col,
-#                        x@params$colors$dn.col)
-#    }
-#
-#    # if border=NULL use color of bar
-#    border.col <- ifelse(is.null(x@params$colors$border),bar.col,x@params$colors$border)
 
     bar.col <- x@params$bar.col
     border.col <- x@params$border.col
@@ -180,7 +155,7 @@ function(x) {
     text(0, max(Volumes,na.rm=TRUE) * .9, "Volume:",pos=4)
 
     text(0, max(Volumes,na.rm=TRUE) * .9,
-         paste("\n\n\n",last(Volumes)*vol.scale[[1]], sep = ""), 
+         paste("\n\n\n",format(last(Volumes)*vol.scale[[1]],big.mark=','), sep = ""), 
          pos = 4,col=last(bar.col))
 
     axis(2)
