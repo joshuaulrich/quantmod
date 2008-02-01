@@ -20,7 +20,8 @@ function(x)
  
   # get current values of series to be charted
   xx <- eval(x@passed.args$x)
-  
+  if(!is.xts(xx)) xx <- as.xts(xx)
+ 
   if(is.OHLC(xx)) {
     Opens <- as.numeric(Op(xx))
     Highs <- as.numeric(Hi(xx))
