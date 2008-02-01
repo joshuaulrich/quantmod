@@ -1,7 +1,19 @@
 #
 #  At present all TA functionality is in this file
-#  most calls the related function in the TTR package
 #  
+#  TA implemented and charting optimized:
+#
+#    BBands,CCI,CMF,CMO,DPO,EMA,Envelope,MACD,Momentum,
+#    RSI,SMA,SMI,Vo,WPR
+
+#  TA implemented, charting not completed/optimized:
+#
+#    ADX,ATR,DEMA,EVWMA,Expiry,Lines,ROC,SAR,TRIX,WMA,ZLEMA
+
+#  TA not yet implemented (and some may not be)
+#
+#    CLV,CMD,OBV,KST,TDI,WHF,Aroon,ChAD,ChVol,WilliamsAD,
+#    Points, Stoch, SD, ...??? 
 
 # addTA {{{
 `addTA` <-
@@ -187,7 +199,7 @@ function(x) {
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
-  } else if(is.null(dim(x)) {
+  } else if(is.null(dim(x))) {
     x
   } else {
     x[,1] 
@@ -291,7 +303,12 @@ function(x) {
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
-  } else x 
+  } else if(is.null(dim(x))) {
+    x
+  } else {
+    x[,1] 
+  }
+
 
   wpr <- WPR(xx,n=n)
 
@@ -333,7 +350,7 @@ function(x) {
     n <- x@params$n
     wpr <- x@TA.values
 
-    y.range <- seq(-max(abs(wpr), na.rm = TRUE), max(abs(wpr), 
+    y.range <- seq(-0.1, max(abs(wpr), 
                    na.rm = TRUE), length.out = length(x.range)) * 1.05
 
     # create appropriately scaled empty plot area
@@ -452,9 +469,13 @@ function(x) {
 
   #  needs to accept any arguments for x, not just close
 
-  xx <- if(is.OHLC(x)) {
+  xx <- if(has.Cl(x)) {
     Cl(x)
-  } else x 
+  } else if(is.null(dim(x))) {
+    x
+  } else {
+    x[,1] 
+  }
 
   cmo <- CMO(xx,n=n)
 
@@ -1133,15 +1154,22 @@ function(x) {
 } # }}}
 
 # addBBands {{{
-`addBBands` <- function(n=20,ma='SMA',sd=2,on=-1) {
+`addBBands` <- function(n=20,ma='SMA',sd=2,draw='bands',on=-1) {
 
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
+
+  draw.options <- c('bands','percent','width')
+  draw <- draw.options[pmatch(draw,draw.options)]
 
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
   chobTA <- new("chobTA")
-  chobTA@new <- FALSE
-
+  if(draw=='bands') {
+    chobTA@new <- FALSE
+    } else {
+      chobTA@new <- TRUE
+      on <- NULL
+  }
 
   x <- as.matrix(eval(lchob@passed.args$x))
 
@@ -1164,7 +1192,8 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        n=n,ma=ma,sd=sd)
+                        n=n,ma=ma,sd=sd,
+                        draw=draw)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
@@ -1187,29 +1216,93 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
+    bband.col <- ifelse(!is.null(x@params$colors$BBands.col),
+                        x@params$colors$BBands.col,'red') 
+
+    # bband col vector
+    # lower.band, middle.band, upper.band, %b, bb.width
+    if(length(bband.col) == 1) # no user specified
+      bband.col <- c(bband.col,'grey',rep(bband.col,3))
+    
     param <- x@params$param; ma.type <- x@params$ma.type
-    bb <- x@TA.values
-    if(x@on[1] > 0) {
-      lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
-      lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
-      #lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
-    } else {
-      xx <- seq(1,length(x.range),by=spacing)
-      polygon(c(xx,rev(xx)), c(bb[,1],rev(bb[,3])),col='#282828',border=NA)
-      lines(seq(1,length(x.range),by=spacing),bb[,1],col='red',lwd=1,lty='dashed')
-      lines(seq(1,length(x.range),by=spacing),bb[,3],col='red',lwd=1,lty='dashed')
-      #lines(seq(1,length(x.range),by=spacing),bb[,2],col='grey',lwd=1,lty='dotted')
-    }
    
-    # return the text to be pasted
-    txt <- list()
-    txt[[1]] <- list(text=paste("Bollinger Bands (",
-                   paste(x@params$n,x@params$sd,sep=","),") [Upper/Lower]: ",
-                   sprintf("%.3f",last(bb[,3])),"/",
-                   sprintf("%.3f",last(bb[,1])), sep = ""), col = 'red') 
+    bb <- x@TA.values
 
-    invisible(txt)
+    if(x@params$draw == 'bands') {
+      # draw Bollinger Bands on price chart
+      if(x@on[1] > 0) {
+        lines(seq(1,length(x.range),by=spacing),
+              bb[,1],col=bband.col[1],lwd=1,lty='dashed')
+        lines(seq(1,length(x.range),by=spacing),
+              bb[,3],col=bband.col[3],lwd=1,lty='dashed')
+        lines(seq(1,length(x.range),by=spacing),
+              bb[,2],col=bband.col[2],lwd=1,lty='dotted')
+      } else {
+        xx <- seq(1,length(x.range),by=spacing)
+        polygon(c(xx,rev(xx)),
+                c(bb[,1],rev(bb[,3])),col='#282828',border=NA)
+        lines(seq(1,length(x.range),by=spacing),
+              bb[,1],col=bband.col[1],lwd=1,lty='dashed')
+        lines(seq(1,length(x.range),by=spacing),
+              bb[,3],col=bband.col[3],lwd=1,lty='dashed')
+        lines(seq(1,length(x.range),by=spacing),
+              bb[,2],col=bband.col[2],lwd=1,lty='dotted')
+      }
+     
+      # return the text to be pasted
+      txt <- list()
+      txt[[1]] <- list(text=paste("Bollinger Bands (",
+                     paste(x@params$n,x@params$sd,sep=","),") [Upper/Lower]: ",
+                     sprintf("%.3f",last(bb[,3])),"/",
+                     sprintf("%.3f",last(bb[,1])), sep = ""), 
+                     col = bband.col[3]) 
+      invisible(txt)
+    } else 
+      if(x@params$draw == 'percent') {
+        # draw %B in new frame
+        y.range <- seq(min(bb[,4], na.rm = TRUE) * .9,
+                        max(abs(bb[,4]), na.rm = TRUE) * 1.05,
+                        length.out = length(x.range))
+        plot(x.range, y.range, type = "n", axes = FALSE, ann = FALSE)
+        grid(NA,NULL,col=x@params$colors$grid.col)
 
+        lines(seq(1,length(x.range),by=spacing), bb[,4],
+              col=bband.col[4],lwd=1)
+        
+        text(0,last(y.range) * .9, paste("Bollinger %b (",
+             paste(x@params$n,x@params$sd,sep=","), "): ",
+             sep=""), pos=4)
+        text(0,last(y.range) * .9, paste("\n\n\n",
+             sprintf("%.3f",last(bb[,4])), sep = ""),
+             pos=4, col=bband.col[4])
+
+        axis(2)
+        box(col = x@params$colors$fg.col)
+        
+      } else {
+        # draw width in new frame
+        # (high band - low band) / middle band
+        bbw <- (bb[,3] - bb[,1]) / bb[,2]
+        
+        y.range <- seq(min(bbw, na.rm = TRUE) * .9,
+                        max(abs(bbw), na.rm = TRUE) * 1.05,
+                        length.out = length(x.range))
+        plot(x.range, y.range, type = "n", axes = FALSE, ann = FALSE)
+        grid(NA,NULL,col=x@params$colors$grid.col)
+
+        lines(seq(1,length(x.range),by=spacing), bbw,
+              col=bband.col[5],lwd=1)
+        
+        text(0,last(y.range) * .9, paste("Bollinger Band Width (",
+             paste(x@params$n,x@params$sd,sep=","), "): ",
+             sep=""), pos=4)
+        text(0,last(y.range) * .9, paste("\n\n\n",
+             sprintf("%.3f",last(bbw)), sep = ""),
+             pos=4, col=bband.col[5])
+
+        axis(2)
+        box(col = x@params$colors$fg.col)
+      }
 } # }}}
 
 # addEnvelope {{{
@@ -1502,7 +1595,7 @@ function(x) {
         colors <- 3:10
       } else colors <- x@params$col
       for(li in 1:length(x@params$v)) {
-        abline(v=x@params$v[li]*spacing,col=colors[li])
+        abline(v=(x@params$v[li]-1)*spacing+1,col=colors[li])
       }
     }
 
