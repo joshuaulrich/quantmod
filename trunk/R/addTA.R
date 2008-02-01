@@ -1556,22 +1556,19 @@ function(x) {
     }
     if(!is.null(x@params$h)) {
       # draw horizontal lines given positions specified in h
-      if(length(x@params$h) > length(x@params$col)) {
-        colors <- 3:10
-      } else colors <- x@params$col
-      for(li in 1:length(x@params$h)) {
-        lines(seq(1,length(x.range),by=spacing),
-              rep(x@params$h[li],length(x.range)/spacing), col=colors[li])
-      }
+      abline(h=x@params$h,col=x@params$col)
+#     if(length(x@params$h) > length(x@params$col)) {
+#       colors <- rep(col,length(x@params$h))
+#     } else colors <- x@params$col
+#     for(li in 1:length(x@params$h)) {
+#       lines(seq(1,length(x.range),by=spacing),
+#             rep(x@params$h[li],length(x.range)/spacing), col=colors[li])
+#     }
     }
     if(!is.null(x@params$v)) {
       # draw vertical lines given positions specified in v
-      if(length(x@params$v) > length(x@params$col)) {
-        colors <- 3:10
-      } else colors <- x@params$col
-      for(li in 1:length(x@params$v)) {
-        abline(v=(x@params$v[li]-1)*spacing+1,col=colors[li])
-      }
+
+      abline(v=(x@params$v-1)*spacing+1,col=x@params$col)
     }
 
 } # }}}
