@@ -16,6 +16,7 @@ and lines. Chart may have white or black background.
 \usage{
 chartSeries(x,
            type = c("auto", "candlesticks", "matchsticks", "bars","line"), 
+           subset = NULL,
            show.grid = TRUE, 
            name = NULL,
            time.scale = NULL,
@@ -30,6 +31,7 @@ chartSeries(x,
 \arguments{
   \item{x}{ an OHLC object - see details }
   \item{type}{ style of chart to draw }
+  \item{subset}{ currently unused }
   \item{show.grid}{ display price grid lines? }
   \item{name}{ name of chart }
   \item{time.scale}{ what is the timescale? automatically deduced }
