@@ -1,0 +1,73 @@
+********************************************************************************
+********************************************************************************
+
+quantmod wishlist: as of Jan 8, 2008
+
+********************************************************************************
+********************************************************************************
+
+  
+  - Documentation (web and vignettes) :
+    1. charting and indicator overlays!
+    2. building models
+    3. testing models
+    4. extending quantmod
+    5. package/inteface preferences
+  
+  - Move to R-forge for devel tools
+  
+  - getSymbols.skeleton, buildModel.skeleton, addTA.skeleton
+
+  - convert to xts from zoo throughout.  Simplify data methods
+  
+  - try to remove dependence on fSeries and its (etc).  Through 'xts'???
+
+FUNCTIONALITY:
+
+  - getFundamentals.google and getFundamentals to download data
+    from google.  Possibly add arbitrary downloads from finance.yahoo.com
+    using http://www.gummy-stuff.org/Yahoo-data.htm formats
+
+  - tradeRule and tradeLog
+
+  - move all quantmod.OHLC to c('OHLC','xts','zoo') format - eventually move
+    to new package all together
+
+
+CHARTS:
+  - add /demo script
+
+  - add addHolidays/Weekends function to add in missing data with NA
+
+  - liveChart function - used in conjunction with RT data feeds
+
+  - dropTA function to remove TA indicators applied
+
+  - add subset argument to chartSeries (et al) and buildModel function to pass
+    along to underlying [.xts method
+
+  - mask lagged indicator days - use full dataset for calculation and a
+    seperate subset for actual plotting.  (using above [.xts method)
+
+  - multiple series in one line chart, or in one window - possibly
+    mchartSeries, mbarChart, mlineChart, mcandleChart plus multiple
+    series normal command interpretation
+     ** OR **
+    partition device in n-regions and have chartSeries.chob check
+
+  - HSV color schemes from vcd or colorbrewer
+
+  - finish TA integration with TTR
+
+  x additional charting tools, like seriesHi, seriesLo, lines, points,...
+
+  x allow for indicators to be drawn under series - BBands, Envelopes...
+
+  - performance charts:
+    - periodReturn
+    - modelResults
+    - integrate with PerformanceAnalytics
+
+TESTING:
+
+  - regression testing suite, via RUnit.  See RQuantLib.
