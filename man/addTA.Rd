@@ -1,4 +1,7 @@
 \name{addTA}
+\alias{dropTA}
+\alias{moveTA}
+\alias{swapTA}
 \alias{addTA}
 \alias{addTRIX}
 \alias{addATR}
@@ -19,6 +22,14 @@ The general mechanism to add technical analysis studies or overlays
 to a financial chart created with \code{chartSeries}.
 
 Functionality marked with a \sQuote{*} is via the \pkg{TTR} package. 
+
+General TA charting tool functions:
+\itemize{
+  \item{addTA}{add technical indicator}
+  \item{dropTA}{remove technical indicator}
+  \item{moveTA}{move a technical indicator}
+  \item{swapTA}{swap two technical indicators}
+}
 
 Current technical indicators include:
 \itemize{
