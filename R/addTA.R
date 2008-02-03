@@ -1081,6 +1081,8 @@ function(x) {
     Cl(x)
   } else x 
 
+  type <- match.arg(type)
+
   roc <- ROC(xx,n=n,type=type,na=NA)
 
   chobTA@TA.values <- roc
