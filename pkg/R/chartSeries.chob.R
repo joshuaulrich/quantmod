@@ -167,7 +167,6 @@ function(x)
   axis(1,at=x@bp*x@spacing+1,labels=x@x.labels,las=1,lwd=1,mgp=c(3,2,0),
        col=x@colors$major.tick)
 
-  title(x@name)
 
   # resave new chob object - just in case of any changes
   write.chob(x,dev.cur())
