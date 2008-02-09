@@ -2179,12 +2179,14 @@ function(x) {
 # get.current.chob {{{
 `get.current.chob` <- function() {
   if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) stop()
+    if(identical(sys.frames()[[1]],.GlobalEnv)) 
+      stop("why are you calling this directly?")
     lchob <- get('chob',env=sys.frames()[[1]])
   } else {
     gchob <- get.chob()
     #protect against NULL device or windows not drawn to yet
-    if(dev.cur()==1 || length(gchob) < dev.cur()) stop()
+    if(dev.cur()==1 || length(gchob) < dev.cur()) 
+      stop("improperly set or missing graphics device")
     current.chob <- which(sapply(gchob,
                                  function(x) {
                                    ifelse(class(x)=="chob" &&
