@@ -66,6 +66,8 @@ setClass("chob",
          representation(
            device="ANY",
            call="call",
+           xdata='ANY',
+           xsubset='ANY',
            name="character",
            type="character",
            passed.args="ANY",
@@ -79,7 +81,8 @@ setClass("chob",
            xlab="character",ylab="character",
            spacing="numeric",width="numeric",
            bp="numeric",x.labels="character",
-           colors="ANY",time.scale="ANY"
+           colors="ANY",time.scale="ANY",
+           minor.ticks="logical"
          )
 )
 

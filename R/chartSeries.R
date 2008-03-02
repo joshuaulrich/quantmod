@@ -9,11 +9,23 @@ function(x,
          line.type="l",
          bar.type="ohlc",
          xlab="time",ylab="price",theme=chartTheme("black"),
+         major.ticks='auto',minor.ticks=TRUE,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
+  sys.TZ <- Sys.getenv('TZ')
+  Sys.setenv(TZ='GMT')
+  on.exit(Sys.setenv(TZ=sys.TZ))
+
   if(!is.xts(x)) x <- as.xts(x)
 
   indexClass(x) <- "POSIXct"
+
+  if(!is.null(subset)) {
+    xsubset <- which(index(x) %in% index(x[subset]))  
+  } else xsubset <- 1:NROW(x)
+
+  xdata <- x
+  x <- x[xsubset]
 
   if(is.OHLC(x)) {
     Opens <- as.numeric(Op(x))
@@ -77,30 +89,35 @@ function(x,
     width <- 3
     if(NROW(x) > 60) width <- 1
   }
-  ticks <- function(x,gt=2,lt=30) {
-      nminutes15 <- function(x) {
-          length(breakpoints(x,minutes15,TRUE))-1
-        }
-      FUNS <-c('nseconds','nminutes','nminutes15','nhours',
-            'ndays','nweeks','nmonths',
-            'nyears')
-      is <-sapply(FUNS[8:1],
-                  function(y) { do.call(y,list(x)) })
-      cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
-      bp <- endpoints(x,cl)
-      bp
-    }
-  bp <- ticks(x)
-  # format the scale
-  x.labels <- format(index(x)[bp+1],"%n%b%n%Y")
-  if(time.scale=='weekly' | time.scale=='daily')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%Y")
-  if(time.scale=='minute')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%H:%M")
- 
+
+  ticks <- function(ival, major.ticks, gt = 2, lt = 30) {
+      tick.opts <- c("years", "months", "weeks", "days", "hours", 
+          "minutes", "seconds")
+      if (major.ticks %in% tick.opts) {
+          cl <- major.ticks[1]
+      }
+      else {
+          is <- sapply(tick.opts, function(y) {
+              length(endpoints(ival, y, 1)) - 1
+          })
+          cl <- names(is)[which(is > gt & is < lt)][1]
+      }
+      ep <- endpoints(ival, cl)
+      ep
+  }
+  ep <- ticks(x, major.ticks)
+  x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
+  if (time.scale == "weekly" | time.scale == "daily") 
+      x.labels <- format(index(x)[ep + 1], "%b %d%n%Y")
+  if (time.scale == "minute") 
+      x.labels <- format(index(x)[ep + 1], "%b %d%n%H:%M")
+
   chob <- new("chob")
   chob@call <- match.call(expand=TRUE)
   if(is.null(name)) name <- as.character(match.call()$x)
+
+  chob@xdata <- xdata
+  chob@xsubset <- xsubset
   chob@name <- name
   chob@type <- chart[1]
 
@@ -110,7 +127,6 @@ function(x,
   } else chob@yrange <- range(x[,1],na.rm=TRUE)
   
 
-
   chob@color.vol <- color.vol
   chob@multi.col <- multi.col
   chob@show.vol <- show.vol
@@ -118,10 +134,11 @@ function(x,
   chob@line.type <- line.type
   chob@spacing <- spacing
   chob@width <- width
-  chob@bp <- bp
+  chob@bp <- ep
   chob@x.labels <- x.labels
   chob@colors <- theme
   chob@time.scale <- time.scale
+  chob@minor.ticks <- minor.ticks
 
   chob@length <- NROW(x)
 
@@ -153,6 +170,8 @@ function(x,
   write.chob(chob,chob@device)
   invisible(chob)
 } #}}}
+
+
 # candleChart {{{
 `candleChart` <-
 function(x,
@@ -611,7 +630,8 @@ function(x,
                                 dn.dn.col="#FF0000",up.dn.col="#000000",
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
-                                dn.dn.border="#666666",up.dn.border="#666666"
+                                dn.dn.border="#666666",up.dn.border="#666666",
+                                main.col="#555555",sub.col="#555555"
                                 ),
                       'black'=
                            list(fg.col="#666666",bg.col="#222222",
@@ -622,7 +642,8 @@ function(x,
                                 dn.dn.col="#FF0000",up.dn.col="#000000",
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
-                                dn.dn.border="#666666",up.dn.border="#666666"
+                                dn.dn.border="#666666",up.dn.border="#666666",
+                                main.col="#999999",sub.col="#999999"
                                 ),
                       'beige'=
                            list(fg.col="#888888",bg.col="#F5F5D0",
@@ -633,7 +654,8 @@ function(x,
                                 dn.dn.col="#FF0000",up.dn.col="#000000",
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
-                                dn.dn.border="#666666",up.dn.border="#666666"
+                                dn.dn.border="#666666",up.dn.border="#666666",
+                                main.col="#555555",sub.col="#555555"
                                 )
                      ), class='chart.theme')
 # }}}
