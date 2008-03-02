@@ -785,6 +785,9 @@ function(x) {
 
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
@@ -792,7 +795,7 @@ function(x) {
 
   atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
 
-  chobTA@TA.values <- atr
+  chobTA@TA.values <- atr[lchob@xsubset,]
   chobTA@name <- "chartATR"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -848,6 +851,9 @@ function(x) {
 
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
@@ -857,7 +863,8 @@ function(x) {
 
   trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
 
-  chobTA@TA.values <- trix
+  chobTA@TA.values <- trix[lchob@xsubset]
+
   chobTA@name <- "chartTRIX"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -918,6 +925,9 @@ function(x) {
 
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
  
@@ -929,7 +939,8 @@ function(x) {
 
   dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)
 
-  chobTA@TA.values <- dpo
+  chobTA@TA.values <- dpo[lchob@xsubset]
+
   chobTA@name <- "chartDPO"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -1019,6 +1030,9 @@ function(x) {
 
   lchob <- get.current.chob()
   x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
@@ -1028,7 +1042,7 @@ function(x) {
   } else x 
 
   rsi <- RSI(xx,n=n,maType=type,wilder=wilder)
-  chobTA@TA.values <- rsi
+  chobTA@TA.values <- rsi[lchob@xsubset]
   chobTA@name <- "chartRSI"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -1094,7 +1108,9 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
@@ -1106,7 +1122,7 @@ function(x) {
 
   roc <- ROC(xx,n=n,type=type,na=NA)
 
-  chobTA@TA.values <- roc
+  chobTA@TA.values <- roc[lchob@xsubset]
   chobTA@name <- "chartROC"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -1311,11 +1327,11 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- FALSE
-
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
@@ -1324,7 +1340,8 @@ function(x) {
   ma <- do.call(maType,list(xx,n=n,...))
   mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))
   
-  chobTA@TA.values <- mae
+  chobTA@TA.values <- mae[lchob@xsubset,]
+
   chobTA@name <- "chartEnvelope"
   chobTA@call <- match.call()
   chobTA@on <- on
@@ -1389,18 +1406,18 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- FALSE
-
-
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   if(!is.OHLC(x)) stop("SAR requires HL series") 
 
   sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)
 
-  chobTA@TA.values <- sar
+  chobTA@TA.values <- sar[lchob@xsubset]
+
   chobTA@name <- "chartSAR"
   chobTA@call <- match.call()
   chobTA@on <- 1
@@ -1446,7 +1463,9 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
+
+  x <- as.matrix(lchob@xdata)
+
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
@@ -1459,7 +1478,8 @@ function(x) {
 
   macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
   
-  chobTA@TA.values <- macd
+  chobTA@TA.values <- macd[lchob@xsubset,]
+
   chobTA@name <- "chartMACD"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
@@ -1610,7 +1630,7 @@ function(x) {
 
   # get the appropriate data - from the approp. src
   if(on==1) {
-    x <- as.matrix(eval(lchob@passed.args$x))
+    x <- as.matrix(lchob@xdata)
 
     if(!is.OHLC(x) | missing(with.col)) with.col <- 1
 
@@ -1639,7 +1659,8 @@ function(x) {
     ma.tmp <- cbind(ma.tmp,ma)     
   }
 
-  chobTA@TA.values <- ma.tmp 
+  chobTA@TA.values <- ma.tmp[lchob@xsubset]
+
   chobTA@name <- "chartEMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
