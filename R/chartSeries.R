@@ -279,7 +279,8 @@ function(subset=NULL) {
 
   chob@passed.args <- lchob@passed.args
   TA <- chob@passed.args$TA
-  if(!is.null(TA)) {
+
+  if(length(TA) > 0) {
 
     # important to force eval of _current_ chob, not saved chob
     thisEnv <- environment()
@@ -757,7 +758,8 @@ function(x,
 } #}}}
 
 # .chart.theme {{{
-`.chart.theme` <- structure(list('white'=
+`.chart.theme` <- structure(list(
+                      'white'=
                            list(fg.col="#888888",bg.col="#FFFFFF",
                                 grid.col="#CCCCCC",border="#666666",
                                 minor.tick="#CCCCCC",major.tick="#888888",
@@ -767,7 +769,8 @@ function(x,
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
-                                main.col="#555555",sub.col="#555555"
+                                main.col="#555555",sub.col="#555555",
+                                BBands=list(col='blue',fill='#F7F7F7')
                                 ),
                       'black'=
                            list(fg.col="#666666",bg.col="#222222",
@@ -779,7 +782,8 @@ function(x,
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
-                                main.col="#999999",sub.col="#999999"
+                                main.col="#999999",sub.col="#999999",
+                                BBands=list(col='red',fill='#282828')
                                 ),
                       'beige'=
                            list(fg.col="#888888",bg.col="#F5F5D0",
@@ -791,7 +795,8 @@ function(x,
                                 up.border="#666666",dn.border="#666666",
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
-                                main.col="#555555",sub.col="#555555"
+                                main.col="#555555",sub.col="#555555",
+                                BBands=list(col='orange',fill='#F5F5DF')
                                 )
                      ), class='chart.theme')
 # }}}
