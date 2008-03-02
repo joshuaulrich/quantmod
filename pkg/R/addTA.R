@@ -1657,10 +1657,10 @@ function(x) {
   for(i in 1:length(n)) {
     ma <- EMA(x.tmp,n=n[i],wilder=wilder[1],
               ratio=ratio[1])
-    ma.tmp <- cbind(ma.tmp,ma)     
+    ma.tmp <- cbind(ma.tmp,ma)
   }
 
-  chobTA@TA.values <- ma.tmp[lchob@xsubset]
+  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],nc=NCOL(ma.tmp))
 
   chobTA@name <- "chartEMA"
   chobTA@call <- match.call()
@@ -1736,7 +1736,7 @@ function(x) {
 
   # get the appropriate data - from the approp. src
   if(on==1) {
-    x <- as.matrix(eval(lchob@passed.args$x))
+    x <- as.matrix(lchob@xdata)
 
     if(!is.OHLC(x) | missing(with.col)) with.col <- 1
 
@@ -1762,7 +1762,7 @@ function(x) {
     ma.tmp <- cbind(ma.tmp,ma)
   }
 
-  chobTA@TA.values <- ma.tmp # single numeric vector
+  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],nc=NCOL(ma.tmp)) # single numeric vector
   chobTA@name <- "chartSMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -1833,7 +1833,7 @@ function(x) {
 
   # get the appropriate data - from the approp. src
   if(on==1) {
-    x <- as.matrix(eval(lchob@passed.args$x))
+    x <- as.matrix(lchob@xdata)
 
     if(!is.OHLC(x) | missing(with.col)) with.col <- 1
 
@@ -1853,7 +1853,7 @@ function(x) {
     } else x.tmp <- x[,with.col]
   }
 
-  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@TA.values <- x.tmp[lchob@xsubset]
   chobTA@name <- "chartWMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -1918,7 +1918,7 @@ function(x) {
 
   # get the appropriate data - from the approp. src
   if(on==1) {
-    x <- as.matrix(eval(lchob@passed.args$x))
+    x <- as.matrix(lchob@xdata)
 
     if(!is.OHLC(x) | missing(with.col)) with.col <- 1
 
@@ -1938,7 +1938,7 @@ function(x) {
     } else x.tmp <- x[,with.col]
   }
 
-  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@TA.values <- x.tmp[lchob@xsubset]
   chobTA@name <- "chartDEMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -2003,7 +2003,7 @@ function(x) {
 
   # get the appropriate data - from the approp. src
   if(on==1) {
-    x <- as.matrix(eval(lchob@passed.args$x))
+    x <- as.matrix(lchob@xdata)
 
     if(!is.OHLC(x) | missing(with.col)) with.col <- 1
 
@@ -2024,7 +2024,7 @@ function(x) {
   }
   if(!has.Vo(x)) return()
 
-  chobTA@TA.values <- cbind(x.tmp,Vo(x)) # Price + Volume
+  chobTA@TA.values <- cbind(x.tmp,Vo(x))[lchob@xsubset,] # Price + Volume
   chobTA@name <- "chartEVWMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -2089,7 +2089,7 @@ function(x) {
 
   # get the appropriate data - from the approp. src
   if(on==1) {
-    x <- as.matrix(eval(lchob@passed.args$x))
+    x <- as.matrix(lchob@xdata)
 
     if(!is.OHLC(x) | missing(with.col)) with.col <- 1
 
@@ -2113,7 +2113,7 @@ function(x) {
     } else x.tmp <- x[,with.col]
   }
 
-  chobTA@TA.values <- x.tmp # single numeric vector
+  chobTA@TA.values <- x.tmp[lchob@xsubset]
   chobTA@name <- "chartZLEMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -2168,19 +2168,20 @@ function(x) {
 } # }}}
 
 # addExpiry {{{
-`addExpiry` <- function(type='options',lty='dotted',col='blue') {
+`addExpiry` <- function(type='options',lty='dotted') {
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- FALSE
 
   # get the appropriate data - from the approp. src
   #if(from.fig==1) {
-  x <- eval(lchob@passed.args$x)
+  x <- lchob@xdata
+
   if(type=='options') {
     index.of.exp <- options.expiry(x)
   } else index.of.exp <- futures.expiry(x)
 
-  chobTA@TA.values <- index.of.exp # single numeric vector
+  chobTA@TA.values <- index.of.exp[index.of.exp %in% lchob@xsubset] # single numeric vector
   chobTA@name <- "chartExpiry"
   chobTA@call <- match.call()
   chobTA@on <- 1
@@ -2217,7 +2218,7 @@ function(x) {
     color.vol <- x@params$color.vol
 
     for(ex in 1:length(x@TA.values)) {
-      abline(v=x@TA.values[ex]*spacing,lty=x@params$lty,col=x@params$col)
+      abline(v=x@TA.values[ex]*spacing,lty=x@params$lty,col=x@params$colors$Expiry)
     }
 } # }}}
 

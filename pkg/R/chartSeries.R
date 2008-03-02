@@ -20,8 +20,17 @@ function(x,
 
   indexClass(x) <- "POSIXct"
 
-  if(!is.null(subset)) {
-    xsubset <- which(index(x) %in% index(x[subset]))  
+  if(!is.null(subset) & is.character(subset)) {
+    if(strsplit(subset,' ')[[1]][1] %in% c('first','last')) {
+      subsetvec <- strsplit(subset,' ')[[1]]
+      if(length(subsetvec) < 3) {
+        subset.n <- ifelse(length(subsetvec)==1,1L,as.numeric(subsetvec[2]))
+      } else {
+        subset.n <- paste(subsetvec[2:3],collapse=' ')
+      }
+      sub.index <- index(do.call(subsetvec[1],list(x,subset.n)))
+      xsubset <- which(index(x) %in% sub.index)
+    } else xsubset <- which(index(x) %in% index(x[subset]))  
   } else xsubset <- 1:NROW(x)
 
   xdata <- x
@@ -183,9 +192,27 @@ function(subset=NULL) {
 
   indexClass(x) <- "POSIXct"
 
-  if(!is.null(subset)) {
-    xsubset <- which(index(x) %in% index(x[subset]))  
-  } else xsubset <- 1:NROW(x)
+    if (!is.null(subset) & is.character(subset)) {
+        if (strsplit(subset, " ")[[1]][1] %in% c("first", "last")) {
+            subsetvec <- strsplit(subset, " ")[[1]]
+            if (length(subsetvec) < 3) {
+                subset.n <- ifelse(length(subsetvec) == 1, 1L, 
+                  as.numeric(subsetvec[2]))
+            }
+            else {
+                subset.n <- paste(subsetvec[2:3], collapse = " ")
+            }
+            sub.index <- index(do.call(subsetvec[1], list(x, 
+                subset.n)))
+            xsubset <- which(index(x) %in% sub.index)
+        }
+        else xsubset <- which(index(x) %in% index(x[subset]))
+    }
+    else xsubset <- 1:NROW(x)
+
+#  if(!is.null(subset)) {
+#    xsubset <- which(index(x) %in% index(x[subset]))  
+#  } else xsubset <- 1:NROW(x)
 
   xdata <- x
   x <- x[xsubset]
@@ -770,6 +797,7 @@ function(x,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#555555",sub.col="#555555",
+                                Expiry='#C9C9C9',
                                 BBands=list(col='blue',fill='#F7F7F7')
                                 ),
                       'black'=
@@ -783,6 +811,7 @@ function(x,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#999999",sub.col="#999999",
+                                Expiry='#383838',
                                 BBands=list(col='red',fill='#282828')
                                 ),
                       'beige'=
@@ -796,6 +825,7 @@ function(x,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#555555",sub.col="#555555",
+                                Expiry='#C9C9C9',
                                 BBands=list(col='orange',fill='#F5F5DF')
                                 )
                      ), class='chart.theme')
