@@ -170,6 +170,142 @@ function(x,
   write.chob(chob,chob@device)
   invisible(chob)
 } #}}}
+# zoomChart {{{
+`zoomChart` <-
+function(subset=NULL) {
+  sys.TZ <- Sys.getenv('TZ')
+  Sys.setenv(TZ='GMT')
+  on.exit(Sys.setenv(TZ=sys.TZ))
+
+  lchob <- get.current.chob()
+
+  x <- lchob@xdata
+
+  indexClass(x) <- "POSIXct"
+
+  if(!is.null(subset)) {
+    xsubset <- which(index(x) %in% index(x[subset]))  
+  } else xsubset <- 1:NROW(x)
+
+  xdata <- x
+  x <- x[xsubset]
+
+  color.vol <- lchob@color.vol
+
+  if(is.OHLC(x)) {
+    Opens <- as.numeric(Op(x))
+    Highs <- as.numeric(Hi(x))
+    Lows <- as.numeric(Lo(x))
+    Closes <- as.numeric(Cl(x))
+  } else {
+    Lows <- min(x[,1])
+    Highs <- max(x[,1])
+    Closes <- as.numeric(x[,1])
+    type <- "line"
+    color.vol <- FALSE
+  } 
+  if(has.Vo(x)) {
+    Volumes <- as.numeric(Vo(x))
+    show.vol <- TRUE
+  } else show.vol <- FALSE
+  
+  time.scale <- lchob@time.scale
+
+  theme <- lchob@colors
+
+  multi.col <- lchob@multi.col
+  show.vol <- lchob@show.vol
+  bar.type <- lchob@bar.type
+  line.type <- lchob@line.type
+  spacing <- lchob@spacing
+  width <- lchob@width
+  minor.ticks <- lchob@minor.ticks 
+  chart <- lchob@type
+  
+
+  major.ticks <- lchob@passed.args$major.ticks
+  if(is.null(major.ticks)) major.ticks <- 'auto'
+
+  ticks <- function(ival, major.ticks, gt = 2, lt = 30) {
+      tick.opts <- c("years", "months", "weeks", "days", "hours", 
+          "minutes", "seconds")
+      if (major.ticks %in% tick.opts) {
+          cl <- major.ticks[1]
+      }
+      else {
+          is <- sapply(tick.opts, function(y) {
+              length(endpoints(ival, y, 1)) - 1
+          })
+          cl <- names(is)[which(is > gt & is < lt)][1]
+      }
+      ep <- endpoints(ival, cl)
+      ep
+  }
+  ep <- ticks(x, major.ticks)
+  x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
+  if (time.scale == "weekly" | time.scale == "daily") 
+      x.labels <- format(index(x)[ep + 1], "%b %d%n%Y")
+  if (time.scale == "minute") 
+      x.labels <- format(index(x)[ep + 1], "%b %d%n%H:%M")
+
+  chob <- new("chob")
+  chob@call <- lchob@call
+  chob@name <- lchob@name
+
+  chob@xdata <- xdata
+  chob@xsubset <- xsubset
+  chob@type <- chart[1]
+
+  chob@xrange <- c(1,NROW(x))
+  if(is.OHLC(x)) {
+    chob@yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
+  } else chob@yrange <- range(x[,1],na.rm=TRUE)
+  
+
+  chob@color.vol <- color.vol
+  chob@multi.col <- multi.col
+  chob@show.vol <- show.vol
+  chob@bar.type <- bar.type
+  chob@line.type <- line.type
+  chob@spacing <- spacing
+  chob@width <- width
+  chob@bp <- ep
+  chob@x.labels <- x.labels
+  chob@colors <- theme
+  chob@time.scale <- time.scale
+  chob@minor.ticks <- minor.ticks
+
+  chob@length <- NROW(x)
+
+  chob@passed.args <- lchob@passed.args
+  TA <- chob@passed.args$TA
+  if(!is.null(TA)) {
+
+    # important to force eval of _current_ chob, not saved chob
+    thisEnv <- environment()
+    if(is.character(TA)) TA <- as.list(TA)
+    chob@passed.args$TA <- list()
+    for(ta in 1:length(TA)) {
+      if(is.character(TA[[ta]])) {
+        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
+      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
+    }
+    chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
+    chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
+  } else chob@windows <- 1
+  
+  #if(debug) return(str(chob))
+  # re-evaluate the TA list, as it will be using stale data,
+  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
+
+  # draw the chart
+  do.call('chartSeries.chob',list(chob))
+
+  chob@device <- lchob@device
+
+  write.chob(chob,chob@device)
+  invisible(chob)
+} #}}}
 
 
 # candleChart {{{
