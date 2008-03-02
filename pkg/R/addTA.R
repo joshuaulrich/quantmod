@@ -1176,7 +1176,6 @@ function(x) {
   draw <- draw.options[pmatch(draw,draw.options)]
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   x <- as.matrix(lchob@xdata)
 
@@ -1232,8 +1231,10 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-    bband.col <- ifelse(!is.null(x@params$colors$BBands.col),
-                        x@params$colors$BBands.col,'red') 
+    bband.col <- ifelse(!is.null(x@params$colors$BBands$col),
+                        x@params$colors$BBands$col,'red') 
+    bband.fill <- ifelse(!is.null(x@params$colors$BBands$fill),
+                        x@params$colors$BBands$fill,x@params$colors$bg.col) 
 
     # bband col vector
     # lower.band, middle.band, upper.band, %b, bb.width
@@ -1256,7 +1257,7 @@ function(x) {
       } else {
         xx <- seq(1,length(x.range),by=spacing)
         polygon(c(xx,rev(xx)),
-                c(bb[,1],rev(bb[,3])),col='#282828',border=NA)
+                c(bb[,1],rev(bb[,3])),col=bband.fill,border=NA)
         lines(seq(1,length(x.range),by=spacing),
               bb[,1],col=bband.col[1],lwd=1,lty='dashed')
         lines(seq(1,length(x.range),by=spacing),

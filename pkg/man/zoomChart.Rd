@@ -22,6 +22,9 @@ is the same as the subsetting for xts objects,
 which is how the data is stored internally for
 rendering.
 
+Calling \code{zoomChart} with no arguments (NULL)
+resets the chart to the original data.
+
 Examples include '2007' for all of the year 2007,
 '2007::2008' for years 2007 through 2008, '::2007'
 for all data from the beginning of the set to the
@@ -39,10 +42,11 @@ data attached to the chart is left unchanged.
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{chartSeries}} }
 \examples{
+\dontrun{
 data(sample_matrix)
 chartSeries(sample_matrix)
 zoomChart('2007-04::')
 zoomChart()
-
+}
 }
 \keyword{ utilities }
