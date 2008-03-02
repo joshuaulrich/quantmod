@@ -20,8 +20,12 @@ function(x)
  
   # get current values of series to be charted
   xx <- eval(x@passed.args$x)
-  if(!is.xts(xx)) xx <- as.xts(xx)
+  xx <- x@xdata
+
+#  if(!is.xts(xx)) xx <- as.xts(xx)
  
+  xx <- xx[x@xsubset]
+
   if(is.OHLC(xx)) {
     Opens <- as.numeric(Op(xx))
     Highs <- as.numeric(Hi(xx))
@@ -123,6 +127,7 @@ function(x)
 
   axis(2)
   box(col=x@colors$fg.col)
+  do.call('title',list(x@name,col.main=x@colors$main.col))
 
   # TA calculation and drawing loops
   if(x@windows > 1 | length(x@passed.args$TA) > 0) {
@@ -163,7 +168,9 @@ function(x)
 
   # draw the final x labels
   #title(xlab=x@colors$time.scale,col.lab=x@colors$fg.col)
-  axis(1,at=1:x@length*x@spacing+1,labels=FALSE,col=x@colors$minor.tick)
+  if(x@minor.ticks)
+    axis(1,at=1:x@length*x@spacing+1,labels=FALSE,col=x@colors$minor.tick)
+ 
   axis(1,at=x@bp*x@spacing+1,labels=x@x.labels,las=1,lwd=1,mgp=c(3,2,0),
        col=x@colors$major.tick)
 
