@@ -10,7 +10,7 @@ function(x)
     layout(matrix(1))
   } else {
     layout(matrix(1:x@windows,x@windows,1,byrow=TRUE),
-                  1,c(3,rep(1,x@windows-2),1.45),
+                  1,c(3,rep(1,x@windows-2),1.65),
            respect=FALSE)
     if(x@windows > 1) par(mar=c(0,4,3,3))
   }
