@@ -92,7 +92,7 @@ function(x,from=NULL,to=NULL) {
 #  barplot(x,col=ifelse(x > 0,3,8))
 #}
 
-`periodicity` <-
+`periodicity0` <-
 function(x,...)
 {
   p <- median(diff(time(x)))
