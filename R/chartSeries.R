@@ -118,7 +118,7 @@ function(x,
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
   if (time.scale == "weekly" | time.scale == "daily") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%Y")
-  if (time.scale == "minute") 
+  if (time.scale == "minute" | time.scale == "hourly") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%H:%M")
 
   chob <- new("chob")
@@ -272,7 +272,7 @@ function(subset=NULL) {
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
   if (time.scale == "weekly" | time.scale == "daily") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%Y")
-  if (time.scale == "minute") 
+  if (time.scale == "minute" | time.scale == "hourly") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%H:%M")
 
   chob <- new("chob")
