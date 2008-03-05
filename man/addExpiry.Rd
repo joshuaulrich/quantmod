@@ -6,12 +6,11 @@ Apply options or futures expiration vertical bars
 to current chart.
 }
 \usage{
-addExpiry(type = "options", lty = "dotted", col = "blue")
+addExpiry(type = "options", lty = "dotted")
 }
 \arguments{
   \item{type}{ options or futures expiration }
   \item{lty}{ type of lines to draw }
-  \item{col}{ color of lines }
 }
 \details{
 See options.expiry and futures.expiry in \pkg{quantmod}
