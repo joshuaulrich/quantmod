@@ -335,6 +335,27 @@ function(subset=NULL) {
   invisible(chob)
 } #}}}
 
+# zoom {{{
+`zoom` <- function(n=5,eps=2) {
+  for(i in 1:n) {
+    points <- locator(2)
+    if(abs(diff(points$x)) < eps) {
+      # if clicks are within `eps` close - zoom out completely
+      zoomChart()
+    } else {
+      usr <- par('usr')
+      xdata <- quantmod:::get.chob()[[2]]@xdata
+      xsubset <- quantmod:::get.chob()[[2]]@xsubset
+      sq <- floor(seq(usr[1],usr[2],1))
+      st <- which(floor(points$x[1])==sq)/length(sq) * NROW(xdata[xsubset]) 
+      en <- which(floor(points$x[2])==sq)/length(sq) * NROW(xdata[xsubset])
+      sorted <- sort(c(st,en)); st <- sorted[1]; en <- sorted[2]*1.05
+      zoomChart(paste(index(xdata[xsubset])[max(1,floor(st))],
+                      index(xdata[xsubset])[min(ceiling(en),NROW(xdata[xsubset]))],sep="::"))
+    }
+  #cat(paste(points),"\n")
+  }
+} #}}}
 
 # candleChart {{{
 `candleChart` <-

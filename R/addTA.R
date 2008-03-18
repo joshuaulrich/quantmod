@@ -2224,10 +2224,14 @@ function(x) {
 
 # get.current.chob {{{
 `get.current.chob` <- function() {
-  if(exists('chob',env=sys.frames()[[1]])) {
-    if(identical(sys.frames()[[1]],.GlobalEnv)) 
-      stop("why are you calling this directly?")
-    lchob <- get('chob',env=sys.frames()[[1]])
+  first.chob <- which(sapply(sys.frames(),function(x) exists('chob',env=x)))[1]
+  if(!is.na(first.chob)) {
+    lchob <- get('chob',env=first.chob)
+
+#  if(exists('chob',env=sys.frames()[[sys.parent()]])) {
+#    if(identical(sys.frames()[[sys.parent()]],.GlobalEnv)) 
+#      stop("why are you calling this directly?")
+#    lchob <- get('chob',env=sys.frames()[[sys.parent()]])
   } else {
     gchob <- get.chob()
     #protect against NULL device or windows not drawn to yet
