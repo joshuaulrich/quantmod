@@ -350,10 +350,9 @@ function(subset=NULL) {
       st <- which(floor(points$x[1])==sq)/length(sq) * NROW(xdata[xsubset]) 
       en <- which(floor(points$x[2])==sq)/length(sq) * NROW(xdata[xsubset])
       sorted <- sort(c(st,en)); st <- sorted[1]; en <- sorted[2]*1.05
-      zoomChart(paste(index(xdata[xsubset])[max(1,floor(st))],
-                      index(xdata[xsubset])[min(ceiling(en),NROW(xdata[xsubset]))],sep="::"))
+      zoomChart(paste(index(xdata[xsubset])[max(1,floor(st),na.rm=TRUE)],
+                      index(xdata[xsubset])[min(ceiling(en),NROW(xdata[xsubset]),na.rm=TRUE)],sep="::"))
     }
-  #cat(paste(points),"\n")
   }
 } #}}}
 
