@@ -17,7 +17,7 @@ additional getSymbols \sQuote{methods}.
 getSymbols.rda(Symbols,
                  env,
                  dir="",
-                 return.class = "zoo",
+                 return.class = "xts",
                  extension="rda",
                  col.names=c("Open","High","Low","Close","Volume","Adjusted"),
                  ...)
@@ -45,7 +45,7 @@ A call to getSymbols.csv will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{quantmod.OHLC}, \code{data.frame}, 
+\code{its}, \code{zoo}, \code{xts}, \code{data.frame}, 
 or \code{timeSeries}.
 }
 \author{ Jeffrey A. Ryan }

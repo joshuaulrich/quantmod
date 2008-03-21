@@ -9,7 +9,7 @@ this function should \emph{NOT} be called directly.
 \usage{
 getSymbols.SQLite(Symbols,
                   env,
-                  return.class = c("quantmod.OHLC", "zoo"),
+                  return.class = 'xts',
                   db.fields = c("row_names",
                                 "Open",
                                 "High",

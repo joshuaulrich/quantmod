@@ -15,7 +15,7 @@ additional getSymbols \sQuote{methods}.
 \usage{
 getSymbols.yahoo(Symbols,
                  env,
-                 return.class = c("quantmod.OHLC", "zoo"),
+                 return.class = 'xts',
                  from = "2007-01-01",
                  to = Sys.Date(),
                   ...)
@@ -44,7 +44,7 @@ A call to getSymbols.yahoo will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
+\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
 }
 \references{ Yahoo Finance: \url{http://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }

@@ -23,7 +23,7 @@ chartSeries(x,
            TA = c(addVo()),
            line.type = "l",
            bar.type = "ohlc",
-           xlab = "time", ylab = "price", theme = chartTheme("black"),
+           theme = chartTheme("black"),
            major.ticks='auto', minor.ticks=TRUE,
            up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
            ...)
@@ -39,8 +39,6 @@ chartSeries(x,
   \item{TA}{ a vector of technical indicators and params }
   \item{line.type}{ type of line in line chart }
   \item{bar.type}{ type of barchart - ohlc or hlc }
-  \item{xlab}{ derived time scale }
-  \item{ylab}{ y axis label }
   \item{theme}{ a chart.theme object }
   \item{major.ticks}{ where should major ticks be drawn}
   \item{minor.ticks}{ should minor ticks be draw? }

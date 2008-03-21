@@ -13,7 +13,7 @@ further user contributed data tools.
 \usage{
 getSymbols.MySQL(Symbols,
                  env, 
-                 return.class = c("quantmod.OHLC", "zoo"), 
+                 return.class = 'xts',
                  db.fields = c("date", "o", "h", "l", "c", "v", "a"), 
                  field.names = NULL,
                  user = NULL, 
@@ -27,8 +27,7 @@ getSymbols.MySQL(Symbols,
                        the names of each symbol to be loaded}
        \item{env}{ where to create objects. (.GlobalEnv)}
        \item{return.class}{ desired class of returned object.
-                            Can be quantmod.OHLC (default
-                            for \dQuote{yahoo} OHLC data),
+                            Can be xts, 
                             zoo, data.frame, ts, or its. (zoo)}
        \item{db.fields}{ character vector indicating
                            names of fields to retrieve}
