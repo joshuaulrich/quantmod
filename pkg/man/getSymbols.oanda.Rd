@@ -18,7 +18,7 @@ getSymbols 'methods'.
 \usage{
 getSymbols.oanda(Symbols,
                  env,
-                 return.class = "zoo",
+                 return.class = "xts",
                  from = "2007-01-01",
                  to = Sys.Date(),
                  ...)
@@ -47,7 +47,7 @@ fail with a warning that the limit has been exceeded.
  A call to getSymbols(Symbols,src="oanda") will load into the specified
 environment one object for each 'Symbol' specified, with class
 defined  by 'return.class'. Presently this may be 'ts', 'its',
-'zoo', 'quantmod.OHLC', or 'timeSeries'.
+'zoo', 'xts', or 'timeSeries'.
 }
 \note{
 Oanda rates are quoted as one unit of base currency to the

@@ -126,7 +126,7 @@ A call to getSymbols will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
+\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
 
 If \code{auto.assign} is set to FALSE an object of type
 \code{return.class} will be returned.
@@ -136,7 +136,7 @@ If \code{auto.assign} is set to FALSE an object of type
 While it is possible to load symbols as classes other
 than \code{zoo}, \pkg{quantmod} requires most, if not
 all, data to be of class \code{zoo} or inherited
-from \code{zoo} - e.g. \code{quantmod.OHLC}. The additional
+from \code{zoo} - e.g. \code{xts}. The additional
 methods are meant mainly to be of use for those
 using the functionality outside of the \pkg{quantmod} workflow.
 }

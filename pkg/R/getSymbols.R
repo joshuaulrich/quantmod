@@ -83,7 +83,7 @@ function(Symbols=NULL,
 
 # getSymbols.yahoo {{{
 "getSymbols.yahoo" <-
-function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
+function(Symbols,env,return.class='xts',
          from='2007-01-01',
          to=Sys.Date(),
          ...)
@@ -136,7 +136,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- read.csv(tmp)
        unlink(tmp)
        if(verbose) cat("done.\n")
-       fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
+       fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='yahoo',updated=Sys.time())
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
@@ -153,7 +153,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 
 # getSymbols.google {{{
 "getSymbols.google" <-
-function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
+function(Symbols,env,return.class='xts',
          from='2007-01-01',
          to=Sys.Date(),
          ...)
@@ -202,7 +202,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
            warning("google duplicate bug - missing Dec 28,29,30 of 2003")
          }
        }
-       fr <- zoo(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'))
+       fr <- xts(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'),src='google',updated=Sys.time())
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
@@ -218,7 +218,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 # }}}
 
 # getSymbols.SQLite {{{
-"getSymbols.SQLite" <- function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
+"getSymbols.SQLite" <- function(Symbols,env,return.class='xts',
                                db.fields=c('row_names','Open','High',
                                            'Low','Close','Volume','Adjusted'),
                                field.names = NULL,
@@ -263,9 +263,9 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
             if(POSIX) {
               d <- as.numeric(fr[,1])
               class(d) <- c("POSIXt","POSIXct")
-              fr <- zoo(fr[,-1],order.by=d)
+              fr <- xts(fr[,-1],order.by=d)
             } else {
-              fr <- zoo(fr[,-1],order.by=as.Date(as.numeric(fr[,1]),origin='1970-01-01'))
+              fr <- xts(fr[,-1],order.by=as.Date(as.numeric(fr[,1]),origin='1970-01-01'))
             }
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
@@ -284,7 +284,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 # }}}
 
 # getSymbols.MySQL {{{
-"getSymbols.MySQL" <- function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
+"getSymbols.MySQL" <- function(Symbols,env,return.class='xts',
                                db.fields=c('date','o','h','l','c','v','a'),
                                field.names = NULL,
                                user=NULL,password=NULL,dbname=NULL,
@@ -324,7 +324,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
             rs <- dbSendQuery(con, query)
             fr <- fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
-            fr <- zoo(fr[,-1],order.by=as.Date(fr[,1],origin='1970-01-01'))
+            fr <- xts(fr[,-1],order.by=as.Date(fr[,1],origin='1970-01-01'),src=dbname,updated=Sys.time())
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
@@ -343,7 +343,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
 
 # getSymbols.FRED {{{
 `getSymbols.FRED` <- function(Symbols,env,
-     return.class="zoo", ...) {
+     return.class="xts", ...) {
      importDefaults("getSymbols.FRED")
      this.env <- environment()
      for(var in names(list(...))) {
@@ -364,7 +364,7 @@ function(Symbols,env,return.class=c('quantmod.OHLC','zoo'),
        fr <- read.csv(tmp,na.string=".")
        unlink(tmp)
        if(verbose) cat("done.\n")
-       fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
+       fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='FRED',updated=Sys.time())
        dim(fr) <- c(NROW(fr),1)
        colnames(fr) <- as.character(toupper(Symbols[[i]]))
        fr <- convert.time.series(fr=fr,return.class=return.class)
@@ -434,7 +434,7 @@ function() {
 "getSymbols.csv" <-
 function(Symbols,env,
          dir="",
-         return.class="zoo",
+         return.class="xts",
          extension="csv",
          ...) {
   importDefaults("getSymbols.csv")
@@ -474,7 +474,7 @@ function(Symbols,env,
     fr <- read.csv(sym.file)
     if(verbose)  
       cat("done.\n")
-    fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
+    fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='csv',updated=Sys.time())
     colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
                           c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
@@ -493,7 +493,7 @@ function(Symbols,env,
 "getSymbols.rda" <-
 function(Symbols,env,
          dir="",
-         return.class="zoo",
+         return.class="xts",
          extension="rda",
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
          ...) {
@@ -536,7 +536,7 @@ function(Symbols,env,
     assign('fr',get(local.name))
     if(verbose)  
       cat("done.\n")
-    if(!is.zoo(fr)) fr <- zoo(fr[,-1],as.Date(fr[,1],origin='1970-01-01'))
+    if(!is.xts(fr)) fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='rda',updated=Sys.time())
     colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),col.names,sep='.')
     fr <- convert.time.series(fr=fr,return.class=return.class)
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
@@ -583,7 +583,7 @@ function(Symbols,env,
 
 # getSymbols.oanda {{{
 `getSymbols.oanda` <-
-function(Symbols,env,return.class='zoo',
+function(Symbols,env,return.class='xts',
          from='2007-01-01',
          to=Sys.Date(),
          ...) {
@@ -640,7 +640,8 @@ function(Symbols,env,return.class='zoo',
                     gsub("<PRE>|</PRE>","",fr[(grep("PRE",fr)[1]):(grep("PRE",fr)[2])]),","))
 
        if(verbose) cat("done.\n")
-       fr <- zoo(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y",origin='1970-01-01'))
+       fr <- xts(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y",origin='1970-01-01'),
+                 src='oanda',updated=Sys.time())
        dim(fr) <- c(length(fr),1)
        colnames(fr) <- gsub("/",".",Symbols[[i]])
        fr <- convert.time.series(fr=fr,return.class=return.class)
@@ -659,9 +660,12 @@ function(Symbols,env,return.class='zoo',
          class(fr) <- c('quantmod.OHLC','zoo')
          return(fr)
        } else
-       if('zoo' %in% return.class) {
+       if('xts' %in% return.class) {
          return(fr)
        }
+       if('zoo' %in% return.class) {
+         return(as.zoo(fr))
+       } else
        if('ts' %in% return.class) {
          fr <- as.ts(fr)
          return(fr)

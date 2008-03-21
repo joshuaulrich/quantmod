@@ -18,7 +18,7 @@ additional getSymbols \sQuote{methods}.
 \usage{
 getSymbols.FRED(Symbols,
                 env,
-                return.class = "zoo",
+                return.class = "xts",
                 ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -47,7 +47,7 @@ A call to getSymbols.FRED will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, or \code{timeSeries}.
+\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
 }
 \references{ St. Louis Fed: Economic Data - FRED \url{http://research.stlouisfed.org/fred2/}
 }

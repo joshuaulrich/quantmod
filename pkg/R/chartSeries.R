@@ -8,7 +8,7 @@ function(x,
          TA=c(addVo()),
          line.type="l",
          bar.type="ohlc",
-         xlab="time",ylab="price",theme=chartTheme("black"),
+         theme=chartTheme("black"),
          major.ticks='auto',minor.ticks=TRUE,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
@@ -210,10 +210,6 @@ function(subset=NULL) {
     }
     else xsubset <- 1:NROW(x)
 
-#  if(!is.null(subset)) {
-#    xsubset <- which(index(x) %in% index(x[subset]))  
-#  } else xsubset <- 1:NROW(x)
-
   xdata <- x
   x <- x[xsubset]
 
@@ -356,452 +352,64 @@ function(subset=NULL) {
   }
 } #}}}
 
+
 # candleChart {{{
 `candleChart` <-
 function(x,
+         subset = NULL,
          type="candlesticks",
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
-         xlab="time",ylab="price",theme=chartTheme("black"),
-         up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
+         theme=chartTheme("black"),
+         major.ticks='auto', minor.ticks = TRUE,
+         color.vol=TRUE,multi.col=FALSE,...
          ) {
-  if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
-  if(is.OHLC(x)) {
-    Opens <- as.numeric(Op(x))
-    Highs <- as.numeric(Hi(x))
-    Lows <- as.numeric(Lo(x))
-    Closes <- as.numeric(Cl(x))
-  } else {
-    Lows <- min(x[,1])
-    Highs <- max(x[,1])
-    Closes <- as.numeric(x[,1])
-    type <- "line"
-    color.vol <- FALSE
-  } 
-  if(has.Vo(x)) {
-    Volumes <- as.numeric(Vo(x))
-    show.vol <- TRUE
-  } else show.vol <- FALSE
-  
-  if(is.null(time.scale)) {
-    time.scale <- periodicity(x)$scale
-  }
-
-  if(is.character(theme)) theme <- chartTheme(theme)
-  if(!missing(up.col)) theme$up.col <- up.col 
-  if(!missing(dn.col)) theme$dn.col <- dn.col 
-  if(missing(multi.col) | !multi.col) { # interpret as FALSE
-    multi.col <- FALSE
-    theme$dn.up.col <- theme$up.col
-    theme$up.up.col <- theme$up.col
-    theme$dn.dn.col <- theme$dn.col
-    theme$up.dn.col <- theme$dn.col
-  } else {
-    if(is.character(multi.col)) {
-      # add some check for length 4 colors
-      theme$dn.up.col <- multi.col[1]
-      theme$up.up.col <- multi.col[2]
-      theme$dn.dn.col <- multi.col[3]
-      theme$up.dn.col <- multi.col[4]
-    }
-    theme$up.col <- theme$up.up.col
-    theme$dn.col <- theme$dn.dn.col
-    multi.col <- TRUE
-  }
-
-  # spacing requirements for chart type
-  chart.options <- c("auto","candlesticks","matchsticks","line","bars")
-  chart <- chart.options[pmatch(type,chart.options)]
-  chart <- 'bars'
-  if(chart[1]=="auto") {
-    chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
-  }
-  if(chart[1]=="candlesticks") {
-    spacing <- 3
-    width <- 3 
-  } else
-  if(chart[1]=="matchsticks" || chart[1]=='line') {
-    spacing <- 1
-    width <- 1
-  } else 
-  if(chart[1]=="bars") {
-    spacing <- 4
-    width <- 3
-    if(NROW(x) > 60) width <- 1
-  }
-  ticks <- function(x,gt=2,lt=30) {
-      nminutes15 <- function(x) {
-          length(breakpoints(x,minutes15,TRUE))-1
-        }
-      FUNS <-c('nseconds','nminutes','nminutes15','nhours',
-            'ndays','nweeks','nmonths',
-            'nyears')
-      is <-sapply(FUNS[8:1],
-                  function(y) { do.call(y,list(x)) })
-      cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
-      bp <- breakpoints(x,cl,TRUE)
-      bp
-    }
-  bp <- ticks(x)
-  # format the scale
-  x.labels <- format(index(x)[bp+1],"%n%b%n%Y")
-  if(time.scale=='weekly' | time.scale=='daily')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%Y")
-  if(time.scale=='minute')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%H:%M")
- 
-  chob <- new("chob")
-  chob@call <- match.call(expand=TRUE)
-  chob@name <- name
-  chob@type <- chart[1]
-
-  chob@xrange <- c(1,NROW(x))
-  if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x)),max(Hi(x)))
-  } else chob@yrange <- range(x)
-  
-
-
-  chob@color.vol <- color.vol
-  chob@multi.col <- multi.col
-  chob@show.vol <- show.vol
- # chob@bar.type <- bar.type
- # chob@line.type <- line.type
-  chob@spacing <- spacing
-  chob@width <- width
-  chob@bp <- bp
-  chob@x.labels <- x.labels
-  chob@colors <- theme
-  chob@time.scale <- time.scale
-
-  chob@length <- NROW(x)
-
-  chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
-  if(!is.null(TA)) {
-
-    # important to force eval of _current_ chob, not saved chob
-    thisEnv <- environment()
-    if(is.character(TA)) TA <- as.list(TA)
-    chob@passed.args$TA <- list()
-    for(ta in 1:length(TA)) {
-      if(is.character(TA[[ta]])) {
-        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
-      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
-    }
-    chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
-    chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
-  } else chob@windows <- 1
-  
-  #if(debug) return(str(chob))
-  # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
-
-  # draw the chart
-  do.call('chartSeries.chob',list(chob))
-
-  chob@device <- as.numeric(dev.cur())
-
-  write.chob(chob,chob@device)
-  invisible(chob)
+  do.call('chartSeries',list(x,subset=subset,
+                             name=name,type='candlesticks',show.grid=show.grid,
+                             time.scale=time.scale,TA=substitute(TA),
+                             theme=theme,major.ticks=major.ticks,minor.ticks=minor.ticks,
+                             color.vol=color.vol,
+                             multi.col=multi.col,...))
 } #}}}
 # barChart {{{
 `barChart` <-
 function(x,
+         subset = NULL,
          type="bars",
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
          bar.type="ohlc",
-         xlab="time",ylab="price",theme=chartTheme("black"),
-         up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
+         theme=chartTheme("black"),
+         major.ticks='auto', minor.ticks = TRUE,
+         color.vol=TRUE,multi.col=FALSE,...
          ) {
-  if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
-  if(is.OHLC(x)) {
-    Opens <- as.numeric(Op(x))
-    Highs <- as.numeric(Hi(x))
-    Lows <- as.numeric(Lo(x))
-    Closes <- as.numeric(Cl(x))
-  } else {
-    Lows <- min(x[,1])
-    Highs <- max(x[,1])
-    Closes <- as.numeric(x[,1])
-    type <- "line"
-    color.vol <- FALSE
-  } 
-  if(has.Vo(x)) {
-    Volumes <- as.numeric(Vo(x))
-    show.vol <- TRUE
-  } else show.vol <- FALSE
-  
-  if(is.null(time.scale)) {
-    time.scale <- periodicity(x)$scale
-  }
-
-  if(is.character(theme)) theme <- chartTheme(theme)
-  if(!missing(up.col)) theme$up.col <- up.col 
-  if(!missing(dn.col)) theme$dn.col <- dn.col 
-  if(missing(multi.col) | !multi.col) { # interpret as FALSE
-    multi.col <- FALSE
-    theme$dn.up.col <- theme$up.col
-    theme$up.up.col <- theme$up.col
-    theme$dn.dn.col <- theme$dn.col
-    theme$up.dn.col <- theme$dn.col
-  } else {
-    if(is.character(multi.col)) {
-      # add some check for length 4 colors
-      theme$dn.up.col <- multi.col[1]
-      theme$up.up.col <- multi.col[2]
-      theme$dn.dn.col <- multi.col[3]
-      theme$up.dn.col <- multi.col[4]
-    }
-    theme$up.col <- theme$up.up.col
-    theme$dn.col <- theme$dn.dn.col
-    multi.col <- TRUE
-  }
-
-  # spacing requirements for chart type
-  chart.options <- c("auto","candlesticks","matchsticks","line","bars")
-  chart <- chart.options[pmatch(type,chart.options)]
-  if(chart[1]=="auto") {
-    chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
-  }
-  if(chart[1]=="candlesticks") {
-    spacing <- 3
-    width <- 3 
-  } else
-  if(chart[1]=="matchsticks" || chart[1]=='line') {
-    spacing <- 1
-    width <- 1
-  } else 
-  if(chart[1]=="bars") {
-    spacing <- 4
-    width <- 3
-    if(NROW(x) > 60) width <- 1
-  }
-  ticks <- function(x,gt=2,lt=30) {
-      nminutes15 <- function(x) {
-          length(breakpoints(x,minutes15,TRUE))-1
-        }
-      FUNS <-c('nseconds','nminutes','nminutes15','nhours',
-            'ndays','nweeks','nmonths',
-            'nyears')
-      is <-sapply(FUNS[8:1],
-                  function(y) { do.call(y,list(x)) })
-      cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
-      bp <- breakpoints(x,cl,TRUE)
-      bp
-    }
-  bp <- ticks(x)
-  # format the scale
-  x.labels <- format(index(x)[bp+1],"%n%b%n%Y")
-  if(time.scale=='weekly' | time.scale=='daily')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%Y")
-  if(time.scale=='minute')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%H:%M")
- 
-  chob <- new("chob")
-  chob@call <- match.call(expand=TRUE)
-  chob@name <- name
-  chob@type <- chart[1]
-
-  chob@xrange <- c(1,NROW(x))
-  if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x)),max(Hi(x)))
-  } else chob@yrange <- range(x)
-  
-
-
-  chob@color.vol <- color.vol
-  chob@multi.col <- multi.col
-  chob@show.vol <- show.vol
-  chob@bar.type <- bar.type
-  #chob@line.type <- line.type
-  chob@spacing <- spacing
-  chob@width <- width
-  chob@bp <- bp
-  chob@x.labels <- x.labels
-  chob@colors <- theme
-  chob@time.scale <- time.scale
-
-  chob@length <- NROW(x)
-
-  chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
-  if(!is.null(TA)) {
-
-    # important to force eval of _current_ chob, not saved chob
-    thisEnv <- environment()
-    if(is.character(TA)) TA <- as.list(TA)
-    chob@passed.args$TA <- list()
-    for(ta in 1:length(TA)) {
-      if(is.character(TA[[ta]])) {
-        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
-      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
-    }
-    chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
-    chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
-  } else chob@windows <- 1
-  
-  #if(debug) return(str(chob))
-  # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
-
-  # draw the chart
-  do.call('chartSeries.chob',list(chob))
-
-  chob@device <- as.numeric(dev.cur())
-
-  write.chob(chob,chob@device)
-  invisible(chob)
+  do.call('chartSeries',list(x,subset=subset,
+                             name=name,type='bars',show.grid=show.grid,
+                             time.scale=time.scale,TA=substitute(TA),bar.type=bar.type,
+                             theme=theme,major.ticks=major.ticks,minor.ticks=minor.ticks,
+                             color.vol=color.vol,
+                             multi.col=multi.col,...))
 } #}}}
 # lineChart {{{
 `lineChart` <-
-function(x,
+function(x,subset = NULL,
          type="line",
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
          TA=c(addVo()),
          line.type="l",
-         xlab="time",ylab="price",theme=chartTheme("black"),
-         up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
+         theme=chartTheme("black"),
+         major.ticks='auto', minor.ticks = TRUE,
+         color.vol=TRUE,multi.col=FALSE,...
          ) {
-  if(is(x,'timeSeries')) x <- zoo(x@Data,as.POSIXct(x@positions))
-  if(is.OHLC(x)) {
-    Opens <- as.numeric(Op(x))
-    Highs <- as.numeric(Hi(x))
-    Lows <- as.numeric(Lo(x))
-    Closes <- as.numeric(Cl(x))
-  } else {
-    Lows <- min(x[,1])
-    Highs <- max(x[,1])
-    Closes <- as.numeric(x[,1])
-    type <- "line"
-    color.vol <- FALSE
-  } 
-  if(has.Vo(x)) {
-    Volumes <- as.numeric(Vo(x))
-    show.vol <- TRUE
-  } else show.vol <- FALSE
-  
-  if(is.null(time.scale)) {
-    time.scale <- periodicity(x)$scale
-  }
-
-  if(is.character(theme)) theme <- chartTheme(theme)
-  if(!missing(up.col)) theme$up.col <- up.col 
-  if(!missing(dn.col)) theme$dn.col <- dn.col 
-  if(missing(multi.col) | !multi.col) { # interpret as FALSE
-    multi.col <- FALSE
-    theme$dn.up.col <- theme$up.col
-    theme$up.up.col <- theme$up.col
-    theme$dn.dn.col <- theme$dn.col
-    theme$up.dn.col <- theme$dn.col
-  } else {
-    if(is.character(multi.col)) {
-      # add some check for length 4 colors
-      theme$dn.up.col <- multi.col[1]
-      theme$up.up.col <- multi.col[2]
-      theme$dn.dn.col <- multi.col[3]
-      theme$up.dn.col <- multi.col[4]
-    }
-    theme$up.col <- theme$up.up.col
-    theme$dn.col <- theme$dn.dn.col
-    multi.col <- TRUE
-  }
-
-  # spacing requirements for chart type
-  chart.options <- c("auto","candlesticks","matchsticks","line","bars")
-  chart <- chart.options[pmatch(type,chart.options)]
-  if(chart[1]=="auto") {
-    chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
-  }
-  if(chart[1]=="candlesticks") {
-    spacing <- 3
-    width <- 3 
-  } else
-  if(chart[1]=="matchsticks" || chart[1]=='line') {
-    spacing <- 1
-    width <- 1
-  } else 
-  if(chart[1]=="bars") {
-    spacing <- 4
-    width <- 3
-    if(NROW(x) > 60) width <- 1
-  }
-  ticks <- function(x,gt=2,lt=30) {
-      nminutes15 <- function(x) {
-          length(breakpoints(x,minutes15,TRUE))-1
-        }
-      FUNS <-c('nseconds','nminutes','nminutes15','nhours',
-            'ndays','nweeks','nmonths',
-            'nyears')
-      is <-sapply(FUNS[8:1],
-                  function(y) { do.call(y,list(x)) })
-      cl <- substring(names(is)[which(is > gt & is < lt)],2)[1]
-      bp <- breakpoints(x,cl,TRUE)
-      bp
-    }
-  bp <- ticks(x)
-  # format the scale
-  x.labels <- format(index(x)[bp+1],"%n%b%n%Y")
-  if(time.scale=='weekly' | time.scale=='daily')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%Y")
-  if(time.scale=='minute')
-    x.labels <- format(index(x)[bp+1],"%b %d%n%H:%M")
- 
-  chob <- new("chob")
-  chob@call <- match.call(expand=TRUE)
-  chob@name <- name
-  chob@type <- chart[1]
-
-  chob@xrange <- c(1,NROW(x))
-  if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x)),max(Hi(x)))
-  } else chob@yrange <- range(x)
-  
-
-
-  chob@color.vol <- color.vol
-  chob@multi.col <- multi.col
-  chob@show.vol <- show.vol
-  #chob@bar.type <- bar.type
-  chob@line.type <- line.type
-  chob@spacing <- spacing
-  chob@width <- width
-  chob@bp <- bp
-  chob@x.labels <- x.labels
-  chob@colors <- theme
-  chob@time.scale <- time.scale
-
-  chob@length <- NROW(x)
-
-  chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
-  if(!is.null(TA)) {
-
-    # important to force eval of _current_ chob, not saved chob
-    thisEnv <- environment()
-    if(is.character(TA)) TA <- as.list(TA)
-    chob@passed.args$TA <- list()
-    for(ta in 1:length(TA)) {
-      if(is.character(TA[[ta]])) {
-        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
-      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
-    }
-    chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
-    chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
-  } else chob@windows <- 1
-  
-  #if(debug) return(str(chob))
-  # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
-
-  # draw the chart
-  do.call('chartSeries.chob',list(chob))
-
-  chob@device <- as.numeric(dev.cur())
-
-  write.chob(chob,chob@device)
-  invisible(chob)
+  do.call('chartSeries',list(x,subset=subset,
+                             name=name,type='line',show.grid=show.grid,
+                             time.scale=time.scale,TA=substitute(TA),line.type=line.type,
+                             theme=theme,major.ticks=major.ticks,minor.ticks=minor.ticks,
+                             color.vol=color.vol,
+                             multi.col=multi.col,...))
 } #}}}
 
 # .chart.theme {{{

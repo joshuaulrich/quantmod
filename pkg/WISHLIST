@@ -1,7 +1,7 @@
 ********************************************************************************
 ********************************************************************************
 
-quantmod wishlist: as of Jan 8, 2008
+quantmod wishlist: as of Mar 21, 2008
 
 ********************************************************************************
 ********************************************************************************
@@ -27,6 +27,7 @@ FUNCTIONALITY:
   - getFundamentals.google and getFundamentals to download data
     from google.  Possibly add arbitrary downloads from finance.yahoo.com
     using http://www.gummy-stuff.org/Yahoo-data.htm formats
+    [ renamed getFinancials (google) done - jar ]
 
   - tradeRule and tradeLog
 
@@ -44,10 +45,10 @@ CHARTS:
   - dropTA function to remove TA indicators applied [moveTA and swapTA added as well: 2/16/2008 - jar]
 
   - add subset argument to chartSeries (et al) and buildModel function to pass
-    along to underlying [.xts method
+    along to underlying [.xts method [done, along with zoom & zoomChart - jar ]
 
   - mask lagged indicator days - use full dataset for calculation and a
-    seperate subset for actual plotting.  (using above [.xts method)
+    seperate subset for actual plotting.  (using above [.xts method) [ done see above - jar ]
 
   - multiple series in one line chart, or in one window - possibly
     mchartSeries, mbarChart, mlineChart, mcandleChart plus multiple

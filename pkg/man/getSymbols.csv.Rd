@@ -16,7 +16,7 @@ additional getSymbols \sQuote{methods}.
 getSymbols.csv(Symbols,
                  env,
                  dir="",
-                 return.class = "zoo",
+                 return.class = "xts",
                  extension="csv",
                   ...)
 }
@@ -42,7 +42,7 @@ A call to getSymbols.csv will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{quantmod.OHLC}, or \code{timeSeries}.
+\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
 }
 \note{
 This has yet to be tested on a windows platform. It \emph{should} work
