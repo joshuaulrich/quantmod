@@ -75,6 +75,7 @@ export(modelData,
 	getModelData,
 #    predictModel,
     getFinancials,getFin,
+    viewFinancials,viewFin,
     getQuote,
     getSymbols,
     getSymbols.MySQL,
@@ -115,6 +116,7 @@ S3method(seriesHi,ts)
 S3method(seriesLo,default)
 S3method(seriesLo,ts)
 S3method(print,periodicity)
+S3method(print,financials)
 S3method(to.period,quantmod.OHLC)
 S3method(to.period,zoo)
 S3method(to.period,timeSeries)

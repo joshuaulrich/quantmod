@@ -1,8 +1,9 @@
 `getFin` <-
-function(Symbol, src='google', ...) {
+function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
   tmp <- tempfile()
   download.file(paste('http://finance.google.com/finance?fstype=ii&q=',Symbol,sep=''),
                 quiet=TRUE,destfile=tmp)
+  Symbol.name <- Symbol
   Symbol <- readLines(tmp)
 
   # strip all html and commas
@@ -124,9 +125,51 @@ function(Symbol, src='google', ...) {
   ret$CF$A <- structure(matrix(as.numeric(gsub('^-$','',as.matrix(ret$CF$A[,-1]))),nr=19),
                         dimnames=list(ret$CF$A[,1],gsub('.*(\\d{4}-\\d{2}-\\d{2})','\\1',colnamesISCF[[4]],perl=TRUE)))
 
-  
-  return(structure(ret,class='getFin'))
+  if(auto.assign) {  
+    assign(paste(gsub(":",".",Symbol.name),'f',sep='.'),
+           structure(ret,symbol=Symbol.name,class='financials',src='google',updated=Sys.time()),env)
+    return(paste(gsub(":",".",Symbol.name),'f',sep='.'))
+  } else {
+    return(structure(ret,symbol=Symbol.name,class='financials',src='google',updated=Sys.time()))
+  } 
 }
 
 `getFinancials` <- getFin
 
+`print.financials` <- function(x, ...) {
+  cat('Financial Statement for',attr(x,'symbol'),'\n')
+  cat('Retrieved from',attr(x,'src'),'at',format(attr(x,'updated')),'\n')
+  cat('Use "viewFinancials" or "viewFin" to view\n')
+}
+
+`viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
+                             subset = NULL) {
+  if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
+  type <- match.arg(toupper(type[1]),c('BS','IS','CF'))
+  period <- match.arg(toupper(period[1]),c('A','Q')) 
+
+
+  statements <- list(BS='Balance Sheet',
+                     IS='Income Statement',
+                     CF='Cash Flow Statement',
+                     A='Annual',
+                     Q='Quarterly')
+
+  if(is.null(subset)) {
+    message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
+    return(x[[type]][[period]])
+  } else {
+    tmp.table <- as.matrix(as.xts(t(x[[type]][[period]]),dateFormat='Date')[subset])
+    dn1 <- rownames(tmp.table)
+    dn2 <- colnames(tmp.table)
+    tmp.table <- t(tmp.table)[, NROW(tmp.table):1]
+    if(is.null(dim(tmp.table))) {
+      dim(tmp.table) <- c(NROW(tmp.table),1)
+      dimnames(tmp.table) <- list(dn2,dn1)
+    }
+    message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
+    return(tmp.table)
+  }
+}
+
+`viewFin` <- viewFinancials
