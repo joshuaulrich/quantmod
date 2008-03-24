@@ -47,6 +47,31 @@ function(x,by=months,from=NULL,to=NULL)
     UseMethod("periodReturn");
 }
 
+`periodReturn2` <-
+function(x,period='monthly',subset=NULL,type='arithmetic',...) {
+  xx <- x
+  if(is.null(subset)) subset <- '::'
+  x <- as.xts(x)
+  .originalCLASS <- CLASS(x)
+  .originalIndexClass <- indexClass(x)
+  .originalAttr <- xtsAttributes(x)
+
+  FUN = eval(parse(text=paste('to',period,sep='.'))) 
+  x <- FUN(x, ...)
+  if(has.Cl(x)) {
+    x <- Delt(Cl(x),type=type)
+  } else {
+    x <- Delt(x[,4],type=type)
+  }
+  colnames(x) <- paste(period,'returns',sep='.')
+  x <- as.xts(x)[subset]
+  CLASS(x) <- .originalCLASS
+  xtsAttributes(x) <- .originalAttr
+  indexClass(x) <- .originalIndexClass
+  reclass(x)
+}
+
+
 
 `dailyReturn` <-
 function(x,from=NULL,to=NULL) {
