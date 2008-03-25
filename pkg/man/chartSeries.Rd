@@ -32,7 +32,7 @@ chartSeries(x,
 \arguments{
   \item{x}{ an OHLC object - see details }
   \item{type}{ style of chart to draw }
-  \item{subset}{ currently unused }
+  \item{subset}{ xts style date subsetting argument }
   \item{show.grid}{ display price grid lines? }
   \item{name}{ name of chart }
   \item{time.scale}{ what is the timescale? automatically deduced }
@@ -56,6 +56,13 @@ time-series properties.
 
 Line charts are created with close data, or from single
 column time series.
+
+The \code{subset} argument can be used to specify a
+particular area of the series to view.  The underlying
+series is left intact to allow for TA functions to
+use the full data set.  Additionally, it is possible
+to use syntax borrowed from the \code{first} and \code{last}
+functions, e.g. \sQuote{last 4 months}.
 
 \code{TA} allows for the inclusion of a variety of
 chart overlays and tecnical indicators.  A full list is
@@ -107,6 +114,8 @@ released technical analysis charting code
 \dontrun{
 getSymbols("YHOO")
 chartSeries(YHOO)
+chartSeries(YHOO, subset='last 4 months')
+chartSeries(YHOO, subset='2007::2008-01')
 chartSeries(YHOO,theme=chartTheme('white'))
 chartSeries(YHOO,TA=NULL)   #no volume
 chartSeries(YHOO,TA=c(addVo(),addBBands()))  #add volume and Bollinger Bands from TTR

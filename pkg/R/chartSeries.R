@@ -332,8 +332,9 @@ function(subset=NULL) {
 } #}}}
 
 # zoom {{{
-`zoom` <- function(n=5,eps=2) {
+`zoom` <- function(n=1,eps=2) {
   for(i in 1:n) {
+    cat('select left and right extremes by clicking the chart\n')
     points <- locator(2)
     if(abs(diff(points$x)) < eps) {
       # if clicks are within `eps` close - zoom out completely
@@ -350,6 +351,7 @@ function(subset=NULL) {
                       index(xdata[xsubset])[min(ceiling(en),NROW(xdata[xsubset]),na.rm=TRUE)],sep="::"))
     }
   }
+  cat('done\n')
 } #}}}
 
 
