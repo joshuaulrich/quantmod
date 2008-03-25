@@ -41,13 +41,13 @@ function(x,by=months,from=NULL,to=NULL)
   x <- x@return@returns
   periodReturn(x,by=by,from=from,to=to)
 }
-`periodReturn` <-
+`periodReturn.old` <-
 function(x,by=months,from=NULL,to=NULL) 
 {
     UseMethod("periodReturn");
 }
 
-`periodReturn2` <-
+`periodReturn` <-
 function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   xx <- x
   if(is.null(subset)) subset <- '::'
@@ -56,7 +56,7 @@ function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   .originalIndexClass <- indexClass(x)
   .originalAttr <- xtsAttributes(x)
 
-  FUN = eval(parse(text=paste('to',period,sep='.'))) 
+  FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
   x <- FUN(x, ...)
   if(has.Cl(x)) {
     x <- Delt(Cl(x),type=type)
@@ -67,48 +67,75 @@ function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   x <- as.xts(x)[subset]
   CLASS(x) <- .originalCLASS
   xtsAttributes(x) <- .originalAttr
+  # this is required for its and ts, should make conditional
+  # so as to preserve yearmon/yearqtr
   indexClass(x) <- .originalIndexClass
   reclass(x)
 }
 
-
-
 `dailyReturn` <-
-function(x,from=NULL,to=NULL) {
-  periodReturn(x,by=weekdays,from,to)
-}
-
-`weeklyReturn` <-
-function(x,from=NULL,to=NULL) {
-  periodReturn(x,by=weeks,from,to)
+function(x,subset=NULL,type='arithmetic',...) {
+  periodReturn(x,'daily',subset,type,...)
 }
 
 `monthlyReturn` <-
-function(x,from=NULL,to=NULL) {
-  periodReturn(x,by=months,from,to)
+function(x,subset=NULL,type='arithmetic',...) {
+  periodReturn(x,'monthly',subset,type,...)
+}
+
+`weeklyReturn` <-
+function(x,subset=NULL,type='arithmetic',...) {
+  periodReturn(x,'weekly',subset,type,...)
 }
 
 `quarterlyReturn` <-
-function(x,from=NULL,to=NULL) {
-  periodReturn(x,by=quarters,from,to)
+function(x,subset=NULL,type='arithmetic',...) {
+  periodReturn(x,'quarterly',subset,type,...)
 }
-`annualReturn` <-
-function(x,from=NULL,to=NULL) {
-  periodReturn(x,by=years,from,to)
+
+`yearlyReturn` <-
+function(x,subset=NULL,type='arithmetic',...) {
+  periodReturn(x,'yearly',subset,type,...)
 }
-`allReturns` <-
-function(x,from=NULL,to=NULL) {
-  all.ret <- cbind(
-    periodReturn(x,by=weekdays,from,to),
-    periodReturn(x,by=weeks,from,to),
-    periodReturn(x,by=months,from,to),
-    periodReturn(x,by=quarters,from,to),
-    periodReturn(x,by=years,from,to)
-  )
-  colnames(all.ret) <- c('daily','weekly','monthly','quarterly','annual')
-  class(all.ret) <- c("periodReturn","zoo")
-  all.ret
-}
+
+`annualReturn` <- yearlyReturn
+
+#`dailyReturn` <-
+#function(x,from=NULL,to=NULL) {
+#  periodReturn(x,by=weekdays,from,to)
+#}
+#
+#`weeklyReturn` <-
+#function(x,from=NULL,to=NULL) {
+#  periodReturn(x,by=weeks,from,to)
+#}
+#
+#`monthlyReturn` <-
+#function(x,from=NULL,to=NULL) {
+#  periodReturn(x,by=months,from,to)
+#}
+#
+#`quarterlyReturn` <-
+#function(x,from=NULL,to=NULL) {
+#  periodReturn(x,by=quarters,from,to)
+#}
+#`annualReturn` <-
+#function(x,from=NULL,to=NULL) {
+#  periodReturn(x,by=years,from,to)
+#}
+#`allReturns` <-
+#function(x,from=NULL,to=NULL) {
+#  all.ret <- cbind(
+#    periodReturn(x,by=weekdays,from,to),
+#    periodReturn(x,by=weeks,from,to),
+#    periodReturn(x,by=months,from,to),
+#    periodReturn(x,by=quarters,from,to),
+#    periodReturn(x,by=years,from,to)
+#  )
+#  colnames(all.ret) <- c('daily','weekly','monthly','quarterly','annual')
+#  class(all.ret) <- c("periodReturn","zoo")
+#  all.ret
+#}
 
 #`barplot.periodReturn` <-
 #function(x,...)

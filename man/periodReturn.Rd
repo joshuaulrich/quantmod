@@ -12,31 +12,31 @@ Given a set of prices, return a \code{quantmod.return} object
 of returns calculated during specified period. 
 }
 \usage{
-periodReturn(x, by = months, from = NULL, to = NULL)
+periodReturn(x, period='monthly', subset=NULL, type='arithmetic',
+             ...)
 
-allReturns(x, from = NULL, to = NULL)
-dailyReturn(x, from = NULL, to = NULL)
-weeklyReturn(x, from = NULL, to = NULL)
-monthlyReturn(x, from = NULL, to = NULL)
-quarterlyReturn(x, from = NULL, to = NULL)
-annualReturn(x, from = NULL, to = NULL)
+% allReturns(x, from = NULL, to = NULL)
+dailyReturn(x, subset=NULL, type='arithmetic', ...)
+weeklyReturn(x, subset=NULL, type='arithmetic', ...)
+monthlyReturn(x, subset=NULL, type='arithmetic', ...)
+quarterlyReturn(x, subset=NULL, type='arithmetic', ...)
+annualReturn(x, subset=NULL, type='arithmetic', ...)
+yearlyReturn(x, subset=NULL, type='arithmetic', ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ zoo object of state prices}
-  \item{by}{ character string indicating time period.  Valid entries are
-             weekdays, weeks, months, quarters, years.  All 
+  \item{period}{ character string indicating time period.  Valid entries are
+             daily, weekly, monthly, quarterly, yearly.  All 
              are accessible from wrapper functions described below.
              Defaults to monthly returns (same as monthlyReturn)}
-  \item{from}{ character string representing dates in ISO 8601 format
-             (e.g. 1992-01-01).  Defaults to beginning of dataset}
-  \item{to}{ character string representing dates in ISO 8601 format
-             (e.g. 1992-01-01).  Defaults to end of dataset}
+  \item{subset}{ an xts style subset string }
+  \item{type}{ type of returns: arithmetic (discrete) or log (continuous) }
 }
 \details{
 \code{periodReturn} is the underlying function for wrappers:
 \itemize{
-  \item \code{allReturns: }      calculate all available return periods
+%  \item \code{allReturns: }      calculate all available return periods
   \item \code{dailyReturn: }     calculate daily returns
   \item \code{weeklyReturn: }    calculate weekly returns
   \item \code{monthlyReturn: }   calculate monthly returns
@@ -45,8 +45,7 @@ annualReturn(x, from = NULL, to = NULL)
 }
 }
 \value{
-Returns object of class \code{quantmod.returns} with ending dates of each
-period indexing the returns
+Returns object of the class that was originally passed in
 }
 \references{ Bodie,Kane...}
 \author{ Jeffrey A. Ryan }

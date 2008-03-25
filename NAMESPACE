@@ -58,7 +58,8 @@ export(modelData,
 #    periodicity,
     periodReturn,
     dailyReturn,weeklyReturn,monthlyReturn,quarterlyReturn,annualReturn,
-    allReturns,
+    yearlyReturn,
+    #allReturns,
     tradeModel,
 #    saveModels,
 #    loadModels,
@@ -117,13 +118,13 @@ S3method(seriesLo,default)
 S3method(seriesLo,ts)
 S3method(print,periodicity)
 S3method(print,financials)
-S3method(to.period,quantmod.OHLC)
-S3method(to.period,zoo)
-S3method(to.period,timeSeries)
-S3method(first,default)
-S3method(last,default)
-S3method(last,zoo)
-S3method(first,zoo)
+#S3method(to.period,quantmod.OHLC)
+#S3method(to.period,zoo)
+#S3method(to.period,timeSeries)
+#S3method(first,default)
+#S3method(last,default)
+#S3method(last,zoo)
+#S3method(first,zoo)
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
@@ -152,9 +153,9 @@ S3method(as.quantmod.OHLC,data.frame)
 S3method(as.quantmod.OHLC,zoo)
 S3method(as.quantmod.OHLC,quantmod.OHLC)
 S3method('[',quantmod.OHLC)
-S3method(periodReturn,zoo)
-S3method(periodReturn,quantmod.OHLC)
-S3method(periodReturn,quantmodResults)
+#S3method(periodReturn,zoo)
+#S3method(periodReturn,quantmod.OHLC)
+#S3method(periodReturn,quantmodResults)
 S3method(predictModel,default)
 S3method(predictModel,nnet)
 S3method(predictModel,mars)
