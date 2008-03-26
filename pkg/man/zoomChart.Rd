@@ -7,7 +7,7 @@ Using \pkg{xts} style date subsetting, zoom into
 or out of the current chart.
 }
 \usage{
-zoom(n=5, eps=2)
+zoom(n=1, eps=2)
 zoomChart(subset = NULL)
 }
 
