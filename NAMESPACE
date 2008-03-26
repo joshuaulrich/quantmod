@@ -1,5 +1,4 @@
-#import(methods)
-useDynLib(quantmod)
+#useDynLib(quantmod)
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)
@@ -14,7 +13,7 @@ importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
 #export(ohlcz,ohlcq)
-export(period.prod,period.sum,period.max,period.min)
+#export(period.prod,period.sum,period.max,period.min)
 #export(.chob,write.chob,get.chob,release.chob)
 export(.chob)
 export(.chart.theme,chartTheme)
@@ -50,27 +49,15 @@ export(modelData,
     Next,
     Lag,
     options.expiry,futures.expiry,
-#    to.period,
-#    to.minutes,to.minutes3,to.minutes5,to.minutes10,to.minutes15,to.minutes30,
-#    to.hourly,to.daily,
-#    to.weekly,to.monthly,to.quarterly,to.yearly,
     nseconds,nminutes,nhours,ndays,nweekdays,nweeks,nmonths,nquarters,nyears,
-#    periodicity,
     periodReturn,
     dailyReturn,weeklyReturn,monthlyReturn,quarterlyReturn,annualReturn,
     yearlyReturn,
-    #allReturns,
+    allReturns,
     tradeModel,
 #    saveModels,
 #    loadModels,
 #	period.apply,
-#    apply.weekly,
-#    apply.daily,
-#    apply.monthly,
-#    apply.quarterly,
-#    apply.yearly,
-#    first,
-#    last,
 	breakpoints,
 	specifyModel,
 	getModelData,
@@ -116,15 +103,7 @@ S3method(seriesHi,default)
 S3method(seriesHi,ts)
 S3method(seriesLo,default)
 S3method(seriesLo,ts)
-S3method(print,periodicity)
 S3method(print,financials)
-#S3method(to.period,quantmod.OHLC)
-#S3method(to.period,zoo)
-#S3method(to.period,timeSeries)
-#S3method(first,default)
-#S3method(last,default)
-#S3method(last,zoo)
-#S3method(first,zoo)
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
