@@ -2,15 +2,15 @@
 function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   xx <- x
   if(is.null(subset)) subset <- '::'
-  x <- as.xts(x)
-  .originalCLASS <- CLASS(x)
-  .originalAttr <- xtsAttributes(x)
 
   FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
 
   x <- FUN(x, ...)
 
   # get key attributes for later rebuilding
+  x <- as.xts(x)
+  .originalCLASS <- CLASS(x)
+  .originalAttr <- xtsAttributes(x)
   .originalIndexClass <- indexClass(x)
 
   x <- Delt(Cl(x),type=type)
@@ -54,7 +54,7 @@ function(x,subset=NULL,type='arithmetic',...) {
 
 `allReturns` <-
 function(x,subset=NULL,type='arithmetic') {
-  all.ret <- cbind(
+  all.ret <- cbind.zoo(
     periodReturn(x,'daily',type=type),
     periodReturn(x,'weekly',type=type),
     periodReturn(x,'monthly',type=type,indexAt='endof'),
