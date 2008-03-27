@@ -204,7 +204,9 @@ function(Symbols,env,return.class='xts',
            warning("google duplicate bug - missing Dec 28,29,30 of 2003")
          }
        }
-       fr <- xts(fr[,-1],as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'),src='google',updated=Sys.time())
+       fr <- xts(as.matrix(fr[,-1]),
+                 as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'),
+                 src='google',updated=Sys.time())
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
@@ -326,7 +328,9 @@ function(Symbols,env,return.class='xts',
             rs <- dbSendQuery(con, query)
             fr <- fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
-            fr <- xts(fr[,-1],order.by=as.Date(fr[,1],origin='1970-01-01'),src=dbname,updated=Sys.time())
+            fr <- xts(as.matrix(fr[,-1]),
+                      order.by=as.Date(fr[,1],origin='1970-01-01'),
+                      src=dbname,updated=Sys.time())
             colnames(fr) <- paste(Symbols[[i]],
                                   c('Open','High','Low','Close','Volume','Adjusted'),
                                   sep='.')
@@ -366,7 +370,9 @@ function(Symbols,env,return.class='xts',
        fr <- read.csv(tmp,na.string=".")
        unlink(tmp)
        if(verbose) cat("done.\n")
-       fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='FRED',updated=Sys.time())
+       fr <- xts(as.matrix(fr[,-1]),
+                 as.Date(fr[,1],origin='1970-01-01'),i
+                 src='FRED',updated=Sys.time())
        dim(fr) <- c(NROW(fr),1)
        colnames(fr) <- as.character(toupper(Symbols[[i]]))
        fr <- convert.time.series(fr=fr,return.class=return.class)
