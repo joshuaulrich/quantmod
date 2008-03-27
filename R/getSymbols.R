@@ -136,7 +136,9 @@ function(Symbols,env,return.class='xts',
        fr <- read.csv(tmp)
        unlink(tmp)
        if(verbose) cat("done.\n")
-       fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='yahoo',updated=Sys.time())
+       fr <- xts(as.matrix(fr[,-1]),
+                 as.Date(fr[,1],origin='1970-01-01'),
+                 src='yahoo',updated=Sys.time())
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
