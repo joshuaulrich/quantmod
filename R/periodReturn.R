@@ -3,14 +3,15 @@ function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   xx <- x
   if(is.null(subset)) subset <- '::'
   x <- as.xts(x)
+  .originalCLASS <- CLASS(x)
+  .originalAttr <- xtsAttributes(x)
+
   FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
 
   x <- FUN(x, ...)
 
   # get key attributes for later rebuilding
-  .originalCLASS <- CLASS(x)
   .originalIndexClass <- indexClass(x)
-  .originalAttr <- xtsAttributes(x)
 
   x <- Delt(Cl(x),type=type)
 

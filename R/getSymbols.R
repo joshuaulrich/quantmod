@@ -371,7 +371,7 @@ function(Symbols,env,return.class='xts',
        unlink(tmp)
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
-                 as.Date(fr[,1],origin='1970-01-01'),i
+                 as.Date(fr[,1],origin='1970-01-01'),
                  src='FRED',updated=Sys.time())
        dim(fr) <- c(NROW(fr),1)
        colnames(fr) <- as.character(toupper(Symbols[[i]]))
