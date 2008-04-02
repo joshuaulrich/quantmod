@@ -61,6 +61,6 @@ function(x,subset=NULL,type='arithmetic') {
     periodReturn(x,'quarterly',type=type,indexAt='endof'),
     periodReturn(x,'yearly',type=type)
   )
-  colnames(all.ret) <- c('daily','weekly','monthly','quarterly','annual')
+  colnames(all.ret) <- c('daily','weekly','monthly','quarterly','yearly')
   all.ret
 }

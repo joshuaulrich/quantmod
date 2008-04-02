@@ -36,3 +36,15 @@ function(formula,na.rm=TRUE) {
   return(new.quantmod);
 }
 
+# used potentially for chartSeries parsing - where a model.frame is unecessary
+`unique.formula.names` <-
+function(x) {
+  tm <- attr(terms(x),'variables')
+  name.list <- lapply(tm, function(y) paste(make.names(y),collapse=''))[-1]
+  unlist(lapply(name.list, function(x) gsub('\\.+','.',x)))
+}
+
+`make.short.names` <-
+function(x) {
+  gsub('\\.+','.',make.names(colnames(model.frame(x))))
+}
