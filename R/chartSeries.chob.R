@@ -15,6 +15,11 @@ function(x)
     if(x@windows > 1) par(mar=c(0,4,3,3))
   }
 
+  #layout(matrix(c(2,3,4,5,1,1,1,1),nc=4,byrow=TRUE),c(1,1,1,1),c(1,2),FALSE)
+  #layout(matrix(c(1,2,1,3,1,4,1,5),nc=2,byrow=TRUE),c(5,1),c(1),FALSE)
+
+
+
   x.range <- 1:(x@xrange[2]*x@spacing)
   y.range <- seq(x@yrange[1],x@yrange[2],length.out=length(x.range))
  

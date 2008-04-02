@@ -678,7 +678,7 @@ function(x) {
     usr <- par('usr')
 
     # draw shading in -100:100 y-range 
-    rect(usr[1],-100,usr[2],100,col="#282828")
+    rect(usr[1],-100,usr[2],100,col=x@params$colors$MACD$fill)
 
     # fill upper and lower areas
     xx <- seq(1,length(x.range),by=spacing)

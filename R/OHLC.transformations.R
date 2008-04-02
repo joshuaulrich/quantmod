@@ -319,11 +319,15 @@ function(x,k=1)
     }
     )
     x.index <- index(x)
-    new.x <- zoo(new.x,x.index)
+    if(inherits(x,'xts')) {
+      new.x <- xts(new.x,x.index)
+    } else {
+      new.x <- zoo(new.x,x.index)
+    }
     colnames(new.x) <- paste("Lag.",k,sep="")
     return(new.x)
 }
-`Lag.zoo` <- Lag.quantmod.OHLC
+`Lag.zoo` <- `Lag.xts` <- Lag.quantmod.OHLC
 
 `Lag.numeric` <-
 function(x,k=1)
@@ -357,6 +361,7 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
         }
     }
     dim(x2) <- NULL  # allow for multiple k matrix math to happen
+    if(is.zoo(x1)) x1 <- as.matrix(x1)
     if(type==1) {
         xx <- log(x2/Lag(x1,k))
     } else {
@@ -364,208 +369,4 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
     }
     colnames(xx) <- paste("Delt",k,type,sep=".")
     xx
-}
-`to.period` <-
-function(x,period=months,name,...)
-{
-  UseMethod('to.period')
-}
-
-`to.period.timeSeries` <-
-function(x,period,name,...) {
-  if(missing(name)) name <- deparse(substitute(x))
-  bp <- breakpoints(x,period,TRUE)
-  date <- rownames(x)[bp]
-  op <- as.numeric(seriesData(Op(x)))[bp+1][-length(bp)]
-  hi <- period.apply(seriesData(Hi(x)),bp,max)
-  lo <- period.apply(seriesData(Lo(x)),bp,min)
-  cl <- as.numeric(seriesData(Cl(x))[bp])
-  vo <- NULL
-  has.Vo <- grep('Volume',colnames(x))
-  if(!identical(has.Vo,integer(0)))
-    vo <- period.apply(seriesData(Vo(x)),bp,sum)
-
-  ad <- NULL
-  has.Ad <- grep('Adjusted',colnames(x))
-  if(!identical(has.Ad,integer(0)))
-    ad <- as.numeric(seriesData(Ad(x))[bp])
-
-  x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
-  colnames(x.out) <- colnames(x)
-  as.timeSeries(x.out)
-}
-
-`to.period.quantmod.OHLC` <-
-function(x,period,name,...) {
-  bp <- breakpoints(x,period,TRUE)
-
-  tz <- as.double(as.matrix(x))
-  hasvol <- ifelse(has.Vo(x), 1, 0)
-  hasadj <- ifelse(has.Ad(x), 1, 0)
-  q <- .Fortran("ohlcq", bp = as.integer(bp), lbp = as.integer(length(bp)), 
-      ia = as.double(tz), lia = as.integer(length(tz)), nri = as.integer(NROW(x)), 
-      hasvol = as.integer(hasvol), 
-      hasadj = as.integer(hasadj), ret = as.double(rep(0, (length(bp) - 
-          1) * (NCOL(x)))), PACKAGE = "quantmod")
-  tz <- zoo(matrix(q$ret, nc = (4 + hasvol + hasadj), byrow = TRUE), 
-      index(x)[bp[-1]])
-  cnames <- c("Open", "High", "Low", "Close")
-  if (hasvol == 1) 
-      cnames <- c(cnames, "Volume")
-  if (hasadj == 1) 
-      cnames <- c(cnames, "Adjusted")
-  if(missing(name)) name <- deparse(substitute(x))
-  tz <- as.quantmod.OHLC(tz, col.names = cnames, name = name)
-  tz
-
-#    date <- index(x)[bp]
-#    op <- as.numeric(Op(x))[bp+1][-length(bp)]
-#    hi <- period.apply(Hi(x),bp,max)
-#    lo <- period.apply(Lo(x),bp,min)
-#    cl <- as.numeric(Cl(x)[bp])
-#    vo <- NULL
-#    has.Vo <- grep('Volume',colnames(x))
-#    if(!identical(has.Vo,integer(0)))
-#      vo <- period.apply(Vo(x),bp,sum)
-#  
-#    ad <- NULL
-#    has.Ad <- grep('Adjusted',colnames(x))
-#    if(!identical(has.Ad,integer(0)))
-#      ad <- as.numeric(Ad(x)[bp])
-#  
-#    x.out <- zoo(cbind(op,hi,lo,cl,vo,ad),date)
-#    colnames(x.out) <- colnames(x)
-#    class(x.out) <- class(x)
-#    x.out
-}
-
-`to.period.zoo` <-
-function(x,period,name=NULL,...)
-{
-  if(is.null(name)) name <- deparse(substitute(x))
-  if(is.OHLC(x)) {
-    return(to.period.quantmod.OHLC(x=x,period=period,name=name,...))
-  }
-  if(NCOL(x)==1) {
-    #### for single dimension (or no?) data 
-    #### original breakpoints(x,period,TRUE)
-    #bp <- breakpoints(x,period,abbreviate=TRUE,...)
-    #date <- index(x)[bp]
-    #x.out <- period.apply(x,bp,
-    #           function(k) c(as.numeric(first(k)),
-    #                         max(k),min(k),as.numeric(last(k))))
-    #x.zoo <- zoo(matrix(x.out,ncol=4,byrow=TRUE),date)
-    #colnames(x.zoo) <- paste(name,c("Open","High","Low","Close"),sep='.')
-    #class(x.zoo) <- c('quantmod.OHLC','zoo')
-    #x.zoo
-
-    bp <- breakpoints(x, period, TRUE)
-    tz <- as.double(as.matrix(x))
-    q <- .Fortran("ohlcz", bp = as.integer(bp), lbp = as.integer(length(bp)), 
-        ia = as.double(tz), lia = as.integer(length(tz)), 
-        ret = as.double(rep(0, (length(bp) - 1) * 4)), PACKAGE = "quantmod")
-    tz <- zoo(matrix(q$ret, nc = 4, byrow = TRUE), index(x)[bp[-1]])
-    colnames(tz) = c("Open", "High", "Low", "Close")
-    class(tz) <- c("quantmod.OHLC", "zoo")
-    tz
-
-  }
-  else {
-    stop("'x' must be a single column or of class 'quantmod.OHLC'")
-  }
-}
-`to.minutes` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,minutes,name)
-}
-`to.minutes3` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,minutes3,name)
-}
-`to.minutes5` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,minutes5,name)
-}
-`to.minutes10` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,minutes10,name)
-}
-`to.minutes15` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,minutes15,name)
-}
-`to.minutes30` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,minutes30,name)
-}
-`to.hourly` <-
-function(x)
-{
-  name <- deparse(substitute(x))
-  to.period(x,hours,name)
-}
-`to.daily` <-
-function(x,drop.time=TRUE)
-{
-  name <- deparse(substitute(x))
-  x <- to.period(x,days,name)
-  if(drop.time) x <- .drop.time(x)
-  return(x)
-}
-`to.weekly` <-
-function(x,drop.time=TRUE)
-{
-  name <- deparse(substitute(x))
-  x <- to.period(x,weeks,name)
-  if(drop.time) x <- .drop.time(x)
-  return(x)
-}
-`to.monthly` <-
-function(x,drop.time=TRUE)
-{
-  name <- deparse(substitute(x))
-  x <- to.period(x,months,name)
-  if(drop.time) x <- .drop.time(x)
-  return(x)
-}
-`to.quarterly` <-
-function(x,drop.time=TRUE)
-{
-  name <- deparse(substitute(x))
-  x <- to.period(x,quarters,name)
-  if(drop.time) x <- .drop.time(x)
-  return(x)
-}
-`to.yearly` <-
-function(x,drop.time=TRUE)
-{
-  name <- deparse(substitute(x))
-  x <- to.period(x,years,name)
-  if(drop.time) x <- .drop.time(x)
-  return(x)
-}
-`.drop.time` <-
-function(x) {
-  # function to remove HHMMSS portion of time index
-  if("timeSeries" %in% class(x)) {
-    if("package:fSeries" %in% search() || require("fSeries",
-        quietly=TRUE)) {
-      x <- as.timeSeries(zoo(seriesData(x),as.Date(rownames(x),origin='1970-01-01')))
-    }
-  } else {
-    index(x) <- as.Date(index(x),origin='1970-01-01')
-  }
-  return(x)
 }

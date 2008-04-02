@@ -430,6 +430,20 @@ function(x,subset = NULL,
                                 Expiry='#C9C9C9',
                                 BBands=list(col='blue',fill='#F7F7F7')
                                 ),
+                      'white.mono'=
+                           list(fg.col="#888888",bg.col="#FFFFFF",
+                                grid.col="#CCCCCC",border="#666666",
+                                minor.tick="#CCCCCC",major.tick="#888888",
+                                up.col="#000000",dn.col="#000000",
+                                dn.up.col="#888888",up.up.col="#FFFFFF",
+                                dn.dn.col="#4D4D4D",up.dn.col="#000000",
+                                up.border="#666666",dn.border="#666666",
+                                dn.up.border="#666666",up.up.border="#666666",
+                                dn.dn.border="#666666",up.dn.border="#666666",
+                                main.col="#555555",sub.col="#555555",
+                                Expiry='#C9C9C9',
+                                BBands=list(col='#666666',fill='#F7F7F7')
+                                ),
                       'black'=
                            list(fg.col="#666666",bg.col="#222222",
                                 grid.col="#303030",border="#666666",
@@ -443,6 +457,20 @@ function(x,subset = NULL,
                                 main.col="#999999",sub.col="#999999",
                                 Expiry='#383838',
                                 BBands=list(col='red',fill='#282828')
+                                ),
+                      'black.mono'=
+                           list(fg.col="#666666",bg.col="#222222",
+                                grid.col="#303030",border="#666666",
+                                minor.tick="#303030",major.tick="#AAAAAA",
+                                up.col="#FFFFFF",dn.col="#FFFFFF",
+                                dn.up.col="#888888",up.up.col="#FFFFFF",
+                                dn.dn.col="#4D4D4D",up.dn.col="#000000",
+                                up.border="#666666",dn.border="#666666",
+                                dn.up.border="#666666",up.up.border="#666666",
+                                dn.dn.border="#666666",up.dn.border="#666666",
+                                main.col="#999999",sub.col="#999999",
+                                Expiry='#383838',
+                                BBands=list(col='#DDDDDD',fill='#777777')
                                 ),
                       'beige'=
                            list(fg.col="#888888",bg.col="#F5F5D0",
