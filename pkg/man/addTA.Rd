@@ -10,6 +10,7 @@
 \alias{addDPO}
 \alias{addCMO}
 \alias{addLines}
+\alias{addPoints}
 \alias{addMomentum}
 \alias{addEnvelope}
 
@@ -48,6 +49,7 @@ Current technical indicators include:
   \item{addLines}{add line(s)}
   \item{addMACD:}{add Moving Average Convergence Divergence *}
   \item{addMomentum}{add Momentum *}
+  \item{addPoints}{add point(s) }
   \item{addROC:}{add Rate of Change *}
   \item{addRSI}{add Relative Strength Indicator *}
   \item{addSAR}{add Parabolic SAR *}

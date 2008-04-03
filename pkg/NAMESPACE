@@ -23,6 +23,7 @@ export(addTA,dropTA,moveTA,swapTA)
 export(zoomChart,zoom)
 export(addVo,addExpiry)
 export(addLines)
+export(addPoints)
 export(addEnvelope)
 export(addSMA,addEMA,addWMA,addDEMA,addEVWMA,addZLEMA)
 export(addSMI)
@@ -46,6 +47,7 @@ export(modelData,
     OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
     seriesHi,seriesLo,
     is.OHLC,has.Op,has.Cl,has.Hi,has.Lo,has.Vo,has.Ad,has.OHLC,
+    HLC,has.HLC,is.HLC,
     Delt,
     Next,
     Lag,
@@ -65,6 +67,7 @@ export(modelData,
 #    predictModel,
     getFinancials,getFin,
     viewFinancials,viewFin,
+    getDividends,
     getQuote,
     getSymbols,
     getSymbols.MySQL,

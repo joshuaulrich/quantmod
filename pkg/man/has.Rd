@@ -7,15 +7,20 @@
 \alias{has.Vo}
 \alias{has.OHLC}
 \alias{is.OHLC}
+\alias{has.HLC}
+\alias{is.HLC}
 \title{ Check For OHLC Data }
 \description{
 A set of functions to check for appropriate
-OHLC column names within a data object, as well
+OHLC and HLC column names within a data object, as well
 as the availability and position of those columns.
 }
 \usage{
 is.OHLC(x)
 has.OHLC(x, which = FALSE)
+
+is.HLC(x)
+has.HLC(x, which = FALSE)
 
 has.Op(x, which = FALSE)
 has.Hi(x, which = FALSE)
@@ -31,7 +36,7 @@ has.Ad(x, which = FALSE)
 }
 \details{
 Mostly used internally by \pkg{quantmod}, they can be useful
-for checking whether a non \code{quantmod.OHLC} object
+for checking whether an object
 can be used in OHLC requiring functions like \code{Op},
 \code{OpCl}, etc.
 
@@ -41,7 +46,7 @@ will return \code{FALSE} (or \code{NA} when which=TRUE). See
 \code{\link{quantmod.OHLC}} for details of \pkg{quantmod}
 naming conventions.
 
-\code{is.OHLC} will only return TRUE is there are columns
+\code{is.OHLC} (and is.HLC, similarly) will only return TRUE is there are columns
 for Open, High, Low and Close.  Additional columns will not affect
 the value.
 }
@@ -51,7 +56,7 @@ A logical value indicating success or failure by default.
 If which=TRUE, a numeric value representing the column position
 will be returned.
 
-\code{is.OHLC} return a single value of TRUE or FALSE.
+\code{is.OHLC} and \code{is.HLC} return a single value of TRUE or FALSE.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{quantmod.OHLC}},\code{\link{OHLC.Transformations}} }
