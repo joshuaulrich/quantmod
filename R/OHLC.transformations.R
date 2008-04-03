@@ -86,6 +86,11 @@ function(x)
 {
   all(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x))
 }
+`is.HLC` <-
+function(x)
+{
+  all(has.Hi(x),has.Lo(x),has.Cl(x))
+}
 `has.OHLC` <-
 function(x,which=FALSE)
 {
@@ -95,7 +100,22 @@ function(x,which=FALSE)
     c(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x))
   }
 }
-
+`has.HLC` <-
+function(x,which=FALSE)
+{
+  if(which) {
+    c(has.Hi(x,1),has.Lo(x,1),has.Cl(x,1))
+  } else {
+    c(has.Hi(x),has.Lo(x),has.Cl(x))
+  }
+}
+`HLC` <-
+function(x)
+{
+  if(is.HLC(x))
+    return(x[,has.HLC(x,1)])
+  NULL
+}
 `Op` <-
 function(x)
 {

@@ -14,6 +14,7 @@
 \alias{OpLo}
 \alias{OpOp}
 \alias{Vo}
+\alias{HLC}
 \alias{seriesHi}
 \alias{seriesLo}
 \title{ Extract and Transform OHLC Time-Series Columns }
@@ -24,20 +25,22 @@ complete description - either \dQuote{Open}, \dQuote{High},
 \dQuote{Low}, \dQuote{Close},
 \dQuote{Volume}, or \dQuote{Adjusted} - though may
 also contain additional characters.  This is the default for objects
-of class \code{quantmod.OHLC}
+returned from most \code{getSymbols} calls.
 
 In the case of functions consisting of combined
 Op, Hi, Lo, Cl (e.g. \code{ClCl(x)}) the one period
 transformation will be applied.
 
 For example, to return the Open to Close of a
-particular \code{quantmod.OHLC} object it is
+object it is
 possible to call \code{OpCl(x)}. If multiple periods
 are desired a call to the function \code{Delt} is 
 necessary.
 
 \code{seriesLo} and \code{seriesHi} will return the
 low and high, respectively, of a given series.
+
+\code{HLC} extracts the High, Low, and Close columns.
 
 These functions are merely to speed the model
 specification process.  All columns may also be extracted
@@ -62,6 +65,8 @@ LoHi(x)
 OpHi(x)
 OpLo(x)
 OpOp(x)
+
+HLC(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
