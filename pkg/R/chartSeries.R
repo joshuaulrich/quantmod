@@ -99,22 +99,22 @@ function(x,
     if(NROW(x) > 60) width <- 1
   }
 
-  ticks <- function(ival, major.ticks, gt = 2, lt = 30) {
-      tick.opts <- c("years", "months", "weeks", "days", "hours", 
-          "minutes", "seconds")
-      if (major.ticks %in% tick.opts) {
-          cl <- major.ticks[1]
-      }
-      else {
-          is <- sapply(tick.opts, function(y) {
-              length(endpoints(ival, y, 1)) - 1
-          })
-          cl <- names(is)[which(is > gt & is < lt)][1]
-      }
-      ep <- endpoints(ival, cl)
-      ep
-  }
-  ep <- ticks(x, major.ticks)
+#  ticks <- function(ival, major.ticks, gt = 2, lt = 30) {
+#      tick.opts <- c("years", "months", "weeks", "days", "hours", 
+#          "minutes", "seconds")
+#      if (major.ticks %in% tick.opts) {
+#          cl <- major.ticks[1]
+#      }
+#      else {
+#          is <- sapply(tick.opts, function(y) {
+#              length(endpoints(ival, y, 1)) - 1
+#          })
+#          cl <- names(is)[which(is > gt & is < lt)][1]
+#      }
+#      ep <- endpoints(ival, cl)
+#      ep
+#  }
+  ep <- axTicksByTime(x, major.ticks)
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
   if (time.scale == "weekly" | time.scale == "daily") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%Y")
