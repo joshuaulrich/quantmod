@@ -174,7 +174,7 @@ function(x)
   # draw the final x labels
   #title(xlab=x@colors$time.scale,col.lab=x@colors$fg.col)
   if(x@minor.ticks)
-    axis(1,at=1:x@length*x@spacing+1,labels=FALSE,col=x@colors$minor.tick)
+    axis(1,at=x.pos,labels=FALSE,col=x@colors$minor.tick)
  
   axis(1,at=x@bp*x@spacing+1,labels=x@x.labels,las=1,lwd=1,mgp=c(3,2,0),
        col=x@colors$major.tick)
