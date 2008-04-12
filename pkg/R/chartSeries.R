@@ -98,7 +98,7 @@ function(x,
     width <- 3
     if(NROW(x) > 60) width <- 1
   }
-  ep <- axTicksByTime(x, major.ticks)
+  ep <- xts:::axTicksByTime0(x, major.ticks)
   ep <- c(rev(rev(ep)[-1]),rev(ep)[1]-1)
 
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
@@ -235,7 +235,7 @@ function(subset=NULL) {
   major.ticks <- lchob@passed.args$major.ticks
   if(is.null(major.ticks)) major.ticks <- 'auto'
 
-  ep <- axTicksByTime(x, major.ticks)
+  ep <- xts:::axTicksByTime0(x, major.ticks)
   ep <- c(rev(rev(ep)[-1]),rev(ep)[1]-1)
 
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
