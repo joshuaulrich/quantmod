@@ -46,7 +46,6 @@ function(dev) {
 `addVo` <- function() {
    lchob <- get.current.chob() 
   if(!lchob@show.vol) return()
-  x <- as.matrix(eval(lchob@passed.args$x))
  
   x <- as.matrix(lchob@xdata)
 
@@ -173,7 +172,6 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
   
   x <- as.matrix(lchob@xdata)
 
@@ -280,7 +278,6 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   x <- as.matrix(lchob@xdata)
 
@@ -784,7 +781,6 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   x <- as.matrix(lchob@xdata)
 
@@ -850,7 +846,6 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   x <- as.matrix(lchob@xdata)
 
@@ -924,7 +919,6 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   x <- as.matrix(lchob@xdata)
 
@@ -1029,7 +1023,6 @@ function(x) {
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
-  x <- as.matrix(eval(lchob@passed.args$x))
 
   x <- as.matrix(lchob@xdata)
 
