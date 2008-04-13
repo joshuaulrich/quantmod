@@ -24,7 +24,6 @@ function(x)
   y.range <- seq(x@yrange[1],x@yrange[2],length.out=length(x.range))
  
   # get current values of series to be charted
-  xx <- eval(x@passed.args$x)
   xx <- x@xdata
 
 #  if(!is.xts(xx)) xx <- as.xts(xx)
