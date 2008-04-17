@@ -38,7 +38,7 @@ FUNCTIONALITY:
 CHARTS:
   - add /demo script
 
-  - add addHolidays/Weekends function to add in missing data with NA
+  - add addHolidays/Weekends function to add in missing data with NA [see fillIndex beta in 'xts']
 
   - liveChart function - used in conjunction with RT data feeds
 
