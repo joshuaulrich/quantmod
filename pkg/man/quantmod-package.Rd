@@ -12,8 +12,8 @@ Quantitative Financial Modelling and Trading Framework for R
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.3-4\cr
-Date: \tab 2007-03-21\cr
+Version: \tab 0.3-5\cr
+Date: \tab 2007-04-18\cr
 Depends: \tab xts,Defaults\cr
 Suggests: \tab DBI,RMySQL,TTR,fSeries,its\cr
 LazyLoad: \tab yes\cr
