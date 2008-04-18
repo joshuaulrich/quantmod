@@ -50,7 +50,7 @@ function(dev) {
   x <- as.matrix(lchob@xdata)
 
   Volumes <- Vo(x)
-  max.vol <- max(Volumes)
+  max.vol <- max(Volumes,na.rm=TRUE)
   vol.scale <- list(100, "100s")
   if (max.vol > 10000) 
     vol.scale <- list(1000, "1000s")
@@ -1161,7 +1161,7 @@ function(x) {
 } # }}}
 
 # addBBands {{{
-`addBBands` <- function(n=20,ma='SMA',sd=2,draw='bands',on=-1) {
+`addBBands` <- function(n=20,sd=2,ma='SMA',draw='bands',on=-1) {
 
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 

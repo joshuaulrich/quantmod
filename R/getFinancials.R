@@ -31,7 +31,7 @@ function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
 
   ISindex <- grep(ISregx,symbol)
   # create single IS matrix 
-  IS <- t(sapply(lapply(ISindex,function(x) seq(x,x+6)), function(x) symbol[x]))
+  IS <- t(sapply(lapply(ISindex,function(x) seq(x,x+8)), function(x) symbol[x]))
 
   # Balance Sheet Fields
   BScols <- c('Cash & Equivalents','Short Term Investments','Cash and Short Term',
@@ -52,7 +52,7 @@ function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
 
   BSindex <- grep(BSregx,symbol)
   # create single BS matrix
-  BS <- t(sapply(lapply(BSindex,function(x) seq(x,x+6)), function(x) symbol[x]))
+  BS <- t(sapply(lapply(BSindex,function(x) seq(x,x+8)), function(x) symbol[x]))
 
 
   # Cash Flow Fields
@@ -68,7 +68,7 @@ function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
 
   CFindex <- grep(CFregx,symbol)
   # create single CF matrix
-  CF <- t(sapply(lapply(CFindex,function(x) seq(x,x+6)), function(x) symbol[x]))
+  CF <- t(sapply(lapply(CFindex,function(x) seq(x,x+8)), function(x) symbol[x]))
 
   # create list of list of matrix objects [IS=[Q,A],BS=[Q,A],CF=[Q,A]]
   ret <- (list(IS=list(Q=IS[1:49,],A=IS[50:98,]),BS=list(Q=BS[1:40,],A=BS[41:80,]),CF=list(Q=CF[1:19,],A=CF[20:38,])))

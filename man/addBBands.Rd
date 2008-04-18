@@ -5,7 +5,7 @@
 Add Bollinger Bands to current chart.
 }
 \usage{
-addBBands(n = 20, ma = "SMA", sd = 2, draw = 'bands', on = -1)
+addBBands(n = 20, sd = 2, ma = "SMA", draw = 'bands', on = -1)
 }
 \arguments{
   \item{n}{ number of moving average periods }

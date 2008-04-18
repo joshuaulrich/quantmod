@@ -4,7 +4,7 @@
 \alias{candleChart}
 \alias{matchChart}
 \alias{lineChart}
-\alias{cS2}  %remove before final push
+\alias{reChart}
 \title{ Create Financial Charts }
 \description{
 Charting tool to create standard financial charts
@@ -12,6 +12,9 @@ given a time series like object. Serves as the base function for
 future technical analysis additions. Possible chart
 styles include candles, matches (1 pixel candles), bars,
 and lines. Chart may have white or black background.
+
+\code{reChart} allows for dynamic changes to the chart without
+having to respecify the full chart parameters.
 }
 \usage{
 chartSeries(x,
@@ -20,13 +23,26 @@ chartSeries(x,
            show.grid = TRUE, 
            name = NULL,
            time.scale = NULL,
-           TA = c(addVo()),
+           TA = 'addVo()',
+           TAsep=';',
            line.type = "l",
            bar.type = "ohlc",
            theme = chartTheme("black"),
            major.ticks='auto', minor.ticks=TRUE,
            up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
            ...)
+
+reChart(type = c("auto", "candlesticks", "matchsticks", "bars","line"), 
+       subset = NULL,
+       show.grid = TRUE, 
+       name = NULL,
+       time.scale = NULL,
+       line.type = "l",
+       bar.type = "ohlc",
+       theme = chartTheme("black"),
+       major.ticks='auto', minor.ticks=TRUE,
+       up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
+       ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -36,7 +52,8 @@ chartSeries(x,
   \item{show.grid}{ display price grid lines? }
   \item{name}{ name of chart }
   \item{time.scale}{ what is the timescale? automatically deduced }
-  \item{TA}{ a vector of technical indicators and params }
+  \item{TA}{ a vector of technical indicators and params, or character strings }
+  \item{TAsep}{ TA delimiter for TA strings }
   \item{line.type}{ type of line in line chart }
   \item{bar.type}{ type of barchart - ohlc or hlc }
   \item{theme}{ a chart.theme object }
@@ -86,6 +103,13 @@ charting applications, and follows the following rules:
   \item{red}{   => Op[t] > Cl[t] and Op[t] < Cl[t-1]}
   \item{black}{ => Op[t] > Cl[t] and Op[t] > Cl[t-1]}
 }
+
+\code{reChart} takes any number of arguments from the original
+chart call --- and redraws the chart with the updated parameters.
+One item of note: if multiple color bars/candles are desired,
+it is necessary to respecify the \code{theme} argument. Additionally
+it is not possible to change TA parameters at present.  This must be
+done with addTA/dropTA/swapTA/moveTA commands.
 }
 \value{
 Returns a standard chart plus volume, if available, suitably scaled.
@@ -106,7 +130,10 @@ to force all future charts to use the same indicators by calling \code{setTA}.
 Additional motivation to add outlined candles to allow
 for scaling and advanced color coding is owed to Josh Ulrich, as
 are the base functions (from \pkg{TTR}) for the yet to be
-released technical analysis charting code
+released technical analysis charting code.
+
+Many improvements in the current version were the result of conversations with
+Gabor Grothendieck.  Many thanks to him.
 }
 \seealso{ \code{\link{getSymbols}}, \code{\link{addTA}}, \code{\link{setTA}},
           \code{\link{chartTheme}} }
