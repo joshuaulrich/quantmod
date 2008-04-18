@@ -1,4 +1,5 @@
 \name{zoomChart}
+\alias{zooom}
 \alias{zoom}
 \alias{zoomChart}
 \title{ Change Zoom Level Of Current Chart }
@@ -7,8 +8,8 @@ Using \pkg{xts} style date subsetting, zoom into
 or out of the current chart.
 }
 \usage{
-zoom(n=1, eps=2)
-zoomChart(subset = NULL)
+zooom(n=1, eps=2)
+zoomChart(subset)
 }
 
 \arguments{
@@ -21,14 +22,14 @@ These function allow for viewing of specific
 areas of a chart produced by \code{chartSeries}
 by simply specifying the dates of interest
 
-\code{zoom} is an interactive chart version
+\code{zooom} is an interactive chart version
 of \code{zoomChart} which utilizes the standard
 \R device interaction tool \code{locator} to
 estimate the subset desired. This estimate is
 then passed to zoomChart for actual redrawing.
 At present it is
 quite experimental in its interface and arguments.
-Its usage entails a call to \code{zoom()} followed
+Its usage entails a call to \code{zooom()} followed
 by the selection of the leftmost and rightmost points
 desired in the newly zoomed chart. This selection
 is accomplished by the user left-clicking each extreme
@@ -69,7 +70,7 @@ chartSeries(sample_matrix)
 zoomChart('2007-04::')
 zoomChart()
 
-zoom() # interactive example
+zooom() # interactive example
 }
 }
 \keyword{ utilities }
