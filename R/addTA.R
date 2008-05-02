@@ -18,7 +18,11 @@
 # addTA {{{
 `addTA` <-
 function(ta,...) {
-  plot(do.call(paste('add',ta,sep=''),list(...)))
+  if(is.character(ta)) {
+    if(exists(ta)) {
+      plot(do.call(paste('add',ta,sep=''),list(...)))
+    } else stop(paste('no TA method found for',paste('add',ta,sep='')))
+  } else stop('must be a character string')
 }#}}}
 
 # setTA {{{
@@ -1542,6 +1546,91 @@ function(x) {
     box(col=x@params$colors$fg.col)
 } # }}}
 
+# addShading {{{
+`addShading` <- function(when,on=-1,overlay=TRUE,col='blue') {
+
+  lchob <- get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- !overlay
+
+    x <- lchob@xdata
+    i <- when
+    indexClass(x) <- "POSIXct"
+    POSIXindex <- index(x)
+    if (missing(i)) 
+        i <- 1:NROW(x)
+    if (xts:::timeBased(i)) 
+        i <- as.character(as.POSIXct(i))
+    if (is.character(i)) {
+        i <- strsplit(i, ';')[[1]]
+        i.tmp <- NULL
+        for (ii in i) {
+            if (!identical(grep("::", ii), integer(0))) {
+                dates <- strsplit(ii, "::")[[1]]
+                first.time <- ifelse(dates[1] == "", POSIXindex[1], 
+                  do.call("firstof", as.list(as.numeric(strsplit(dates[1], 
+                    ":|-|/| ")[[1]]))))
+                last.time <- ifelse(length(dates) == 1, POSIXindex[length(POSIXindex)], 
+                  do.call("lastof", as.list(as.numeric(strsplit(dates[2], 
+                    ":|-|/| ")[[1]]))))
+            }
+            else {
+                dates <- ii
+                first.time <- do.call("firstof", as.list(as.numeric(strsplit(dates, 
+                  ":|-|/| ")[[1]])))
+                last.time <- do.call("lastof", as.list(as.numeric(strsplit(dates, 
+                  ":|-|/| ")[[1]])))
+            }
+            i.tmp <- c(i.tmp, which(POSIXindex <= last.time & 
+                POSIXindex >= first.time))
+        }
+        i <- i.tmp
+    }
+
+  xstart <- unique(c(i[1],i[which(diff(i) != 1)+1]))
+  xend   <- unique(c(i[which(diff(i) != 1)-1], rev(i)[1]))
+
+  chobTA@TA.values <- x
+  chobTA@name <- "chartShading"
+  chobTA@call <- match.call()
+  chobTA@on <- on # used for deciding when to draw...
+  chobTA@params <- list(xrange=lchob@xrange,
+                        yrange=lchob@yrange,
+                        colors=lchob@colors,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        xsubset=lchob@xsubset,
+                        time.scale=lchob@time.scale,
+                        xstart=xstart,xend=xend
+                        )
+  if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  } 
+} # }}}
+# chartShading {{{
+`chartShading` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+    y.range <- x@params$yrange
+    xstart <- x@params$xstart
+    xend <- x@params$xend
+ 
+    rect(((xstart-1)*spacing+1)-width/2, rep(y.range[1]*.95,length(xstart)),
+         ((xend-1)*spacing+1)+width/2, rep(y.range[2]*1.05,length(xend)),
+         col=c(x@params$colors$BBands$fill),border=NA)
+      #abline(v=(x@params$v-1)*spacing+1,col=x@params$col)
+} # }}}
+
 # addLines {{{
 `addLines` <- function(x,h,v,on=1,overlay=TRUE,col='blue') {
  
@@ -1591,22 +1680,14 @@ function(x) {
  
     if(!is.null(x@params$x)) {
       # draw lines given positions specified in x
-
+      lines(x=(x@params$x-1)*spacing+1,col=x@params$col)  
     }
     if(!is.null(x@params$h)) {
       # draw horizontal lines given positions specified in h
       abline(h=x@params$h,col=x@params$col)
-#     if(length(x@params$h) > length(x@params$col)) {
-#       colors <- rep(col,length(x@params$h))
-#     } else colors <- x@params$col
-#     for(li in 1:length(x@params$h)) {
-#       lines(seq(1,length(x.range),by=spacing),
-#             rep(x@params$h[li],length(x.range)/spacing), col=colors[li])
-#     }
     }
     if(!is.null(x@params$v)) {
       # draw vertical lines given positions specified in v
-
       abline(v=(x@params$v-1)*spacing+1,col=x@params$col)
     }
 
@@ -1623,6 +1704,7 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- !overlay
 
+  
   chobTA@TA.values <- xdata[lchob@xsubset,]
   chobTA@name <- "chartPoints"
   chobTA@call <- match.call()

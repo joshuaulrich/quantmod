@@ -344,6 +344,7 @@ function(x,k=1)
     } else {
       new.x <- zoo(new.x,x.index)
     }
+    dim(new.x) <- c(NROW(new.x),max(k,1))
     colnames(new.x) <- paste("Lag.",k,sep="")
     return(new.x)
 }
@@ -358,6 +359,7 @@ function(x,k=1)
         c(rep(NA,k.e),x[-((length(x)-k.e+1):length(x))])
     }
     )
+    dim(new.x) <- c(NROW(new.x),max(k,1))
     colnames(new.x) <- paste("Lag.",k,sep="")
     return(new.x)
 }

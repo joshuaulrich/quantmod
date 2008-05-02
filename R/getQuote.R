@@ -43,22 +43,26 @@
 #}
 
 `getQuote` <-
-function(Symbols,src='yahoo') {
+function(Symbols,src='yahoo',what='d1t1l1c1ohgv') {
   if(src != 'yahoo') stop('no additional src methods available yet')
   tmp <- tempfile()
+  Symbols <- paste(strsplit(Symbols,';')[[1]],collapse="+")
   download.file(paste(
-                "http://download.finance.yahoo.com/d/quotes.csv?s=",
+                "http://finance.yahoo.com/d/quotes.csv?s=",
                 Symbols,
-                "&f=sl1d1t1c1ohgv&e=.csv",sep=""),
+                "&f=",what,sep=""),
                 dest=tmp,quiet=TRUE)
-  sq <- read.table(file=tmp,sep=',',stringsAsFactors=FALSE)
+  sq <- read.csv(file=tmp,sep=',',stringsAsFactors=FALSE,header=FALSE)
   unlink(tmp)
-  Qposix <- (paste(sub('(.+)/(.+)/(....)','\\3/\\1/\\2',sq[,3]),
-                             sq[,4]))
-  class(Qposix) <- c("POSIXt","POSIXct")
-  Q.zoo <- zoo(sq[,c(2,5,6,7,8,9)],Qposix)
-  dim(Q.zoo) <- c(1,6)
-  colnames(Q.zoo) <- paste(Symbols,c("Last","Change","Open","High","Low","Volume"),sep=".")
-  Q.zoo
+  Qposix <- strptime(paste(sq[,1],sq[,2]),format='%m/%d/%Y %H:%M')
+  #Qposix <- (paste(sub('(.+)/(.+)/(....)','\\3/\\1/\\2',sq[,3]),
+  #                           sq[,4]))
+  #class(Qposix) <- c("POSIXt","POSIXct")
+  #Q.xts <- xts(sq[,c(2,5,6,7,8,9)],Qposix)
+  #dim(Q.xts) <- c(1,6)
+  #if(what=='d1t1l1c1ohgv')
+  #  colnames(Q.xts) <- paste(Symbols,c("Last","Change","Open","High","Low","Volume"),sep=".")
+  #Q.xts
+  data.frame(Qposix,sq[,3:NCOL(sq)])
 }
 

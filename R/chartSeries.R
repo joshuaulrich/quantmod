@@ -173,7 +173,7 @@ function(x,
          type="candlesticks",
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
-         TA=c(addVo()),
+         TA="addVo()",
          theme=chartTheme("black"),
          major.ticks='auto', minor.ticks = TRUE,
          color.vol=TRUE,multi.col=FALSE,...
@@ -192,7 +192,7 @@ function(x,
          type="bars",
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
-         TA=c(addVo()),
+         TA="addVo()",
          bar.type="ohlc",
          theme=chartTheme("black"),
          major.ticks='auto', minor.ticks = TRUE,
@@ -211,7 +211,7 @@ function(x,subset = NULL,
          type="line",
          show.grid=TRUE,name=deparse(substitute(x)),
          time.scale=NULL,
-         TA=c(addVo()),
+         TA="addVo()",
          line.type="l",
          theme=chartTheme("black"),
          major.ticks='auto', minor.ticks = TRUE,
@@ -238,8 +238,8 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#555555",sub.col="#555555",
+                                fill="#F7F7F7",
                                 Expiry='#C9C9C9',
-                                BBands=list(col='blue',fill='#F7F7F7'),
                                 theme.name='white'
                                 ),
                       'white.mono'=
@@ -253,7 +253,9 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#555555",sub.col="#555555",
+                                fill="#F7F7F7",
                                 Expiry='#C9C9C9',
+                                BBands.col='#666666',BBands.fill="#F7F7F7",
                                 BBands=list(col='#666666',fill='#F7F7F7'),
                                 theme.name='white.mono'
                                 ),
@@ -268,7 +270,9 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#999999",sub.col="#999999",
+                                fill="#282828",
                                 Expiry='#383838',
+                                BBands.col='red',BBands.fill="#282828",
                                 BBands=list(col='red',fill='#282828'),
                                 theme.name='black'
                                 ),
@@ -283,8 +287,10 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#999999",sub.col="#999999",
+                                fill="#777777",
                                 Expiry='#383838',
                                 BBands=list(col='#DDDDDD',fill='#777777'),
+                                BBands.col='#DDDDDD',BBands.fill="#777777",
                                 theme.name='black.mono'
                                 ),
                       'beige'=
@@ -298,12 +304,18 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#555555",sub.col="#555555",
+                                fill="#F5F5F5",
                                 Expiry='#C9C9C9',
+                                BBands.col='orange',BBands.fill='#F5F5DF',
                                 BBands=list(col='orange',fill='#F5F5DF'),
                                 theme.name='beige'
                                 )
                      ), class='chart.theme')
 # }}}
+
+`print.chart.theme` <- function(x,...) {
+  str(x)
+}
 
 # chartTheme {{{
 `chartTheme` <- function(theme='black',...) {
@@ -448,6 +460,7 @@ function(x,
   chob@colors <- theme
   chob@time.scale <- time.scale
   chob@minor.ticks <- minor.ticks
+  chob@major.ticks <- major.ticks
 
   chob@length <- NROW(x)
 
