@@ -74,13 +74,22 @@ function (type = c("auto", "candlesticks", "matchsticks",
     }
 
     chob@xsubset <- xsubset
-    chob@bp <- axTicksByTime(x,'auto')
+    if(missing(major.ticks)) {
+      majorticks <- chob@major.ticks
+    } else majorticks <- major.ticks
+    chob@bp <- axTicksByTime(x,majorticks)
     chob@x.labels <- names(chob@bp)
     chob@length <- NROW(x)
   }
   ########### end subset ##########
 
-  
+  if(!missing(major.ticks)) {
+    chob@bp <- axTicksByTime(x[chob@xsubset],major.ticks)
+    chob@x.labels <- names(chob@bp)
+    chob@major.ticks <- major.ticks
+  }
+  if(!missing(minor.ticks))
+    chob@minor.ticks = minor.ticks
   ########### chartTheme ##########
   if(!missing(theme)) {
     if(inherits(theme,'chart.theme')) {

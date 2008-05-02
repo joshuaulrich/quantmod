@@ -82,7 +82,8 @@ setClass("chob",
            spacing="numeric",width="numeric",
            bp="numeric",x.labels="character",
            colors="ANY",time.scale="ANY",
-           minor.ticks="logical"
+           minor.ticks="logical",
+           major.ticks="ANY"
          )
 )
 
