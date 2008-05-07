@@ -40,7 +40,12 @@ CHARTS:
 
   - add addHolidays/Weekends function to add in missing data with NA [see fillIndex beta in 'xts']
 
-  - liveChart function - used in conjunction with RT data feeds
+  - liveChart function - used in conjunction with RT data feeds [SEE BELOW]
+  - add x to reChart to allow for updated/different data, which may
+    be used in conjuction with a RT feed callback such as in the IBrokers
+    package
+
+  - add 'periodicity' argument to chartSeries
 
   - dropTA function to remove TA indicators applied [moveTA and swapTA added as well: 2/16/2008 - jar]
 

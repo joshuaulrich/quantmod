@@ -21,6 +21,7 @@ function(Symbols=NULL,
       #src <- src[1]
       if(is.character(Symbols)) {
       # at least one Symbol has been specified
+        Symbols <- unlist(strsplit(Symbols,';'))
         tmp.Symbols <- vector("list")
         for(each.symbol in Symbols) {
           if(each.symbol %in% names(symbols.src)) {
