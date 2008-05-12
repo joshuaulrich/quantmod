@@ -14,6 +14,16 @@
 #
 #    CLV,CMD,OBV,KST,TDI,WHF,Aroon,ChAD,ChVol,WilliamsAD,
 #    Points, Stoch, SD, ...??? 
+`funToTA` <-
+function(x,drop.arg=1) {
+  drop.arg <- if(any(drop.arg < 1)) {
+    1:length(formals(x))
+  } else -drop.arg
+  fun.args <- paste(names(formals(x))[drop.arg],'=',sapply(formals(x), deparse)[drop.arg],sep='')
+  fun.args <- paste(gsub('=$','',fun.args),collapse=',')
+  paste('add',deparse(substitute(x)),'(',fun.args,') {',collapse='',sep='')
+}
+
 
 # addTA {{{
 `addTA` <-
