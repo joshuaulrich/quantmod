@@ -728,7 +728,7 @@ function(Symbols,env,return.class='xts',
          return(fr)
        } else
        if('its' %in% return.class) {
-         if("package:its" %in% search() || require("its", quietly=TRUE)) {
+         if("package:its" %in% search() || suppressMessages(require("its", quietly=TRUE))) {
            fr.dates <- as.POSIXct(as.character(index(fr)))
            fr <- its::its(coredata(fr),fr.dates)
            return(fr)
@@ -738,7 +738,7 @@ function(Symbols,env,return.class='xts',
          }
        } else 
        if('timeSeries' %in% return.class) {
-         if("package:fSeries" %in% search() || require("fSeries",quietly=TRUE)) {
+         if("package:fSeries" %in% search() || suppressMessages(require("fSeries",quietly=TRUE))) {
            fr <- as.timeSeries(fr)
            return(fr)
          } else {
