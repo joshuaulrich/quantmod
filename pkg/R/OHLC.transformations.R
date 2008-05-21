@@ -374,6 +374,7 @@ function(x,k=1)
 `Delt` <-
 function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
 {
+    x1 <- try.xts(x1, error=FALSE)
     type <- pmatch(type[1],c('log','arithmetic'))
     if(length(x2)!=length(x1) && !is.null(x2)) stop('x1 and x2 must be of same length');
     if(is.null(x2)){
@@ -390,5 +391,5 @@ function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
         xx <- (x2-Lag(x1,k))/Lag(x1,k)
     }
     colnames(xx) <- paste("Delt",k,type,sep=".")
-    xx
+    reclass(xx,x1)
 }

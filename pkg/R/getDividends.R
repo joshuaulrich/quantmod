@@ -8,7 +8,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=.GlobalEnv,src='yahoo',
 
   yahoo.URL <- 'http://ichart.finance.yahoo.com/table.csv?s='
   from.y <- as.numeric(strsplit(as.character(from), "-", )[[1]][1])
-  from.m <- as.numeric(strsplit(as.character(from), "-", )[[1]][2])
+  from.m <- as.numeric(strsplit(as.character(from), "-", )[[1]][2])-1
   from.d <- as.numeric(strsplit(as.character(from), "-", )[[1]][3])
   to.y <- as.numeric(strsplit(as.character(to), "-", )[[1]][1])
   to.m <- as.numeric(strsplit(as.character(to), "-", )[[1]][2])
