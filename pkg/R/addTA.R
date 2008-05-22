@@ -35,6 +35,46 @@ function(ta,...) {
   } else stop('must be a character string')
 }#}}}
 
+`addTA2` <-
+function(ta, col=3,...) {
+  lchob <- quantmod:::get.current.chob()
+  chobTA <- new("chobTA")
+  chobTA@new <- TRUE
+  nrc <- NROW(lchob@xdata)
+  if(is.xts(ta)) {
+    x <- merge(lchob@xdata, ta)
+  } else {
+    if(NROW(ta) != nrc) stop('mismatched row lengths')
+    x <- merge(lchob@xdata, ta)
+  }
+  chobTA@TA.values <- coredata(x)[,NCOL(x)]
+  chobTA@name <- "chartROC"
+  chobTA@call <- match.call()
+  chobTA@params <- list(xrange=lchob@xrange,
+                        colors=lchob@colors,
+                        color.vol=lchob@color.vol,
+                        multi.col=lchob@multi.col,
+                        spacing=lchob@spacing,
+                        width=lchob@width,
+                        bp=lchob@bp,
+                        x.labels=lchob@x.labels,
+                        col=col,
+                        time.scale=lchob@time.scale)
+ if(is.null(sys.call(-1))) {
+    TA <- lchob@passed.args$TA
+    lchob@passed.args$TA <- c(TA,chobTA)
+    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+    do.call('chartSeries.chob',list(lchob))
+    #quantmod:::chartSeries.chob(lchob)
+    invisible(chobTA)
+  } else {
+   return(chobTA)
+  }
+
+
+}
+
+
 # setTA {{{
 `setTA` <-
 function(type=c('chartSeries','barChart','candleChart')) {
