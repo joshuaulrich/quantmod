@@ -25,8 +25,8 @@ function(x,drop.arg=1) {
 }
 
 
-# addTA {{{
-`addTA` <-
+# addTA0 {{{
+`addTA0` <-
 function(ta,...) {
   if(is.character(ta)) {
     if(exists(ta)) {
@@ -34,21 +34,25 @@ function(ta,...) {
     } else stop(paste('no TA method found for',paste('add',ta,sep='')))
   } else stop('must be a character string')
 }#}}}
-
-`addTA2` <-
-function(ta, col=3,...) {
+# addTA {{{
+`addTA` <-
+function(ta, ...) {
   lchob <- quantmod:::get.current.chob()
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
   nrc <- NROW(lchob@xdata)
+
+  ta <- try.xts(ta, error=FALSE)
+
   if(is.xts(ta)) {
-    x <- merge(lchob@xdata, ta)
+    x <- merge(lchob@xdata,convertIndex(ta, "POSIXct"))
   } else {
     if(NROW(ta) != nrc) stop('mismatched row lengths')
     x <- merge(lchob@xdata, ta)
   }
-  chobTA@TA.values <- coredata(x)[,NCOL(x)]
-  chobTA@name <- "chartROC"
+  # for multicolumn TAs like MACD, get all
+  chobTA@TA.values <- coredata(x)[,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
+  chobTA@name <- "chartTA"
   chobTA@call <- match.call()
   chobTA@params <- list(xrange=lchob@xrange,
                         colors=lchob@colors,
@@ -58,7 +62,7 @@ function(ta, col=3,...) {
                         width=lchob@width,
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
-                        col=col,
+                        pars=list(...),
                         time.scale=lchob@time.scale)
  if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
@@ -72,8 +76,59 @@ function(ta, col=3,...) {
   }
 
 
-}
+}#}}}
+# chartTA {{{
+`chartTA` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
 
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    multi.col <- x@params$multi.col
+    color.vol <- x@params$color.vol
+
+    tav <- x@TA.values
+    #if(is.null(dim(tav))) tav <- matrix(tav,nc=1)
+
+    y.range <- seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
+                   length.out=length(x.range))
+
+    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+
+    grid(NA,NULL,col=x@params$colors$grid.col)
+
+    pars <- x@params$pars
+#    pars$col <- rep(pars$col, length.out=NCOL(tav))
+#    pars$type <- rep(pars$type, length.out=NCOL(tav))
+#    pars$lty <- rep(pars$lty, length.out=NCOL(tav))
+#    pars$lwd <- rep(pars$lwd, length.out=NCOL(tav))
+    pars <- lapply(pars, function(x) rep(x, length.out=NCOL(tav)))
+
+    if(NCOL(tav) == 1) {
+        tmp.pars <- lapply(pars,function(x) x[1])
+        #lines(seq(1,length(x.range),by=spacing),tav,col=COLOR,lwd=1,type=x@params$type)
+        do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
+    } else {
+      for(cols in 1:NCOL(tav)) {
+        tmp.pars <- lapply(pars,function(x) x[cols])
+        #lines(seq(1,length(x.range),by=spacing),tav,col=COLOR,lwd=1,type=x@params$type)
+        do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
+      }
+    }
+
+    text(0, last(y.range)*.9,
+         paste(deparse(x@call[-1][[1]]),":",sep=""), 
+         pos = 4)
+
+    text(0, last(y.range)*.9,
+        paste("\n\n\n",sprintf("%.3f",last(tav)), sep = ""), col = pars$col[1], 
+        pos = 4)
+
+    axis(2)
+    box(col=x@params$colors$fg.col)
+} # }}}
 
 # setTA {{{
 `setTA` <-
