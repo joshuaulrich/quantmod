@@ -25,57 +25,53 @@ function(x,drop.arg=1) {
 }
 
 
-# addTA0 {{{
-`addTA0` <-
-function(ta,...) {
+# addTA {{{
+`addTA` <-
+function(ta, order=NULL, ...) {
   if(is.character(ta)) {
     if(exists(ta)) {
       plot(do.call(paste('add',ta,sep=''),list(...)))
     } else stop(paste('no TA method found for',paste('add',ta,sep='')))
-  } else stop('must be a character string')
-}#}}}
-# addTA {{{
-`addTA` <-
-function(ta, ...) {
-  lchob <- quantmod:::get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-  nrc <- NROW(lchob@xdata)
-
-  ta <- try.xts(ta, error=FALSE)
-
-  if(is.xts(ta)) {
-    x <- merge(lchob@xdata,convertIndex(ta, "POSIXct"))
   } else {
-    if(NROW(ta) != nrc) stop('mismatched row lengths')
-    x <- merge(lchob@xdata, ta)
+    lchob <- get.current.chob()
+    chobTA <- new("chobTA")
+    chobTA@new <- TRUE
+    nrc <- NROW(lchob@xdata)
+  
+    ta <- try.xts(ta, error=FALSE)
+  
+    if(is.xts(ta)) {
+      x <- merge(lchob@xdata,convertIndex(ta, "POSIXct"))
+    } else {
+      if(NROW(ta) != nrc) stop('mismatched row lengths')
+      x <- merge(lchob@xdata, ta)
+    }
+    # for multicolumn TAs like MACD, get all new columns
+    chobTA@TA.values <- coredata(x)[,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
+    chobTA@name <- "chartTA"
+    chobTA@call <- match.call()
+    chobTA@params <- list(xrange=lchob@xrange,
+                          colors=lchob@colors,
+                          color.vol=lchob@color.vol,
+                          multi.col=lchob@multi.col,
+                          spacing=lchob@spacing,
+                          width=lchob@width,
+                          bp=lchob@bp,
+                          x.labels=lchob@x.labels,
+                          order=order,
+                          pars=list(...),
+                          time.scale=lchob@time.scale)
+   if(is.null(sys.call(-1))) {
+      TA <- lchob@passed.args$TA
+      lchob@passed.args$TA <- c(TA,chobTA)
+      lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+      do.call('chartSeries.chob',list(lchob))
+      #quantmod:::chartSeries.chob(lchob)
+      invisible(chobTA)
+    } else {
+     return(chobTA)
+    }
   }
-  # for multicolumn TAs like MACD, get all
-  chobTA@TA.values <- coredata(x)[,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
-  chobTA@name <- "chartTA"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        pars=list(...),
-                        time.scale=lchob@time.scale)
- if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    #quantmod:::chartSeries.chob(lchob)
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  }
-
-
 }#}}}
 # chartTA {{{
 `chartTA` <-
@@ -100,31 +96,48 @@ function(x) {
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     pars <- x@params$pars
-#    pars$col <- rep(pars$col, length.out=NCOL(tav))
-#    pars$type <- rep(pars$type, length.out=NCOL(tav))
-#    pars$lty <- rep(pars$lty, length.out=NCOL(tav))
-#    pars$lwd <- rep(pars$lwd, length.out=NCOL(tav))
     pars <- lapply(pars, function(x) rep(x, length.out=NCOL(tav)))
+
+    col.order <- if(is.null(x@params$order)) {
+      1:NCOL(tav)
+    } else x@params$order
 
     if(NCOL(tav) == 1) {
         tmp.pars <- lapply(pars,function(x) x[1])
-        #lines(seq(1,length(x.range),by=spacing),tav,col=COLOR,lwd=1,type=x@params$type)
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
+        #if(!is.na(x@params$annotate) && x@params$annotate > 0) {
+          text(0, last(y.range)*.9,
+               paste(deparse(x@call[-1][[1]]),":",sep=""), 
+               pos = 4)
+          text(0, last(y.range)*.9,
+              paste("\n\n\n",sprintf("%.3f",last(tav)), sep = ""), col = pars$col[1], 
+              pos = 4)
+        #}
     } else {
-      for(cols in 1:NCOL(tav)) {
+      #annotate <- x@params$annotate # must make it collength + 1
+      #if(is.na(annotate[1]) || (is.logical(annotate[1]) && annotate[1]) )
+      #  annotate <- rep(annotate, length.out=NCOL(tav)+1)
+      #if(length(annotate) < NCOL(tav)) stop("annotate wrong length")
+
+      for(cols in col.order) {
         tmp.pars <- lapply(pars,function(x) x[cols])
-        #lines(seq(1,length(x.range),by=spacing),tav,col=COLOR,lwd=1,type=x@params$type)
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
+        if(cols==1) { 
+          TA.title <- deparse(x@call[-1][[1]])
+          text(0, last(y.range)*.9,
+               paste(TA.title,":",sep=""), 
+               pos = 4)
+        }
+        # for each column, add colname: value
+        Col.title <- colnames(tav)[cols]
+        text(0, last(y.range)*.9,
+             paste(paste(rep("\n\n\n",cols),collapse=''),
+             paste(Col.title,":",sep=""),
+             sprintf("%.3f",last(tav[,cols])), sep = ""),
+             col = pars$col[cols], pos = 4)
       }
     }
 
-    text(0, last(y.range)*.9,
-         paste(deparse(x@call[-1][[1]]),":",sep=""), 
-         pos = 4)
-
-    text(0, last(y.range)*.9,
-        paste("\n\n\n",sprintf("%.3f",last(tav)), sep = ""), col = pars$col[1], 
-        pos = 4)
 
     axis(2)
     box(col=x@params$colors$fg.col)
