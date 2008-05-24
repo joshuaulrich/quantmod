@@ -47,7 +47,7 @@ function(ta, order=NULL, ...) {
       x <- merge(lchob@xdata, ta)
     }
     # for multicolumn TAs like MACD, get all new columns
-    chobTA@TA.values <- coredata(x)[,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
+    chobTA@TA.values <- coredata(x)[lchob@xsubset,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
     chobTA@name <- "chartTA"
     chobTA@call <- match.call()
     chobTA@params <- list(xrange=lchob@xrange,
