@@ -27,7 +27,7 @@ function(x,drop.arg=1) {
 
 # addTA {{{
 `addTA` <-
-function(ta, order=NULL, ...) {
+function(ta, order=NULL, on=NA, ...) {
   if(is.character(ta)) {
     if(exists(ta)) {
       plot(do.call(paste('add',ta,sep=''),list(...)))
@@ -35,7 +35,13 @@ function(ta, order=NULL, ...) {
   } else {
     lchob <- get.current.chob()
     chobTA <- new("chobTA")
-    chobTA@new <- TRUE
+    chobTA@new <- ifelse(is.na(on), TRUE, FALSE)
+    if(is.na(on)) {
+      chobTA@new <- TRUE
+    } else {
+      chobTA@new <- FALSE
+      chobTA@on  <- on
+    }
     nrc <- NROW(lchob@xdata)
   
     ta <- try.xts(ta, error=FALSE)
@@ -170,6 +176,7 @@ function(dev) {
   if(!lchob@show.vol) return()
  
   x <- as.matrix(lchob@xdata)
+  if(!has.Vo(x)) return()
 
   Volumes <- Vo(x)
   max.vol <- max(Volumes,na.rm=TRUE)

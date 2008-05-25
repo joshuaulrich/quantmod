@@ -470,14 +470,24 @@ function(x,
     # important to force eval of _current_ chob, not saved chob
     thisEnv <- environment()
     if(is.character(TA)) TA <- as.list(strsplit(TA,TAsep)[[1]])
+    #if(!has.Vo(x)) TA <- TA[-which(TA=='addVo()')] # remove addVo if no volume
     chob@passed.args$TA <- list()
-    for(ta in 1:length(TA)) {
-      if(is.character(TA[[ta]])) {
-        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
-      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
-    }
-    chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
-    chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
+    #if(length(TA) > 0) {
+      for(ta in 1:length(TA)) {
+        if(is.character(TA[[ta]])) {
+          chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
+        } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
+      }
+      poss.new <- sapply(chob@passed.args$TA, function(x) x@new)
+      chob@windows <- sum(poss.new) + 1
+      #chob@windows <- length(which(sapply(chob@passed.args$TA,
+      #                           function(x) ifelse(is.null(x),FALSE,x@new))))+1
+      chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,
+                                     function(x) x@name=="chartVo"))
+    #} else {
+    #  chob@windows <- 1
+    #  chob@passed.args$TA <- NULL
+    #}
   } else chob@windows <- 1
   
   #if(debug) return(str(chob))
