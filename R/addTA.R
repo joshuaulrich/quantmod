@@ -27,7 +27,7 @@ function(x,drop.arg=1) {
 
 # addTA {{{
 `addTA` <-
-function(ta, order=NULL, on=NA, ...) {
+function(ta, order=NULL, on=NA, legend='auto', ...) {
   if(is.character(ta)) {
     if(exists(ta)) {
       plot(do.call(paste('add',ta,sep=''),list(...)))
@@ -58,13 +58,11 @@ function(ta, order=NULL, on=NA, ...) {
     chobTA@call <- match.call()
     chobTA@params <- list(xrange=lchob@xrange,
                           colors=lchob@colors,
-                          color.vol=lchob@color.vol,
-                          multi.col=lchob@multi.col,
                           spacing=lchob@spacing,
                           width=lchob@width,
                           bp=lchob@bp,
                           x.labels=lchob@x.labels,
-                          order=order,
+                          order=order,legend=legend,
                           pars=list(...),
                           time.scale=lchob@time.scale)
    if(is.null(sys.call(-1))) {
@@ -88,18 +86,16 @@ function(x) {
     x.range <- x@params$xrange
     x.range <- seq(x.range[1],x.range[2]*spacing)
 
-    multi.col <- x@params$multi.col
-    color.vol <- x@params$color.vol
-
     tav <- x@TA.values
-    #if(is.null(dim(tav))) tav <- matrix(tav,nc=1)
 
-    y.range <- seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
-                   length.out=length(x.range))
-
-    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
-
-    grid(NA,NULL,col=x@params$colors$grid.col)
+    if(x@new) {
+      y.range <- seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
+                     length.out=length(x.range))
+      plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    }
 
     pars <- x@params$pars
     pars <- lapply(pars, function(x) rep(x, length.out=NCOL(tav)))
@@ -108,45 +104,46 @@ function(x) {
       1:NCOL(tav)
     } else x@params$order
 
-    if(NCOL(tav) == 1) {
-        tmp.pars <- lapply(pars,function(x) x[1])
-        do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
-        #if(!is.na(x@params$annotate) && x@params$annotate > 0) {
-          text(0, last(y.range)*.9,
-               paste(deparse(x@call[-1][[1]]),":",sep=""), 
-               pos = 4)
-          text(0, last(y.range)*.9,
-              paste("\n\n\n",sprintf("%.3f",last(tav)), sep = ""), col = pars$col[1], 
-              pos = 4)
-        #}
-    } else {
-      #annotate <- x@params$annotate # must make it collength + 1
-      #if(is.na(annotate[1]) || (is.logical(annotate[1]) && annotate[1]) )
-      #  annotate <- rep(annotate, length.out=NCOL(tav)+1)
-      #if(length(annotate) < NCOL(tav)) stop("annotate wrong length")
+    if(is.null(x@params$legend)) legend <- function(...) {}
+    if(is.character(x@params$legend) && x@params$legend != "auto") {
+      legend("topleft", legend=x@params$legend)
+      legend <- function(...) { }
+    }
 
+    if(!x@new) {
+      legend <- function() { list(legend=legend,text.col=text.col) }
+      formals(legend) <- formals(graphics::legend)
+    }
+
+    legend.text <- list()
+
+    if(NCOL(tav) == 1) {
+      tmp.pars <- lapply(pars,function(x) x[1])
+      do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
+      legend.text[[1]] <- legend('topleft',
+             legend=c(paste(deparse(x@call[-1][[1]]),":"),sprintf("%.3f",last(na.omit(tav)))),
+             text.col=c(x@params$colors$fg.col,pars$col[1]),bty='n',y.inter=.95)
+    } else {
       for(cols in col.order) {
         tmp.pars <- lapply(pars,function(x) x[cols])
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
         if(cols==1) { 
-          TA.title <- deparse(x@call[-1][[1]])
-          text(0, last(y.range)*.9,
-               paste(TA.title,":",sep=""), 
-               pos = 4)
+          legend.text[[cols]] <- legend('topleft',
+                 legend=c(paste(deparse(x@call[-1][[1]]),":")),
+                 text.col=c(x@params$colors$fg.col,pars$col[1]),bty='n',y.inter=.95)
         }
         # for each column, add colname: value
         Col.title <- colnames(tav)[cols]
-        text(0, last(y.range)*.9,
-             paste(paste(rep("\n\n\n",cols),collapse=''),
-             paste(Col.title,":",sep=""),
-             sprintf("%.3f",last(tav[,cols])), sep = ""),
-             col = pars$col[cols], pos = 4)
-      }
+        legend.text[[cols]] <- legend('topleft',
+               legend=c(rep('',cols),paste(Col.title,":",
+                        sprintf("%.3f",last(na.omit(tav[,cols]))))),
+               text.col=pars$col[cols],bty='n',y.inter=.95)
+      } 
     }
-
 
     axis(2)
     box(col=x@params$colors$fg.col)
+    invisible(legend.text)
 } # }}}
 
 # setTA {{{
@@ -264,17 +261,22 @@ function(x) {
     x.range <- x@params$xrange
     x.range <- seq(x.range[1],x.range[2]*spacing)
 
-    multi.col <- x@params$multi.col
+#    multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
     vol.scale <- x@params$vol.scale
     plot(x.range,seq(min(Volumes),max(Volumes),
          length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
 
-    bar.col <- x@params$bar.col
+    bar.col <- if(x@params$color.vol) {
+                 x@params$bar.col
+               } else x@params$border.col
+
     border.col <- x@params$border.col
 
     if(x@params$thin) {
@@ -284,12 +286,14 @@ function(x) {
       rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
            col=bar.col,border=border.col)
     }
+    legend("topleft",
+           legend=c("Volume:",format(last(Volumes)*vol.scale[[1]],big.mark=',')),
+           text.col=c(x@params$colors$fg.col, last(bar.col)), bty="n", y.inter=0.95)
+#   text(0, max(Volumes,na.rm=TRUE) * .9, "Volume:",pos=4)
 
-    text(0, max(Volumes,na.rm=TRUE) * .9, "Volume:",pos=4)
-
-    text(0, max(Volumes,na.rm=TRUE) * .9,
-         paste("\n\n\n",format(last(Volumes)*vol.scale[[1]],big.mark=','), sep = ""), 
-         pos = 4,col=last(bar.col))
+#   text(0, max(Volumes,na.rm=TRUE) * .9,
+#        paste("\n\n\n",format(last(Volumes)*vol.scale[[1]],big.mark=','), sep = ""), 
+#        pos = 4,col=last(bar.col))
 
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -372,6 +376,8 @@ function(x) {
 
     plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR <- "#0033CC"
@@ -468,6 +474,8 @@ function(x) {
     # create appropriately scaled empty plot area
     plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR <- "#0033CC"
@@ -547,6 +555,8 @@ function(x) {
 
     plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     xx <- seq(1,length(x.range),by=spacing)
@@ -638,6 +648,8 @@ function(x) {
 
     plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR="#0033CC"
@@ -719,6 +731,8 @@ function(x) {
                    length.out=length(x.range)) * 1.05
     plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     COLOR <- "#0033CC"
@@ -799,6 +813,8 @@ function(x) {
                    length.out=length(x.range))*1.05
     plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     usr <- par('usr')
@@ -888,6 +904,8 @@ function(x) {
     plot(x.range,seq(min(adx[,4]*.975,na.rm=TRUE),
          max(adx[,4]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
     # draw DIp
     lines(seq(1,length(x.range),by=spacing),adx[,1],col='green',lwd=1,type='l')
@@ -960,6 +978,8 @@ function(x) {
     plot(x.range,seq(min(atr[,2]*.975,na.rm=TRUE),
          max(atr[,2]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     # draw ADX
@@ -1031,6 +1051,8 @@ function(x) {
          max(trix[,1]*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
 
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     # draw TRIX
@@ -1106,6 +1128,8 @@ function(x) {
 
     plot(x.range,y.range,
          type='n',axes=FALSE,ann=FALSE)
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     xx <- seq(1,length(x.range),by=spacing)
@@ -1207,6 +1231,8 @@ function(x) {
 
     plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
@@ -1389,13 +1415,13 @@ function(x) {
       }
      
       # return the text to be pasted
-      txt <- list()
-      txt[[1]] <- list(text=paste("Bollinger Bands (",
+      legend.text <- list()
+      legend.text[[1]] <- list(legend=paste("Bollinger Bands (",
                      paste(x@params$n,x@params$sd,sep=","),") [Upper/Lower]: ",
                      sprintf("%.3f",last(bb[,3])),"/",
                      sprintf("%.3f",last(bb[,1])), sep = ""), 
-                     col = bband.col[3]) 
-      invisible(txt)
+                     text.col = bband.col[3]) 
+      invisible(legend.text)
     } else 
       if(x@params$draw == 'percent') {
         # draw %B in new frame
@@ -1642,6 +1668,8 @@ function(x) {
 
     plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
+    coords <- par('usr')
+    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
     grid(NA,NULL,col=x@params$colors$grid.col)
 
     if(x@params$histo) {
@@ -1654,18 +1682,24 @@ function(x) {
     lines(seq(1,length(x.range),by=spacing),macd[,1],col=col[3],lwd=1)
     lines(seq(1,length(x.range),by=spacing),macd[,2],col=col[4],lwd=1,lty='dotted')
 
-    text(0, last(y.range)*.9,
-         paste("Moving Average Convergence Divergence (",
-         paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""), 
-         pos = 4)
+    legend("topleft",
+           legend=c(paste("Moving Average Convergence Divergence (",
+                    paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""),
+                    paste("MACD:",sprintf("%.3f",last(macd[,1]))),
+                    paste("Signal:",sprintf("%.3f",last(macd[,2])))),
+           text.col=c(x@params$colors$fg.col, col[3], col[4]), bty='n', y.inter=0.95) 
+#   text(0, last(y.range)*.9,
+#        paste("Moving Average Convergence Divergence (",
+#        paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""), 
+#        pos = 4)
 
-    text(0, last(y.range)*.9,
-        paste("\n\n\nMACD: ",sprintf("%.3f",last(macd[,1])), sep = ""),
-        col = col[3],pos = 4)
+#   text(0, last(y.range)*.9,
+#       paste("\n\n\nMACD: ",sprintf("%.3f",last(macd[,1])), sep = ""),
+#       col = col[3],pos = 4)
 
-    text(0, last(y.range)*.9,
-        paste("\n\n\n\n\n\nSignal: ",sprintf("%.3f",last(macd[,2])), sep = ""),
-        col = col[4],pos = 4)
+#   text(0, last(y.range)*.9,
+#       paste("\n\n\n\n\n\nSignal: ",sprintf("%.3f",last(macd[,2])), sep = ""),
+#       col = col[4],pos = 4)
 
     axis(2)
     box(col=x@params$colors$fg.col)
@@ -1908,7 +1942,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) || missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
@@ -1985,7 +2019,9 @@ function(x) {
         par(new=TRUE)
         plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
              type='n',axes=FALSE,ann=FALSE)
-        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        coords <- par('usr')
+        rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+       # title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
         axis(2)
         box(col=x@params$colors$fg.col)
       }
@@ -2085,7 +2121,9 @@ function(x) {
         par(new=TRUE)
         plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
              type='n',axes=FALSE,ann=FALSE)
-        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+        coords <- par('usr')
+        rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+        #title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
         axis(2)
         box(col=x@params$colors$fg.col)
       }

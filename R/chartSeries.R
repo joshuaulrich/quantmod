@@ -238,6 +238,7 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#555555",sub.col="#555555",
+                                area="#FFFFFF",
                                 fill="#F7F7F7",
                                 Expiry='#C9C9C9',
                                 theme.name='white'
@@ -270,6 +271,7 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#999999",sub.col="#999999",
+                                area="#272727",
                                 fill="#282828",
                                 Expiry='#383838',
                                 BBands.col='red',BBands.fill="#282828",
@@ -340,6 +342,7 @@ function(x,
          line.type="l",
          bar.type="ohlc",
          theme=chartTheme("black"),
+         layout=NA,
          major.ticks='auto',minor.ticks=TRUE,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
@@ -458,6 +461,7 @@ function(x,
   chob@bp <- ep
   chob@x.labels <- x.labels
   chob@colors <- theme
+  chob@layout <- layout
   chob@time.scale <- time.scale
   chob@minor.ticks <- minor.ticks
   chob@major.ticks <- major.ticks
