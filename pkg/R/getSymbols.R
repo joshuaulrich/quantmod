@@ -576,37 +576,38 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
     verbose <- FALSE
   if(missing(auto.assign))
     auto.assign <- TRUE
-  stopifnot('package:IBrokers' %in% search() || require("IBrokers",quietly=TRUE))
-  tws <- twsConnect(clientId=1001)
-  on.exit(twsDisconnect(tws))
-
-  if(missing(endDateTime)) endDateTime <- NULL
-
-  for(i in 1:length(Symbols)) {
-    Contract <- getSymbolLookup()[[Symbols[i]]]
-    if(inherits(Contract,'twsContract')) {
-      fr <- reqHistoricalData(tws, Contract, endDateTime=endDateTime,
-                              barSize=barSize, duration=duration,
-                              useRTH=useRTH, whatToShow=whatToShow,
-                              time.format=time.format, verbose=verbose)
-      fr <- convert.time.series(fr=fr, return.class=return.class)
-      if(auto.assign)
-        assign(Symbols[[i]], fr, env)
-      if(i < length(Symbols)) {
-        if(verbose) cat('waiting for TWS to accept next request')
-        for(pacing in 1:6) {
-          if(verbose) cat('.',sep='')
-          Sys.sleep(1)
+  if(is.method.available("twsConnect","IBrokers")) {
+    tws <- twsConnect(clientId=1001)
+    on.exit(twsDisconnect(tws))
+  
+    if(missing(endDateTime)) endDateTime <- NULL
+  
+    for(i in 1:length(Symbols)) {
+      Contract <- getSymbolLookup()[[Symbols[i]]]
+      if(inherits(Contract,'twsContract')) {
+        fr <- reqHistoricalData(tws, Contract, endDateTime=endDateTime,
+                                barSize=barSize, duration=duration,
+                                useRTH=useRTH, whatToShow=whatToShow,
+                                time.format=time.format, verbose=verbose)
+        fr <- convert.time.series(fr=fr, return.class=return.class)
+        if(auto.assign)
+          assign(Symbols[[i]], fr, env)
+        if(i < length(Symbols)) {
+          if(verbose) cat('waiting for TWS to accept next request')
+          for(pacing in 1:6) {
+            if(verbose) cat('.',sep='')
+            Sys.sleep(1)
+          }
+          if(verbose) cat('done\n')
         }
-        if(verbose) cat('done\n')
+      } else {
+        warning(paste('unable to load',Symbols[i],': missing twsContract definition'))
       }
-    } else {
-      warning(paste('unable to load',Symbols[i],': missing twsContract definition'))
     }
+    if(auto.assign)
+      return(Symbols)
+    return(fr) 
   }
-  if(auto.assign)
-    return(Symbols)
-  return(fr) 
 }
 # }}}
 

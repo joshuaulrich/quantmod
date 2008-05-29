@@ -28,6 +28,7 @@ chartSeries(x,
            line.type = "l",
            bar.type = "ohlc",
            theme = chartTheme("black"),
+           legend = NULL,
            major.ticks='auto', minor.ticks=TRUE,
            up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
            ...)
@@ -57,6 +58,7 @@ reChart(type = c("auto", "candlesticks", "matchsticks", "bars","line"),
   \item{line.type}{ type of line in line chart }
   \item{bar.type}{ type of barchart - ohlc or hlc }
   \item{theme}{ a chart.theme object }
+  \item{legend}{ ignore for now }
   \item{major.ticks}{ where should major ticks be drawn}
   \item{minor.ticks}{ should minor ticks be draw? }
   \item{up.col}{ up bar/candle color }
