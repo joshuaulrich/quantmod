@@ -106,12 +106,12 @@ function(x) {
 
     if(is.null(x@params$legend)) legend <- function(...) {}
     if(is.character(x@params$legend) && x@params$legend != "auto") {
-      legend("topleft", legend=x@params$legend)
+      legend("topleft", legend=x@params$legend, bty='n', y.inter=0.95)
       legend <- function(...) { }
     }
 
     if(!x@new) {
-      legend <- function() { list(legend=legend,text.col=text.col) }
+      legend <- function(legend,text.col) { list(legend=legend,text.col=text.col) }
       formals(legend) <- formals(graphics::legend)
     }
 

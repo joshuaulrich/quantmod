@@ -7,15 +7,17 @@ handle sourcing quotes from Yahoo Finance, but it will be extended to
 additional sources over time.
 }
 \usage{
-getQuote(Symbols, src = "yahoo")
+getQuote(Symbols, src = "yahoo", what = standardQuote(), ...)
 }
 \arguments{
   \item{Symbols}{ character string of symbol }
   \item{src}{ source of data (only yahoo is implemented) }
+  \item{what}{ what should be retrieved }
+  \item{\dots}{ currently unused }
 }
 \value{
-Returns a zoo object of one row, with timestamp of class
-POSIXct.
+Returns a data frame with rows matching the number of Symbols
+requested.
 }
 \references{ Yahoo! Finance \url{finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }
