@@ -5,26 +5,21 @@ function(x)
   old.par  <- par(c('pty','mar','xpd','bg','xaxs','las','col.axis','fg'))
   on.exit(par(old.par))
 
-  LAYOUT <- ifelse(is.na(list(x@layout)),TRUE,FALSE)
+  LAYOUT <- ifelse(is.null(list(x@layout)),FALSE,TRUE)
 
-  par.list <- list(list(mar=c(0,4,3,3)),
-                   list(mar=c(0,4,0,3)),
-                   list(mar=c(4,4,0,3)))
-
+  par.list <- list(list(mar=c(  0,3.5,2,3)),
+                   list(mar=c(  0,3.5,0,3)),
+                   list(mar=c(3.5,3.5,0,3)))
+ 
   # layout page
   if(LAYOUT) {
-    if(x@windows == 1) {
-      layout(matrix(1))
-    } else {
-      layout(matrix(1:x@windows,x@windows,1,byrow=TRUE),
-                    1,c(3,rep(1,x@windows-2),1.65),
-             respect=FALSE)
-      if(x@windows > 1) do.call('par',par.list[[1]]) #par(mar=c(0,4,3,3))
-    }
-  } else {
-    # handle passed pars
-    if(x@windows > 1) do.call('par',par.list[[1]])
+    if(!inherits(x@layout,'chart.layout')) {
+      cl <- chart.layout(x@windows)
+    } else cl <- x@layout
+    
+    layout(cl$mat, cl$width, cl$height, respect=FALSE)
   }
+  if(x@windows > 1) do.call('par',par.list[[1]]) 
   #layout(matrix(c(2,3,4,5,1,1,1,1),nc=4,byrow=TRUE),c(1,1,1,1),c(1,2),FALSE)
   #layout(matrix(c(1,2,1,3,1,4,1,5),nc=2,byrow=TRUE),c(5,1),c(1),FALSE)
 
@@ -76,7 +71,10 @@ function(x)
 
 
   if(x@type=='line') {
-    lines(x.pos,Closes,col='blue',type=x@line.type)
+    lines(x.pos,Closes,col=x@colors$up.col,type=x@line.type)
+    main.key <- c(list(list(legend=
+                       paste('Last',last(Closes)),
+                       text.col=x@colors$up.col)),main.key)
   } else {
     # create a vector of colors
     if(x@multi.col) {
@@ -123,11 +121,19 @@ function(x)
         segments(x.pos-x@spacing/6,Closes,x.pos,Closes,col=bar.col)
       } else segments(x.pos-x@spacing/6,Opens,x.pos,Opens,col=bar.col)
     }    
+    main.key <- c(list(list(legend=
+                       paste('Last',last(Closes)),
+                       text.col=last(bar.col))),main.key)
   }
 
   axis(2)
   box(col=x@colors$fg.col)
-  do.call('title',list(x@name,col.main=x@colors$main.col))
+
+  old.adj <- par('adj')
+  par('adj'=0)
+  do.call('title',list(paste(x@name,' (',start(xx),'-',end(xx),')', sep='')
+                      ,col.main=x@colors$main.col))
+  par('adj'=old.adj)
 
   # TA calculation and drawing loops
   if(x@windows > 1 | length(x@passed.args$TA) > 0) {
@@ -178,3 +184,25 @@ function(x)
   # reset layout of page
   if(LAYOUT) layout(matrix(1))
 }#}}}
+
+# chart.layout {{{
+`chart.layout` <-
+function(x) {
+  if(x==1) {
+    lyt <- 'layout(matrix(1))'
+    mat <- matrix(1)
+    wd  <- 1
+    ht  <- 1
+  } else {
+    lyt <- paste('layout(matrix(1:',x,',',x,',1,byrow=TRUE),',
+                 '1,c(3,rep(1,',x-2,'),1.60),respect=FALSE)',sep='')
+    mat <- matrix(1:x,x,1,byrow=TRUE)
+    wd  <- 1
+    ht  <- c(3,rep(1,x-2),1.60)
+  }
+  par.list <- list(list(mar=c(  0,3.5,2,3)),
+                   list(mar=c(  0,3.5,0,3)),
+                   list(mar=c(3.5,3.5,0,3)))
+  structure(list(text=lyt,mat=mat,width=wd,height=ht,par.list=par.list), class='chart.layout')
+}
+#}}}

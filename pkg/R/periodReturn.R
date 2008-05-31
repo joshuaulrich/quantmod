@@ -1,5 +1,18 @@
 `periodReturn` <-
 function(x,period='monthly',subset=NULL,type='arithmetic',...) {
+  xx <- try.xts(x)
+  FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
+  firstval <- as.numeric(Delt(Cl(xx[c(1,endpoints(xx)[2])]),type=type)[2,1])
+  ret <- Delt(Cl(FUN(x,...)),type=type)
+  ret[1,1] <- firstval
+  colnames(ret) <- paste(period,'returns',sep='.')
+  tret <- reclass(ret,xx[endpoints(xx)[-1]])
+  if(is.null(subset)) subset <- '/'
+  reclass(as.xts(tret)[subset])
+}
+
+`periodReturn0` <-
+function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   xx <- x
   if(is.null(subset)) subset <- '::'
 
