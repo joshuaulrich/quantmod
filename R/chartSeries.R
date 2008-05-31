@@ -228,7 +228,7 @@ function(x,subset = NULL,
 # .chart.theme {{{
 `.chart.theme` <- structure(list(
                       'white'=
-                           list(fg.col="#888888",bg.col="#FFFFFF",
+                           list(fg.col="#666666",bg.col="#F0F0F0",
                                 grid.col="#CCCCCC",border="#666666",
                                 minor.tick="#CCCCCC",major.tick="#888888",
                                 up.col="#00CC00",dn.col="#FF7700",
@@ -244,7 +244,7 @@ function(x,subset = NULL,
                                 theme.name='white'
                                 ),
                       'white.mono'=
-                           list(fg.col="#888888",bg.col="#FFFFFF",
+                           list(fg.col="#666666",bg.col="#FFFFFF",
                                 grid.col="#CCCCCC",border="#666666",
                                 minor.tick="#CCCCCC",major.tick="#888888",
                                 up.col="#000000",dn.col="#000000",
@@ -271,7 +271,7 @@ function(x,subset = NULL,
                                 dn.up.border="#666666",up.up.border="#666666",
                                 dn.dn.border="#666666",up.dn.border="#666666",
                                 main.col="#999999",sub.col="#999999",
-                                area="#272727",
+                                area="#252525",
                                 fill="#282828",
                                 Expiry='#383838',
                                 BBands.col='red',BBands.fill="#282828",
