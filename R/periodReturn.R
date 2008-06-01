@@ -2,11 +2,18 @@
 function(x,period='monthly',subset=NULL,type='arithmetic',...) {
   xx <- try.xts(x)
   FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
-  firstval <- as.numeric(Delt(Cl(xx[c(1,endpoints(xx)[2])]),type=type)[2,1])
+  on.opts <- list(daily='days',
+                  weekly='weeks',
+                  monthly='months',
+                  quarterly='quarters',
+                  yearly='years',
+                  annually='years')
+  ep <- endpoints(xx, on=on.opts[[period]],...)
+  firstval <- as.numeric(Delt(Cl(xx[c(1,ep[2])]),type=type)[2,1])
   ret <- Delt(Cl(FUN(x,...)),type=type)
   ret[1,1] <- firstval
   colnames(ret) <- paste(period,'returns',sep='.')
-  tret <- reclass(ret,xx[endpoints(xx)[-1]])
+  tret <- reclass(ret,xx[ep[-1]])
   if(is.null(subset)) subset <- '/'
   reclass(as.xts(tret)[subset])
 }
