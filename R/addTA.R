@@ -117,11 +117,14 @@ function(x) {
 
     legend.text <- list()
 
+    # possibly able to handle newTA functionality
+    if(is.null(x@params$legend.name)) x@params$legend.name <- deparse(x@call[-1][[1]])
+
     if(NCOL(tav) == 1) {
       tmp.pars <- lapply(pars,function(x) x[1])
       do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
       legend.text[[1]] <- legend('topleft',
-             legend=c(paste(deparse(x@call[-1][[1]]),":"),sprintf("%.3f",last(na.omit(tav)))),
+             legend=c(paste(x@params$legend.name,":"),sprintf("%.3f",last(na.omit(tav)))),
              text.col=c(x@params$colors$fg.col,pars$col[1]),bty='n',y.inter=.95)
     } else {
       for(cols in col.order) {
@@ -129,7 +132,7 @@ function(x) {
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
         if(cols==1) { 
           legend.text[[cols]] <- legend('topleft',
-                 legend=c(paste(deparse(x@call[-1][[1]]),":")),
+                 legend=c(paste(x@params$legend.name,":")),
                  text.col=c(x@params$colors$fg.col,pars$col[1]),bty='n',y.inter=.95)
         }
         # for each column, add colname: value
