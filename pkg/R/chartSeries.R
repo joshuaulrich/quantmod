@@ -228,15 +228,15 @@ function(x,subset = NULL,
 # .chart.theme {{{
 `.chart.theme` <- structure(list(
                       'white'=
-                           list(fg.col="#666666",bg.col="#F0F0F0",
-                                grid.col="#CCCCCC",border="#666666",
-                                minor.tick="#CCCCCC",major.tick="#888888",
+                           list(fg.col="#000000",bg.col="#F0F0F0",
+                                grid.col="#CCCCCC",border="#444444",
+                                minor.tick="#888888",major.tick="#000000",
                                 up.col="#00CC00",dn.col="#FF7700",
                                 dn.up.col="#888888",up.up.col="#FFFFFF",
                                 dn.dn.col="#FF0000",up.dn.col="#000000",
-                                up.border="#666666",dn.border="#666666",
-                                dn.up.border="#666666",up.up.border="#666666",
-                                dn.dn.border="#666666",up.dn.border="#666666",
+                                up.border="#444444",dn.border="#444444",
+                                dn.up.border="#444444",up.up.border="#444444",
+                                dn.dn.border="#444444",up.dn.border="#444444",
                                 main.col="#555555",sub.col="#555555",
                                 area="#FFFFFF",
                                 fill="#F7F7F7",
@@ -350,7 +350,10 @@ function(x,
   Sys.setenv(TZ='GMT')
   on.exit(Sys.setenv(TZ=sys.TZ))
 
-  if(!is.xts(x)) x <- as.xts(x)
+  #if(!is.xts(x)) x <- as.xts(x)
+  x <- try.xts(x, error='chartSeries requires an xtsible object')
+
+  x <- na.omit(x)
 
   indexClass(x) <- "POSIXct"
 

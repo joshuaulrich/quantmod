@@ -131,7 +131,9 @@ function(x)
 
   old.adj <- par('adj')
   par('adj'=0)
-  do.call('title',list(paste(x@name,' (',start(xx),'-',end(xx),')', sep='')
+  do.call('title',list(x@name, col.main=x@colors$fg.col))
+  par('adj'=1)
+  do.call('title',list(paste('[',start(xx),'/',end(xx),']', sep='')
                       ,col.main=x@colors$main.col))
   par('adj'=old.adj)
 

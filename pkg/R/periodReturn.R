@@ -1,6 +1,19 @@
 `periodReturn` <-
-function(x,period='monthly',subset=NULL,type='arithmetic',...) {
+function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
   xx <- try.xts(x)
+
+  # currently there is a bug in ts conversions, just use 'xts'
+  if(inherits(x,'ts')) {
+    x <- na.omit(try.xts(x))
+    xtsAttributes(x) <- CLASS(x) <- NULL
+    xx <- x 
+    TS <- TRUE
+  } else TS <- FALSE
+
+  if(has.Cl(xx)) {
+    getCol <- function(X) Cl(X)
+  } else getCol <- function(X) X[,1]
+
   FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
   on.opts <- list(daily='days',
                   weekly='weeks',
@@ -9,13 +22,18 @@ function(x,period='monthly',subset=NULL,type='arithmetic',...) {
                   yearly='years',
                   annually='years')
   ep <- endpoints(xx, on=on.opts[[period]],...)
-  firstval <- as.numeric(Delt(Cl(xx[c(1,ep[2])]),type=type)[2,1])
-  ret <- Delt(Cl(FUN(x,...)),type=type)
-  ret[1,1] <- firstval
+  ret <- Delt(getCol(FUN(x,...)),type=type)
+
+  if(ep[1] != 1 && leading) {
+    firstval <- as.numeric(Delt(getCol(xx[c(1,ep[2])]),type=type)[2,1])
+    ret[1,1] <- firstval
+  }
+
   colnames(ret) <- paste(period,'returns',sep='.')
-  tret <- reclass(ret,xx[ep[-1]])
+  if(TS) xx <- 1  # make sure reclass doesn't do anything!
+  tmp.ret <- reclass(ret,xx[ep[-1]])
   if(is.null(subset)) subset <- '/'
-  reclass(as.xts(tret)[subset])
+  reclass(as.xts(tmp.ret)[subset])
 }
 
 `periodReturn0` <-
@@ -46,36 +64,36 @@ function(x,period='monthly',subset=NULL,type='arithmetic',...) {
 }
 
 `dailyReturn` <-
-function(x,subset=NULL,type='arithmetic',...) {
-  periodReturn(x,'daily',subset,type,...)
+function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
+  periodReturn(x,'daily',subset,type,leading,...)
 }
 
 `monthlyReturn` <-
-function(x,subset=NULL,type='arithmetic',...) {
-  periodReturn(x,'monthly',subset,type,...)
+function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
+  periodReturn(x,'monthly',subset,type,leading,...)
 }
 
 `weeklyReturn` <-
-function(x,subset=NULL,type='arithmetic',...) {
-  periodReturn(x,'weekly',subset,type,...)
+function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
+  periodReturn(x,'weekly',subset,type,leading,...)
 }
 
 `quarterlyReturn` <-
-function(x,subset=NULL,type='arithmetic',...) {
-  periodReturn(x,'quarterly',subset,type,...)
+function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
+  periodReturn(x,'quarterly',subset,type,leading,...)
 }
 
 `yearlyReturn` <-
-function(x,subset=NULL,type='arithmetic',...) {
-  periodReturn(x,'yearly',subset,type,...)
+function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
+  periodReturn(x,'yearly',subset,type,leading,...)
 }
 
 `annualReturn` <- yearlyReturn
 
 `allReturns` <-
-function(x,subset=NULL,type='arithmetic') {
+function(x,subset=NULL,type='arithmetic',leading=TRUE) {
   all.ret <- cbind.zoo(
-    periodReturn(x,'daily',type=type),
+    periodReturn(x,'daily',type=type,leading),
     periodReturn(x,'weekly',type=type),
     periodReturn(x,'monthly',type=type,indexAt='endof'),
     periodReturn(x,'quarterly',type=type,indexAt='endof'),

@@ -577,18 +577,18 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
   if(missing(auto.assign))
     auto.assign <- TRUE
   if(is.method.available("twsConnect","IBrokers")) {
-    tws <- twsConnect(clientId=1001)
-    on.exit(twsDisconnect(tws))
+    tws <- do.call('twsConnect',list(clientId=1001))
+    on.exit(do.call('twsDisconnect',list(tws)))
   
     if(missing(endDateTime)) endDateTime <- NULL
   
     for(i in 1:length(Symbols)) {
       Contract <- getSymbolLookup()[[Symbols[i]]]
       if(inherits(Contract,'twsContract')) {
-        fr <- reqHistoricalData(tws, Contract, endDateTime=endDateTime,
+        fr <- do.call('reqHistoricalData',list(tws, Contract, endDateTime=endDateTime,
                                 barSize=barSize, duration=duration,
                                 useRTH=useRTH, whatToShow=whatToShow,
-                                time.format=time.format, verbose=verbose)
+                                time.format=time.format, verbose=verbose))
         fr <- convert.time.series(fr=fr, return.class=return.class)
         if(auto.assign)
           assign(Symbols[[i]], fr, env)
