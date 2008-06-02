@@ -32,11 +32,11 @@ function(cache.file=NULL) {
   
 }
 
-`getSymbolName` <-
-function(name,exchange) {
+#`getSymbolName` <-
+#function(name,exchange) {
   
-  found <- grep(name,db,perl=TRUE)
-}
+#  found <- grep(name,db,perl=TRUE)
+#}
 
 `getOptionSymbol` <-
 function(desc,src='yahoo',optionSymbolsFile) {

@@ -20,6 +20,7 @@ export(.chob)
 export(.chart.theme,chartTheme)
 export(listTA,setTA,unsetTA)
 export(addTA,dropTA,moveTA,swapTA)
+export(newTA)
 export(zoomChart,zooom)
 export(addVo,addExpiry)
 
@@ -73,6 +74,7 @@ export(modelData,
     getDividends,
     getQuote,
     standardQuote,
+    yahooQF,
     getSymbols,
     getSymbols.MySQL,
     getSymbols.SQLite,
