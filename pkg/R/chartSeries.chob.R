@@ -5,7 +5,7 @@ function(x)
   old.par  <- par(c('pty','mar','xpd','bg','xaxs','las','col.axis','fg'))
   on.exit(par(old.par))
 
-  LAYOUT <- ifelse(is.null(list(x@layout)),FALSE,TRUE)
+  LAYOUT <- ifelse(is.null(x@layout),FALSE,TRUE)
 
   par.list <- list(list(mar=c(  0,3.5,2,3)),
                    list(mar=c(  0,3.5,0,3)),

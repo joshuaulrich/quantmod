@@ -63,7 +63,7 @@ function(ta, order=NULL, on=NA, legend='auto', ...) {
                           bp=lchob@bp,
                           x.labels=lchob@x.labels,
                           order=order,legend=legend,
-                          pars=list(...),
+                          pars=list(list(...)),
                           time.scale=lchob@time.scale)
    if(is.null(sys.call(-1))) {
       TA <- lchob@passed.args$TA
@@ -97,8 +97,16 @@ function(x) {
       grid(NA,NULL,col=x@params$colors$grid.col)
     }
 
-    pars <- x@params$pars
-    pars <- lapply(pars, function(x) rep(x, length.out=NCOL(tav)))
+    pars <- x@params$pars[[1]]
+    pars <- lapply(pars,
+             function(x) {
+              len <- NCOL(tav)
+              if(length(x) < len) {
+                rep(list(x), length.out=len)
+              } else rep(list(x),length.out=len)
+             })
+#    pars <- x@params$pars#[[1]]
+#    pars <- lapply(pars, function(x) rep(x, length.out=NCOL(tav)))
 
     col.order <- if(is.null(x@params$order)) {
       1:NCOL(tav)
@@ -121,26 +129,26 @@ function(x) {
     if(is.null(x@params$legend.name)) x@params$legend.name <- deparse(x@call[-1][[1]])
 
     if(NCOL(tav) == 1) {
-      tmp.pars <- lapply(pars,function(x) x[1])
+      tmp.pars <- lapply(pars,function(x) x[1][[1]])
       do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
       legend.text[[1]] <- legend('topleft',
              legend=c(paste(x@params$legend.name,":"),sprintf("%.3f",last(na.omit(tav)))),
-             text.col=c(x@params$colors$fg.col,pars$col[1]),bty='n',y.inter=.95)
+             text.col=c(x@params$colors$fg.col,pars$col[[1]][1]),bty='n',y.inter=.95)
     } else {
       for(cols in col.order) {
-        tmp.pars <- lapply(pars,function(x) x[cols])
+        tmp.pars <- lapply(pars,function(x) x[cols][[cols]])
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
         if(cols==1) { 
           legend.text[[cols]] <- legend('topleft',
                  legend=c(paste(x@params$legend.name,":")),
-                 text.col=c(x@params$colors$fg.col,pars$col[1]),bty='n',y.inter=.95)
+                 text.col=c(x@params$colors$fg.col,pars$col[[cols]][1]),bty='n',y.inter=.95)
         }
         # for each column, add colname: value
         Col.title <- colnames(tav)[cols]
         legend.text[[cols]] <- legend('topleft',
                legend=c(rep('',cols),paste(Col.title,":",
                         sprintf("%.3f",last(na.omit(tav[,cols]))))),
-               text.col=pars$col[cols],bty='n',y.inter=.95)
+               text.col=pars$col[[cols]][cols],bty='n',y.inter=.95)
       } 
     }
 
