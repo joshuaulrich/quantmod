@@ -3,6 +3,7 @@
 \alias{moveTA}
 \alias{swapTA}
 \alias{addTA}
+\alias{newTA}
 \alias{addTRIX}
 \alias{addATR}
 \alias{addCCI}
@@ -74,6 +75,12 @@ Called for its side effects, an object to class \code{chobTA}
 will be returned invisibly.  If called from the \R command line
 the method will draw the appropriate indicator on the current chart.
 }
+\note{
+Calling any of the above methods from within a function or script
+will generally require them to be wrapped in a \code{plot} call
+as they rely on the context of the call to initiate the actual
+charting addition.
+}
 \references{ Josh Ulrich - TTR package }
 \author{ Jeffrey A. Ryan }
-\keyword{ utilities }
+\keyword{ aplot }
