@@ -76,12 +76,14 @@ function(ta,occ=1,dev) {
 
   for(cta in 1:length(ta)) {
 
-    # make indicator name match original call
-    if(regexpr("^add",ta[cta]) == -1) ta[cta] <- paste("add",ta[cta],sep='')
-
-    # locate the TA which needs to be removed
-    which.ta <- which(ta[cta]==sapply(ta.list,
-                               function(x) deparse(x[[1]])))[occ]
+    if(is.character(ta[cta])) {
+      # make indicator name match original call
+      if(regexpr("^add",ta[cta]) == -1) ta[cta] <- paste("add",ta[cta],sep='')
+  
+      # locate the TA which needs to be removed
+      which.ta <- which(ta[cta]==sapply(ta.list,
+                                 function(x) deparse(x[[1]])))[occ]
+    } else which.ta <- cta
 
     # skip and warn if no indicator found  
     if(!is.na(which.ta)) {
