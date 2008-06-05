@@ -1,4 +1,5 @@
-`newTA` <- function(FUN, tFUN, legend.name, fdots=TRUE, cdots=TRUE, data.at=1, ...) {
+`newTA` <- function(FUN, tFUN, on=NA,
+                    legend.name, fdots=TRUE, cdots=TRUE, data.at=1, ...) {
   if(is.character(FUN)) {
     if(exists(FUN) && is.function(get(FUN))) {
       FUN.name <- FUN
@@ -31,6 +32,11 @@
   .body <- deparse(body(skeleton.TA))
   gpars <- list(...)
 
+  # add ability to customize legend.name, still retaining legend color/last value
+  if(!missing(legend.name) && is.character(legend.name)) {
+    .body[21] <- paste('legend.name <-',deparse(legend.name))
+  }  
+
   # cdots: should the newTA object have a ... arg?
   # if the function uses, the call must too
   if(missing(fdots) && !('...' %in% .formals))
@@ -38,16 +44,16 @@
   if(fdots) cdots <- TRUE
   if(!cdots) {
     .formals <- .formals[-which('...' == names(.formals))]
-    .body[15] <- paste("gpars <-",list(gpars))
+    .body[21] <- paste("gpars <-",list(gpars))
   } else {
     if(!'...' %in% names(.formals)) {
       .formals <- c(.formals,alist(...=))
     }
-    .body[15] <- paste('gpars <- c(list(...),', list(gpars),
+    .body[21] <- paste('gpars <- c(list(...),', list(gpars),
                        ')[unique(names(c(',list(gpars),',list(...))))]')
   }
 
-  .formals <- c(.formals,alist(legend="auto"))
+  .formals <- eval(parse(text=paste('c(.formals,alist(on=',on,', legend="auto"))')))
 
   if(!missing(tFUN)) {
     if(is.character(tFUN)) {
@@ -63,17 +69,12 @@
   # if missing, assume no transform need to be done
   } else .body[4] <- 'FP <- ""'
 
-  # add ability to customize legend.name, still retaining legend color/last value
-  if(!missing(legend.name) && is.character(legend.name)) {
-    .body[14] <- paste('legend.name <-',deparse(legend.name))
-  }  
-
   # fdots: should the underlying function call use ...
   .body[5] <- paste("x <-",funToFun(FUN,FUN.name,data.at, dots=fdots))
   as.function(c(.formals,as.call(parse(text=.body))[[1]]),.GlobalEnv) 
 }
 
-`skeleton.TA` <- function()
+`skeleton.TA` <- function(on)
 {
     lchob <- quantmod:::get.current.chob()
     x <- as.matrix(lchob@xdata)
@@ -84,7 +85,13 @@
     chobTA@TA.values <- x[lchob@xsubset]
     } else chobTA@TA.values <- x[lchob@xsubset,]
     chobTA@name <- "chartTA"
+    if(is.na(on)) {
     chobTA@new <- TRUE
+    }
+    else {
+      chobTA@new <- FALSE
+      chobTA@on  <- on
+    }
     chobTA@call <- match.call()
     legend.name <- gsub('^add','',deparse(match.call()))
     gpars <- list()

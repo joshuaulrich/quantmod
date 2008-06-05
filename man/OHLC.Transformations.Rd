@@ -15,6 +15,7 @@
 \alias{OpOp}
 \alias{Vo}
 \alias{HLC}
+\alias{OHLC}
 \alias{seriesHi}
 \alias{seriesLo}
 \title{ Extract and Transform OHLC Time-Series Columns }
@@ -41,10 +42,13 @@ necessary.
 low and high, respectively, of a given series.
 
 \code{HLC} extracts the High, Low, and Close columns.
+\code{OHLC} extracts the Open, High, Low, and Close columns.
 
 These functions are merely to speed the model
 specification process.  All columns may also be extracted
 through standard R methods.
+
+Assignment will not work at present.
 }
 \usage{
 Op(x)
@@ -67,6 +71,7 @@ OpLo(x)
 OpOp(x)
 
 HLC(x)
+OHLC(x)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

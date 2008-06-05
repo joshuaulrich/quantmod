@@ -82,14 +82,29 @@ function(x) {
   min(x,na.rm=TRUE)
 }
 `is.OHLC` <-
-function(x)
+function (x) #, check=FALSE) 
 {
-  all(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x))
+    if(all(has.Op(x), has.Hi(x), has.Lo(x), has.Cl(x))) # &&
+#       has.OHLC(x,TRUE) == seq(has.Op(x,1), length,out=4))
+    {
+#     if(check) {
+#       if(!all(x[,2] >  x[,3] &&
+#               x[,2] >= x[,1] &&
+#               x[,2] >= x[,4] &&
+#               x[,3] <= x[,1] &&
+#               x[,3] <= x[,4])) {
+#         warning('OHLC data is inconsistent')
+#         return(FALSE)
+#       }
+#     }
+    TRUE
+    } else FALSE
 }
+
 `is.HLC` <-
 function(x)
 {
-  all(has.Hi(x),has.Lo(x),has.Cl(x))
+  all(has.Hi(x),has.Lo(x),has.Cl(x))# && has.HLC(x,TRUE) == seq(has.Hi(x,1),length.out=3)
 }
 `has.OHLC` <-
 function(x,which=FALSE)
@@ -114,6 +129,13 @@ function(x)
 {
   if(is.HLC(x))
     return(x[,has.HLC(x,1)])
+  NULL
+}
+`OHLC` <-
+function(x)
+{
+  if(is.OHLC(x))
+    return(x[,has.OHLC(x,1)])
   NULL
 }
 `Op` <-
@@ -344,7 +366,7 @@ function(x,k=1)
     } else {
       new.x <- zoo(new.x,x.index)
     }
-    dim(new.x) <- c(NROW(new.x),max(k,1))
+ #   dim(new.x) <- c(NROW(new.x),max(k,1))
     colnames(new.x) <- paste("Lag.",k,sep="")
     return(new.x)
 }
