@@ -129,19 +129,19 @@ function(x) {
     if(is.null(x@params$legend.name)) x@params$legend.name <- deparse(x@call[-1][[1]])
 
     if(NCOL(tav) == 1) {
-      tmp.pars <- lapply(pars,function(x) x[1][[1]])
+      tmp.pars <- lapply(pars,function(x) x[[1]][[1]])
       do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
       legend.text[[1]] <- legend('topleft',
              legend=c(paste(x@params$legend.name,":"),sprintf("%.3f",last(na.omit(tav)))),
-             text.col=c(x@params$colors$fg.col,pars$col[[1]][1]),bty='n',y.inter=.95)
+             text.col=c(x@params$colors$fg.col,last(pars$col[[1]])),bty='n',y.inter=.95)
     } else {
       for(cols in col.order) {
-        tmp.pars <- lapply(pars,function(x) x[cols][[cols]])
+        tmp.pars <- lapply(pars,function(x) x[[cols]][[cols]])
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
         if(cols==1) { 
           legend.text[[cols]] <- legend('topleft',
                  legend=c(paste(x@params$legend.name,":")),
-                 text.col=c(x@params$colors$fg.col,pars$col[[cols]][1]),bty='n',y.inter=.95)
+                 text.col=c(x@params$colors$fg.col,last(pars$col[[cols]])),bty='n',y.inter=.95)
         }
         # for each column, add colname: value
         Col.title <- colnames(tav)[cols]

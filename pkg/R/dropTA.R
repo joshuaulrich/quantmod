@@ -61,7 +61,9 @@ function(ta,pos,occ=1,dev) {
 }
 
 `dropTA` <-
-function(ta,occ=1,dev) {
+function(ta,occ=1,dev,all=FALSE) {
+
+  if(all) return(do.call('dropTA', list(1:length(listTA()))))
 
   if(missing(ta)) stop("no TA indicator specified")
 
@@ -100,6 +102,8 @@ function(ta,occ=1,dev) {
 
   # remove TA from current list 
   lchob@passed.args$TA <- lchob@passed.args$TA[-sel.ta]
+  if(length(lchob@passed.args$TA) < 1)
+    lchob@passed.args$TA <- list()
 
   # redraw chart
   do.call("chartSeries.chob",list(lchob))
