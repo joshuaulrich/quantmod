@@ -3,7 +3,6 @@
 \alias{dropTA}
 \alias{moveTA}
 \alias{swapTA}
-\alias{newTA}
 \alias{addTRIX}
 \alias{addATR}
 \alias{addCCI}
