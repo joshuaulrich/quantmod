@@ -165,7 +165,10 @@ acts as a dynamic TA skeleton generation tool
 to help develop reusable TA generation code
 for use on any chart.
 }
-\seealso{ \code{\link{chartSeries}} }
+\seealso{ \code{\link{chartSeries}},
+          \code{\link{TA}},
+          \code{\linkS4class{chob}},
+          \code{\linkS4class{chobTA}} }
 \examples{
 \dontrun{
 getSymbols('SBUX')
