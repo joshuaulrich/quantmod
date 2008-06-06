@@ -34,7 +34,7 @@
 
   # add ability to customize legend.name, still retaining legend color/last value
   if(!missing(legend.name) && is.character(legend.name)) {
-    .body[21] <- paste('legend.name <-',deparse(legend.name))
+    .body[20] <- paste('legend.name <-',deparse(legend.name))
   }  
 
   # cdots: should the newTA object have a ... arg?
