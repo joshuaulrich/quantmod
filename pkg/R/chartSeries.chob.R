@@ -196,8 +196,9 @@ function(x) {
     wd  <- 1
     ht  <- 1
   } else {
-    lyt <- paste('layout(matrix(1:',x,',',x,',1,byrow=TRUE),',
-                 '1,c(3,rep(1,',x-2,'),1.60),respect=FALSE)',sep='')
+    lyt <- paste('layout(matrix(c(1,1:',x,'),',x+1,',1,byrow=TRUE),',
+                 '1,1,respect=FALSE)',sep='')
+                 #'1,c(3,rep(1,',x-2,'),1.60),respect=FALSE)',sep='')
     mat <- matrix(1:x,x,1,byrow=TRUE)
     wd  <- 1
     ht  <- c(3,rep(1,x-2),1.60)

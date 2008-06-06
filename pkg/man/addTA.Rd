@@ -1,8 +1,8 @@
-\name{addTA}
+\name{TA}
+\alias{TA}
 \alias{dropTA}
 \alias{moveTA}
 \alias{swapTA}
-\alias{addTA}
 \alias{newTA}
 \alias{addTRIX}
 \alias{addATR}
@@ -27,7 +27,7 @@ Functionality marked with a \sQuote{*} is via the \pkg{TTR} package.
 
 General TA charting tool functions:
 \itemize{
-  \item{addTA}{add technical indicator}
+  \item{addTA}{add data as custom indicator }
   \item{dropTA}{remove technical indicator}
   \item{moveTA}{move a technical indicator}
   \item{swapTA}{swap two technical indicators}
