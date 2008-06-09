@@ -175,10 +175,8 @@ getSymbols('SBUX')
 barChart(SBUX)
 addTA(EMA(Cl(SBUX)), on=1, col=6)
 addTA(OpCl(SBUX), col=4, type='b', lwd=2)
-}
 # create new EMA TA function
 newEMA <- newTA(EMA, Cl, on=1, col=7)
-\dontrun{
 newEMA()
 newEMA(on=NA, col=5)
 }
