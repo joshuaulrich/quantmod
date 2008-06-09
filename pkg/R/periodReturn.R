@@ -10,8 +10,8 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
     TS <- TRUE
   } else TS <- FALSE
 
-  if(has.Cl(xx)) {
-    getCol <- function(X) Cl(X)
+  if(has.Op(xx)) {
+    getCol <- function(X) Op(X)
   } else getCol <- function(X) X[,1]
 
   FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
@@ -22,7 +22,7 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
                   yearly='years',
                   annually='years')
   ep <- endpoints(xx, on=on.opts[[period]],...)
-  ret <- Delt(getCol(FUN(x,...)),type=type)
+  ret <- Delt(Cl(FUN(x,...)),type=type)
 
   if(ep[1] != 1 && leading) {
     firstval <- as.numeric(Delt(getCol(xx[c(1,ep[2])]),type=type)[2,1])
