@@ -394,7 +394,7 @@ function(x,k=1)
 }
 
 `Delt` <-
-function(x1,x2=NULL,k=0,type=c('log','arithmetic'))
+function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
 {
     x1 <- try.xts(x1, error=FALSE)
     type <- pmatch(type[1],c('log','arithmetic'))

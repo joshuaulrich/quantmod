@@ -1,3 +1,17 @@
+0.3-6
+MODIFICATIONS
+- Delt (and functions that call) now defaults
+  to 'arithmetic' (discrete) calculations vs. the previous behavior
+  of 'log' (continuous) calculation.  This is more inline with
+  expected behavior
+
+- 
+
+NEW FUNCTIONALITY
+- addTA and newTA allow for dynamic indicator additions with little coding
+
+
+
 0.3-2
 
 BUG FIXES

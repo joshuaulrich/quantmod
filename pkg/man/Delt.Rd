@@ -9,13 +9,13 @@ from one period to another of a given series, or to calculate
 the percent difference between two series over the full series.
 }
 \usage{
-Delt(x1, x2 = NULL, k = 0, type = c("log", "arithmetic"))
+Delt(x1, x2 = NULL, k = 0, type = c("arithmetic", "log"))
 }
 \arguments{
   \item{x1}{ \emph{m x 1} vector }
   \item{x2}{ \emph{m x 1} vector }
   \item{k}{ change over \code{k}-periods. default k=1 when x2 is NULL. }
-  \item{type}{ type of difference. log (default) or arithmetic. }
+  \item{type}{ type of difference. log or arithmetic (defauly). }
 }
 \details{
 When called with only \code{x1}, the one period percent change of the
