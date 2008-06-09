@@ -397,7 +397,7 @@ function(x,k=1)
 function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
 {
     x1 <- try.xts(x1, error=FALSE)
-    type <- match.arg(type,c('log','arithmetic'))[1]
+    type <- match.arg(type[1],c('log','arithmetic'))
     if(length(x2)!=length(x1) && !is.null(x2)) stop('x1 and x2 must be of same length');
     if(is.null(x2)){
         x2 <- x1 #copy for same symbol deltas
@@ -407,10 +407,10 @@ function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
     }
     dim(x2) <- NULL  # allow for multiple k matrix math to happen
     if(is.zoo(x1)) x1 <- as.matrix(x1)
-    if(type=='arithmetic') {
+    if(type=='log') {
         xx <- log(x2/Lag(x1,k))
     } else {
-        xx <- x2-Lag(x1,k)-1
+        xx <- x2/Lag(x1,k)-1
     }
     colnames(xx) <- paste("Delt",k,type,sep=".")
     reclass(xx,x1)
