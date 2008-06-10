@@ -209,3 +209,30 @@ function(x) {
   structure(list(text=lyt,mat=mat,width=wd,height=ht,par.list=par.list), class='chart.layout')
 }
 #}}}
+
+# experimental {{{
+#`doCharts` <- function(x, nc) {
+#  chartLayout(x,nc)
+#  for(i in 1:x) barChart(GS, subset='2008', layout=NULL)
+#}
+#
+#`chartLayout` <- function(x, nc) {
+# x <- (rep(c(1,1,2),x) + rep(seq(0,x*2-2,by=2),each=3),nc=nc,byrow=FALSE)
+# layout(x,1,1,respect=FALSE)
+#}
+#
+#`dozenCharts` <- function(x, nc) {
+#  getSymbols("GS")
+#  chartLayout(x,nc)
+#  TAs <- paste('addVo();addMACD();addRSI();addSMI();addROC();addDPO()',
+#               'addADX();addATR();addCMF();addCCI();addCMO();addWPR()',sep=';')
+#  TAs <- unlist(strsplit(TAs,';'))
+#  Overlays <- paste('addEMA();addBBands();addEnvelope()',
+#                     'addExpiry();addSAR();addSMA()',sep=';')
+#  Overlays <- rep(unlist(strsplit(Overlays,';')),2)
+#   
+#  for(i in 1:x) {
+#    TA <- paste(TAs[i],Overlays[i],sep=';')
+#    candleChart(GS, theme='white', subset='2008', type='b', layout=NULL, TA=TA)
+#  }
+#} #}}}
