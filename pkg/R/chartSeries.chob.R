@@ -211,19 +211,21 @@ function(x) {
 #}}}
 
 # experimental {{{
-#`doCharts` <- function(x, nc) {
-#  chartLayout(x,nc)
+#`doCharts` <- function(W, TA, nc) {
+#  chartLayout(W,TA,nc)
 #  for(i in 1:x) barChart(GS, subset='2008', layout=NULL)
 #}
 #
-#`chartLayout` <- function(x, nc) {
-# x <- (rep(c(1,1,2),x) + rep(seq(0,x*2-2,by=2),each=3),nc=nc,byrow=FALSE)
+#`chartLayout` <- function(W=1, TA=1, nc=1) {
+# x <- matrix(rep(c(1,1,seq(2,length.out=TA)),W) +
+#              rep(seq(0,by=TA+1, length.out=W), each=TA+2),
+#              nc=nc, byrow=FALSE)
 # layout(x,1,1,respect=FALSE)
 #}
 #
-#`dozenCharts` <- function(x, nc) {
+#`dozenCharts` <- function(W,TA , nc) {
 #  getSymbols("GS")
-#  chartLayout(x,nc)
+#  chartLayout(W,TA,nc)
 #  TAs <- paste('addVo();addMACD();addRSI();addSMI();addROC();addDPO()',
 #               'addADX();addATR();addCMF();addCCI();addCMO();addWPR()',sep=';')
 #  TAs <- unlist(strsplit(TAs,';'))
@@ -231,7 +233,7 @@ function(x) {
 #                     'addExpiry();addSAR();addSMA()',sep=';')
 #  Overlays <- rep(unlist(strsplit(Overlays,';')),2)
 #   
-#  for(i in 1:x) {
+#  for(i in 1:W) {
 #    TA <- paste(TAs[i],Overlays[i],sep=';')
 #    candleChart(GS, theme='white', subset='2008', type='b', layout=NULL, TA=TA)
 #  }

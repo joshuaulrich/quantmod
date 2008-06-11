@@ -13,6 +13,8 @@ functions \code{chartSeries}, \code{barChart}, \code{lineChart}, and
 	 \describe{
     \item{\code{device}:}{Object of class \code{"ANY"} ~~ }
     \item{\code{call}:}{Object of class \code{"call"} ~~ }
+    \item{\code{xdata}:}{Object of class \code{"ANY"} ~~ }
+    \item{\code{xsubset}:}{Object of class \code{"ANY"} ~~ }
     \item{\code{name}:}{Object of class \code{"character"} ~~ }
     \item{\code{type}:}{Object of class \code{"character"} ~~ }
     \item{\code{passed.args}:}{Object of class \code{"ANY"} ~~ }
@@ -33,6 +35,7 @@ functions \code{chartSeries}, \code{barChart}, \code{lineChart}, and
     \item{\code{bp}:}{Object of class \code{"numeric"} ~~ }
     \item{\code{x.labels}:}{Object of class \code{"character"} ~~ }
     \item{\code{colors}:}{Object of class \code{"ANY"} ~~ }
+    \item{\code{layout}:}{Object of class \code{"ANY"} ~~ }
     \item{\code{time.scale}:}{Object of class \code{"ANY"} ~~ }
     \item{\code{major.ticks}:}{Object of class \code{"ANY"} ~~ }
     \item{\code{minor.ticks}:}{Object of class \code{"logical"} ~~ }

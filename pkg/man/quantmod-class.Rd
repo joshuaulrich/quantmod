@@ -1,7 +1,18 @@
 \name{quantmod-class}
 \docType{class}
 \alias{quantmod-class}
-\alias{quantmod-show}
+\alias{summary,quantmod-method}
+\alias{show,quantmod-method}
+\alias{fittedModel<--methods}
+\alias{fittedModel<-,quantmod-method}
+
+\alias{quantmodResults-class}
+\alias{show,quantmodResults-method}
+
+\alias{quantmodReturn-class}
+
+\alias{tradeLog-class}
+\alias{show,tradeLog-method}
 
 \title{Class "quantmod" }
 \description{   Objects of class \code{quantmod} help to 
