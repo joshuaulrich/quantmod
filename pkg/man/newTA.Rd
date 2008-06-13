@@ -11,11 +11,14 @@ addTA(ta,
       order = NULL,
       on = NA,
       legend = "auto",
+      yrange = NULL,
       ...)
 
 newTA(FUN,
-      tFUN,
+      preFUN,
+      postFUN,
       on = NA,
+      yrange = NULL,
       legend.name,
       fdots = TRUE,
       cdots = TRUE,
@@ -27,8 +30,10 @@ newTA(FUN,
   \item{order}{ which should the columns (if > 1) be plotted }
   \item{legend}{ what custom legend text should be added to the chart. }
   \item{FUN}{ Main filter function name - as a symbol } 
-  \item{tFUN}{ Pre-filter transformation or extraction function }
+  \item{preFUN}{ Pre-filter transformation or extraction function }
+  \item{postFUN}{ Post-filter transformation or extraction function }
   \item{on}{ where to draw }
+  \item{yrange}{ length 2 vector of y-axis range }
   \item{legend.name}{ optional legend heading, automatically derived otherwise }
   \item{fdots}{ should any \dots be included in the main filter call }
   \item{cdots}{ should any \dots be included in the resultant function object.
@@ -85,9 +90,20 @@ columns of output.  By default all columns of output will be added to the chart,
 unless suppressed by passing the appropriately positioned \code{type='n'} as
 the \dots arg. Note that this will not suppress the labels added to the chart.
 
-The \code{tFUN} argument will be called on the main chart's data prior
+The \code{preFUN} argument will be called on the main chart's data prior
 to passing it to FUN. This must be a function symbol or a character
 string of the name function to be called.
+
+The \code{postFUN} argument will be called on the resultant data
+returned from the \code{FUN} filter. This is useful for extracting
+the relevant data from the returned filter data. Like \code{preFUN}
+it must be a function symbol or a character string of the name
+of the function to be called.
+
+The \code{yrange} argument is used to provide a custom
+scale to the y-axis.  If \code{NULL} the min and
+max of the data to be plotted will be used for the y-axis
+range.
 
 The \code{on} is used to identify which subchart to add the
 graphic to.  By default, \code{on=NA} will draw the series

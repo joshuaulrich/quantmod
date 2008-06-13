@@ -1,4 +1,4 @@
-`newTA` <- function(FUN, tFUN, on=NA,
+`newTA` <- function(FUN, preFUN, postFUN, on=NA, yrange=NULL,
                     legend.name, fdots=TRUE, cdots=TRUE, data.at=1, ...) {
   if(is.character(FUN)) {
     if(exists(FUN) && is.function(get(FUN))) {
@@ -34,7 +34,7 @@
 
   # add ability to customize legend.name, still retaining legend color/last value
   if(!missing(legend.name) && is.character(legend.name)) {
-    .body[20] <- paste('legend.name <-',deparse(legend.name))
+    .body[22] <- paste('legend.name <-',deparse(legend.name))
   }  
 
   # cdots: should the newTA object have a ... arg?
@@ -44,33 +44,54 @@
   if(fdots) cdots <- TRUE
   if(!cdots) {
     .formals <- .formals[-which('...' == names(.formals))]
-    .body[21] <- paste("gpars <-",list(gpars))
+    .body[23] <- paste("gpars <-",list(gpars))
   } else {
     if(!'...' %in% names(.formals)) {
       .formals <- c(.formals,alist(...=))
     }
-    .body[21] <- paste('gpars <- c(list(...),', list(gpars),
+    .body[23] <- paste('gpars <- c(list(...),', list(gpars),
                        ')[unique(names(c(',list(gpars),',list(...))))]')
   }
 
   .formals <- eval(parse(text=paste('c(.formals,alist(on=',on,', legend="auto"))')))
 
-  if(!missing(tFUN)) {
-    if(is.character(tFUN)) {
-      if(exists(tFUN) && is.function(get(tFUN))) {
-        tFUN <- tFUN
+  if(!missing(preFUN)) {
+    if(is.character(preFUN)) {
+      if(exists(preFUN) && is.function(get(preFUN))) {
+        preFUN <- preFUN
       }
     } else
-    if(is.function(tFUN)) {
-      tFUN <- deparse(substitute(tFUN))
-    } else stop('tFun required to be a function object')
+    if(is.function(preFUN)) {
+      preFUN <- deparse(substitute(preFUN))
+    } else stop('preFUN required to be a function object')
     # add tranform Function to .body
-    .body[4] <- paste("x <-",tFUN,"(x)",sep="")
+    .body[4] <- paste("x <-",preFUN,"(x)",sep="")
   # if missing, assume no transform need to be done
-  } else .body[4] <- 'FP <- ""'
+  } else .body[4] <- 'preFUN <- ""'
+
+  if(!missing(postFUN)) {
+    if(is.character(postFUN)) {
+      if(exists(postFUN) && is.function(get(postFUN))) {
+        postFUN <- postFUN
+      }
+    } else
+    if(is.function(postFUN)) {
+      postFUN <- deparse(substitute(postFUN))
+    } else stop('postFUN required to be a function object')
+    # add tranform Function to .body
+    .body[6] <- paste("x <-",postFUN,"(x)",sep="")
+  # if missing, assume no transform need to be done
+  } else .body[6] <- 'postFUN <- ""'
+
+  # allow for yrange to be set
+  if(!is.null(yrange)) {
+    .body[7] <- paste('yrange <-',deparse(yrange))
+  }
 
   # fdots: should the underlying function call use ...
   .body[5] <- paste("x <-",funToFun(FUN,FUN.name,data.at, dots=fdots))
+  if(.body[6] == 'postFUN <- ""') .body[6] <- ''
+  if(.body[4] == 'preFUN <- ""' ) .body[4] <- ''
   as.function(c(.formals,as.call(parse(text=.body))[[1]]),.GlobalEnv) 
 }
 
@@ -78,8 +99,10 @@
 {
     lchob <- quantmod:::get.current.chob()
     x <- as.matrix(lchob@xdata)
-    TDP <- "TRANSFORM DATA PLACEHOLDER"
-    FP  <- "FUNCTION PLACEHOLDER"
+    preFUN  <- ""
+    FUN     <- ""
+    postFUN <- ""
+    yrange  <- NULL
     chobTA <- new("chobTA")
     if(NCOL(x) == 1) {
     chobTA@TA.values <- x[lchob@xsubset]
@@ -95,7 +118,7 @@
     chobTA@call <- match.call()
     legend.name <- gsub('^add','',deparse(match.call()))
     gpars <- list()
-    chobTA@params <- list(xrange = lchob@xrange, colors = lchob@colors, 
+    chobTA@params <- list(xrange = lchob@xrange, yrange=yrange, colors = lchob@colors, 
         color.vol = lchob@color.vol, multi.col = lchob@multi.col, 
         spacing = lchob@spacing, width = lchob@width, bp = lchob@bp, 
         x.labels = lchob@x.labels, time.scale = lchob@time.scale,

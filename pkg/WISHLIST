@@ -39,8 +39,10 @@ CHARTS:
   - add /demo script
 
   - add addHolidays/Weekends function to add in missing data with NA [see fillIndex beta in 'xts']
+    [this is not really good - as any TA indicators will have to jump? past the NAs - jar]
 
   - liveChart function - used in conjunction with RT data feeds [SEE BELOW]
+
   - add x to reChart to allow for updated/different data, which may
     be used in conjuction with a RT feed callback such as in the IBrokers
     package
@@ -48,9 +50,10 @@ CHARTS:
   - add 'periodicity' argument to chartSeries
 
   - dropTA function to remove TA indicators applied [moveTA and swapTA added as well: 2/16/2008 - jar]
+    [updated to remove _all_ TA by position in TA list. Still buggy - jar]
 
   - add subset argument to chartSeries (et al) and buildModel function to pass
-    along to underlying [.xts method [done, along with zoom & zoomChart - jar ]
+    along to underlying [.xts method [done, along with zooom & zoomChart - jar ]
 
   - mask lagged indicator days - use full dataset for calculation and a
     seperate subset for actual plotting.  (using above [.xts method) [ done see above - jar ]
@@ -60,8 +63,9 @@ CHARTS:
     series normal command interpretation
      ** OR **
     partition device in n-regions and have chartSeries.chob check
+    [chartLayout is close to a solution for the second idea]
 
-  - HSV color schemes from vcd or colorbrewer
+  - HSV color schemes from vcd or colorbrewer - or built in
 
   - finish TA integration with TTR
 
