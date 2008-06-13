@@ -25,6 +25,8 @@ function(x)
 
   x.range <- 1:(x@xrange[2]*x@spacing)
   y.range <- seq(x@yrange[1],x@yrange[2],length.out=length(x.range))
+
+  log.scale <- ifelse(x@log.scale, 'y', '')
  
   # get current values of series to be charted
   xx <- x@xdata
@@ -47,7 +49,12 @@ function(x)
       xaxs='r',las=2,fg=x@colors$fg.col)
 
   # create scale of main plot window
-  plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+ # plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+
+  plot.new()
+  plot.window(xlim=c(1,x@xrange[2]*x@spacing),
+              ylim=c(x@yrange[1],x@yrange[2]),
+              log=log.scale)
 
   coords <- par('usr')
   rect(coords[1],coords[3],coords[2],coords[4],col=x@colors$area)

@@ -27,7 +27,7 @@ function(x,drop.arg=1) {
 
 # addTA {{{
 `addTA` <-
-function(ta, order=NULL, on=NA, legend='auto', ...) {
+function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
   if(is.character(ta)) {
     if(exists(ta)) {
       plot(do.call(paste('add',ta,sep=''),list(...)))
@@ -57,6 +57,7 @@ function(ta, order=NULL, on=NA, legend='auto', ...) {
     chobTA@name <- "chartTA"
     chobTA@call <- match.call()
     chobTA@params <- list(xrange=lchob@xrange,
+                          yrange=yrange,
                           colors=lchob@colors,
                           spacing=lchob@spacing,
                           width=lchob@width,
@@ -89,8 +90,11 @@ function(x) {
     tav <- x@TA.values
 
     if(x@new) {
-      y.range <- seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
-                     length.out=length(x.range))
+      y.range <- if(is.null(x@params$yrange) || length(x@params$yrange) != 2) {
+                   seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
+                   length.out=length(x.range))
+                 } else seq(x@params$yrange[1],x@params$yrange[2],length.out=length(x.range))
+
       plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
       coords <- par('usr')
       rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)

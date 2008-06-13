@@ -21,6 +21,7 @@ functions \code{chartSeries}, \code{barChart}, \code{lineChart}, and
     \item{\code{windows}:}{Object of class \code{"numeric"} ~~ }
     \item{\code{xrange}:}{Object of class \code{"numeric"} ~~ }
     \item{\code{yrange}:}{Object of class \code{"numeric"} ~~ }
+    \item{\code{log.scale}:}{Object of class \code{"logical"} ~~ }
     \item{\code{length}:}{Object of class \code{"numeric"} ~~ }
     \item{\code{color.vol}:}{Object of class \code{"logical"} ~~ }
     \item{\code{multi.col}:}{Object of class \code{"logical"} ~~ }
