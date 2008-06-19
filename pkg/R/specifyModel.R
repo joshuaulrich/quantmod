@@ -1,3 +1,48 @@
+`specifyModel2` <-
+function(formula, na.rm = TRUE) {
+  nq <- new('quantmod')
+  formula <- as.formula(formula)
+  
+  if(length(formula) < 3) stop('formula must have a lhs')
+  
+  nq@model.spec <- formula #original specification on the cli
+
+  nq@model.formula <- model.formula(formula)     #parsed formula to remove illegal chars
+  
+  nq@model.target  <- as.character(nq@model.formula[[2]])
+  nq@build.inputs  <- as.character(attr(terms(nq@model.formula), 'term.labels'))
+  nq@symbols <- all.vars(formula)
+  nq@product <- all.vars(formula)[1]
+  nq@model.data <- as.zoo(model.data(formula))
+  return(nq)
+}
+
+
+`model.data` <- function(x) {
+  # create a data.frame for use in statistical function calls
+  # this creates the data.frame that will be passable
+  # as a 'data' argument to most function calls
+  dat <- sapply(attr(terms(x), 'variables')[-1], eval)
+  colnames(dat) <- make.names(attr(terms(x), 'variables'))[-1]
+  rownames(dat) <- rownames(get(all.vars(x)[1]))
+  as.data.frame(dat)
+}
+
+`model.formula` <- function(x) {
+  Terms <- rownames(attr(terms(x), 'factors'))
+  escape <- function(ff) {
+      ff <- gsub('(\\()','\\\\(',ff)
+      ff <- gsub('(\\))','\\\\)',ff)
+      ff <- gsub('(\\[)','\\\\[',ff)
+      gsub('(\\])','\\\\]',ff)
+  }
+  for(i in 1:length(Terms)) {
+    x <- eval(parse(text=gsub(escape(Terms[i]), make.names(Terms[i]), deparse(x))))
+  }
+  x
+
+}
+
 "specifyModel" <-
 function(formula,na.rm=TRUE) {
   new.quantmod <- new("quantmod");
@@ -21,6 +66,8 @@ function(formula,na.rm=TRUE) {
   new.quantmod <- getModelData(new.quantmod,na.rm=na.rm);
   return(new.quantmod);
 }
+
+
 "specifyModel.original" <-
 function(formula,na.rm=TRUE) {
   new.quantmod <- new("quantmod");
