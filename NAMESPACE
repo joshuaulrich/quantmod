@@ -24,6 +24,7 @@ export(newTA)
 export(zoomChart,zooom)
 export(addVo,addExpiry)
 
+export(sM,bM)
 export(addShading,chartShading)
 
 export(addLines)
