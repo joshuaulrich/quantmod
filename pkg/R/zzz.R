@@ -15,11 +15,11 @@ setClass("quantmod",representation(
                     build.inputs="character",
                     symbols="character",
                     product="character",
-                    price.levels="zoo",
+                    price.levels="ANY",
                     training.data="ANY",
                     build.date="character",
                     fitted.model="ANY",
-                    model.data="zoo",
+                    model.data="ANY",
                     quantmod.version="numeric"
                     )
         );

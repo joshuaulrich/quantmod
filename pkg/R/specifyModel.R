@@ -1,4 +1,4 @@
-`specifyModel2` <-
+`sM` <-
 function(formula, na.rm = TRUE) {
   nq <- new('quantmod')
   formula <- as.formula(formula)
@@ -13,7 +13,7 @@ function(formula, na.rm = TRUE) {
   nq@build.inputs  <- as.character(attr(terms(nq@model.formula), 'term.labels'))
   nq@symbols <- all.vars(formula)
   nq@product <- all.vars(formula)[1]
-  nq@model.data <- as.zoo(model.data(formula))
+  nq@model.data <- structure(as.xts(model.data(formula)),.CLASS=NULL)
   return(nq)
 }
 
