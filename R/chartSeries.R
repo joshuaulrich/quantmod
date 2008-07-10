@@ -344,6 +344,7 @@ function(x,
          theme=chartTheme("black"),
          layout=NA,
          major.ticks='auto',minor.ticks=TRUE,
+         yrange=NULL,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
   sys.TZ <- Sys.getenv('TZ')
@@ -453,6 +454,9 @@ function(x,
     chob@yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
   } else chob@yrange <- range(x[,1],na.rm=TRUE)
   
+  if(!is.null(yrange) && length(yrange)==2)
+    chob@yrange <- yrange
+
   chob@log.scale <- log.scale
 
   chob@color.vol <- color.vol
@@ -487,7 +491,7 @@ function(x,
         } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
       }
       poss.new <- sapply(chob@passed.args$TA, function(x) x@new)
-      chob@windows <- sum(poss.new) + 1
+      chob@windows <- length(poss.new) + 1
       #chob@windows <- length(which(sapply(chob@passed.args$TA,
       #                           function(x) ifelse(is.null(x),FALSE,x@new))))+1
       chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,

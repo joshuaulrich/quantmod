@@ -583,7 +583,7 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
     if(missing(endDateTime)) endDateTime <- NULL
   
     for(i in 1:length(Symbols)) {
-      Contract <- getSymbolLookup()[[Symbols[i]]]
+      Contract <- getSymbolLookup()[[Symbols[i]]]$Contract
       if(inherits(Contract,'twsContract')) {
         fr <- do.call('reqHistoricalData',list(tws, Contract, endDateTime=endDateTime,
                                 barSize=barSize, duration=duration,
