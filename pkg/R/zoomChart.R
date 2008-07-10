@@ -1,7 +1,15 @@
 `zoomChart` <- 
-function(subset) {
-  if(missing(subset) || is.null(subset)) subset <- '::'
-  reChart(subset=subset)
+function(subset, yrange=NULL) {
+  if(missing(subset) || is.null(subset)) #{
+    subset <- '::'
+#  } else {
+#      if (!is.character(subset))                        
+#          subset <- deparse(match.call()$subset)             
+#      subset <- gsub("::", "/", subset, perl = TRUE)         
+#      subset <- gsub("[-:]", "", subset, perl = TRUE)        
+#      subset <- gsub("[ ]", "", subset, perl = TRUE)  
+#  }
+  reChart(subset=subset, yrange=yrange)
 }
 
 `zooom` <-

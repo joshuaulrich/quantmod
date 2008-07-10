@@ -13,13 +13,14 @@ Quantitative Financial Modelling and Trading Framework for R
 Package: \tab quantmod\cr
 Type: \tab Package\cr
 Version: \tab 0.3-7\cr
-Revision: \tab 440\cr
-Date: \tab 2007-06-12\cr
+Revision: \tab 444\cr
+Date: \tab 2007-07-10\cr
 Depends: \tab xts(>=0.0-15),Defaults\cr
 Suggests: \tab DBI,RMySQL,TTR,fSeries,its\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL-3\cr
 URL: \tab http://www.quantmod.com\cr
+URL: \tab http://quantmod.r-forge.r-project.org\cr
 }
 The quantmod package for R is designed to
 assist the quantitative trader in the

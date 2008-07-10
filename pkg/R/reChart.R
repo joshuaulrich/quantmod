@@ -2,7 +2,9 @@
 function (type = c("auto", "candlesticks", "matchsticks", 
     "bars", "line"), subset = NULL, show.grid = TRUE, name = NULL, 
     time.scale = NULL, line.type = "l", bar.type = "ohlc", 
-    theme = chartTheme("black"), major.ticks = "auto", minor.ticks = TRUE, 
+    theme = chartTheme("black"),
+    major.ticks = "auto", minor.ticks = TRUE, 
+    yrange=NULL,
     up.col, dn.col, color.vol = TRUE, multi.col = FALSE, ...) 
 {
   chob <- quantmod:::get.current.chob()
@@ -71,6 +73,7 @@ function (type = c("auto", "candlesticks", "matchsticks",
             na.rm = TRUE))
       }   
       else chob@yrange <- range(x[, 1], na.rm = TRUE)
+      if(!is.null(yrange) && length(yrange)==2) chob@yrange <- yrange
     }
 
     chob@xsubset <- xsubset

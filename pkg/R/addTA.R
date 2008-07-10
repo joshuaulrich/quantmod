@@ -183,7 +183,7 @@ function(dev) {
 } # }}}
 
 # addVo {{{
-`addVo` <- function() {
+`addVo` <- function(log.scale=FALSE) {
    lchob <- get.current.chob() 
   if(!lchob@show.vol) return()
  
@@ -247,6 +247,7 @@ function(dev) {
                         bp=lchob@bp,
                         vol.scale=vol.scale,
                         x.labels=lchob@x.labels,
+                        log.scale=log.scale,
                         bar.col=bar.col,border.col=border.col,
                         time.scale=lchob@time.scale)
 
@@ -278,14 +279,20 @@ function(x) {
 
 #    multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
+    log.scale <- ifelse(x@params$log.scale,"y","")
 
     vol.scale <- x@params$vol.scale
-    plot(x.range,seq(min(Volumes),max(Volumes),
-         length.out=length(x.range)),
-         type='n',axes=FALSE,ann=FALSE)
+    plot.new()
+    plot.window(xlim=c(1, x@params$xrange[2] * spacing),
+                ylim=c(min(Volumes,na.rm=TRUE),max(Volumes,na.rm=TRUE)),
+                log=log.scale)
+    #plot(x.range,seq(min(Volumes),max(Volumes),
+    #     length.out=length(x.range)),log=log.scale,
+    #     type='n',axes=FALSE,ann=FALSE)
     coords <- par('usr')
     rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
-    grid(NA,NULL,col=x@params$colors$grid.col)
+    #grid(NA,NULL,col=x@params$colors$grid.col)
+    abline(h=axTicks(2), col=x@params$colors$grid.col, lty='dotted')
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
 
     bar.col <- if(x@params$color.vol) {
@@ -296,9 +303,9 @@ function(x) {
 
     if(x@params$thin) {
       # plot thin volume bars if appropriate
-      segments(x.pos,0,x.pos,Volumes,col=bar.col)
+      segments(x.pos,1,x.pos,Volumes,col=bar.col)
     } else {
-      rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
+      rect(x.pos-spacing/3,1,x.pos+spacing/3,Volumes,
            col=bar.col,border=border.col)
     }
     legend("topleft",
