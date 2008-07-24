@@ -143,7 +143,7 @@ function(x)
 {
   if(has.Op(x))
     return(x[,grep('Open',colnames(x))])
-  NULL
+  stop('subscript out of bounds: no column name containing "Open"')
 }
 
 `has.Op` <-
@@ -160,7 +160,7 @@ function(x)
 {
   if(has.Hi(x))
     return(x[,grep('High',colnames(x))])
-  NULL
+  stop('subscript out of bounds: no column name containing "High"')
 }
 
 `has.Hi` <-
@@ -177,7 +177,7 @@ function(x)
 {
   if(has.Lo(x))
     return(x[,grep('Low',colnames(x))])
-  NULL
+  stop('subscript out of bounds: no column name containing "Low"')
 }
 
 `has.Lo` <-
@@ -194,7 +194,7 @@ function(x)
 {
   if(has.Cl(x))
     return(x[,grep('Close',colnames(x))])
-  NULL
+  stop('subscript out of bounds: no column name containing "Close"')
 }
 `has.Cl` <-
 function(x,which=FALSE)
@@ -212,7 +212,7 @@ function(x)
   #if(!identical(vo,integer(0)))
   if(has.Vo(x))
     return(x[,grep('Volume',colnames(x))])
-  NULL
+  stop('subscript out of bounds: no column name containing "Volume"')
 }
 `has.Vo` <-
 function(x,which=FALSE)
@@ -228,7 +228,7 @@ function(x)
 {
   if(has.Ad(x))
     return(x[,grep('Adjusted',colnames(x))])
-  NULL
+  stop('subscript out of bounds: no column name containing "Adjusted"')
 }
 `has.Ad` <-
 function(x,which=FALSE)
