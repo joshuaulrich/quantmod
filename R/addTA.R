@@ -303,13 +303,13 @@ function(x) {
 
     if(x@params$thin) {
       # plot thin volume bars if appropriate
-      segments(x.pos,1,x.pos,Volumes,col=bar.col)
+      segments(x.pos,0,x.pos,Volumes,col=bar.col)
     } else {
-      rect(x.pos-spacing/3,1,x.pos+spacing/3,Volumes,
+      rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
            col=bar.col,border=border.col)
     }
     legend("topleft",
-           legend=c("Volume:",format(last(Volumes)*vol.scale[[1]],big.mark=',')),
+           legend=c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(Volumes)*vol.scale[[1]],big.mark=',')),
            text.col=c(x@params$colors$fg.col, last(bar.col)), bty="n", y.inter=0.95)
 #   text(0, max(Volumes,na.rm=TRUE) * .9, "Volume:",pos=4)
 
