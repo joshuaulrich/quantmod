@@ -728,6 +728,10 @@ function(Symbols,env,return.class='xts',
          fr <- as.data.frame(fr)
          return(fr)
        } else
+       if('matrix' %in% return.class) {
+         fr <- as.data.frame(fr)
+         return(fr)
+       } else
        if('its' %in% return.class) {
          if("package:its" %in% search() || suppressMessages(require("its", quietly=TRUE))) {
            fr.dates <- as.POSIXct(as.character(index(fr)))
@@ -735,16 +739,16 @@ function(Symbols,env,return.class='xts',
            return(fr)
          } else {
            warning(paste("'its' from package 'its' could not be loaded:",
-                         " 'zoo' class returned"))
+                         " 'xts' class returned"))
          }
        } else 
        if('timeSeries' %in% return.class) {
          if("package:fSeries" %in% search() || suppressMessages(require("fSeries",quietly=TRUE))) {
-           fr <- as.timeSeries(fr)
+           fr <- timeSeries(coredata(fr), charvec=as.character(index(fr)))
            return(fr)
          } else {
            warning(paste("'timeSeries' from package 'fSeries' could not be loaded:",
-                   " 'zoo' class returned"))
+                   " 'xts' class returned"))
          }
        }
 }#}}}
