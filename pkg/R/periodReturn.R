@@ -10,9 +10,10 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
     TS <- TRUE
   } else TS <- FALSE
 
-  if(has.Op(xx)) {
-    getCol <- function(X) Op(X)
-  } else getCol <- function(X) X[,1]
+  if(has.Op(xx) & has.Cl(xx)) {
+    getFirst <- function(X) Op(X)
+    getLast  <- function(X) Cl(X)
+  } else getFirst <- getLast <- function(X) X[,1]
 
   FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
   on.opts <- list(daily='days',
@@ -24,8 +25,8 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
   ep <- endpoints(xx, on=on.opts[[period]],...)
   ret <- Delt(Cl(FUN(x,...)),type=type)
 
-  if(ep[1] != 1 && leading) {
-    firstval <- as.numeric(Delt(getCol(xx[c(1,ep[2])]),type=type)[2,1])
+  if(leading) {
+    firstval <- as.numeric(Delt(getFirst(xx[1]),getLast(xx[ep[2]]),type=type))
     ret[1,1] <- firstval
   }
 
