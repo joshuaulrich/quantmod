@@ -16,9 +16,11 @@ quantmod wishlist: as of Mar 21, 2008
   
   - Move to R-forge for devel tools [done]
   
-  - getSymbols.skeleton, buildModel.skeleton, addTA.skeleton
+  - getSymbols.skeleton
+  - buildModel.skeleton
+  - addTA.skeleton [done]
 
-  - convert to xts from zoo throughout.  Simplify data methods [started]
+  - convert to xts from zoo throughout.  Simplify data methods [done]
   
   - try to remove dependence on fSeries and its (etc).  Through 'xts'???
 
@@ -27,12 +29,12 @@ FUNCTIONALITY:
   - getFundamentals.google and getFundamentals to download data
     from google.  Possibly add arbitrary downloads from finance.yahoo.com
     using http://www.gummy-stuff.org/Yahoo-data.htm formats
-    [ renamed getFinancials (google) done - jar ]
+    [ renamed getFinancials (google) done - jar, getQuote - done ]
 
   - tradeRule and tradeLog
 
   - move all quantmod.OHLC to c('OHLC','xts','zoo') format - eventually move
-    to new package all together [ xts is ready for move - jar]
+    to new package all together [ done ]
 
 
 CHARTS:
@@ -77,6 +79,34 @@ CHARTS:
     - periodReturn - chartSeries method(no!) to handle
     - modelResults
     - integrate with PerformanceAnalytics
+
+  - New rules functions to be implemented:
+
+    recentTop(nback
+    recentBot(nback
+    recentHi(nback
+    recentLo(nback
+
+    crossAbove(level
+    crossBelow(level
+
+    levelAbove(
+    levelBelow(
+
+    higherHi(nback
+    higherLo(nback
+
+    lowerHi(nback
+    lowerLo(nback
+
+    newHi(nback
+    newLo(nback
+
+    seriesIncr  [ diff( > 0 ]
+    seriesDecr  [ diff( < 0 ]
+
+    seriesAccel [ diff(diff > 0 ]
+    seriesDecel [ diff(diff < 0 ]
 
 TESTING:
 
