@@ -21,7 +21,7 @@ function(x)
   }
   if(x@windows > 1) {
     do.call('par',par.list[[1]]) 
-  } else par(mar=c(3.5,3.5,2,3)
+  } else par(mar=c(3.5,3.5,2,3))
   #layout(matrix(c(2,3,4,5,1,1,1,1),nc=4,byrow=TRUE),c(1,1,1,1),c(1,2),FALSE)
   #layout(matrix(c(1,2,1,3,1,4,1,5),nc=2,byrow=TRUE),c(5,1),c(1),FALSE)
 
