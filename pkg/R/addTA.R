@@ -47,7 +47,8 @@ function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
     ta <- try.xts(ta, error=FALSE)
   
     if(is.xts(ta)) {
-      x <- merge(lchob@xdata,convertIndex(ta, "POSIXct"))
+      #x <- merge(lchob@xdata,convertIndex(ta, "POSIXct"), join="left")
+      x <- merge(lchob@xdata, na.locf(merge(lchob@xdata, ta, join='outer'))[,-(1:NCOL(lchob@xdata))], join='left')
     } else {
       if(NROW(ta) != nrc) stop('mismatched row lengths')
       x <- merge(lchob@xdata, ta)
@@ -1893,6 +1894,13 @@ function(x) {
 
   if(missing(bg)) bg <- col
 
+    xsubset <- x %in% lchob@xsubset
+    if(NROW(x) != NROW(y)) stop('x and y must be of equal lengths')
+    x <- x[xsubset]
+    if(!is.null(y))
+      y <- y[xsubset]
+
+
   chobTA@params <- list(xrange=lchob@xrange,
                         colors=lchob@colors,
                         color.vol=lchob@color.vol,
@@ -1943,7 +1951,7 @@ function(x) {
         Hi(xdata)
       } else Lo(xdata)
     } else xdata
- 
+
     if(is.null(y.points)) y.points <- y.data[x.points] * offset
 
     points(x=(x.points-1) * spacing + 1, y=y.points,
