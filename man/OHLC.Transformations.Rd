@@ -18,6 +18,8 @@
 \alias{OHLC}
 \alias{seriesHi}
 \alias{seriesLo}
+\alias{seriesInc}
+\alias{seriesDec}
 \title{ Extract and Transform OHLC Time-Series Columns }
 \description{
 Extract (transformed) data from a suitable OHLC object.
