@@ -1,3 +1,24 @@
+seriesAccel <- function(x)
+{
+  diff(x, diff=2L, na.pad=TRUE) > 0
+}
+
+seriesDecel <- function(x)
+{
+  diff(x, diff=2L, na.pad=TRUE) < 0
+}
+
+seriesIncr <- function(x)
+{
+  diff(x, diff=1L, na.pad=TRUE) > 0
+}
+
+
+seriesDecr <- function(x)
+{
+  diff(x, diff=1L, na.pad=TRUE) < 0
+}
+
 `seriesHi` <-
 function(x) {
   UseMethod("seriesHi")
