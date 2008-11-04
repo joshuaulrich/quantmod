@@ -23,7 +23,7 @@ shading <- function(x)
   #          shading$end-spacing, par('usr')[3])    
   if( !is.logical(x) )
     warning('need logical object')
-  runs <- rle(x)
+  runs <- rle(as.logical(x))
   list(
      start=cumsum(runs$length)[which(runs$values)] - runs$length[which(runs$values)]+1,
        end=cumsum(runs$lengths)[which(runs$values)]
@@ -53,13 +53,17 @@ function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
   
     if(is.xts(ta)) {
       #x <- merge(lchob@xdata, na.locf(merge(lchob@xdata, ta, join='outer'))[,-(1:NCOL(lchob@xdata))], join='left')
-      x <- na.locf(merge(lchob@xdata, ta, join='left', retside=c(FALSE,TRUE)))
+      x <- (merge(lchob@xdata, ta, fill=ifelse(is.logical(ta),0,NA),join='left', retside=c(FALSE,TRUE)))
     } else {
       if(NROW(ta) != nrc) stop('non-xtsible data must match the length of the underlying series')
       x <- merge(lchob@xdata, ta, join='left', retside=c(FALSE,TRUE))
     }
+    if(!is.logical(ta))
+      x <- na.locf(x)
     # for multicolumn TAs like MACD, get all new columns
     # chobTA@TA.values <- coredata(x)[lchob@xsubset,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
+    if(is.logical(ta))
+      x <- as.logical(x, drop=FALSE)
     chobTA@TA.values <- coredata(x)
     chobTA@name <- "chartTA"
     chobTA@call <- match.call()
@@ -142,6 +146,10 @@ function(x) {
 
     if(NCOL(tav) == 1) {
       tmp.pars <- lapply(pars,function(x) x[[1]][[1]])
+      if(x@params$isLogical) {
+        do.call('rect',list(shading(tav)$start*spacing, par('usr')[3],
+                            shading(tav)$end*spacing,   par('usr')[4], col=x@params$colors$fill))
+      } else
       do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
       legend.text[[1]] <- legend('topleft',
              legend=c(paste(x@params$legend.name,":"),sprintf("%.3f",last(na.omit(tav)))),
