@@ -52,19 +52,21 @@ function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
     ta <- try.xts(ta, error=FALSE)
   
     if(is.xts(ta)) {
-      #x <- merge(lchob@xdata, na.locf(merge(lchob@xdata, ta, join='outer'))[,-(1:NCOL(lchob@xdata))], join='left')
-      x <- (merge(lchob@xdata, ta, fill=ifelse(is.logical(ta),0,NA),join='left', retside=c(FALSE,TRUE)))
+      x <- merge(lchob@xdata, ta, fill=ifelse(is.logical(ta),0,NA),join='left', retside=c(FALSE,TRUE))
     } else {
-      if(NROW(ta) != nrc) stop('non-xtsible data must match the length of the underlying series')
+      if(NROW(ta) != nrc)
+        stop('non-xtsible data must match the length of the underlying series')
       x <- merge(lchob@xdata, ta, join='left', retside=c(FALSE,TRUE))
     }
-    if(!is.logical(ta))
-      x <- na.locf(x)
+    if(!is.logical(ta)) {
+      x <- na.locf(x, na.rm=FALSE)
+    } else x <- as.logical(x, drop=FALSE)
+
     # for multicolumn TAs like MACD, get all new columns
     # chobTA@TA.values <- coredata(x)[lchob@xsubset,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
-    if(is.logical(ta))
-      x <- as.logical(x, drop=FALSE)
-    chobTA@TA.values <- coredata(x)
+#    if(is.logical(ta))
+#      x <- as.logical(x, drop=FALSE)
+    chobTA@TA.values <- coredata(x)[lchob@xsubset,]
     chobTA@name <- "chartTA"
     chobTA@call <- match.call()
     chobTA@params <- list(xrange=lchob@xrange,
@@ -147,8 +149,8 @@ function(x) {
     if(NCOL(tav) == 1) {
       tmp.pars <- lapply(pars,function(x) x[[1]][[1]])
       if(x@params$isLogical) {
-        do.call('rect',list(shading(tav)$start*spacing, par('usr')[3],
-                            shading(tav)$end*spacing,   par('usr')[4], col=x@params$colors$fill))
+        do.call('rect',c(list(shading(tav)$start*spacing), list(par('usr')[3]),
+                         list(shading(tav)$end*spacing),   list(par('usr')[4]), tmp.pars))
       } else
       do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
       legend.text[[1]] <- legend('topleft',
