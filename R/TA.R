@@ -151,11 +151,14 @@ function(x) {
       if(x@params$isLogical) {
         do.call('rect',c(list(shading(tav)$start*spacing), list(par('usr')[3]),
                          list(shading(tav)$end*spacing),   list(par('usr')[4]), tmp.pars))
-      } else
-      do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
-      legend.text[[1]] <- legend('topleft',
+        # do not add a legend name for background shading.  probably better to have
+        # the labels in another routine
+      } else {
+        do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
+        legend.text[[1]] <- legend('topleft',
              legend=c(paste(x@params$legend.name,":"),sprintf("%.3f",last(na.omit(tav)))),
              text.col=c(x@params$colors$fg.col,last(pars$col[[1]])),bty='n',y.inter=.95)
+      }
     } else {
       for(cols in col.order) {
         tmp.pars <- lapply(pars,function(x) x[[cols]][[cols]])
@@ -177,6 +180,92 @@ function(x) {
     axis(2)
     box(col=x@params$colors$fg.col)
     invisible(legend.text)
+} # }}}
+# chartSetUp {{{
+`chartSetUp` <-
+function(x) {
+    spacing <- x@params$spacing
+    width <- x@params$width
+
+    x.range <- x@params$xrange
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+
+    tav <- x@TA.values
+
+    if(x@new) {
+      y.range <- if(is.null(x@params$yrange) || length(x@params$yrange) != 2) {
+                   seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
+                   length.out=length(x.range))
+                 } else seq(x@params$yrange[1],x@params$yrange[2],length.out=length(x.range))
+
+      plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    }
+
+#    pars <- x@params$pars[[1]]
+#    pars <- lapply(pars,
+#             function(x) {
+#              len <- NCOL(tav)
+#              if(length(x) < len) {
+#                rep(list(x), length.out=len)
+#              } else rep(list(x),length.out=len)
+#             })
+##    pars <- x@params$pars#[[1]]
+##    pars <- lapply(pars, function(x) rep(x, length.out=NCOL(tav)))
+#
+#    col.order <- if(is.null(x@params$order)) {
+#      1:NCOL(tav)
+#    } else x@params$order
+#
+#    if(is.null(x@params$legend)) legend <- function(...) {}
+#    if(is.character(x@params$legend) && x@params$legend != "auto") {
+#      legend("topleft", legend=x@params$legend, bty='n', y.inter=0.95)
+#      legend <- function(...) { }
+#    }
+
+#    if(!x@new) {
+#      legend <- function(legend,text.col) { list(legend=legend,text.col=text.col) }
+#      formals(legend) <- formals(graphics::legend)
+#    }
+#
+#    legend.text <- list()
+#
+#    # possibly able to handle newTA functionality
+#    if(is.null(x@params$legend.name)) x@params$legend.name <- deparse(x@call[-1][[1]])
+#
+#    if(NCOL(tav) == 1) {
+#      tmp.pars <- lapply(pars,function(x) x[[1]][[1]])
+#      if(x@params$isLogical) {
+#        do.call('rect',c(list(shading(tav)$start*spacing), list(par('usr')[3]),
+#                         list(shading(tav)$end*spacing),   list(par('usr')[4]), tmp.pars))
+#      } else
+#      do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav), tmp.pars))
+#      legend.text[[1]] <- legend('topleft',
+#             legend=c(paste(x@params$legend.name,":"),sprintf("%.3f",last(na.omit(tav)))),
+#             text.col=c(x@params$colors$fg.col,last(pars$col[[1]])),bty='n',y.inter=.95)
+#    } else {
+#      for(cols in col.order) {
+#        tmp.pars <- lapply(pars,function(x) x[[cols]][[cols]])
+#        do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
+#        if(cols==1) { 
+#          legend.text[[cols]] <- legend('topleft',
+#                 legend=c(paste(x@params$legend.name,":")),
+#                 text.col=c(x@params$colors$fg.col,last(pars$col[[cols]])),bty='n',y.inter=.95)
+#        }
+#        # for each column, add colname: value
+#        Col.title <- colnames(tav)[cols]
+#        legend.text[[cols]] <- legend('topleft',
+#               legend=c(rep('',cols),paste(Col.title,":",
+#                        sprintf("%.3f",last(na.omit(tav[,cols]))))),
+#               text.col=pars$col[[cols]][cols],bty='n',y.inter=.95)
+#      } 
+#    }
+#
+    axis(2)
+    box(col=x@params$colors$fg.col)
+    #invisible(legend.text)
 } # }}}
 
 # setTA {{{
