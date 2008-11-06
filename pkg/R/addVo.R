@@ -99,17 +99,17 @@ function(x) {
     log.scale <- ifelse(x@params$log.scale,"y","")
 
     vol.scale <- x@params$vol.scale
-    plot.new()
-    plot.window(xlim=c(1, x@params$xrange[2] * spacing),
-                ylim=c(min(Volumes,na.rm=TRUE),max(Volumes,na.rm=TRUE)),
-                log=log.scale)
-    #plot(x.range,seq(min(Volumes),max(Volumes),
-    #     length.out=length(x.range)),log=log.scale,
-    #     type='n',axes=FALSE,ann=FALSE)
-    coords <- par('usr')
-    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
-    #grid(NA,NULL,col=x@params$colors$grid.col)
-    abline(h=axTicks(2), col=x@params$colors$grid.col, lty='dotted')
+
+    if(x@new) {
+      plot.new()
+      plot.window(xlim=c(1, x@params$xrange[2] * spacing),
+                  ylim=c(min(Volumes,na.rm=TRUE),max(Volumes,na.rm=TRUE)),
+                  log=log.scale)
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      abline(h=axTicks(2), col=x@params$colors$grid.col, lty='dotted')
+    }
+
     x.pos <- 1 + spacing * (1:length(Volumes) - 1)
 
     bar.col <- if(x@params$color.vol) {

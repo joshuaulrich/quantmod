@@ -471,12 +471,13 @@ function(x) {
     y.range <- seq(-max(abs(dpo), na.rm = TRUE), max(abs(dpo), 
                    na.rm = TRUE), length.out = length(x.range)) * 1.05
 
-    plot(x.range,y.range,
-         type='n',axes=FALSE,ann=FALSE)
-    coords <- par('usr')
-    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
-    grid(NA,NULL,col=x@params$colors$grid.col)
-
+    if(x@new) {
+      plot(x.range,y.range,
+           type='n',axes=FALSE,ann=FALSE)
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    }
     xx <- seq(1,length(x.range),by=spacing)
 
     dpo.tmp <- dpo
@@ -574,12 +575,13 @@ function(x) {
     y.range <- seq(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05,
                    length.out=length(x.range))
 
-    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
-
-    coords <- par('usr')
-    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
-    grid(NA,NULL,col=x@params$colors$grid.col)
-
+    if(x@new) {
+      plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+  
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    }
     lines(seq(1,length(x.range),by=spacing),rsi,col='#0033CC',lwd=2,type='l')
     lines(seq(1,length(x.range),by=spacing),rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
 
@@ -651,9 +653,11 @@ function(x) {
 
     #param <- x@params$param; ma.type <- x@params$ma.type
     roc <- x@TA.values
-    plot(x.range,seq(min(roc*.975,na.rm=TRUE),max(roc*1.05,na.rm=TRUE),length.out=length(x.range)),
+    if(x@new) {
+      plot(x.range,seq(min(roc*.975,na.rm=TRUE),max(roc*1.05,na.rm=TRUE),length.out=length(x.range)),
          type='n',axes=FALSE,ann=FALSE)
-    grid(NA,NULL,col=x@params$colors$grid.col)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    }
     lines(seq(1,length(x.range),by=spacing),roc,col=x@params$col,lwd=2,type='l')
     #title(ylab=paste('RSI(',paste(c(n.up,collapse=','),')',sep=''))
     axis(2)
@@ -1011,11 +1015,13 @@ function(x) {
     y.range <- seq(-max(abs(macd),na.rm=TRUE),max(abs(macd),na.rm=TRUE),
                    length.out=length(x.range)) * 1.05
 
-    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+    if(x@new) {
+      plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
 
-    coords <- par('usr')
-    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
-    grid(NA,NULL,col=x@params$colors$grid.col)
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    }
 
     if(x@params$histo) {
       x.pos <- 1 + spacing * (1:NROW(macd) -1)

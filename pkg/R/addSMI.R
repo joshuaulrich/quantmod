@@ -61,25 +61,18 @@ function(x) {
     multi.col <- x@params$multi.col
     color.vol <- x@params$color.vol
 
-# subset thinking ...
-#
-# could subset the TA.values here (or in addSMI more likely)
-# this way the calculation is performed on the entire set, but
-# the smaller view is printed.
-# 
-#   smi <- x@TA.values[x@sindex] ???
-#
     smi <- x@TA.values
 
     y.range <- seq(-max(abs(smi[,1]), na.rm = TRUE), max(abs(smi[,1]), 
                    na.rm = TRUE), length.out = length(x.range)) * 1.05
 
-    plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
-
-    coords <- par('usr')
-    rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
-    grid(NA,NULL,col=x@params$colors$grid.col)
-
+    if(x@new) {
+      plot(x.range,y.range,type='n',axes=FALSE,ann=FALSE)
+  
+      coords <- par('usr')
+      rect(coords[1],coords[3],coords[2],coords[4],col=x@params$colors$area)
+      grid(NA,NULL,col=x@params$colors$grid.col)
+    } 
     COLOR <- "#0033CC"
     SIGNAL <- "#BFCFFF"
 
