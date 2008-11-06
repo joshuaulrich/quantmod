@@ -122,7 +122,7 @@
         color.vol = lchob@color.vol, multi.col = lchob@multi.col, 
         spacing = lchob@spacing, width = lchob@width, bp = lchob@bp, 
         x.labels = lchob@x.labels, time.scale = lchob@time.scale,
-        legend = legend, legend.name = legend.name, pars = list(gpars)) 
+        isLogical=is.logical(x),legend = legend, legend.name = legend.name, pars = list(gpars)) 
     if (is.null(sys.call(-1))) {
         TA <- lchob@passed.args$TA
         lchob@passed.args$TA <- c(TA, chobTA)
