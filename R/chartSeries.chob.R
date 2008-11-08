@@ -156,7 +156,7 @@ function(x)
         main.key <- c(main.key,overlay.text)
       }
 
-      if(1) {#i == 1) {
+      if(1) { #i == 1) {
         # add indicator key to main chart
         if(length(main.key) > 0) {
           for(indicator in 1:length(main.key)) {
@@ -165,6 +165,7 @@ function(x)
                    text.col=rev(main.key[[indicator]][["text.col"]])[1], bty='n', y.inter=0.95)
           }
         }
+        main.key <- list()
       } 
 
       if(x@windows >= i+1) {
@@ -177,18 +178,27 @@ function(x)
                              function(x) identical(x@on, as.numeric(-(i+1)))))
         if(length(underlay.TA) > 0) {
           # if underlays are to be drawn, first set up plot window
-          main.key <- list()
+          #main.key <- list(list("")) # need to position underlay text _under_ original text
           do.call("chartSetUp",list(x@passed.args$TA[[next.new.TA]]))
           for (j in underlay.TA) {
             tmp.x <- x@passed.args$TA[[j]]
-            main.key <- c(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x)))
+            underlay.text <- c(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x)))
             #main.key <- c(main.key,do.call(x@passed.args$TA[[j]]@name, list(tmp.x)))
           }
           x@passed.args$TA[[next.new.TA]]@new <- FALSE # make sure plot is not redrawn
-          main.key <- c(main.key,do.call(x@passed.args$TA[[next.new.TA]]@name,list(x@passed.args$TA[[next.new.TA]])))
+          main.key <- c(do.call(x@passed.args$TA[[next.new.TA]]@name,list(x@passed.args$TA[[next.new.TA]])),underlay.text)
           x@passed.args$TA[[next.new.TA]]@new <- TRUE # make sure plot is redrawn
+cat(str(main.key))
+browser()
+          if(length(main.key) > 0) {
+            for(indicator in (length(main.key)-length(underlay.text)):length(main.key)) {
+              legend("topleft",
+                     legend=c(rep('',indicator-1), paste(main.key[[indicator]][["legend"]],collapse="")),
+                     text.col=rev(main.key[[indicator]][["text.col"]])[1], bty='n', y.inter=0.95)
+            }
+          }
         } else
-        do.call(x@passed.args$TA[[next.new.TA]]@name,list(x@passed.args$TA[[next.new.TA]]))
+        main.key <- do.call(x@passed.args$TA[[next.new.TA]]@name,list(x@passed.args$TA[[next.new.TA]]))
       }
     }
 

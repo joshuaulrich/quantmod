@@ -125,6 +125,10 @@ function(x) {
       rect(x.pos-spacing/3,0,x.pos+spacing/3,Volumes,
            col=bar.col,border=border.col)
     }
+    legend.text <- list(list(
+           legend=c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(Volumes)*vol.scale[[1]],big.mark=',')),
+           text.col=c(x@params$colors$fg.col, last(bar.col))
+           ))
     legend("topleft",
            legend=c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(Volumes)*vol.scale[[1]],big.mark=',')),
            text.col=c(x@params$colors$fg.col, last(bar.col)), bty="n", y.inter=0.95)
@@ -136,5 +140,6 @@ function(x) {
 
     axis(2)
     box(col=x@params$colors$fg.col)
+    invisible(vector('list',2))
 } # }}}
 
