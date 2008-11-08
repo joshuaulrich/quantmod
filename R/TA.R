@@ -179,7 +179,6 @@ function(x) {
 
     axis(2)
     box(col=x@params$colors$fg.col)
-#cat(str(legend.text))
     invisible(legend.text)
 } # }}}
 # chartSetUp {{{

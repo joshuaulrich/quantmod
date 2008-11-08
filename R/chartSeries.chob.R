@@ -188,8 +188,6 @@ function(x)
           x@passed.args$TA[[next.new.TA]]@new <- FALSE # make sure plot is not redrawn
           main.key <- c(do.call(x@passed.args$TA[[next.new.TA]]@name,list(x@passed.args$TA[[next.new.TA]])),underlay.text)
           x@passed.args$TA[[next.new.TA]]@new <- TRUE # make sure plot is redrawn
-cat(str(main.key))
-browser()
           if(length(main.key) > 0) {
             for(indicator in (length(main.key)-length(underlay.text)):length(main.key)) {
               legend("topleft",
