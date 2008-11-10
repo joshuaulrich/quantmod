@@ -289,3 +289,4 @@ function(dev) {
   sapply(get.chob()[[dev]]@passed.args$TA,function(x) x@call)
 } # }}}
 
+chartNULL <- function(...) return(invisible(NULL))
