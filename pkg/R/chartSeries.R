@@ -490,7 +490,15 @@ function(x,
           chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
         } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
       }
-      poss.new <- which(sapply(chob@passed.args$TA, function(x) x@new))
+      # check if all args are indeed chobTA
+      poss.new <- sapply(chob@passed.args$TA, function(x) 
+                          {
+                            if(isS4(x) && is(x, 'chobTA')) 
+                              return(x@new) 
+                            stop('improper TA argument/call in chartSeries', call.=FALSE)
+                          } )
+      if(length(poss.new) > 0)
+        poss.new <- which(poss.new)
       chob@windows <- length(poss.new) + 1
       #chob@windows <- length(which(sapply(chob@passed.args$TA,
       #                           function(x) ifelse(is.null(x),FALSE,x@new))))+1

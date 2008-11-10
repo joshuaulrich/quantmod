@@ -2,11 +2,10 @@
 # addVo {{{
 `addVo` <- function(log.scale=FALSE) {
    lchob <- get.current.chob() 
-  if(!lchob@show.vol) return()
- 
   x <- as.matrix(lchob@xdata)
-  if(!has.Vo(x)) return()
-
+  if(!lchob@show.vol || !has.Vo(x))
+    return(invisible(new('chobTA', new=FALSE, name="chartNULL", call=match.call())))
+ 
   Volumes <- Vo(x)
   max.vol <- max(Volumes,na.rm=TRUE)
   vol.scale <- list(100, "100s")
