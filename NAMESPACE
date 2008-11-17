@@ -16,50 +16,120 @@ importFrom(zoo,as.zoo)
 #export(ohlcz,ohlcq)
 #export(period.prod,period.sum,period.max,period.min)
 #export(.chob,write.chob,get.chob,release.chob)
+
 export(.chob)
 export(.chart.theme,chartTheme)
-export(listTA,setTA,unsetTA)
-export(addTA,dropTA,moveTA,swapTA)
-export(newTA)
+
+export(listTA,
+       setTA,
+       unsetTA,
+       
+       addTA,
+       chartTA,
+       newTA,
+
+       dropTA,
+       moveTA,
+       swapTA)
+
 export(zoomChart,zooom)
-export(addVo,addExpiry)
 
+#  No idea why these are exported?  debugging???
 export(sM,bM)
-export(addShading,chartShading)
 
-export(addLines)
-export(addPoints)
-export(addEnvelope)
-export(addSMA,addEMA,addWMA,addDEMA,addEVWMA,addZLEMA)
-export(addSMI)
-export(addADX)
-export(addDPO)
-export(addCCI)
-export(addCMF)
-export(addCMO)
-export(addMomentum)
-export(addATR)
-export(addTRIX)
-export(addRSI)
-export(addROC)
-export(addWPR)
-export(addSAR)
-export(addMACD)
-export(addBBands)
-export(modelData,
-    modelSignal,
-    Op,Lo,Hi,Cl,Vo,Ad,
-    OpCl,OpOp,ClCl,OpHi,OpLo,LoCl,HiCl,LoHi,
-    seriesHi,seriesLo,
-    seriesIncr, seriesDecr,
-    seriesAccel, seriesDecel,
-    OHLC,is.OHLC,has.Op,has.Cl,has.Hi,has.Lo,has.Vo,has.Ad,has.OHLC,
-    HLC,has.HLC,is.HLC,
-    Delt,
-    Next,
-    Lag,
-    options.expiry,futures.expiry,
-#    nseconds,nminutes,nhours,ndays,nweekdays,nweeks,nmonths,nquarters,nyears,
+export(
+       # quantmod-only code
+       addVo,       # volume
+       addExpiry,   # expiration dates
+       addEnvelope, # envelope
+
+       addShading,  chartShading,
+       addLines,
+       addPoints
+
+      # package:graphics functionality wrappers NYI
+      #add.lines,
+      #add.points,
+      #add.curve,
+      #add.rect,
+      #add.segments,
+      
+      )
+
+     
+
+# TTR functionality
+export(
+       # Moving Averages
+       addSMA,   	# simple moving average
+       addEMA,   	# exponential moving average
+       addWMA,   	# weigthed moving average
+       addDEMA,  	# double exponential moving average
+       addEVWMA, 	# elastic, volume-weighted moving average
+       addZLEMA, 	# zero lag exponential moving average
+
+      # not yet implemented
+      #addOBV,      # on balance volume
+      #addCLV,      # close location value
+      #addEMV,      # ease of movement 
+      #addKST,      # know sure thing
+      #addMFI,      # money flow index
+      #addTDI,      # trend detection index
+      #addVHF,      # vertical horizontal filter
+      #addZigZag,   # Zig-Zag
+      #addAroon,    # aroon
+      #addChAD,     # chaikin AD
+      #addChVol,    # chaikin Volatility
+      #addVol,      # volatility
+      #addWAD,      # william's AD
+
+       addSMI,   	# stochastic moving average
+       addADX,   	# directional movement index 
+       addDPO,   	# de-trended price oscillator 
+       addCCI,   	# commodity channel index
+       addCMF,   	# chaikin money flow
+       addCMO,   	# chande momentum oscillator
+       addMomentum, # momentum
+       addATR,      # average true range
+       addTRIX,     # triple smoothed exponential oscillator
+       addRSI,      # relative strength index
+       addROC,      # rate of change
+       addWPR,      # william's %R
+       addSAR,      # parabolic stop-and-reverse
+       addMACD,     # moving average convergence divergence
+       addBBands    # Bollinger Bands
+      #addPctB      # Bollinger %b
+      #addBBwidth   # Bollinger band width
+      )
+
+
+export(
+       modelData,
+       modelSignal,
+
+       Op, has.Op,
+       Lo, has.Lo,
+       Hi, has.Hi,
+       Cl, has.Cl,
+       Vo, has.Vo,
+       Ad, has.Ad,
+
+       OHLC, has.OHLC, is.OHLC, # OHLC extraction and test
+       HLC, has.HLC, is.HLC,    # HLC  extraction and test
+
+       # quick delta calculation functions
+       OpCl, OpOp, ClCl, OpHi, OpLo, LoCl, HiCl, LoHi,
+
+       seriesHi,seriesLo,
+       seriesIncr, seriesDecr,
+       seriesAccel, seriesDecel,
+
+       Delt,
+       Next,
+       Lag,
+
+       options.expiry,futures.expiry,
+
     periodReturn,
     dailyReturn,weeklyReturn,monthlyReturn,quarterlyReturn,annualReturn,
     yearlyReturn,
