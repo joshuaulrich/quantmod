@@ -1,4 +1,4 @@
-#useDynLib(quantmod)
+# NAMESPACE file for quantmod
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)
@@ -12,9 +12,7 @@ importFrom(stats,residuals)
 importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
-#importFrom(zoo,cbind.zoo)
-#export(ohlcz,ohlcq)
-#export(period.prod,period.sum,period.max,period.min)
+
 #export(.chob,write.chob,get.chob,release.chob)
 
 export(.chob)
@@ -72,16 +70,17 @@ export(
       #addOBV,      # on balance volume
       #addCLV,      # close location value
       #addEMV,      # ease of movement 
+      #addVHF,      # vertical horizontal filter
+      #addChAD,     # chaikin AD
+      #addChVol,    # chaikin Volatility
+      #addWAD,      # william's AD
+
+      #addVolatility, # volatility
+      #addZigZag,   # Zig-Zag
+      #addAroon,    # aroon
       #addKST,      # know sure thing
       #addMFI,      # money flow index
       #addTDI,      # trend detection index
-      #addVHF,      # vertical horizontal filter
-      #addZigZag,   # Zig-Zag
-      #addAroon,    # aroon
-      #addChAD,     # chaikin AD
-      #addChVol,    # chaikin Volatility
-      #addVol,      # volatility
-      #addWAD,      # william's AD
 
        addSMI,   	# stochastic moving average
        addADX,   	# directional movement index 
@@ -124,6 +123,9 @@ export(
        seriesIncr, seriesDecr,
        seriesAccel, seriesDecel,
 
+       peak,
+       valley,
+
        Delt,
        Next,
        Lag,
@@ -142,12 +144,16 @@ export(
 	specifyModel,
 	getModelData,
 #    predictModel,
+
     getFinancials,getFin,
     viewFinancials,viewFin,
+
     getDividends,
+
     getQuote,
     standardQuote,
     yahooQF,
+
     getSymbols,
     getSymbols.MySQL,
     getSymbols.SQLite,
@@ -160,18 +166,24 @@ export(
     getSymbols.rda,
     getSymbols.RData,
     getSymbols.google,
+
     getFX,
     getMetals,
+
     oanda.currencies,
+
     showSymbols,
     removeSymbols,
     saveSymbols,
+
     fittedModel,
 	buildModel,
 	buildData,
+
     is.quantmod,
     is.quantmodResults,
     as.quantmod.OHLC)
+
 export(setSymbolLookup)
 export(getSymbolLookup)
 export(saveSymbolLookup)
@@ -183,22 +195,27 @@ export(reChart)
 export(barChart)
 export(lineChart)
 export(candleChart)
+
 S3method(seriesHi,default)
 S3method(seriesHi,ts)
 S3method(seriesLo,default)
 S3method(seriesLo,ts)
+
 S3method(print,financials)
 S3method(print,chart.theme)
+
 S3method(Next,zoo)
 S3method(Next,numeric)
 S3method(Next,data.frame)
 S3method(Next,quantmod.OHLC)
+
 S3method(Lag,default)
 S3method(Lag,numeric)
 S3method(Lag,data.frame)
 S3method(Lag,zoo)
 S3method(Lag,xts)
 S3method(Lag,quantmod.OHLC)
+
 S3method(formula,quantmod)
 S3method(fitted,quantmod)
 S3method(fitted.values,quantmod)
@@ -231,7 +248,6 @@ S3method(predictModel,tree)
 S3method(predictModel,randomForest)
 
 # trade signal functionality
-export(peak, valley)
 
 exportClass(quantmod)
 exportClass(quantmodResults,quantmodReturn)

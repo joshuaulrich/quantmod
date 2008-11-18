@@ -161,7 +161,7 @@ function(x) {
       }
     } else {
       for(cols in col.order) {
-        tmp.pars <- lapply(pars,function(x) x[[cols]][[cols]])
+        tmp.pars <- lapply(pars,function(x) x[[cols]][[1]])
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
         if(cols==1) { 
           legend.text[[cols]] <- legend('topleft',

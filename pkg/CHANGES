@@ -1,3 +1,16 @@
+0.3-7
+- addTA now handles logical vectors or logical xtsible objects
+  by drawing bands on chart window
+
+- addTA can now draw on or under any window via 'on=' arg
+
+- chartSeries now cleanly handles series without volume automatically
+
+- addVo has new log.scale option
+
+
+
+
 0.3-6
 MODIFICATIONS
 - Delt (and functions that call) now defaults
