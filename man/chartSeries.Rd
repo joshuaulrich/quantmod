@@ -31,6 +31,7 @@ chartSeries(x,
            theme = chartTheme("black"),
            layout = NA,
            major.ticks='auto', minor.ticks=TRUE,
+           yrange=NULL,
            up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
            ...)
 
@@ -43,6 +44,7 @@ reChart(type = c("auto", "candlesticks", "matchsticks", "bars","line"),
        bar.type = "ohlc",
        theme = chartTheme("black"),
        major.ticks='auto', minor.ticks=TRUE,
+       yrange=NULL,
        up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
        ...)
 }
@@ -63,6 +65,7 @@ reChart(type = c("auto", "candlesticks", "matchsticks", "bars","line"),
   \item{layout}{ if \code{NULL} bypass internal layout }
   \item{major.ticks}{ where should major ticks be drawn}
   \item{minor.ticks}{ should minor ticks be draw? }
+  \item{yrange}{ override y-scale }
   \item{up.col}{ up bar/candle color }
   \item{dn.col}{ down bar/candle color }
   \item{color.vol}{ color code volume? }

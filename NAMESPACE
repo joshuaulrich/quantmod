@@ -35,7 +35,7 @@ export(listTA,
 export(zoomChart,zooom)
 
 #  No idea why these are exported?  debugging???
-export(sM,bM)
+#export(sM,bM)
 
 export(
        # quantmod-only code

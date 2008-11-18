@@ -1,6 +1,7 @@
 \name{newTA}
 \alias{newTA}
 \alias{addTA}
+\alias{chartTA}
 \title{ Create A New TA Indicator For chartSeries }
 \description{
 Functions to assist in the creation of indicators or

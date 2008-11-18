@@ -18,8 +18,10 @@
 \alias{OHLC}
 \alias{seriesHi}
 \alias{seriesLo}
-\alias{seriesInc}
-\alias{seriesDec}
+\alias{seriesIncr}
+\alias{seriesDecr}
+\alias{seriesAccel}
+\alias{seriesDecel}
 \title{ Extract and Transform OHLC Time-Series Columns }
 \description{
 Extract (transformed) data from a suitable OHLC object.
@@ -42,6 +44,13 @@ necessary.
 
 \code{seriesLo} and \code{seriesHi} will return the
 low and high, respectively, of a given series.
+
+\code{seriesAccel}, \code{seriesDecel}, \code{seriesIncr},
+and \code{seriesDecr}, return a vector of logicals
+indicating if the series is accellerating, decellerating,
+increasing, or decreasing. This is managed by \code{diff},
+which provides NA fill and suitable re-indexing.  These
+are here to make trade rules easier to read.
 
 \code{HLC} extracts the High, Low, and Close columns.
 \code{OHLC} extracts the Open, High, Low, and Close columns.

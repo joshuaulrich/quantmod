@@ -63,44 +63,44 @@ function(x,INDEX) {
   tz
 }
 
-`ohlcq` <-
-function(x,by)
-{
-  bp <- breakpoints(x,by=by,TRUE)
-  xx <- as.double(as.matrix(x))
-  #hasvol <- ifelse(NCOL(x)>=5,1,0)
-  #hasadj <- ifelse(NCOL(x)==6,1,0)
-  hasvol <- has.Vo(x)
-  hasadj <- has.Ad(x)
-  q <- .Fortran('ohlcq',bp=as.integer(bp),lbp=as.integer(length(bp)),
-                ia=as.double(xx),lia=as.integer(length(xx)),
-                nri=as.integer(NROW(x)),
-                hasvol=as.integer(hasvol),hasadj=as.integer(hasadj),
-                ret=as.double(rep(0,(length(bp)-1)*(NCOL(x))))
-                ,PACKAGE='quantmod')
-  #matrix(q$ret,nc=(4+hasvol+hasadj),byrow=TRUE)
-  tz <- zoo(matrix(q$ret,nc=(4+hasvol+hasadj),byrow=TRUE),index(x)[bp[-1]])
-  cnames <- c("Open","High","Low","Close")
-  if(hasvol==1) cnames <- c(cnames,"Volume")
-  if(hasadj==1) cnames <- c(cnames,"Adjusted")
-  name <- deparse(substitute(x))
-  tz <- as.quantmod.OHLC(tz,col.names=cnames,name=name)
-  tz
-}
-
-`ohlcz` <- 
-function(x,by)
-{
-  if(NCOL(x) > 1) stop("single col data only")
-  name <- deparse(substitute(x))
-  bp <- breakpoints(x,by=by,TRUE)
-  xx <- as.double(as.matrix(x))
-  q <- .Fortran('ohlcz',bp=as.integer(bp),lbp=as.integer(length(bp)),
-                ia=as.double(xx),lia=as.integer(length(xx)),
-                ret=as.double(rep(0,(length(bp)-1)*4))
-                ,PACKAGE='quantmod')
-  tz <- zoo(matrix(q$ret,nc=4,byrow=TRUE),index(x)[bp[-1]])
-  colnames(tz)=c("Open","High","Low","Close")
-  class(tz) <- c("quantmod.OHLC","zoo")
-  tz
-}
+#`ohlcq` <-
+#function(x,by)
+#{
+#  bp <- breakpoints(x,by=by,TRUE)
+#  xx <- as.double(as.matrix(x))
+#  #hasvol <- ifelse(NCOL(x)>=5,1,0)
+#  #hasadj <- ifelse(NCOL(x)==6,1,0)
+#  hasvol <- has.Vo(x)
+#  hasadj <- has.Ad(x)
+#  q <- .Fortran('ohlcq',bp=as.integer(bp),lbp=as.integer(length(bp)),
+#                ia=as.double(xx),lia=as.integer(length(xx)),
+#                nri=as.integer(NROW(x)),
+#                hasvol=as.integer(hasvol),hasadj=as.integer(hasadj),
+#                ret=as.double(rep(0,(length(bp)-1)*(NCOL(x))))
+#                ,PACKAGE='quantmod')
+#  #matrix(q$ret,nc=(4+hasvol+hasadj),byrow=TRUE)
+#  tz <- zoo(matrix(q$ret,nc=(4+hasvol+hasadj),byrow=TRUE),index(x)[bp[-1]])
+#  cnames <- c("Open","High","Low","Close")
+#  if(hasvol==1) cnames <- c(cnames,"Volume")
+#  if(hasadj==1) cnames <- c(cnames,"Adjusted")
+#  name <- deparse(substitute(x))
+#  tz <- as.quantmod.OHLC(tz,col.names=cnames,name=name)
+#  tz
+#}
+#
+#`ohlcz` <- 
+#function(x,by)
+#{
+#  if(NCOL(x) > 1) stop("single col data only")
+#  name <- deparse(substitute(x))
+#  bp <- breakpoints(x,by=by,TRUE)
+#  xx <- as.double(as.matrix(x))
+#  q <- .Fortran('ohlcz',bp=as.integer(bp),lbp=as.integer(length(bp)),
+#                ia=as.double(xx),lia=as.integer(length(xx)),
+#                ret=as.double(rep(0,(length(bp)-1)*4))
+#                ,PACKAGE='quantmod')
+#  tz <- zoo(matrix(q$ret,nc=4,byrow=TRUE),index(x)[bp[-1]])
+#  colnames(tz)=c("Open","High","Low","Close")
+#  class(tz) <- c("quantmod.OHLC","zoo")
+#  tz
+#}
