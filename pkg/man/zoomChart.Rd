@@ -9,13 +9,14 @@ or out of the current chart.
 }
 \usage{
 zooom(n=1, eps=2)
-zoomChart(subset)
+zoomChart(subset, yrange=NULL)
 }
 
 \arguments{
   \item{n}{ the number of interactive view changes per call }
   \item{eps}{ the distance between clicks to be considered a valid subset request }
   \item{subset}{ a valid subset string }
+  \item{yrange}{ override y-scale }
 }
 \details{
 These function allow for viewing of specific
