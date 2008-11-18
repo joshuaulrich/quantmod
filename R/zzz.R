@@ -1,6 +1,6 @@
 ".onLoad" <- function(lib,pkg) {
   cat("quantmod: Quantitative Financial Modelling Framework\n\n")
-  cat("Version 0.3-8, Revision 461\n")
+  cat("Version 0.3-7, Revision 461\n")
   cat("http://www.quantmod.com\n\n")
 }
 
