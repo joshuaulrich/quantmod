@@ -67,14 +67,14 @@ export(
        addZLEMA, 	# zero lag exponential moving average
 
       # not yet implemented
-      #addOBV,      # on balance volume
-      #addCLV,      # close location value
-      #addEMV,      # ease of movement 
       #addVHF,      # vertical horizontal filter
-      #addChAD,     # chaikin AD
-      #addChVol,    # chaikin Volatility
-      #addWAD,      # william's AD
+      #addWilliamsAD, # william's AD
 
+       addOBV,      # on balance volume
+       addCLV,      # close location value
+       addEMV,      # ease of movement 
+       addChAD,     # chaikin AD
+       addChVol,    # chaikin Volatility
        addVolatility, # volatility (close, garman.klass, parkinson, rogers.satchell)
        addZigZag,   # Zig-Zag
        addAroon,    # aroon
@@ -82,7 +82,6 @@ export(
        addKST,      # know sure thing
        addMFI,      # money flow index
        addTDI,      # trend detection index
-
        addSMI,   	# stochastic momentum index
        addADX,   	# directional movement index 
        addDPO,   	# de-trended price oscillator 
