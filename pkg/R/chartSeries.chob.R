@@ -108,7 +108,11 @@ function(x)
     }
     if(x@type %in% c('candlesticks','matchsticks')) {
       # draw HL lines
-      segments(x.pos,Lows,x.pos,Highs,col=bar.border)
+      #segments(x.pos,Lows,x.pos,Highs,col=bar.border)
+      # draw bottom wick
+      segments(x.pos,Lows,x.pos,apply(cbind(Opens,Closes),1,min),col=bar.border)
+      # draw top wick
+      segments(x.pos,Highs,x.pos,apply(cbind(Opens,Closes),1,max),col=bar.border)
 
       # draw OC candles
       if(x@type=='candlesticks') {
