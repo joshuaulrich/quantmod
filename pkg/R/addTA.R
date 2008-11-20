@@ -268,7 +268,7 @@ function(x) {
 } # }}}
 
 # addATR {{{
-`addATR` <- function(n=14, maType="EMA", wilder=TRUE) {
+`addATR` <- function(n=14, maType="EMA", ...) {
 
   stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
@@ -281,7 +281,7 @@ function(x) {
 
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
-  atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
+  atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,...)
 
   chobTA@TA.values <- atr[lchob@xsubset,]
   chobTA@name <- "chartATR"
@@ -295,7 +295,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        n=n,maType=maType,wilder=wilder)
+                        n=n,maType=maType)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)

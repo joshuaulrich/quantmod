@@ -161,7 +161,13 @@ function(x) {
       }
     } else {
       for(cols in col.order) {
-        tmp.pars <- lapply(pars,function(x) x[[cols]][[1]])
+        tmp.pars <- lapply(pars,function(x) {
+                                              p <- try(x[[cols]][[cols]],silent=TRUE)
+                                              if(inherits(p, 'try-error')) {
+                                                stop("TA parameter length must equal number of columns", call.=FALSE)
+                                              } else p
+                                            }
+                          )
         do.call('lines',c(list(seq(1,length(x.range),by=spacing)), list(tav[,cols]), tmp.pars))
         if(cols==1) { 
           legend.text[[cols]] <- legend('topleft',
