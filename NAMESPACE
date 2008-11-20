@@ -75,14 +75,15 @@ export(
       #addChVol,    # chaikin Volatility
       #addWAD,      # william's AD
 
-      #addVolatility, # volatility
-      #addZigZag,   # Zig-Zag
-      #addAroon,    # aroon
-      #addKST,      # know sure thing
-      #addMFI,      # money flow index
-      #addTDI,      # trend detection index
+       addVolatility, # volatility (close, garman.klass, parkinson, rogers.satchell)
+       addZigZag,   # Zig-Zag
+       addAroon,    # aroon
+       addAroonOsc, # aroon oscillator
+       addKST,      # know sure thing
+       addMFI,      # money flow index
+       addTDI,      # trend detection index
 
-       addSMI,   	# stochastic moving average
+       addSMI,   	# stochastic momentum index
        addADX,   	# directional movement index 
        addDPO,   	# de-trended price oscillator 
        addCCI,   	# commodity channel index
