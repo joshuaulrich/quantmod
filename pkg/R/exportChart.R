@@ -1,7 +1,6 @@
-`exportChart` <-
-function(.type='pdf', ..., dev=2) {
-  if(missing(dev))
-    dev <- as.numeric(dev.cur())
+`saveChart` <-
+function(.type='pdf', ..., dev=dev.cur()) {
+  dev <- as.numeric(dev)
 
   gchob <- get.chob()[[dev]]
 
@@ -17,6 +16,6 @@ function(.type='pdf', ..., dev=2) {
   chartSeries.chob(gchob)
   invisible(dev.off())  # turn off device
   release.chob(length(get.chob()))  # remove from internal chob list
-  message(paste(export.pars$file,"printed")
+  message(paste("chart saved to",export.pars$file))
 }
 

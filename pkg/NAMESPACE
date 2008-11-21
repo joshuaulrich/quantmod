@@ -189,7 +189,7 @@ export(
 
        setSymbolLookup,
        saveSymbolLookup,
-       loadSymbolLookup,
+       loadSymbolLookup
       )
 
 #export(tradeLog)
