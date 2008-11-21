@@ -54,7 +54,7 @@ Current technical indicators include:
   \item{addBBands:}{add Bollinger Bands *}
   \item{addCCI}{add Commodity Channel Index *}
   \item{addCMF}{add Chaiken Money Flow *}
-  \item{addChAD}{add Chaiken Accumulation Distribution Line *
+  \item{addChAD}{add Chaiken Accumulation Distribution Line *}
   \item{addChVol}{add Chaiken Volatility *}
   \item{addCMO}{add Chande Momentum Oscillator *}
   \item{addDEMA}{add Double Exponential Moving Average *}

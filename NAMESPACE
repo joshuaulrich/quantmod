@@ -28,9 +28,9 @@ export(listTA,
 
        dropTA,
        moveTA,
-       swapTA)
+       swapTA
+      )
 
-export(zoomChart,zooom)
 
 #  No idea why these are exported?  debugging???
 #export(sM,bM)
@@ -184,18 +184,35 @@ export(
     is.quantmodResults,
     as.quantmod.OHLC)
 
-export(setSymbolLookup)
-export(getSymbolLookup)
-export(saveSymbolLookup)
-export(loadSymbolLookup)
+export(
+       # symbol lookup utilities
+
+       setSymbolLookup,
+       saveSymbolLookup,
+       loadSymbolLookup,
+      )
+
 #export(tradeLog)
 #export(gainloss)
-export(chartSeries)
-export(reChart)
-export(barChart)
-export(lineChart)
-export(candleChart)
 
+export(
+       # main charting functions
+ 
+       chartSeries,
+       reChart,
+       exportChart,
+
+       zoomChart,
+       zooom,
+
+       barChart,
+       lineChart,
+       candleChart,
+       matchChart
+      )
+
+
+# S3 methods
 S3method(seriesHi,default)
 S3method(seriesHi,ts)
 S3method(seriesLo,default)

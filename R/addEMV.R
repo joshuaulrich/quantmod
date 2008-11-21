@@ -8,6 +8,7 @@
 function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA, 
     legend = "auto") 
 {
+    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
     lchob <- quantmod:::get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- EMV(HL = HLC(x)[,-3], volume = Vo(x), n = n, maType = maType, 
