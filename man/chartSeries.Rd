@@ -32,6 +32,7 @@ chartSeries(x,
            layout = NA,
            major.ticks='auto', minor.ticks=TRUE,
            yrange=NULL,
+           plot=TRUE,
            up.col,dn.col,color.vol = TRUE, multi.col = FALSE,
            ...)
 
@@ -66,6 +67,7 @@ reChart(type = c("auto", "candlesticks", "matchsticks", "bars","line"),
   \item{major.ticks}{ where should major ticks be drawn}
   \item{minor.ticks}{ should minor ticks be draw? }
   \item{yrange}{ override y-scale }
+  \item{plot}{ should plot be drawn }
   \item{up.col}{ up bar/candle color }
   \item{dn.col}{ down bar/candle color }
   \item{color.vol}{ color code volume? }
@@ -120,6 +122,8 @@ done with addTA/dropTA/swapTA/moveTA commands.
 }
 \value{
 Returns a standard chart plus volume, if available, suitably scaled.
+
+If \code{plot=FALSE} a chob object will be returned.
 }
 \author{ Jeffrey A. Ryan }
 \references{ Josh Ulrich - \pkg{TTR} package and multi.col coding }

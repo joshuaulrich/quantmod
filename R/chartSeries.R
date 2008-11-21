@@ -185,6 +185,25 @@ function(x,
                              color.vol=color.vol,
                              multi.col=multi.col,...))
 } #}}}
+# matchChart {{{
+`matchChart` <-
+function(x,
+         subset = NULL,
+         type="matchsticks",
+         show.grid=TRUE,name=deparse(substitute(x)),
+         time.scale=NULL,log.scale=FALSE,
+         TA="addVo()",
+         theme=chartTheme("black"),
+         major.ticks='auto', minor.ticks = TRUE,
+         color.vol=TRUE,multi.col=FALSE,...
+         ) {
+  do.call('chartSeries',list(x,subset=subset,
+                             name=name,type='matchsticks',show.grid=show.grid,
+                             time.scale=time.scale,log.scale=log.scale,TA=substitute(TA),
+                             theme=theme,major.ticks=major.ticks,minor.ticks=minor.ticks,
+                             color.vol=color.vol,
+                             multi.col=multi.col,...))
+} #}}}
 # barChart {{{
 `barChart` <-
 function(x,
@@ -345,6 +364,7 @@ function(x,
          layout=NA,
          major.ticks='auto',minor.ticks=TRUE,
          yrange=NULL,
+         plot=TRUE,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
   sys.TZ <- Sys.getenv('TZ')
@@ -514,6 +534,9 @@ function(x,
   # re-evaluate the TA list, as it will be using stale data,
   chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
 
+  if(!plot)
+    return(chob)
+  
   # draw the chart
   do.call('chartSeries.chob',list(chob))
 
