@@ -200,7 +200,7 @@ export(
  
        chartSeries,
        reChart,
-       exportChart,
+       saveChart,
 
        zoomChart,
        zooom,

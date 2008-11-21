@@ -1,11 +1,11 @@
-\name{exportChart}
-\alias{exportChart}
+\name{saveChart}
+\alias{saveChart}
 \title{ Save Chart to External File }
 \description{
 Save selected chart to an external file.
 }
 \usage{
-exportChart(.type = "pdf", ..., dev = 2)
+saveChart(.type = "pdf", ..., dev = dev.cur())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -57,8 +57,8 @@ chartSeries(AAPL)
 require(TTR)
 addBBands()
 
-exportChart('pdf')
-exportChart('pdf', width=13)
+saveChart('pdf')
+saveChart('pdf', width=13)
 }
 }
 \keyword{ aplot }
