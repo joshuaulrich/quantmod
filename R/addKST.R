@@ -22,7 +22,7 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
     }
     else chobTA@TA.values <- x[lchob@xsubset, ]
     chobTA@name <- "chartTA"
-    if (is.na(on)) {
+    if (any(is.na(on))) {
         chobTA@new <- TRUE
     }
     else {

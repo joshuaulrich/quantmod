@@ -20,7 +20,7 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
     }
     else chobTA@TA.values <- x[lchob@xsubset, ]
     chobTA@name <- "chartTA"
-    if (is.na(on)) {
+    if (any(is.na(on))) {
         chobTA@new <- TRUE
     }
     else {
