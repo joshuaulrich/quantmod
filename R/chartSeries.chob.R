@@ -189,7 +189,7 @@ function(x)
                              function(x) {
                                on <- (-(i+1) %in% x@on)
                                ifelse(!identical(on,logical(0)),on,FALSE)
-                             }
+                             }))
         if(length(underlay.TA) > 0) {
           # if underlays are to be drawn, first set up plot window
           #main.key <- list(list("")) # need to position underlay text _under_ original text
