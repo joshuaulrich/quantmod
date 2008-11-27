@@ -188,6 +188,7 @@ export(
        # symbol lookup utilities
 
        setSymbolLookup,
+       getSymbolLookup,
        saveSymbolLookup,
        loadSymbolLookup
       )
