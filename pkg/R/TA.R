@@ -40,8 +40,7 @@ function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
   } else {
     lchob <- get.current.chob()
     chobTA <- new("chobTA")
-    chobTA@new <- ifelse(is.na(on), TRUE, FALSE)
-    if(is.na(on)) {
+    if(any(is.na(on))) {
       chobTA@new <- TRUE
     } else {
       chobTA@new <- FALSE

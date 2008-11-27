@@ -18,7 +18,7 @@ function (..., on = NA, legend = "auto")
     }
     else chobTA@TA.values <- x[lchob@xsubset, ]
     chobTA@name <- "chartTA"
-    if (is.na(on)) {
+    if (any(is.na(on))) {
         chobTA@new <- TRUE
     }
     else {
