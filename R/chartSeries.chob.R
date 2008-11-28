@@ -63,7 +63,7 @@ function(x)
     underlay.TA <- which(sapply(x@passed.args$TA,
                          function(x) {
                            on <- (-1 %in% x@on)
-                           ifelse(!identical(on, logical(0), on, F))
+                           ifelse(!identical(on, logical(0)), on, F)
                          }))
     for (j in underlay.TA) {
       tmp.x <- x@passed.args$TA[[j]]
