@@ -615,7 +615,7 @@ function(x) {
 
   type <- match.arg(type)
 
-  roc <- ROC(xx,n=n,type=type,na=NA)
+  roc <- ROC(xx,n=n,type=type,na.pad=TRUE)
 
   chobTA@TA.values <- roc[lchob@xsubset]
   chobTA@name <- "chartROC"
