@@ -667,7 +667,7 @@ function(Symbols,env,return.class='xts',
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- ifelse(is.null(to),default.to,to)
    
-       if(as.Date(to,origin='1970-01-01')-as.Date(from,origin='1970-01-01') > 1999) stop("oanda limits data to 2000 days")
+       if(as.Date(to,origin='1970-01-01')-as.Date(from,origin='1970-01-01') > 499) stop("oanda limits data to 2000 days")
        # automatically break larger requests into equal sized smaller request at some point
        # for now just let it remain
 

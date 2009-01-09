@@ -13,6 +13,8 @@ function(Symbols,src='yahoo',what=standardQuote(), ...) {
 `getQuote.yahoo` <-
 function(Symbols,what=standardQuote(),...) {
   tmp <- tempfile()
+  if(length(Symbols) > 1 && is.character(Symbols))
+    Symbols <- paste(Symbols,collapse=";")
   Symbols <- paste(strsplit(Symbols,';')[[1]],collapse="+")
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
