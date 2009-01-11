@@ -42,7 +42,7 @@ more details and references.
 A moving average indicator will be draw on the current
 chart.  A chobTA object will be returned silently.
 }
-\references{ see MovingAverages in pkg{TTR} written by Josh Ulrich }
+\references{ see MovingAverages in \pkg{TTR} written by Josh Ulrich }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{addTA}}}
 \examples{
