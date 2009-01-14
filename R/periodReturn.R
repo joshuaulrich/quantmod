@@ -1,3 +1,8 @@
+cumReturn <- function(x, ...) {
+  first.value <- as.numeric(x[1])
+  (x - first.value)/first.value
+}
+
 `periodReturn` <-
 function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
   xx <- try.xts(x)

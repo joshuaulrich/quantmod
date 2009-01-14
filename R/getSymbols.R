@@ -147,6 +147,10 @@ function(Symbols,env,return.class='xts',
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
+       if(i >= 5 && length(Symbols) > 5) {
+         message("pausing 1 second between requests for more than 5 symbols")
+         Sys.sleep(1)
+       }
      }
      if(auto.assign)
        return(Symbols)
