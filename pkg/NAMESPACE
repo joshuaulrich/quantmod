@@ -31,10 +31,6 @@ export(listTA,
        swapTA
       )
 
-
-#  No idea why these are exported?  debugging???
-#export(sM,bM)
-
 export(
        # quantmod-only code
        addVo,       # volume
@@ -153,6 +149,8 @@ export(
     getQuote,
     standardQuote,
     yahooQF,
+
+    attachSymbols,
 
     getSymbols,
     getSymbols.MySQL,
