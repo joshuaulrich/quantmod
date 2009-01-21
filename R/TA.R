@@ -57,14 +57,9 @@ function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
         stop('non-xtsible data must match the length of the underlying series')
       x <- merge(lchob@xdata, ta, join='left', retside=c(FALSE,TRUE))
     }
-    if(!is.logical(ta)) {
-      x <- na.locf(x, na.rm=FALSE)
-    } else x <- as.logical(x, drop=FALSE)
+    if(is.logical(ta))
+      x <- as.logical(x, drop=FALSE)  #identical to storage.mode(x)<-"logical"
 
-    # for multicolumn TAs like MACD, get all new columns
-    # chobTA@TA.values <- coredata(x)[lchob@xsubset,(NCOL(x)-NCOL(ta)+1):NCOL(x)]
-#    if(is.logical(ta))
-#      x <- as.logical(x, drop=FALSE)
     chobTA@TA.values <- coredata(x)[lchob@xsubset,]
     chobTA@name <- "chartTA"
     chobTA@call <- match.call()
