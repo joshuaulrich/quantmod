@@ -119,8 +119,10 @@ export(
        seriesIncr, seriesDecr,
        seriesAccel, seriesDecel,
 
-       peak,
-       valley,
+       findPeaks,
+       findValleys,
+       peak, # deprecated
+       valley, # deprecated
 
        Delt,
        Next,
@@ -151,6 +153,7 @@ export(
     yahooQF,
 
     attachSymbols,
+    flushSymbols,
 
     getSymbols,
     getSymbols.MySQL,

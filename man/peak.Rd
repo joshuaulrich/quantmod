@@ -1,4 +1,6 @@
-\name{peak}
+\name{findPeaks}
+\alias{findPeaks}
+\alias{findValleys}
 \alias{peak}
 \alias{valley}
 \title{ Find Peaks and Valleys In A Series }
@@ -7,11 +9,12 @@ Functions to find the peaks (tops) and valleys (bottoms)
 of a given series.
 }
 \usage{
-peak(x)
-valley(x)
+findPeaks(x, thresh=0)
+findValleys(x, thresh=0)
 }
 \arguments{
-  \item{x}{ a time series }
+  \item{x}{ a time series or vector }
+  \item{thresh}{ minimum peak/valley threshold }
 }
 \value{
 A vector of integers corresponding to peaks/valleys.
@@ -24,9 +27,9 @@ data, so as not to accidentally induce a look-ahead bias.
 }
 \author{ Jeffrey A. Ryan }
 \examples{
-peak(sin(1:10))
+findPeaks(sin(1:10))
 
-p <- peak(sin(seq(1,10,.1)))
+p <- findPeaks(sin(seq(1,10,.1)))
 sin(seq(1,10,.1))[p]
 
 plot(sin(seq(1,10,.1))[p])
