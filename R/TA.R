@@ -98,6 +98,7 @@ function(x) {
     tav <- x@TA.values
 
     if(x@new) {
+      # draw new sub-window
       y.range <- if(is.null(x@params$yrange) || length(x@params$yrange) != 2) {
                    seq(min(tav * 0.975, na.rm = TRUE), max(tav * 1.05, na.rm = TRUE),
                    length.out=length(x.range))
@@ -140,11 +141,12 @@ function(x) {
     # possibly able to handle newTA functionality
     if(is.null(x@params$legend.name)) x@params$legend.name <- deparse(x@call[-1][[1]])
 
+    x.pos <- 1 + spacing * (1:length(x.range))
     if(NCOL(tav) == 1) {
       tmp.pars <- lapply(pars,function(x) x[[1]][[1]])
       if(x@params$isLogical) {
-        do.call('rect',c(list(shading(tav)$start*spacing), list(par('usr')[3]),
-                         list(shading(tav)$end*spacing),   list(par('usr')[4]), tmp.pars))
+        do.call('rect',c(list(x.pos[shading(tav)$start-1] - spacing/3), list(par('usr')[3]),
+                         list(x.pos[shading(tav)$end-1]   + spacing/3), list(par('usr')[4]), tmp.pars))
         # do not add a legend name for background shading.  probably better to have
         # the labels in another routine
       } else {
