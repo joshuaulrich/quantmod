@@ -9,9 +9,9 @@ function (type = c("auto", "candlesticks", "matchsticks",
 {
   chob <- quantmod:::get.current.chob()
 
-  sys.TZ <- Sys.getenv('TZ')
-  Sys.setenv(TZ='GMT')
-  on.exit(Sys.setenv(TZ=sys.TZ))
+  #sys.TZ <- Sys.getenv('TZ')
+  #Sys.setenv(TZ='GMT')
+  #on.exit(Sys.setenv(TZ=sys.TZ))
 
   x <- chob@xdata
   ########### name ###########

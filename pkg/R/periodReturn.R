@@ -27,7 +27,7 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
                   quarterly='quarters',
                   yearly='years',
                   annually='years')
-  ep <- endpoints(xx, on=on.opts[[period]],...)
+  ep <- endpoints(xx, on=on.opts[[period]])
   ret <- Delt(Cl(FUN(x,...)),type=type)
 
   if(leading) {
@@ -98,8 +98,8 @@ function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
 
 `allReturns` <-
 function(x,subset=NULL,type='arithmetic',leading=TRUE) {
-  all.ret <- cbind.zoo(
-    periodReturn(x,'daily',type=type,leading),
+  all.ret <- cbind(
+    periodReturn(x,'daily',type=type,leading=FALSE),
     periodReturn(x,'weekly',type=type),
     periodReturn(x,'monthly',type=type,indexAt='endof'),
     periodReturn(x,'quarterly',type=type,indexAt='endof'),
