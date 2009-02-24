@@ -367,9 +367,9 @@ function(x,
          plot=TRUE,
          up.col,dn.col,color.vol=TRUE,multi.col=FALSE,...
          ) {
-  sys.TZ <- Sys.getenv('TZ')
-  Sys.setenv(TZ='GMT')
-  on.exit(Sys.setenv(TZ=sys.TZ))
+  #sys.TZ <- Sys.getenv('TZ')
+  #Sys.setenv(TZ='GMT')
+  #on.exit(Sys.setenv(TZ=sys.TZ))
 
   #if(!is.xts(x)) x <- as.xts(x)
   x <- try.xts(x, error='chartSeries requires an xtsible object')
