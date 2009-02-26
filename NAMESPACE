@@ -151,6 +151,7 @@ export(
     getQuote,
     standardQuote,
     yahooQF,
+    yahooQuote.EOD,
 
     attachSymbols,
     flushSymbols,

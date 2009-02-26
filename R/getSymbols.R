@@ -138,7 +138,7 @@ function(Symbols,env,return.class='xts',
        unlink(tmp)
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
-                 as.Date(fr[,1],origin='1970-01-01'),
+                 as.POSIXct(fr[,1]),
                  src='yahoo',updated=Sys.time())
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
