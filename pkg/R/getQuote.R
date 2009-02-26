@@ -69,6 +69,10 @@ aq
                     "Open", "Days High", "Days Low", "Volume"))
 }
 
+yahooQuote.EOD <- structure(list("ohgl1v", c("Open", "High",
+                                   "Low", "Close",
+                                   "Volume")), class="quoteFormat")
+
 `yahooQF` <- function(names) {
    optnames <- c("Ask", "Average Daily Volume", "Ask Size", "Bid", "Ask (Real-time)", 
               "Bid (Real-time)", "Book Value", "Bid Size", "Change & Percent Change", 
