@@ -394,7 +394,7 @@ function(Symbols,env,return.class='xts',
 
 # getFX {{{
 `getFX` <-
-function(Currencies,from='2007-01-01',to=Sys.Date(),
+function(Currencies,from=Sys.Date()-500,to=Sys.Date(),
          env=.GlobalEnv,
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
@@ -420,7 +420,7 @@ function(Currencies,from='2007-01-01',to=Sys.Date(),
 
 # getMetals {{{
 `getMetals` <-
-function(Metals,from='2007-01-01',to=Sys.Date(),
+function(Metals,from=Sys.Date()-500,to=Sys.Date(),
          base.currency="USD",env=.GlobalEnv,
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
@@ -642,10 +642,12 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
 # getSymbols.oanda {{{
 `getSymbols.oanda` <-
 function(Symbols,env,return.class='xts',
-         from='2007-01-01',
+         from=Sys.Date()-500,
          to=Sys.Date(),
          ...) {
      importDefaults("getSymbols.oanda")
+     if( (to-from) > 500 )
+       stop("oanda.com limits data to 500 days per request", call.=FALSE)
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
