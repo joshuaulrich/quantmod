@@ -32,7 +32,7 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
 
   if(leading) {
     firstval <- as.numeric(Delt(getFirst(xx[1]),getLast(xx[ep[2]]),type=type))
-    ret[1,1] <- firstval
+    ret[1] <- firstval
   }
 
   colnames(ret) <- paste(period,'returns',sep='.')
