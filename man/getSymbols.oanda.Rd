@@ -19,7 +19,7 @@ getSymbols 'methods'.
 getSymbols.oanda(Symbols,
                  env,
                  return.class = "xts",
-                 from = "2007-01-01",
+                 from = Sys.Date() - 500,
                  to = Sys.Date(),
                  ...)
 }

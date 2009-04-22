@@ -7,7 +7,8 @@ Download daily metals prices from oanda.
 }
 \usage{
 getMetals(Metals,
-      from = "2007-01-01", to = Sys.Date(),
+      from = Sys.Date() - 500,
+      to = Sys.Date(),
       base.currency="USD",
       env = .GlobalEnv,
       verbose = FALSE,
