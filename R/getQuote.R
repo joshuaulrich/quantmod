@@ -15,6 +15,23 @@ function(Symbols,what=standardQuote(),...) {
   tmp <- tempfile()
   if(length(Symbols) > 1 && is.character(Symbols))
     Symbols <- paste(Symbols,collapse=";")
+  length.of.symbols <- length(unlist(strsplit(Symbols, ";")))
+  if(length.of.symbols > 200) {
+    # yahoo only works with 200 symbols or less per call
+    # we will recursively call getQuote.yahoo to handle each block of 200
+    Symbols <- unlist(strsplit(Symbols,";"))
+    all.symbols <- lapply(seq(1,length.of.symbols,200),
+                          function(x) na.omit(Symbols[x:(x+199)]))
+    df <- NULL
+    cat("downloading set: ")
+    for(i in 1:length(all.symbols)) {
+      Sys.sleep(0.5)
+      cat(i,", ")
+      df <- rbind(df, getQuote.yahoo(all.symbols[[i]]))
+    }
+    cat("...done\n")
+    return(df)
+  }
   Symbols <- paste(strsplit(Symbols,';')[[1]],collapse="+")
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
