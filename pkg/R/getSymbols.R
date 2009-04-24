@@ -1,7 +1,7 @@
 # getSymbols {{{
 "getSymbols" <-
 function(Symbols=NULL,
-         env=.GlobalEnv,
+         env=new.env(),
          reload.Symbols=FALSE,
          verbose=FALSE,
          warnings=TRUE,
@@ -73,7 +73,8 @@ function(Symbols=NULL,
         all.symbols <- c(all.symbols,old.Symbols)[unique(names(c(all.symbols,old.Symbols)))]
         if(auto.assign) {
           assign('.getSymbols',all.symbols,env);
-          return(req.symbols)
+          #return(req.symbols)
+          return(env)
         }
         #invisible(return(env))
       } else {
