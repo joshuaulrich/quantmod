@@ -87,9 +87,9 @@ The main downside of this approach is the that data must be loaded
 from disk each time, with the corresponding (if generally negligible)
 overhead of file access.
 }
-\value{
-
-}
+%\value{
+%
+%}
 \references{ Luke's stuff and Mark Brevington and Roger Peng }
 \author{ Jeffrey A. Ryan }
 \note{ 
