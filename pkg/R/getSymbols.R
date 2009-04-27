@@ -67,16 +67,16 @@ function(Symbols=NULL,
                                            ...))
           if(!auto.assign)
             return(symbols.returned)
-          for(each.symbol in symbols.returned) all.symbols[[each.symbol]]=symbol.source 
+          for(each.symbol in symbols.returned) all.symbols[[each.symbol]] <- symbol.source 
         }
         req.symbols <- names(all.symbols)
         all.symbols <- c(all.symbols,old.Symbols)[unique(names(c(all.symbols,old.Symbols)))]
         if(auto.assign) {
           assign('.getSymbols',all.symbols,env);
-          #return(req.symbols)
+          if(identical(env, .GlobalEnv))
+            return(req.symbols)
           return(env)
         }
-        #invisible(return(env))
       } else {
         warning('no Symbols specified')
       }

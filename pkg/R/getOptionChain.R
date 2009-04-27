@@ -12,9 +12,9 @@ function(Symbols, Exp="2009-05",...) {
     return(x)
   } 
   if(is.null(Exp)) {
-    opt <- try(readLines(paste("http://finance.yahoo.com/q/op?s=",
+    opts <- try(readLines(paste("http://finance.yahoo.com/q/op?s=",
                            Symbols,"&m=",Exp,sep="")), silent=TRUE)
-    if(inherits(opt, "try-error"))
+    if(inherits(opts, "try-error"))
       return(NULL)
     Exp <- unlist(strsplit(gsub("(CALL OPTIONS)| ","",gsub("<.*?>","",opts[grep("View By Expiration",opts)+1],perl=TRUE)),"\\|"))
   }
