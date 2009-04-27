@@ -88,6 +88,7 @@ function(Symbols=NULL,
 function(Symbols,env,return.class='xts',
          from='2007-01-01',
          to=Sys.Date(),
+         adjust=FALSE,
          ...)
 {
      importDefaults("getSymbols.yahoo")
@@ -144,6 +145,19 @@ function(Symbols,env,return.class='xts',
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
+       if(adjust) {
+         # Adjustment algorithm by Joshua Ulrich
+         div <- getDividends(Symbols[[i]], auto.assign=FALSE)
+         spl <- getSplits(Symbols[[i]],    auto.assign=FALSE)
+         adj <- na.omit(adjSplitDiv(spl, div, Cl(fr)))[-1,]
+
+         fr[,1] <- fr[,1] * adj[,'Split'] * adj[,'Div']  # Open
+         fr[,2] <- fr[,2] * adj[,'Split'] * adj[,'Div']  # High
+         fr[,3] <- fr[,3] * adj[,'Split'] * adj[,'Div']  # Low
+         fr[,4] <- fr[,4] * adj[,'Split'] * adj[,'Div']  # Close
+         fr[,5] <- fr[,5] * ( 1 / adj[,'Div'] )          # Volume
+       }
+
        fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)

@@ -4,8 +4,8 @@ Title: Quantitative Financial Modelling Framework
 Version: 0.3-8
 Date: 2008-11-20
 Author: Jeffrey A. Ryan
-Depends: methods,xts(>= 0.0-15),zoo,Defaults
-Suggests: DBI,RMySQL,RSQLite,TTR(>= 0.14-0),fSeries,its
+Depends: methods,xts(>= 0.0-15),zoo,Defaults,TTR(>= 0.2)
+Suggests: DBI,RMySQL,RSQLite,fSeries,its
 Maintainer: Jeffrey A. Ryan <jeff.a.ryan@gmail.com>
 Description: Specify, build, trade, and analyse quantitative financial trading strategies
 LazyLoad: yes
