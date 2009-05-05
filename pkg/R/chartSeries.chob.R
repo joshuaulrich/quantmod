@@ -44,11 +44,11 @@ function(x)
     Highs <- max(xx[,1],na.rm=TRUE)
     Closes <- as.numeric(xx[,1])
   }
-  if(x@type="Heikin-Ashi") {
-#    xCloses <- (Opens+Highs+Lows+Closes)/4
-#    xOpens  <- (Opens + lag(Closes)) / 2
-#    xHighs  <- max(c(Highs, xOpens, xCloses),na=TRUE)
-#    xLows   <- min(c(Lows,  xOpens, xCloses),na=TRUE)
+  if(x@type=="Heikin-Ashi") {
+    xCloses <- (Opens+Highs+Lows+Closes)/4
+    xOpens  <- (Opens + lag(Closes)) / 2
+    xHighs  <- max(c(Highs, xOpens, xCloses),na=TRUE)
+    xLows   <- min(c(Lows,  xOpens, xCloses),na=TRUE)
     Closes <- xCloses
     Opens  <- xOpens
     Highs  <- xHighs

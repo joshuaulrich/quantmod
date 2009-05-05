@@ -133,7 +133,7 @@ function(x) {
     }
 
     if(!x@new) {
-      legend <- function(legend,text.col) { list(legend=legend,text.col=text.col) }
+      legend <- function(legend,text.col,...) { list(legend=legend,text.col=text.col) }
       formals(legend) <- formals(graphics::legend)
     }
     legend.text <- list()
