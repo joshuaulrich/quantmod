@@ -1,5 +1,11 @@
 `getOptionChain` <-
-function(Symbols, Exp="2009-05",...) {
+function(Symbols, Exp="2009-05", src="yahoo", ...) {
+  Call <- paste("getOptionChain",src,sep=".")
+  do.call(Call, list(Symbols=Symbols, Exp=Exp, ...))
+}
+
+`getOptionChain.yahoo` <-
+function(Symbols, Exp="2009-05", ...) {
   parse.expiry <- function(x) {
     if(nchar(x)==5L) {
       #MonYR
