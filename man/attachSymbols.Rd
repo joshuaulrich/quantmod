@@ -13,9 +13,9 @@ attachSymbols(DB = DDB_Yahoo(),
               mem.cache = TRUE,
               file.cache = FALSE,
               cache.dir = tempdir())
-}
 
 flushSymbols(DB = DDB_Yahoo())
+}
 \arguments{
   \item{DB}{ A \code{DDB} data base object }
   \item{pos}{ position in search path to attach DB }
