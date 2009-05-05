@@ -15,7 +15,7 @@ data sources follow an S3-like naming convention. Additional
 methods can be added by simply adhering to the convention.
 
 Current \code{src} methods available are: yahoo, google,
-MySQL, FRED, csv, RData, and Oanda.
+MySQL, FRED, csv, RData, and oanda.
 
 Data is loaded silently \emph{without} user
 assignment by default.
