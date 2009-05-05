@@ -1,5 +1,6 @@
 \name{getSymbols}
 \alias{getSymbols}
+\alias{loadSymbols}
 \alias{showSymbols}
 \alias{removeSymbols}
 \alias{saveSymbols}
@@ -18,11 +19,10 @@ MySQL, FRED, csv, RData, and Oanda.
 
 Data is loaded silently \emph{without} user
 assignment by default.
-
 }
 \usage{
 getSymbols(Symbols = NULL, 
-           env = new.env(),
+           env = .GlobalEnv,
            reload.Symbols = FALSE,
            verbose = FALSE,
            warnings = TRUE,
@@ -30,6 +30,16 @@ getSymbols(Symbols = NULL,
            symbol.lookup = TRUE,
            auto.assign = TRUE,
            ...)
+
+loadSymbols(Symbols = NULL, 
+            env = .GlobalEnv,
+            reload.Symbols = FALSE,
+            verbose = FALSE,
+            warnings = TRUE,
+            src = "yahoo",
+            symbol.lookup = TRUE,
+            auto.assign = TRUE,
+            ...)
 
 showSymbols(env=.GlobalEnv)
 removeSymbols(Symbols=NULL,env=.GlobalEnv)
@@ -74,7 +84,8 @@ though it is not advised.
 
 Previous versions of getSymbols assigned each object into the user's
 .GlobalEnv by name.  This behavior is now supported by setting
-env=.GlobalEnv, or by using the wrapper \code{loadSymbols}.  Many
+env=.GlobalEnv (the current transitional default),
+or by using the wrapper \code{loadSymbols}.  Many
 thanks to Kurt Hornik and Achim Zeileis for suggesting this change.
 
 By default the variable chosen is an \R-legal name derived

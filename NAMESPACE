@@ -159,6 +159,7 @@ export(
     attachSymbols,
     flushSymbols,
 
+    loadSymbols,
     getSymbols,
     getSymbols.MySQL,
     getSymbols.SQLite,

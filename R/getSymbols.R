@@ -1,7 +1,7 @@
 # getSymbols {{{
 "getSymbols" <-
 function(Symbols=NULL,
-         env=new.env(),
+         env=.GlobalEnv,
          reload.Symbols=FALSE,
          verbose=FALSE,
          warnings=TRUE,
@@ -82,6 +82,12 @@ function(Symbols=NULL,
       }
 }
 #}}}
+
+loadSymbols <- getSymbols
+loadSymbols.formals <- formals(getSymbols)
+loadSymbols.formals$env <- substitute(.GlobalEnv)
+formals(loadSymbols) <- loadSymbols.formals
+
 
 # getSymbols.yahoo {{{
 "getSymbols.yahoo" <-
