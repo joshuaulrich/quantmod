@@ -6,11 +6,12 @@ Function to download option chain data from
 data providers.
 }
 \usage{
-getOptionChain(Symbols, Exp = "2009-05", ...)
+getOptionChain(Symbols, Exp = "2009-05", src="yahoo", ...)
 }
 \arguments{
   \item{Symbols}{ The name of the underlying symbol }
   \item{Exp}{ One or more expiration dates }
+  \item{src}{ Source }
   \item{\dots}{ additional parameters }
 }
 \details{
