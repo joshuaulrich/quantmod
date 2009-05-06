@@ -427,7 +427,7 @@ function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
         }
     }
     dim(x2) <- NULL  # allow for multiple k matrix math to happen
-    if(is.zoo(x1)) x1 <- coredata(x1)
+    if(is.zoo(x1)) x1 <- as.matrix(x1)
     if(type=='log') {
         xx <- lapply(k, function(K.) {
                 log(x2/Lag(x1,K.))
