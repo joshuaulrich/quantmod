@@ -2,6 +2,8 @@
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=.GlobalEnv,src='yahoo',
          auto.assign=TRUE,auto.update=TRUE,verbose=FALSE,...) {
 
+  # Function written by Joshua Ulrich, using
+  # getSymbols.yahoo as a guide.
   Symbol.name <- ifelse(!is.character(Symbol),
                         deparse(substitute(Symbol)),
                         as.character(Symbol))
@@ -27,11 +29,11 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=.GlobalEnv,src='yahoo',
   spl <- data.frame( split=fr[fr[,"V1"]=="SPLIT","V3"],
     row.names=as.Date(as.character(fr[fr[,"V1"]=="SPLIT","V2"]),"%Y%m%d"),
     stringsAsFactors=FALSE )
-  colnames(spl) <- paste(Symbol.name,'spl',sep='.')
 
   if(NROW(spl)==0) {
     spl <- NA
   } else {
+    colnames(spl) <- paste(Symbol.name,'spl',sep='.')
     spl[,1] <- sub(":","/", spl[,1])
     spl[,1] <- 1 / sapply( parse( text=spl[,1] ), eval )
     spl <- as.xts(spl)
