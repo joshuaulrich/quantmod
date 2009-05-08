@@ -74,9 +74,9 @@ function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
   ret <- (list(IS=list(Q=IS[1:49,],A=IS[50:98,]),BS=list(Q=BS[1:40,],A=BS[41:80,]),CF=list(Q=CF[1:19,],A=CF[20:38,])))
 
   # identify the colnames for IS and CF matricies
-  epEnding <- c(0,which(diff(grep('Ending',symbol, ignore.case=TRUE)) > 5), length(grep('Ending',symbol, ignore.case=TRUE)))
+  epEnding <- c(0,which(diff(grep('ending',symbol, ignore.case=TRUE)) > 5), length(grep('ending',symbol, ignore.case=TRUE)))
   indexISCF <- lapply(1:(length(epEnding)-1), function(x) seq(epEnding[x],epEnding[x+1])[-1])
-  colnamesISCF <- lapply(indexISCF,function(x) symbol[grep('Ending',symbol, ignore.case=TRUE)][x])
+  colnamesISCF <- lapply(indexISCF,function(x) symbol[grep('ending',symbol, ignore.case=TRUE)][x])
 
   # Income Statement Quarters
   # remove empty columns
