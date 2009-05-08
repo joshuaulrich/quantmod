@@ -155,7 +155,7 @@ function(Symbols,env,return.class='xts',
          # Adjustment algorithm by Joshua Ulrich
          div <- getDividends(Symbols[[i]], auto.assign=FALSE)
          spl <- getSplits(Symbols[[i]],    auto.assign=FALSE)
-         adj <- na.omit(adjSplitDiv(spl, div, Cl(fr)))[-1,]
+         adj <- na.omit(adjSplitDiv(spl, div, Cl(fr)))
 
          fr[,1] <- fr[,1] * adj[,'Split'] * adj[,'Div']  # Open
          fr[,2] <- fr[,2] * adj[,'Split'] * adj[,'Div']  # High
