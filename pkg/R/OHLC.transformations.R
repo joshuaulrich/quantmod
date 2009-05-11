@@ -377,7 +377,7 @@ function(x,k=1)
 {
     new.x <- sapply(as.list(k), function(k.e) {
         if(k.e<0||k.e!=as.integer(k.e)) stop("k must be a non-negative integer")
-        if(k.e==0) return(x);
+        if(k.e==0) return(coredata(x));
         c(rep(NA,k.e),x[-((length(x)-k.e+1):length(x))])
     }
     )
@@ -427,7 +427,6 @@ function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
         }
     }
     dim(x2) <- NULL  # allow for multiple k matrix math to happen
-    if(is.zoo(x1)) x1 <- as.matrix(x1)
     if(type=='log') {
         xx <- lapply(k, function(K.) {
                 log(x2/Lag(x1,K.))
