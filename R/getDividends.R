@@ -1,6 +1,6 @@
 `getDividends` <-
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=.GlobalEnv,src='yahoo',
-         auto.assign=TRUE,auto.update=TRUE,verbose=FALSE,...) {
+         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...) {
 
   Symbol.name <- ifelse(!is.character(Symbol),
                         deparse(substitute(Symbol)),

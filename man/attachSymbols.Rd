@@ -11,7 +11,7 @@ attachSymbols(DB = DDB_Yahoo(),
               prefix = NULL,
               postfix = NULL,
               mem.cache = TRUE,
-              file.cache = FALSE,
+              file.cache = !mem.cache,
               cache.dir = tempdir())
 
 flushSymbols(DB = DDB_Yahoo())

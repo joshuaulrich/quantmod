@@ -330,7 +330,20 @@ function(x,subset = NULL,
                                 BBands.col='orange',BBands.fill='#F5F5DF',
                                 BBands=list(col='orange',fill='#F5F5DF'),
                                 theme.name='beige'
-                                )
+                                ),
+                       'wsj'= 
+                            list(fg.col="#000000",bg.col="#F0F0F0",
+                                 grid.col="#ffffff",border="#444444",
+                                 minor.tick="#888888",major.tick="#000000", 
+                                 up.col="#FFFFFF",dn.col="#666666",
+                                 dn.up.col="#888888",up.up.col="#FFFFFF",
+                                 dn.dn.col="#FF0000",up.dn.col="#000000", 
+                                 up.border="#444444",dn.border="#666666",
+                                 dn.up.border="#444444",up.up.border="#444444",
+                                 dn.dn.border="#444444",up.dn.border="#444444", 
+                                 main.col = "#555555", sub.col = "#555555", area = "#d3d0af", 
+                                 fill = "#F7F7F7", Expiry = "#C9C9C9", 
+                                 theme.name = "wsj")
                      ), class='chart.theme')
 # }}}
 

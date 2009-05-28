@@ -11,8 +11,8 @@ getDividends(Symbol,
              to = Sys.Date(), 
              env = .GlobalEnv, 
              src = "yahoo", 
-             auto.assign = TRUE, 
-             auto.update = TRUE, 
+             auto.assign = FALSE, 
+             auto.update = FALSE, 
              verbose = FALSE, ...)
 }
 %- maybe also 'usage' for other objects documented here.

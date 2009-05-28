@@ -74,16 +74,16 @@ function(ta, order=NULL, on=NA, legend='auto', yrange=NULL, ...) {
                           order=order,legend=legend,
                           pars=list(list(...)),
                           time.scale=lchob@time.scale)
-   if(is.null(sys.call(-1))) {
-      TA <- lchob@passed.args$TA
-      lchob@passed.args$TA <- c(TA,chobTA)
-      lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-      do.call('chartSeries.chob',list(lchob))
-      #quantmod:::chartSeries.chob(lchob)
-      invisible(chobTA)
-    } else {
+#   if(is.null(sys.call(-1))) {
+#      TA <- lchob@passed.args$TA
+#      lchob@passed.args$TA <- c(TA,chobTA)
+#      lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+#      do.call('chartSeries.chob',list(lchob))
+#      #quantmod:::chartSeries.chob(lchob)
+#      invisible(chobTA)
+#    } else {
      return(chobTA)
-    }
+#    }
   }
 }#}}}
 # chartTA {{{
