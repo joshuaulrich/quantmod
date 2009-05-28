@@ -32,23 +32,13 @@ function (n = 20, ..., on = NA, legend = "auto")
     gpars <- c(list(...), list(col = 3:4))[unique(names(c(list(col = 3:4), 
         list(...))))]
     chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 
-        colors = lchob@colors, color.vol = lchob@color.vol, multi.col = lchob@multi.col, 
+        colors = lchob@colors, color.vol = lchob@color.vol, 
+        multi.col = lchob@multi.col, 
         spacing = lchob@spacing, width = lchob@width, bp = lchob@bp, 
         x.labels = lchob@x.labels, time.scale = lchob@time.scale, 
         isLogical = is.logical(x), legend = legend, legend.name = legend.name, 
         pars = list(gpars))
-    if (is.null(sys.call(-1))) {
-        TA <- lchob@passed.args$TA
-        lchob@passed.args$TA <- c(TA, chobTA)
-        lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
-            0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
-        do.call("chartSeries.chob", list(lchob))
-        invisible(chobTA)
-    }
-    else {
-        return(chobTA)
-    }
+    return(chobTA)
 }
 
 `addAroonOsc` <-

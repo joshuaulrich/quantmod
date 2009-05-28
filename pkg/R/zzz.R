@@ -62,6 +62,12 @@ setClass("quantmodResults",representation(
 #         tradeLog <- cbind(object@date,object@trade.id,object@price,object@quantity)
 #         print(zoo(tradeLog,order.by=object@date))
 #         })
+setMethod("show", "chobTA",
+          function(object) {
+            plot.chobTA(object)
+          }
+)
+
 setMethod("show","quantmod", function(object) {
 	cat("\nquantmod object:  ",
         object@model.id,"\tBuild date: ",

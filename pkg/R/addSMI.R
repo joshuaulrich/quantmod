@@ -39,15 +39,15 @@
                         time.scale=lchob@time.scale,
                         n=n,slow=slow,fast=fast,signal=signal,
                         ma.type=ma.type)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  #if(is.null(sys.call(-1))) {
+  #  TA <- lchob@passed.args$TA
+  #  lchob@passed.args$TA <- c(TA,chobTA)
+  #  lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
+  #  do.call('chartSeries.chob',list(lchob))
+  #  invisible(chobTA)
+  #} else {
+  return(chobTA)
+  #} 
 } #}}}
 # chartSMI {{{
 `chartSMI` <-

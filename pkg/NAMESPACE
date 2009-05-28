@@ -178,6 +178,8 @@ export(
 
     oanda.currencies,
 
+    adjustOHLC,
+
     showSymbols,
     removeSymbols,
     saveSymbols,

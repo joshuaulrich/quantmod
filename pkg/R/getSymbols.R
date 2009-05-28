@@ -523,6 +523,65 @@ function(Symbols,env,
 }
 #}}}
 
+# getSymbols.rds {{{
+"getSymbols.rds" <-
+function(Symbols,env,
+         dir="",
+         return.class="xts",
+         extension="rds",
+         col.names=c('Open','High','Low','Close','Volume','Adjusted'),
+         ...) {
+  importDefaults("getSymbols.rds")
+  this.env <- environment()
+  for(var in names(list(...))) {
+    assign(var,list(...)[[var]], this.env)
+  }
+
+  default.return.class <- return.class
+  default.dir <- dir
+  default.extension <- extension
+
+  if(missing(verbose)) verbose <- FALSE
+  if(missing(auto.assign)) auto.assign <- TRUE
+
+  for(i in 1:length(Symbols)) {
+    return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+    return.class <- ifelse(is.null(return.class),default.return.class,
+                           return.class)
+    dir <- getSymbolLookup()[[Symbols[[i]]]]$dir
+    dir <- ifelse(is.null(dir),default.dir,
+                           dir)
+    extension <- getSymbolLookup()[[Symbols[[i]]]]$extension
+    extension <- ifelse(is.null(extension),default.extension,
+                           extension)
+    if(verbose) cat("loading ",Symbols[[i]],".....")
+    if(dir=="") {
+      sym.file <- paste(Symbols[[i]],extension,sep=".")
+    } else {
+      sym.file <- file.path(dir,paste(Symbols[[i]],extension,sep="."))
+    }
+    if(!file.exists(sym.file)) {
+      cat("\nfile ",paste(Symbols[[i]],extension,sep='.')," does not exist ",
+          "in ",dir,"....skipping\n")
+      next
+    }
+    #fr <- read.csv(sym.file)
+    fr <- .readRDS(sym.file)
+    if(verbose)  
+      cat("done.\n")
+    if(!is.xts(fr)) fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='rda',updated=Sys.time())
+    colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),col.names,sep='.')
+    fr <- convert.time.series(fr=fr,return.class=return.class)
+    Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+    if(auto.assign)
+      assign(Symbols[[i]],fr,env)
+    }
+    if(auto.assign)
+      return(Symbols)
+    return(fr)
+}
+#}}}
+
 # getSymbols.rda {{{
 "getSymbols.rda" <-
 function(Symbols,env,

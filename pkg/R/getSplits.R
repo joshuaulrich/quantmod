@@ -1,6 +1,6 @@
 `getSplits` <-
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=.GlobalEnv,src='yahoo',
-         auto.assign=TRUE,auto.update=TRUE,verbose=FALSE,...) {
+         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...) {
 
   # Function written by Joshua Ulrich, using
   # getSymbols.yahoo as a guide.

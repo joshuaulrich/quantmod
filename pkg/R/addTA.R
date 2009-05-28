@@ -706,15 +706,7 @@ function(x) {
                         time.scale=lchob@time.scale,
                         n=n,ma=ma,sd=sd,
                         draw=draw)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  return(chobTA)
 } #}}}
 # chartBBands {{{
 `chartBBands` <-
@@ -990,15 +982,7 @@ function(x) {
                         fast=fast,slow=slow,signal=signal,
                         col=col,histo=histogram
                         )
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  return(chobTA)
 } #}}}
 # chartMACD {{{
 `chartMACD` <-

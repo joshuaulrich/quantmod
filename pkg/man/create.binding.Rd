@@ -9,19 +9,22 @@ to create active bindings for symbols defined in a \code{DDB} object.
 create.binding(s,
                lsym,
                rsym,
+               gsrc,
                mem.cache = TRUE,
-               file.cache = FALSE,
+               file.cache = !mem.cache,
                cache.dir = tempdir(),
-               envir)
+               envir,...)
 }
 \arguments{
   \item{s}{ symbol name }
   \item{lsym}{ function to convert to local name (legal R name) }
   \item{rsym}{ function to convert to remote name (source name) }
+  \item{gsrc}{ corresponds to 'src' arg in getSymbols call }
   \item{mem.cache}{ cache to memory }
   \item{file.cache}{ cache to disk }
   \item{cache.dir}{ directory to cache to/from }
   \item{envir}{ environment name (character) }
+  \item{\dots}{ arguments to pass to getSymbols call }
 }
 \details{
 Low level function to create bindings during initial

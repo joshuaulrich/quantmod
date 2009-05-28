@@ -37,16 +37,16 @@ function (..., on = NA, legend = "auto")
         x.labels = lchob@x.labels, time.scale = lchob@time.scale, 
         isLogical = is.logical(x), legend = legend, legend.name = legend.name, 
         pars = list(gpars))
-    if (is.null(sys.call(-1))) {
-        TA <- lchob@passed.args$TA
-        lchob@passed.args$TA <- c(TA, chobTA)
-        lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
-            0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
-        do.call("chartSeries.chob", list(lchob))
-        invisible(chobTA)
-    }
-    else {
-        return(chobTA)
-    }
+#    if (is.null(sys.call(-1))) {
+#        TA <- lchob@passed.args$TA
+#        lchob@passed.args$TA <- c(TA, chobTA)
+#        lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
+#            0)
+#        chartSeries.chob <- quantmod:::chartSeries.chob
+#        do.call("chartSeries.chob", list(lchob))
+#        invisible(chobTA)
+#    }
+#    else {
+     return(chobTA)
+#    }
 }

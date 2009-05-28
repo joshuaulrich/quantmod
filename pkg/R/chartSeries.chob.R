@@ -150,7 +150,7 @@ function(x)
                        text.col=last(bar.col))),main.key)
   }
 
-  axis(2)
+  axis(4)
   box(col=x@colors$fg.col)
 
   old.adj <- par('adj')

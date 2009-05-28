@@ -25,12 +25,13 @@ function(cache.dir=tempdir(), cacheOK=TRUE, verbose=getOption('verbose')) {
   local.s
 }
 
-create.binding <- function(s, lsym, rsym, 
+create.binding <- function(s, lsym, rsym, gsrc, 
                            mem.cache=TRUE,
-                           file.cache=FALSE, 
+                           file.cache=!mem.cache, 
                            cache.dir=tempdir(),
-                           envir) {
-  if((mem.cache + file.cache) != 1) stop("only mem or file caching supported")
+                           envir, ...) {
+  #if((mem.cache + file.cache) != 1) stop("only mem or file caching supported")
+  # allow both to be set to FALSE, to force no caching
     if(missing(rsym) || !is.function(rsym)) {
       rsym <- function(x) x
     }
@@ -42,7 +43,7 @@ create.binding <- function(s, lsym, rsym,
           f <- function(value) {
           if(missing(value)) {
             if(!file.exists(file.path(cache.dir, paste(s,"rda",sep=".")))) {
-              assign(lsym(s), getSymbols(rsym(s), auto.assign=FALSE))
+              assign(lsym(s), getSymbols(rsym(s), src=gsrc, auto.assign=FALSE, ...))
               save(list=lsym(s), file=file.path(cache.dir, paste(s,"rda",sep=".")))
               get(lsym(s))
             } else {
@@ -50,21 +51,31 @@ create.binding <- function(s, lsym, rsym,
               get(lsym(s))
             }
           } else {
-            return(message("assignment not possible with 'fetch' databases"))
+            return(message("assignment not possible with 'DDB' databases"))
           }}
           makeActiveBinding(lsym(s), f, as.environment(envir))
-    }
+    } else
     if(mem.cache) {
       envir <- as.environment(envir)
       delayedAssign(lsym(s), { 
-                    assign(lsym(s),getSymbols(rsym(s),auto.assign=FALSE), env=envir)
+                    assign(lsym(s),getSymbols(rsym(s),auto.assign=FALSE, src=gsrc, ...), env=envir)
                     get(lsym(s), env=envir) },
                     assign.env=envir)
+    } else { # no cache
+      f <- function(value) {
+        if(missing(value)) {
+          assign(lsym(s), getSymbols(rsym(s), src=gsrc, auto.assign=FALSE, ...))
+          tmp <- get(lsym(s))
+          rm(list=lsym(s))
+          tmp
+        } else return(massage("assignment not possible with 'DDB' databases"))
+      }
+      makeActiveBinding(lsym(s), f, as.environment(envir))
     }
 }
 
 attachSymbols <- function(DB=DDB_Yahoo(),pos=2,prefix=NULL,postfix=NULL, 
-                          mem.cache=TRUE, file.cache=FALSE, cache.dir=tempdir())
+                          mem.cache=TRUE, file.cache=!mem.cache, cache.dir=tempdir())
 {
   # this will be the function exported in quantmod  
   if(!inherits(DB, 'DDB'))
@@ -84,13 +95,23 @@ flushSymbols <- function(DB=DDB_Yahoo())
   attachSymbols(DB=DB,pos=pos)
 }
 
+attachSymbols.rds <- function(DB,pos,prefix,postfix,mem.cache,file.cache,cache.dir,...) {
+  attach(NULL, pos=pos, name=DB$name)
+  # convert underscore to hyphen for Yahoo fetch
+  rsym <- function(x) gsub("_","-",x,perl=TRUE)
+  lsym <- function(x) paste(prefix,as.character(x),postfix,sep="")
+  invisible(sapply(DB$db, create.binding, lsym=lsym, 
+                       rsym=rsym, gsrc="rds", mem.cache=mem.cache, file.cache=file.cache,
+                       cache.dir=cache.dir, envir=DB$name, dir=DB$dir))
+}
+
 attachSymbols.yahoo <- function(DB,pos,prefix,postfix,mem.cache,file.cache,cache.dir,...) {
   attach(NULL, pos=pos, name=DB$name)
   # convert underscore to hyphen for Yahoo fetch
   rsym <- function(x) gsub("_","-",x,perl=TRUE)
   lsym <- function(x) paste(prefix,as.character(x),postfix,sep="")
   invisible(sapply(DB$db, create.binding, lsym=lsym, 
-                       rsym=rsym, mem.cache=mem.cache, file.cache=file.cache,
+                       rsym=rsym, gsrc="yahoo", mem.cache=mem.cache, file.cache=file.cache,
                        cache.dir=cache.dir, envir=DB$name))
 }
 
