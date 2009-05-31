@@ -429,11 +429,11 @@ function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
     dim(x2) <- NULL  # allow for multiple k matrix math to happen
     if(type=='log') {
         xx <- lapply(k, function(K.) {
-                log(x2/Lag(x1,K.))
+                log(unclass(x2)/Lag(x1,K.))
               })
     } else {
         xx <- lapply(k, function(K.) {
-                x2/Lag(x1,K.)-1
+                unclass(x2)/Lag(x1,K.)-1
               })
     }
     xx <- do.call("cbind", xx)
