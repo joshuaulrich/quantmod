@@ -98,6 +98,8 @@ function(x,subset=NULL,type='arithmetic',leading=TRUE,...) {
 
 `allReturns` <-
 function(x,subset=NULL,type='arithmetic',leading=TRUE) {
+  x.orig <- x
+  x <- try.xts(x)
   all.ret <- cbind(
     periodReturn(x,'daily',type=type,leading=FALSE),
     periodReturn(x,'weekly',type=type),
@@ -106,5 +108,5 @@ function(x,subset=NULL,type='arithmetic',leading=TRUE) {
     periodReturn(x,'yearly',type=type)
   )
   colnames(all.ret) <- c('daily','weekly','monthly','quarterly','yearly')
-  all.ret
+  reclass(all.ret, x.orig)
 }
