@@ -68,7 +68,7 @@ create.binding <- function(s, lsym, rsym, gsrc,
           tmp <- get(lsym(s))
           rm(list=lsym(s))
           tmp
-        } else return(massage("assignment not possible with 'DDB' databases"))
+        } else return(message("assignment not possible with 'DDB' databases"))
       }
       makeActiveBinding(lsym(s), f, as.environment(envir))
     }

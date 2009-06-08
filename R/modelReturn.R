@@ -2,7 +2,7 @@
 {
   quantmodReturn <- new("quantmodReturn");
 
-  trade.signal <- tR.results@signal;
+  trade.signal <- tR.results$signal;
   trade.start <- start(trade.signal);
   trade.end <- end(trade.signal);
   holding.period <- trade.end - trade.start;
