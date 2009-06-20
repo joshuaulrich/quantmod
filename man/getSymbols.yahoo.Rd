@@ -16,6 +16,7 @@ additional getSymbols \sQuote{methods}.
 getSymbols.yahoo(Symbols,
                  env,
                  return.class = 'xts',
+                 index.class  = 'Date',
                  from = "2007-01-01",
                  to = Sys.Date(),
                  adjust=FALSE,
@@ -27,8 +28,9 @@ getSymbols.yahoo(Symbols,
                        the names of each symbol to be loaded}
        \item{env}{ where to create objects. (.GlobalEnv) }  
        \item{return.class}{ class of returned object }  
+       \item{index.class}{ class of returned object index (xts only) }  
        \item{from}{ Retrieve data no earlier than this date. 
-                    (1990-01-01)}
+                    (2007-01-01)}
        \item{to}{ Retrieve data through this date (Sys.Date())}
        \item{adjust}{ Logical; if 'TRUE', the Open, High, Low,
                       and Close prices will be adjusted for
@@ -50,6 +52,10 @@ environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
 \code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
+
+In the case of xts objects, the indexing will be by Date. This
+can be altered with the \code{index.class} argument.  See
+\code{indexClass} for more information on changing index classes.
 }
 \references{ Yahoo Finance: \url{http://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }

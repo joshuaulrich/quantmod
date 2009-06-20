@@ -91,7 +91,7 @@ formals(loadSymbols) <- loadSymbols.formals
 
 # getSymbols.yahoo {{{
 "getSymbols.yahoo" <-
-function(Symbols,env,return.class='xts',
+function(Symbols,env,return.class='xts',index.class="Date",
          from='2007-01-01',
          to=Sys.Date(),
          adjust=FALSE,
@@ -155,7 +155,7 @@ function(Symbols,env,return.class='xts',
          # Adjustment algorithm by Joshua Ulrich
          div <- getDividends(Symbols[[i]], auto.assign=FALSE)
          spl <- getSplits(Symbols[[i]],    auto.assign=FALSE)
-         adj <- na.omit(adjSplitDiv(spl, div, Cl(fr)))
+         adj <- na.omit(adjRatios(spl, div, Cl(fr)))
 
          fr[,1] <- fr[,1] * adj[,'Split'] * adj[,'Div']  # Open
          fr[,2] <- fr[,2] * adj[,'Split'] * adj[,'Div']  # High
@@ -165,6 +165,9 @@ function(Symbols,env,return.class='xts',
        }
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
+       if(is.xts(fr))
+         indexClass(fr) <- index.class
+
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)

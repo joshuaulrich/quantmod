@@ -547,11 +547,8 @@ function(x,
   # re-evaluate the TA list, as it will be using stale data,
   chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
 
-  if(!plot)
-    return(chob)
-  
-  # draw the chart
-  do.call('chartSeries.chob',list(chob))
+  if(plot) # draw the chart
+    do.call('chartSeries.chob',list(chob))
 
   chob@device <- as.numeric(dev.cur())
 

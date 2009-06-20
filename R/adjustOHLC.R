@@ -16,7 +16,7 @@ function(x,
       # use actual split and/or dividend data
       div    <- getDividends(symbol.name)
       splits <- getSplits(symbol.name)
-      ratios <- adjSplitDiv(splits, div, Cl(x))
+      ratios <- adjRatios(splits, div, Cl(x))
       if(length(adjust)==1 && adjust == "split") {
         ratio <- ratios[,1]
       } else if(length(adjust)==1 && adjust == "dividend") {
