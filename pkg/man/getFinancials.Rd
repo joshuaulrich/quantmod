@@ -61,13 +61,13 @@ As with all free data, you may be getting exactly what you pay for.
 }
 \examples{
 \dontrun{
-JAVA <- getFinancials('JAVA')
-AAPL <- getFin('AAPL')
+getFinancials('JAVA')  # returns JAVA.f to "env"
+getFin('AAPL') # returns AAPL.f to "env"
 
-JAVA$IS$Q   # Quarterly Income Statement
-AAPL$CF$A   # Annual Cash Flows
+viewFin(JAVA.f, "IS", "Q")  # Quarterly Income Statement
+viewFin(AAPL.f, "CF", "A")   # Annual Cash Flows
 
-str(AAPL)
+str(AAPL.f)
 }
 }
 \keyword{ utilities }
