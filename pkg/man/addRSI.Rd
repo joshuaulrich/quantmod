@@ -5,11 +5,11 @@
 Add a Relative Strength Index indicator to chart.
 }
 \usage{
-addRSI(n = 14, type = "EMA", wilder = TRUE)
+addRSI(n = 14, maType = "EMA", wilder = TRUE)
 }
 \arguments{
   \item{n}{ periods }
-  \item{type}{ type of MA to use }
+  \item{maType}{ type of MA to use }
   \item{wilder}{ use wilder (see EMA) }
 }
 \details{
