@@ -5,11 +5,11 @@
 Add Bollinger Bands to current chart.
 }
 \usage{
-addBBands(n = 20, sd = 2, ma = "SMA", draw = 'bands', on = -1)
+addBBands(n = 20, sd = 2, maType = "SMA", draw = 'bands', on = -1)
 }
 \arguments{
   \item{n}{ number of moving average periods }
-  \item{ma}{ type of moving average to be used }
+  \item{maType}{ type of moving average to be used }
   \item{sd}{ number of standard deviations }
   \item{draw}{ indicator to draw: bands, percent, or width }
   \item{on}{ which figure area of chart to apply to }
