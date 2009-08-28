@@ -153,8 +153,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
                              sep='.')
        if(adjust) {
          # Adjustment algorithm by Joshua Ulrich
-         div <- getDividends(Symbols[[i]], auto.assign=FALSE)
-         spl <- getSplits(Symbols[[i]],    auto.assign=FALSE)
+         div <- getDividends(Symbols[[i]], from=from, to=to, auto.assign=FALSE)
+         spl <- getSplits(Symbols[[i]],    from=from, to=to, auto.assign=FALSE)
          adj <- na.omit(adjRatios(spl, div, Cl(fr)))
 
          fr[,1] <- fr[,1] * adj[,'Split'] * adj[,'Div']  # Open
