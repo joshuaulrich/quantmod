@@ -546,7 +546,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        n=n, wilder=wilder,maType=type)
+                        n=n, wilder=wilder,maType=maType)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
@@ -704,7 +704,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        n=n,ma=ma,sd=sd,
+                        n=n,ma=maType,sd=sd,
                         draw=draw)
   return(chobTA)
 } #}}}
