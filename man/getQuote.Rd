@@ -53,7 +53,7 @@ yahooQuote.EOD
 getQuote("AAPL")
 getQuote("QQQQ;SPY;^VXN",what=yahooQF(c("Bid","Ask")))
 standardQuote()
-yahooFQ()
+yahooQF()
 }
 }
 \keyword{ IO }
