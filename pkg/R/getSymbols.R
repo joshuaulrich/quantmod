@@ -725,11 +725,11 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
 # getSymbols.oanda {{{
 `getSymbols.oanda` <-
 function(Symbols,env,return.class='xts',
-         from=Sys.Date()-500,
+         from=Sys.Date()-499,
          to=Sys.Date(),
          ...) {
      importDefaults("getSymbols.oanda")
-     if( (to-from) > 500 )
+     if( (as.Date(to)-as.Date(from)) > 500 )
        stop("oanda.com limits data to 500 days per request", call.=FALSE)
      this.env <- environment()
      for(var in names(list(...))) {
@@ -756,7 +756,7 @@ function(Symbols,env,return.class='xts',
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- ifelse(is.null(to),default.to,to)
    
-       if(as.Date(to,origin='1970-01-01')-as.Date(from,origin='1970-01-01') > 499) stop("oanda limits data to 2000 days")
+       if(as.Date(to,origin='1970-01-01')-as.Date(from,origin='1970-01-01') > 499) stop("oanda limits data to 500 days")
        # automatically break larger requests into equal sized smaller request at some point
        # for now just let it remain
 
@@ -765,7 +765,7 @@ function(Symbols,env,return.class='xts',
        
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
-       currency.pair <- strsplit(toupper(Symbols[[i]]),"/")[[1]]
+       currency.pair <- strsplit(toupper(Symbols.name),"/")[[1]]
        if(length(currency.pair) != 2) {
          warning(paste("incorrectly specified currency pair",Symbols.name))
          next
