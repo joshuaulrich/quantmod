@@ -10,7 +10,7 @@ function() {
   do.call('cbind',c(list(ohlc),values))
 }
 
-getSubset
+getSubset <- 
 function() {
   chob <- current.chob()
   from <- round(locator(1)$x)
