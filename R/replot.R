@@ -186,6 +186,8 @@ print.replot <- function(x, ...) plot(x,...)
 plot.replot <- function(x, ...) {
   plot.new()
   cex <- par(cex=x$Env$cex)
+  if(.Device=="X11") # only reasonable way to fix X11/quartz issue
+    par(cex=x$Env$cex * 1.5)
   oxpd <- par(xpd=FALSE)
   usr <- par("usr")
   # plot negative (underlay) actions
@@ -231,6 +233,37 @@ scale.ranges <- function(frame, asp, ranges)
   asp/asp[frame] * abs(diff(ranges[[frame]]))
 }
 
+heikin.ashi.bars <- 
+function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.border=up.border) {
+  if(is.OHLC(x)) {
+    haCloses <- as.xts(apply(OHLC(x),1,sum))/4
+    haOpens  <- Op(x)
+    haOpens  <- (lag(haOpens) + lag(haCloses))/2
+    haHighs  <- as.numeric(as.xts(apply(cbind(Hi(x),haOpens,haCloses),1,max)))
+    haLows   <- as.numeric(as.xts(apply(cbind(Lo(x),haOpens,haCloses),1,min)))
+    haOpens  <- as.numeric(haOpens)
+    haCloses <- as.numeric(haCloses)
+  }
+  bar.col <- ifelse(haOpens < haCloses, up.col, dn.col)
+  bar.border <- ifelse(haOpens < haCloses, up.border, dn.border)
+  
+  x.pos <- spacing*(1:NROW(x))
+  segments(x.pos, haLows, x.pos, apply(cbind(haOpens,haCloses),1,min),col=bar.border)
+  segments(x.pos, haHighs, x.pos, apply(cbind(haOpens,haCloses),1,max),col=bar.border)
+
+  if (type == "candlesticks") {
+     rect(x.pos - spacing/3, haOpens, x.pos + spacing/3, 
+          haCloses, col = bar.col, border = bar.border)
+  } else segments(x.pos, haOpens, x.pos, haCloses, col='blue')
+  
+}
+
+bars <- function(x, spacing=1, bar.col="grey", border.col="darkgrey") {
+  x.pos <- spacing*(1:NROW(x))
+  rect(x.pos-spacing/3, x, x.pos+spacing/3, rep(0,NROW(x)), col=bar.col, border=border.col)
+}
+
+
 range.bars <-
 function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.border=up.border) {
   if(is.OHLC(x)) {
@@ -238,18 +271,45 @@ function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.
     Highs <- as.numeric(Hi(x))
     Lows <- as.numeric(Lo(x))
     Closes <- as.numeric(Cl(x))
+    if(type=="heikin.ashi") {
+      Closes <- as.xts(apply(OHLC(x),1,sum))/4
+      Opens  <- Op(x)
+      Opens  <- (lag(Opens) + lag(Closes))/2
+      Highs  <- as.numeric(as.xts(apply(cbind(Hi(x),Opens,Closes),1,max)))
+      Lows   <- as.numeric(as.xts(apply(cbind(Lo(x),Opens,Closes),1,min)))
+      Opens  <- as.numeric(Opens)
+      Closes <- as.numeric(Closes)
+      type <- "candlesticks"
+    }
   }
   bar.col <- ifelse(Opens < Closes, up.col, dn.col)
   bar.border <- ifelse(Opens < Closes, up.border, dn.border)
   
   x.pos <- spacing*(1:NROW(x))
-  segments(x.pos, Lows, x.pos, apply(cbind(Opens,Closes),1,min),col=bar.border)
-  segments(x.pos, Highs, x.pos, apply(cbind(Opens,Closes),1,max),col=bar.border)
+  if( type %in% c("ohlc", "hlc")) {
+    bar.border <- bar.col
+    bar.border[is.na(bar.border)] <- up.border
+  }
+
+  segments(x.pos, Lows, x.pos, apply(cbind(Opens,Closes),1,min),col=bar.border,lwd=1.5,lend=3)
+  segments(x.pos, Highs, x.pos, apply(cbind(Opens,Closes),1,max),col=bar.border,lwd=1.5,lend=3)
 
   if (type == "candlesticks") {
      rect(x.pos - spacing/3, Opens, x.pos + spacing/3, 
           Closes, col = bar.col, border = bar.border)
-  } else segments(x.pos, Opens, x.pos, Closes, col='blue')
+  } else 
+  if (type == "matchsticks") {
+    segments(x.pos, Opens, x.pos, Closes, col='blue',lwd=1.5,lend=3)
+  } else
+  if (type == "ohlc") {
+    segments(x.pos, Opens, x.pos, Closes, col=bar.border,lwd=1.5,lend=3)
+    segments(x.pos-1/3, Opens, x.pos, Opens, col=bar.border,lwd=1.5,lend=3) 
+    segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.5,lend=3) 
+  } else
+  if (type == "hlc") {
+    segments(x.pos, Opens, x.pos, Closes, col=bar.border,lwd=1.5,lend=3)
+    segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.5,lend=3) 
+  }
   
 }
 
@@ -276,11 +336,11 @@ chart_Series <- function(x, name=deparse(substitute(x)), type="candlesticks", su
                if(is.list(lenv)) lenv <- lenv[[1]]
                min.tmp <- min(ylim[[frame]][1],range(na.omit(lenv$xdata[Env$xsubset]))[1],na.rm=TRUE)
                max.tmp <- max(ylim[[frame]][2],range(na.omit(lenv$xdata[Env$xsubset]))[2],na.rm=TRUE)
-               ylim[[frame]][1] <<- ifelse(min.tmp < 0, min.tmp * 1.3, min.tmp * 0.8)
-               ylim[[frame]][2] <<- ifelse(max.tmp > 0, max.tmp * 1.3, max.tmp * 0.8)
-               if(frame == 2L) {
+               #ylim[[frame]][1] <<- ifelse(min.tmp < 0, min.tmp * 1.3, min.tmp * 0.8)
+               #ylim[[frame]][2] <<- ifelse(max.tmp > 0, max.tmp * 1.3, max.tmp * 0.8)
+               #if(frame == 2L) {
                  ylim[[frame]] <<- c(min.tmp,max.tmp)
-               }
+               #}
              }
            })
     # reset all ylim values, by looking for range(env[[1]]$xdata)
@@ -361,8 +421,13 @@ chart_Series <- function(x, name=deparse(substitute(x)), type="candlesticks", su
   #            col=theme$labels,offset=0,cex=0.9,pos=4))
   # add main series
   cs$set_frame(2)
+#  if(type=="heikin.ashi") {
+#  cs$add(heikin.ashi.bars(xdata[xsubset], type="candlesticks",
+#         1,theme$up.col,theme$dn.col,theme$up.border,theme$dn.border))
+#  } else {
   cs$add(range.bars(xdata[xsubset], type,
          1,theme$up.col,theme$dn.col,theme$up.border,theme$dn.border))
+#  }
   assign(".chob", cs, .GlobalEnv)
 
   # handle TA="add_Vo()" as we would interactively
@@ -538,7 +603,7 @@ add_RSI <- function (n=14, maType="EMA", ...) {
              range(na.omit(rsi))[2], col=x$Env$theme$grid)
     lines(x.pos, rep(30,length(x.pos)), col=theme$col$lines, lwd=2,lty=2,lend=2,...) 
     lines(x.pos, rep(70,length(x.pos)), col=theme$col$lines, lwd=2,lty=2,lend=2,...) 
-    lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=2,...) 
+    lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=2.5,...) 
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
         names(list(n=n,maType=maType,...)),
@@ -629,10 +694,6 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   lenv$xdata <- structure(cbind(macd,macd[,1]-macd[,2]),.Dimnames=list(NULL,c("macd","signal","histogram")))
   lenv$macd <- cbind(macd,macd[,1]-macd[,2])
   
-  #macd <- macd[xsubset]
-
-  # need to have a value set for ylim
-  
   # text annotation
   plot_object$add_frame(ylim=c(0,1),asp=0.15)
   plot_object$next_frame()
@@ -647,33 +708,28 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
   # main MACD plot from expression above
-  #plot_object$add_frame(ylim=c(-max(abs(macd[xsubset]),na.rm=TRUE),max(abs(macd[xsubset]),na.rm=TRUE))*c(1.5),asp=1)
   lenv$grid_lines <- function(xdata,x) { 
-    max.range <- max(abs(range(na.omit(xdata[x]))))
-    if(max.range < 4) {
-      seq.int(-ceiling(max.range),ceiling(max.range))
-    } else seq.int(-ceiling(max.range),ceiling(max.range),2)
+    axTicksByValue(xdata[xsubset],c(4,3,2),3)
   }
-  #plot_object$add_frame(ylim=(range(na.omit(macd[xsubset])))*1.5,asp=1)
-  plot_object$add_frame(ylim=max(range(lenv$grid_lines(macd,xsubset)))*c(-1,1),asp=1)
+  plot_object$add_frame(ylim=(range(na.omit(macd[xsubset]))),asp=1)
   plot_object$next_frame()
 
   # add grid lines
-  exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)),
+  exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
   # add axis labels/boxes
-           expression(text(0,grid_lines(xdata,xsubset),
-                      sprintf("%+d",grid_lines(xdata,xsubset)),
-                      col=theme$labels,offset=0,pos=2,cex=0.9)),
-           expression(text(length(xsubset),grid_lines(xdata,xsubset),
-                      sprintf("%+d",grid_lines(xdata,xsubset)),
-                      col=theme$labels,offset=0,pos=4,cex=0.9)),exp)
+           expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
+                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
+                      col=theme$labels,offset=0,pos=4,cex=0.9)),
+           expression(text(length(xsubset)+1/3,grid_lines(xdata,xsubset),
+                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
+                      col=theme$labels,offset=0,pos=4,cex=0.9)))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
   # return plot_object to allow for auto-printing
   plot_object
 } # }}}
 
 # add_BBands {{{
-add_BBands <- function(n=20, maType="EMA", sd=2, on=-1, ...) { #, plot_object=current.chob()) {
+add_BBands <- function(n=20, maType="EMA", sd=2, on=-1, ...) { 
   lenv <- new.env()
   lenv$plot_bbands <- function(x, n, maType, sd, on, ...) {
     xdata <- x$Env$xdata
@@ -699,11 +755,13 @@ add_BBands <- function(n=20, maType="EMA", sd=2, on=-1, ...) { #, plot_object=cu
   # save data that is drawn on charts
   plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
-  lenv$xdata <- BBands(Cl(xdata),n=n, maType,sd)
+  lenv$xdata <- BBands(Cl(xdata),n=n, maType,sd)[,-4]  # pctB is bad for ylim calculation on subset
+  if(is.null(plot_object$Env$theme$bbands)) {
   plot_object$Env$theme$bbands <- list(bg="#f1f1f1", #plot_object$Env$theme$grid2,
                                        upper=plot_object$Env$theme$grid,
                                        lower=plot_object$Env$theme$grid,
                                        ma=plot_object$Env$theme$grid)
+  }
 
   plot_object$set_frame(sign(on)*(abs(on)+1L)) # need to adjust for header offset
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
