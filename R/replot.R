@@ -1,5 +1,4 @@
-findOHLC <- 
-function() {
+findOHLC <- function() {
   chob <- current.chob()
   loc <- round(locator(1)$x)
   ohlc <- current.chob()$Env$xdata[current.chob()$Env$xsubset][loc]
@@ -10,8 +9,7 @@ function() {
   do.call('cbind',c(list(ohlc),values))
 }
 
-getSubset <- 
-function() {
+getSubset <- function() {
   chob <- current.chob()
   from <- round(locator(1)$x)
   to <- round(locator(1)$x)
@@ -24,12 +22,13 @@ function() {
 }
 
 axTicksByValue <-
-function(x,match.to=c(20,10,5,2,1), gt=3) {
+function(x,match.to=c(100,50,20,10,5,2,1), gt=3) {
   x <- na.omit(x)
   by <- match.to[which(diff(range(x %/% 1)) %/% match.to > gt)[1]]
   do.call('seq.int', as.list(c(range(x)[1]%/%by*by,range(x)[2]%/%by*by,by)))
 }
 
+# replot {{{
 new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fixed=FALSE))) {
   # global variables
   Env <- new.env()
@@ -177,12 +176,13 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
                  set_xlim=set_xlim, get_xlim=get_xlim,
                  reset_ylim=reset_ylim, set_ylim=set_ylim, get_ylim=get_ylim),
             class="replot")
-}
+} # }}}
 
 str.replot <- function(x, ...) {
   print(str(unclass(x)))
 }
 
+# print/plot replot methods {{{
 print.replot <- function(x, ...) plot(x,...)
 plot.replot <- function(x, ...) {
   plot.new()
@@ -229,12 +229,13 @@ plot.replot <- function(x, ...) {
   do.call("clip",as.list(usr))
   par(xpd=oxpd,cex=cex$cex,mar=mar$mar)#,usr=usr)
   invisible(x$Env$actions)
-}
+} # }}}
 
+# scale.ranges {{{
 scale.ranges <- function(frame, asp, ranges)
 {
   asp/asp[frame] * abs(diff(ranges[[frame]]))
-}
+} # }}}
 
 heikin.ashi.bars <- 
 function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.border=up.border) {
@@ -261,12 +262,7 @@ function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.
   
 }
 
-bars <- function(x, spacing=1, bar.col="grey", border.col="darkgrey") {
-  x.pos <- spacing*(1:NROW(x))
-  rect(x.pos-spacing/3, x, x.pos+spacing/3, rep(0,NROW(x)), col=bar.col, border=border.col)
-}
-
-
+# range.bars {{{
 range.bars <-
 function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.border=up.border) {
   if(is.OHLC(x) && type != "line") {
@@ -318,25 +314,36 @@ function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.
     segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.5,lend=3) 
   }
   
-}
+} # }}}
 
-bars <- function(x, spacing=1, bar.col="grey", border.col="darkgrey") {
-  x.pos <- spacing*(1:NROW(x))
-  rect(x.pos-spacing/3, x, x.pos+spacing/3, rep(0,NROW(x)), col=bar.col, border=border.col)
-}
+# {{{ chart_theme
+chart_theme <- chart_theme_white <- function() {
+  theme <-list(col=list(bg="#FFFFFF",
+                        grid="#D0D0D0",
+                        grid2="#F5F5F5",
+                        labels="#333333",
+                        dn.col="red",
+                        up.col=NA, 
+                        dn.border="#333333", 
+                        up.border="#333333"),
+               shading=1,
+               format.labels=TRUE,
+               rylab=TRUE,
+               lylab=TRUE,
+               grid.ticks.on="months")
+  theme$bbands <- list(col=list(fill="whitesmoke",upper=theme$col$grid,
+                                lower=theme$col$grid,ma=theme$col$grid),
+                       lty=list(upper="dashed",lower="dashed",ma="dotted")
+                      )
+  theme
+} # }}}
 
-chart_theme <- function() {
-  list(dn.col="red",
-       up.col=NA,
-       dn.border="#333333",
-       up.border="#333333",
-       format.labels=TRUE,
-       grid.ticks.on="months")
-}
+# chart_pars {{{
 chart_pars <- function() {
-  list(cex=0.6, mar=c(3,1,1,1))
-}
+  list(cex=0.6, mar=c(3,1,0,1))
+} # }}}
 
+# chart_Series {{{
 chart_Series <- function(x, 
                          name=deparse(substitute(x)), 
                          type="candlesticks", 
@@ -348,10 +355,10 @@ chart_Series <- function(x,
   cex <- pars$cex
   mar <- pars$mar
 
-  up.col <- theme$up.col
-  dn.col <- theme$dn.col
-  up.border <- theme$up.border
-  dn.border <- theme$dn.border
+  up.col <- theme$col$up.col
+  dn.col <- theme$col$dn.col
+  up.border <- theme$col$up.border
+  dn.border <- theme$col$dn.border
   format.labels <- theme$format.labels
   grid.ticks.on <- theme$grid.ticks.on
   
@@ -393,6 +400,8 @@ chart_Series <- function(x,
   cs$set_xlim(c(1,NROW(subset)))
   cs$set_ylim(list(structure(range(cs$Env$xdata[subset]),fixed=FALSE)))
   cs$set_frame(1,FALSE)
+  cs$Env$theme$bbands <- theme$bbands
+  cs$Env$theme$shading <- theme$shading
   cs$Env$theme$up.col <- up.col
   cs$Env$theme$dn.col <- dn.col
   cs$Env$theme$up.border <- up.border
@@ -440,35 +449,34 @@ chart_Series <- function(x,
   cs$Env$axis_labels <- function(xdata,xsubset,scale=5) {
     axTicksByValue(na.omit(xdata[xsubset]))
   }
-  cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
+  #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
 
   # add $1 gridlines
   cs$set_frame(-2)
+
+  # add $1 gridlines
   cs$add(abline(h=seq(min(xdata[xsubset]%/%1,na.rm=TRUE),max(xdata[xsubset]%/%1,na.rm=TRUE),1),col=theme$grid2))
   cs$set_frame(2)
-  # add $5 gridlines
+  # add main gridlines
   cs$add(abline(h=axis_labels(xdata,xsubset),col=theme$grid))
-  # add $5 axis labels/boxes
-  cs$add(text(1-1/3-max(strwidth(axis_labels(xdata,xsubset))),
-              axis_labels(xdata,xsubset), 
-              noquote(format(axis_labels(xdata,xsubset),justify="right")), 
-              col=theme$labels,offset=0,cex=0.9,pos=4))
-  cs$add(text(length(xsubset)+1/3,#-1/3-max(strwidth(axis_labels(xdata,xsubset))),
-              axis_labels(xdata,xsubset), 
-              noquote(format(axis_labels(xdata,xsubset),justify="right")),
-              col=theme$labels,offset=0,cex=0.9,pos=4))
-  #cs$add(text(length(xsubset),seq(min(xdata[xsubset]%/%5*5+5,na.rm=TRUE),max(xdata[xsubset]%/%5*5-5,na.rm=TRUE),5),
-  #              seq(min(xdata[xsubset]%/%5*5+5,na.rm=TRUE),max(xdata[xsubset]%/%5*5-5,na.rm=TRUE),5),
-  #            col=theme$labels,offset=0,cex=0.9,pos=4))
+  # left axis labels
+  if(theme$lylab) {
+    cs$add(text(1-1/3-max(strwidth(axis_labels(xdata,xsubset))),
+                axis_labels(xdata,xsubset), 
+                noquote(format(axis_labels(xdata,xsubset),justify="right")), 
+                col=theme$labels,offset=0,cex=0.9,pos=4))
+  }
+  # right axis labels
+  if(theme$rylab) {
+    cs$add(text(length(xsubset)+1/3,
+                axis_labels(xdata,xsubset), 
+                noquote(format(axis_labels(xdata,xsubset),justify="right")),
+                col=theme$labels,offset=0,cex=0.9,pos=4))
+  }
   # add main series
   cs$set_frame(2)
-#  if(type=="heikin.ashi") {
-#  cs$add(heikin.ashi.bars(xdata[xsubset], type="candlesticks",
-#         1,theme$up.col,theme$dn.col,theme$up.border,theme$dn.border))
-#  } else {
   cs$add(range.bars(xdata[xsubset], type,
          1,theme$up.col,theme$dn.col,theme$up.border,theme$dn.border))
-#  }
   assign(".chob", cs, .GlobalEnv)
 
   # handle TA="add_Vo()" as we would interactively
@@ -484,7 +492,7 @@ chart_Series <- function(x,
   }
   assign(".chob", cs, .GlobalEnv)
   cs
-}
+} #}}}
 
 current.chob <- function() get(".chob",.GlobalEnv)
 use.chob <- function(use=TRUE) {
@@ -672,6 +680,10 @@ add_RSI <- function (n=14, maType="EMA", ...) {
              range(na.omit(rsi))[1], 
              axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
              range(na.omit(rsi))[2], col=x$Env$theme$grid)
+    #lines(x.pos, rep(30,length(x.pos)), 
+    #      col=colorRampPalette(c(theme$col$lines,x$Env$theme$grid))(10)[x$Env$theme$shading], lwd=2,lty=2,lend=2,...) 
+    #lines(x.pos, rep(70,length(x.pos)), 
+    #      col=colorRampPalette(c(theme$col$lines,x$Env$theme$grid))(10)[x$Env$theme$shading], lwd=2,lty=2,lend=2,...) 
     lines(x.pos, rep(30,length(x.pos)), col=theme$col$lines, lwd=2,lty=2,lend=2,...) 
     lines(x.pos, rep(70,length(x.pos)), col=theme$col$lines, lwd=2,lty=2,lend=2,...) 
     lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=2.5,...) 
@@ -791,7 +803,7 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   lenv$grid_lines <- function(xdata,x) { 
     axTicksByValue(xdata[xsubset],c(5,4,3,2,1),3)
   }
-  plot_object$add_frame(ylim=range(na.omit(macd[xsubset])),fixed=FALSE,asp=1)
+  plot_object$add_frame(ylim=range(na.omit(lenv$macd[xsubset])),fixed=FALSE,asp=1)
   plot_object$next_frame()
 
   # add grid lines
@@ -814,18 +826,19 @@ add_BBands <- function(n=20, maType="EMA", sd=2, on=-1, ...) {
   lenv$plot_bbands <- function(x, n, maType, sd, on, ...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    theme <- x$Env$theme
+    col <- x$Env$theme$bbands$col
+    lty <- x$Env$theme$bbands$lty
     bbands <- coredata(BBands(Cl(xdata),n=n, maType,sd)[xsubset])
     if(on < 0) {
-      xx <- do.call("seq",as.list(plot_object$get_xlim()))
-      polygon(c(xx,rev(xx)), c(bbands[,1],rev(bbands[,3])),col=theme$bbands$bg,border=NA)
-      lines(1:NROW(xdata[xsubset]), bbands[,1], lty='dashed', col=theme$bbands$upper,...)
-      lines(1:NROW(xdata[xsubset]), bbands[,3], lty='dashed', col=theme$bbands$lower,...)
-      lines(1:NROW(xdata[xsubset]), bbands[,2], lty='dotted', col=theme$bbands$ma,...)
+      xx <- do.call("seq",as.list(x$get_xlim()))
+      polygon(c(xx,rev(xx)), c(bbands[,1],rev(bbands[,3])),col=col$fill,border=NA)
+      lines(1:NROW(xdata[xsubset]), bbands[,1], lty=lty$upper, col=col$upper,...)
+      lines(1:NROW(xdata[xsubset]), bbands[,3], lty=lty$lower, col=col$lower,...)
+      lines(1:NROW(xdata[xsubset]), bbands[,2], lty=lty$ma, col=col$ma,...)
     } else {
-      lines(1:NROW(xdata[xsubset]), bbands[,1], lty='dashed', ...)
-      lines(1:NROW(xdata[xsubset]), bbands[,3], lty='dashed', ...)
-      lines(1:NROW(xdata[xsubset]), bbands[,2], lty='dotted', ...)
+      lines(1:NROW(xdata[xsubset]), bbands[,1], lty=lty$upper, ...)
+      lines(1:NROW(xdata[xsubset]), bbands[,3], lty=lty$lower, ...)
+      lines(1:NROW(xdata[xsubset]), bbands[,2], lty=lty$ma, ...)
     }
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) },
@@ -833,19 +846,13 @@ add_BBands <- function(n=20, maType="EMA", sd=2, on=-1, ...) {
   exp <- parse(text=gsub("list","plot_bbands",as.expression(substitute(list(x=current.chob(),n=n,maType=maType,
                sd=sd,on=on,...)))),srcfile=NULL)
   # save data that is drawn on charts
-  plot_object <- current.chob()
-  xdata <- plot_object$Env$xdata
+  chob <- current.chob()
+  xdata <- chob$Env$xdata
   lenv$xdata <- BBands(Cl(xdata),n=n, maType,sd)[,-4]  # pctB is bad for ylim calculation on subset
-  if(is.null(plot_object$Env$theme$bbands)) {
-  plot_object$Env$theme$bbands <- list(bg="#f1f1f1", #plot_object$Env$theme$grid2,
-                                       upper=plot_object$Env$theme$grid,
-                                       lower=plot_object$Env$theme$grid,
-                                       ma=plot_object$Env$theme$grid)
-  }
 
-  plot_object$set_frame(sign(on)*(abs(on)+1L)) # need to adjust for header offset
-  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
-  plot_object
+  chob$set_frame(sign(on)*(abs(on)+1L)) # need to adjust for header offset
+  chob$add(exp,env=c(lenv, chob$Env),expr=TRUE)
+  chob
 } # }}}
 
 # add_Vo {{{
