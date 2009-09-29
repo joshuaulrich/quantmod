@@ -32,7 +32,9 @@ will be returned.
 \references{ \url{http://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }
 \examples{
+\dontrun{
 AAPL.OPT <- getOptionChain("AAPL")
 AAPL.OPTS <- getOptionChain("AAPL", NULL)
+}
 }
 \keyword{ utilities }% __ONLY ONE__ keyword per line

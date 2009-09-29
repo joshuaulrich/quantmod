@@ -19,7 +19,7 @@ getSymbols 'methods'.
 getSymbols.oanda(Symbols,
                  env,
                  return.class = "xts",
-                 from = Sys.Date() - 500,
+                 from = Sys.Date() - 499,
                  to = Sys.Date(),
                  ...)
 }
@@ -40,7 +40,7 @@ available by calling \code{oanda.currencies} }
  Meant to be called internally by getSymbols only.
 
  Oanda data is 7 day daily average price data, that is Monday through Sunday.
-There is a limit of 2000 days per request, and getSymbols will
+There is a limit of 500 days per request, and getSymbols will
 fail with a warning that the limit has been exceeded.
 }
 \value{
