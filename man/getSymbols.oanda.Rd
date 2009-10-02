@@ -9,7 +9,7 @@ as more that 36000 currency pairs from Oanda.com.
 Downloads \code{Symbols} to specified \code{env} from
 \url{www.oanda.com} historical currency database.
 This method is not meant to be called directly, instead
-a call to \code{getSymbols(\dQuote{x},src=\dQuote{oanda})} will
+a call to \code{getSymbols("x",src="oanda")} will
 in turn call this method. It is documented for the
 sole purpose of highlighting the arguments accepted,
 and to serve as a guide to creating additional

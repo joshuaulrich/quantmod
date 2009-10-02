@@ -1,8 +1,8 @@
 Package: quantmod
 Type: Package
 Title: Quantitative Financial Modelling Framework
-Version: 0.3-11
-Date: 2009-07-21
+Version: 0.3-12
+Date: 2009-10-01
 Author: Jeffrey A. Ryan
 Depends: methods,xts(>= 0.6-7),zoo,Defaults,TTR(>= 0.2)
 Suggests: DBI,RMySQL,RSQLite,fSeries,its
