@@ -84,7 +84,7 @@ of the period. Leading period calculations can be suppressed by setting \code{le
 \author{ Jeffrey A. Ryan }
 \note{
 }
-\seealso{\code{\link{getSymbols}} \code{\link[pkg:xts]{to.period}} }
+\seealso{\code{\link{getSymbols}}}
 \examples{
 \dontrun{
 getSymbols('QQQQ',src='yahoo')

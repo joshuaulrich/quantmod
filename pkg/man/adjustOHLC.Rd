@@ -87,7 +87,6 @@ will be exact for intraday values.
 \code{\link{getSymbols.yahoo}}
 \code{\link{getSplits}}
 \code{\link{getDividends}}
-\code{\link[TTR:TTR-package]{adjSplitDiv}}
 }
 \examples{
 \dontrun{
