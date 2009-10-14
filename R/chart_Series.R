@@ -245,7 +245,7 @@ chart_Series <- function(x,
   cs$add(axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid))
   cs$Env$axis_ticks <- function(xdata,xsubset) {
     ticks <- diff(axTicksByTime(xdata[xsubset],"months",labels=FALSE))/2 + 
-                  last(axTicksByTime(xdata[xsubset],"months",labels=T,format.labels="%b"),-1)
+                  last(axTicksByTime(xdata[xsubset],"months",labels=TRUE,format.labels="%b"),-1)
     if(length(ticks) > 20) ticks <- structure(unname(ticks),.Names=substring(names(ticks),1,1))
     ticks
   }
