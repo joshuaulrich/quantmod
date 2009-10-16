@@ -94,6 +94,31 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
     Env$ylim <- append(Env$ylim,list(structure(ylim,fixed=fixed)),after)
     Env$asp  <- append(Env$asp,asp,after)
   }
+  update_frames <- function(headers=TRUE) {
+    # use subset code here, without the subset part.
+    from_by <- ifelse(headers,2,1)  
+    ylim <- get_ylim()
+    for(y in seq(from_by,length(ylim),by=from_by)) {
+      if(!attr(ylim[[y]],'fixed'))
+        ylim[[y]] <- structure(c(Inf,-Inf),fixed=FALSE)
+    }
+    lapply(Env$actions,
+           function(x) {
+             frame <- abs(attr(x, "frame"))
+             fixed <- attr(ylim[[frame]],'fixed')
+             #fixed <- attr(x, "fixed")
+             if(frame %% from_by == 0 && !fixed) {
+               lenv <- attr(x,"env")
+               if(is.list(lenv)) lenv <- lenv[[1]]
+               min.tmp <- min(ylim[[frame]][1],range(na.omit(lenv$xdata[Env$xsubset]))[1],na.rm=TRUE)
+               max.tmp <- max(ylim[[frame]][2],range(na.omit(lenv$xdata[Env$xsubset]))[2],na.rm=TRUE)
+               ylim[[frame]] <<- structure(c(min.tmp,max.tmp),fixed=fixed)
+             }
+           })
+    # reset all ylim values, by looking for range(env[[1]]$xdata)
+    # xdata should be either coming from Env or if lenv, lenv
+    set_ylim(ylim)
+  }
   remove_frame <- function(frame) {
     rm.frames <- NULL
     max.frame <- max(abs(sapply(Env$actions, function(x) attr(x,"frame"))))
@@ -140,6 +165,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
                  set_window=set_window,
                  add=add, replot=replot,
                  get_actions, subset=subset,
+                 update_frames=update_frames,
                  set_frame=set_frame, get_frame=get_frame, next_frame=next_frame,
                  add_frame=add_frame, remove_frame=remove_frame,
                  set_asp=set_asp, get_asp=get_asp,
@@ -165,6 +191,7 @@ plot.replot <- function(x, ...) {
   usr <- par("usr")
   # plot negative (underlay) actions
   last.frame <- x$get_frame()
+  x$update_frames()
   lapply(x$Env$actions,
     function(aob) {
       if(attr(aob,"frame") < 0) {
@@ -191,10 +218,10 @@ plot.replot <- function(x, ...) {
       }
     }
   )
-  for(frames in 1:length(x$get_ylim())) {
-    x$set_frame(frames)
-    abline(h=x$get_ylim()[[frames]][1], col=x$Env$theme$grid, lwd=1)
-  }
+  #for(frames in 1:length(x$get_ylim())) {
+    #x$set_frame(frames)
+    #abline(h=x$get_ylim()[[frames]][1], col=x$Env$theme$grid, lwd=1)
+  #}
   x$set_frame(abs(last.frame),clip=FALSE)
   do.call("clip",as.list(usr))
   par(xpd=oxpd,cex=cex$cex,mar=mar$mar)#,usr=usr)
