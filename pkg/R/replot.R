@@ -104,6 +104,8 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
     }
     lapply(Env$actions,
            function(x) {
+             if(!is.null(attr(x,"no.update")) && attr(x, "no.update"))
+                return(NULL)
              frame <- abs(attr(x, "frame"))
              fixed <- attr(ylim[[frame]],'fixed')
              #fixed <- attr(x, "fixed")
@@ -154,7 +156,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
     if(!expr) {
       x <- match.call()$x
     } 
-    a <- structure(x,frame=Env$frame,clip=clip,env=env)
+    a <- structure(x,frame=Env$frame,clip=clip,env=env,...)
     Env$actions[[length(Env$actions)+1]] <<- a
   }
 
