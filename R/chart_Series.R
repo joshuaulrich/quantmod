@@ -413,9 +413,16 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
 add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
-  lenv$plot_ta <- function(x, ta, ...) {
-    ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
-    lines(1:length(x$Env$xsubset), ta, ...)
+  lenv$plot_ta <- function(x, ta, on, ...) {
+    if(is.logical(ta)) {
+      ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
+      shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
+      rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4],
+           density=30,col=x$Env$theme$grid, border=FALSE) 
+    } else {
+      ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
+      lapply(1:NCOL(ta), function(NC) lines(1:length(x$Env$xsubset), ta[,NC], ...))
+    }
   }
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
@@ -428,6 +435,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
   xsubset <- plot_object$Env$xsubset
+  if(is.logical(x)) no.update <- TRUE else no.update <- FALSE
   tav <- merge(x, xdata, join="left",retside=c(TRUE,FALSE))
   lenv$xdata <- tav
   tav <- tav[xsubset]
@@ -462,8 +470,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   #} else { plot_object$set_frame(sign(on)*(abs(on)+1L)) }
   } else { plot_object$set_frame(2*on) }
 
-
-  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
   plot_object
 } #}}}
 
@@ -640,24 +647,46 @@ add_RSI <- function (n=14, maType="EMA", ...) {
   plot_object
 } # }}}
 
+skeleton_TA <- function(on) {
+  lenv <- new.env()
+  lenv$plot_ta <- function(x, arg, ...) {
+    # fill in body of low level plot calls here
+    # use a switch based on type of TA to draw: bands, bars, lines, dots...
+  }
+  mapply(function(name, value) {assign(name,value,envir=lenv)},
+         names(list(arg=arg,...)),
+               list(arg=arg,...))
+  exp <- parse(text=gsub("list","plot_ta",
+               as.expression(substitute(list(x=current.chob(),
+                                        arg=arg,
+                                        ...)))), srcfile=NULL)
+  chob <- current.chob()
+  xsubset <- chob$Env$xsubset
+  preFUN <- ""
+  FUN <- ""
+  postFUN <- ""
+  chob$add_frame(ylin=c(0,1),asp=0.15)
+  chob$next_frame()
+}
+
 # add_MACD {{{
 add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   lenv <- new.env()
+  
+  # plot_macd draws the indicator using the data from the first(only) call to
+  # add_MACD.  This is a bit analogous to chartMACD in the first quantmod versions
   lenv$plot_macd <- function(x, fast, slow, signal, maType, histogram,...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     macd <- MACD(HLC(xdata),fast,slow,signal,maType)[xsubset]
-
-    x.pos <- 1:NROW(macd)
-    #segments(axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
-    #         min(-10,range(na.omit(macd))[1]), 
-    #         axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
-    #         max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
+    # vertical grid lines
     segments(axTicksByTime2(xdata[xsubset]),
-             min(-10,range(na.omit(macd))[1]), 
+             par("usr")[3], #min(-10,range(na.omit(macd))[1]), 
              axTicksByTime2(xdata[xsubset]),
-             max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
+             par("usr")[4], #max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
+             col=x$Env$theme$grid)
     # histogram
+    x.pos <- 1:NROW(macd)
     if(histogram) {
       macd.hist <- macd[,1] - macd[,2]
       bar.col <- ifelse(macd.hist > 0, x$Env$theme$macd$up.col, x$Env$theme$macd$dn.col)
@@ -725,7 +754,7 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
 } # }}}
 
 # add_BBands {{{
-add_BBands <- function(n=20, maType="EMA", sd=2, on=-1, ...) { 
+add_BBands <- function(n=20, maType="SMA", sd=2, on=-1, ...) { 
   lenv <- new.env()
   lenv$plot_bbands <- function(x, n, maType, sd, on, ...) {
     xdata <- x$Env$xdata
