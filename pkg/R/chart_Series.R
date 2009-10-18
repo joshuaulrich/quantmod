@@ -410,15 +410,20 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   plot_object
 } #}}}
 # add_TA {{{
-add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) { 
+add_TA <- function(x, order=NULL, on=NA, legend="auto", density=NULL, ...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_ta <- function(x, ta, on, ...) {
     if(is.logical(ta)) {
       ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
       shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
-      rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4],
-           density=30,col=x$Env$theme$grid, border=FALSE) 
+      if(!is.null(density)) {
+        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4],
+             density=30,col=x$Env$theme$grid, border=FALSE) 
+      } else {
+        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4],
+             col=x$Env$theme$grid, border=FALSE) 
+      }
     } else {
       ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
       lapply(1:NCOL(ta), function(NC) lines(1:length(x$Env$xsubset), ta[,NC], ...))
@@ -427,10 +432,10 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(x=x,order=order,on=on,legend=legend,...)),
-              list(x=x,order=order,on=on,legend=legend,...))
+        names(list(x=x,order=order,on=on,legend=legend,density=density,...)),
+              list(x=x,order=order,on=on,legend=legend,density=density,...))
   exp <- parse(text=gsub("list","plot_ta",
-               as.expression(substitute(list(x=current.chob(),ta=get("x"), ...)))),
+               as.expression(substitute(list(x=current.chob(),ta=get("x"),on=on,density=density, ...)))),
                srcfile=NULL)
   plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
