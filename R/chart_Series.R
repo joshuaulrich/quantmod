@@ -125,8 +125,8 @@ function(x, type="", spacing=1, line.col="darkorange",
 # {{{ chart_theme
 chart_theme <- chart_theme_white <- function() {
   theme <-list(col=list(bg="#FFFFFF",
-                        label.bg="#D0D0D0",
-                        grid="#D0D0D0",
+                        label.bg="#F0F0F0",
+                        grid="#F0F0F0",
                         grid2="#F5F5F5",
                         labels="#333333",
                         line.col="darkorange",
@@ -269,13 +269,13 @@ chart_Series <- function(x,
   cs$add_frame(0,ylim=c(0,1),asp=0.2)
   cs$set_frame(1)
 
-  cs$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border='black'))
-  cs$add(expression(if(length(xsubset)<400) {axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid)}),expr=TRUE)
+  #cs$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=theme$grid))
+  cs$add(expression(if(length(xsubset)<400) {axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid,tcl=0.3)}),expr=TRUE)
 
   # add "month" or "month.abb"
   cs$add(expression(axis(1,at=axTicksByTime(xdata[xsubset]),
                 labels=names(axTicksByTime(xdata[xsubset],format.labels=format.labels)),
-                las=1,lwd.ticks=1,mgp=c(3,1.5,0),cex.axis=.9)),
+                las=1,lwd.ticks=1,mgp=c(3,1.5,0),tcl=-0.4,cex.axis=.9)),
          expr=TRUE)
   cs$Env$name <- name
   text.exp <- c(expression(text(1-1/3,0.5,name,font=2,col='#444444',offset=0,cex=1.1,pos=4)),
@@ -410,38 +410,40 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   plot_object
 } #}}}
 # add_TA {{{
-add_TA <- function(x, order=NULL, on=NA, legend="auto", density=NULL, ...) { 
+add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_ta <- function(x, ta, on, ...) {
     if(is.logical(ta)) {
-      ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
+      ta <- merge(ta, x$Env$xdata, join="right",retside=c(TRUE,FALSE))[x$Env$xsubset]
       shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
-      if(!is.null(density)) {
-        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4],
-             density=30,col=x$Env$theme$grid, border=FALSE) 
-      } else {
-        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4],
-             col=x$Env$theme$grid, border=FALSE) 
-      }
+      rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], ...) 
     } else {
-      ta <- merge(ta, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
+#    ta <- merge(n=.xts(1:NROW(x$Env$xdata),.index(x$Env$xdata)), ta)
+#    ta <- ta[x$Env$xsubset]
+#    lapply(1:NCOL(ta), function(NC) lines(, ta[,NC], ...))
+      ta <- merge(ta, x$Env$xdata, join="right",retside=c(TRUE,FALSE))[x$Env$xsubset]
       lapply(1:NCOL(ta), function(NC) lines(1:length(x$Env$xsubset), ta[,NC], ...))
     }
   }
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(x=x,order=order,on=on,legend=legend,density=density,...)),
-              list(x=x,order=order,on=on,legend=legend,density=density,...))
+        names(list(x=x,order=order,on=on,legend=legend,...)),
+              list(x=x,order=order,on=on,legend=legend,...))
   exp <- parse(text=gsub("list","plot_ta",
-               as.expression(substitute(list(x=current.chob(),ta=get("x"),on=on,density=density, ...)))),
+               as.expression(substitute(list(x=current.chob(),ta=get("x"),on=on,...)))),
                srcfile=NULL)
   plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
   xsubset <- plot_object$Env$xsubset
   if(is.logical(x)) no.update <- TRUE else no.update <- FALSE
-  tav <- merge(x, xdata, join="left",retside=c(TRUE,FALSE))
+  #  this merge isn't going to work if x isn't in xdata range. Something like:
+  #    na.approx(merge(n=.xts(1:NROW(xdata),.index(xdata)),ta)[,1])
+  #  should allow for any time not in the original to be merged in.
+  #  probably need to subset xdata _before_ merging, else subset will be wrong
+  #
+  tav <- merge(x, xdata, join="right",retside=c(TRUE,FALSE))
   lenv$xdata <- tav
   tav <- tav[xsubset]
 
@@ -526,9 +528,9 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
     smi <- SMI(HLC(xdata),n=n,nFast=nFast,nSlow=nSlow,nSig=nSig,
                maType=maType,bounded=bounded)
     x.pos <- 1:length(xsubset)
-    segments(axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
+    segments(axTicksByTime2(xdata[xsubset]),
              range(na.omit(smi))[1], 
-             axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
+             axTicksByTime2(xdata[xsubset]),
              range(na.omit(smi))[2], col=x$Env$theme$grid)
     lines(x.pos, smi[xsubset,1], col=x$Env$theme$smi$col$smi, lwd=2,...) 
     lines(x.pos, smi[xsubset,2], col=x$Env$theme$smi$col$signal,  ...) 
@@ -551,18 +553,18 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
   xsubset <- plot_object$Env$xsubset
   smi <- SMI(HLC(plot_object$Env$xdata),n=n,nFast=nFast,nSlow=nSlow,nSig=nSig,
                     maType=maType,bounded=bounded)
-  plot_object$add_frame(ylim=c(0,1),asp=0.15)
+  plot_object$add_frame(ylim=c(0,1),asp=0.2)
   plot_object$next_frame()
   lenv$xdata <- structure(smi,.Dimnames=list(NULL, c("smi","signal")))
   text.exp <- expression(text(c(0,
                                 0+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep="")),
-                                0+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep=""))+strwidth("5.55555")+1),
-                       0.5,
+                                0+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep=""))+strwidth("-22.22222")),
+                       0.3,
                        c(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep=""),
                          round(last(xdata[xsubset,1]),5),
                          round(last(xdata[xsubset,2]),5)),
                        col=c(1,theme$smi$col$smi,theme$smi$col$signal),adj=c(0,0),cex=0.9,offset=0,pos=4))
-  plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$grid,border=NA)),expr=TRUE)
+  #plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$grid,border=NA)),expr=TRUE)
   plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
   plot_object$add_frame(ylim=range(na.omit(smi)),fixed=TRUE ,asp=1)
@@ -622,16 +624,16 @@ add_RSI <- function (n=14, maType="EMA", ...) {
   }
   xsubset <- plot_object$Env$xsubset
   rsi <- RSI(Cl(plot_object$Env$xdata),n=n,maType=maType)
-  plot_object$add_frame(ylim=c(0,1),asp=0.15)
+  plot_object$add_frame(ylim=c(0,1),asp=0.2)
   plot_object$next_frame()
   lenv$xdata <- structure(rsi,.Dimnames=list(NULL, "rsi"))
   text.exp <- expression(text(c(0,
                                 0+strwidth(paste("RSI(",n,"):",sep=""))),
-                       0.5,
+                       0.3,
                        c(paste("RSI(",n,"):",sep=""),
                          round(last(xdata[xsubset]),5)),
                        col=c(1,theme$rsi$col$rsi),adj=c(0,0),cex=0.9,offset=0,pos=4))
-  plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$grid,border="black")),expr=TRUE)
+  #plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$grid,border="black")),expr=TRUE)
   plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
   plot_object$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)
@@ -730,13 +732,13 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   text.exp <- expression(text(x=c(0,
                                   0+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep="")),
                                   0+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""))+strwidth("5")*7),
-                              y=0.5,
+                              y=0.3,
                               labels=c(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""),round(last(xdata[xsubset,1]),5),
                                        round(last(xdata[xsubset,2]),5)),
                               col=c(1,theme$macd$macd,theme$macd$signal),adj=c(0,0),cex=0.9,offset=0,pos=4))
-  plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$grid,border="black")),expr=TRUE)
+#  plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=theme$grid)),expr=TRUE)
   plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
-
+#
   # main MACD plot from expression above
   lenv$grid_lines <- function(xdata,x) { 
     axTicksByValue(xdata[xsubset],c(5,4,3,2,1),gt=3)
