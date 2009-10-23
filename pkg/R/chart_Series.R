@@ -27,7 +27,7 @@ function(x,
                     50,20,10,
                     5,2,1,
                     0.50,0.25,0.20,0.10,
-                    0.05,0.01), 
+                    0.05,0.02,0.01), 
          lt=20,gt=3, secondary=FALSE) {
   x <- na.omit(x)
   diff_range <- diff(range(x))
@@ -128,6 +128,7 @@ chart_theme <- chart_theme_white <- function() {
                         label.bg="#F0F0F0",
                         grid="#F0F0F0",
                         grid2="#F5F5F5",
+                        ticks="#999999",
                         labels="#333333",
                         line.col="darkorange",
                         dn.col="red",
@@ -140,8 +141,8 @@ chart_theme <- chart_theme_white <- function() {
                lylab=TRUE,
                grid.ticks.lwd=1,
                grid.ticks.on="months")
-  theme$bbands <- list(col=list(fill="whitesmoke",upper=theme$col$grid,
-                                lower=theme$col$grid,ma=theme$col$grid),
+  theme$bbands <- list(col=list(fill="whitesmoke",upper="#D5D5D5",
+                                lower="#D5D5D5",ma="#D5D5D5"),
                        lty=list(upper="dashed",lower="dashed",ma="dotted")
                       )
   theme
@@ -414,16 +415,30 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_ta <- function(x, ta, on, ...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    if(is.na(on)) {
+      segments(axTicksByTime2(xdata[xsubset]),
+               par("usr")[3],
+               axTicksByTime2(xdata[xsubset]),
+               par("usr")[4],
+               col=x$Env$theme$grid)
+    }
     if(is.logical(ta)) {
-      ta <- merge(ta, x$Env$xdata, join="right",retside=c(TRUE,FALSE))[x$Env$xsubset]
+      ta <- merge(ta, xdata, join="right",retside=c(TRUE,FALSE))[xsubset]
       shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
+print(par("usr"))
       rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], ...) 
     } else {
-#    ta <- merge(n=.xts(1:NROW(x$Env$xdata),.index(x$Env$xdata)), ta)
-#    ta <- ta[x$Env$xsubset]
-#    lapply(1:NCOL(ta), function(NC) lines(, ta[,NC], ...))
-      ta <- merge(ta, x$Env$xdata, join="right",retside=c(TRUE,FALSE))[x$Env$xsubset]
-      lapply(1:NCOL(ta), function(NC) lines(1:length(x$Env$xsubset), ta[,NC], ...))
+      # we can add points that are not necessarily at the points
+      # on the main series
+      subset.range <- paste(start(x$Env$xdata[x$Env$xsubset]),
+                            end(x$Env$xdata[x$Env$xsubset]),sep="/")
+      ta.adj <- merge(n=.xts(1:NROW(x$Env$xdata[x$Env$xsubset]),
+                             .index(x$Env$xdata[x$Env$xsubset])),ta)[subset.range]
+      ta.x <- as.numeric(na.approx(ta.adj[,1]))
+      ta.y <- ta.adj[,2]
+      lapply(1:NCOL(ta.y), function(NC) lines(ta.x, ta.y[,NC], ...))
     }
   }
   lenv$xdata <- x
@@ -450,19 +465,16 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   if(is.na(on)) {
     plot_object$add_frame(ylim=c(0,1),asp=0.15)
     plot_object$next_frame()
-    text.exp <- expression(text(c(0,
-                                  0+strwidth(paste(name,sep="")),
-                                  0+strwidth(paste(name,sep=""))+strwidth("5.55555")+1),
-                         0.5,
-                         name,
+    text.exp <- expression(text(c(0, 0+strwidth(paste(name,sep=""))),
+                         0.3,
+                         labels=c(name,sprintf("%.4f",last(xdata[xsubset]))),
                          col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
-    plot_object$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=NA))
     plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
     plot_object$add_frame(ylim=range(na.omit(tav)),asp=1)  # need to have a value set for ylim
     plot_object$next_frame()
     lenv$grid_lines <- function(xdata,x) { 
-      ticks <- axTicksByValue(xdata[x])
+      ticks <- axTicksByValue(xdata[x],lt=10,gt=3)
       ticks
     }
     # add grid lines
