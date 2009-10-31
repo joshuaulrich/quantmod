@@ -82,8 +82,6 @@ i.e. this week/month/quarter/year return to date even if the start/end is not th
 of the period. Leading period calculations can be suppressed by setting \code{leading=FALSE}.
 }
 \author{ Jeffrey A. Ryan }
-\note{
-}
 \seealso{\code{\link{getSymbols}}}
 \examples{
 \dontrun{

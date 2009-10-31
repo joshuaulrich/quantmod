@@ -112,8 +112,9 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
              if(frame %% from_by == 0 && !fixed) {
                lenv <- attr(x,"env")
                if(is.list(lenv)) lenv <- lenv[[1]]
-               min.tmp <- min(ylim[[frame]][1],range(na.omit(lenv$xdata[Env$xsubset]))[1],na.rm=TRUE)
-               max.tmp <- max(ylim[[frame]][2],range(na.omit(lenv$xdata[Env$xsubset]))[2],na.rm=TRUE)
+               dat.range <- range(na.omit(lenv$xdata[Env$xsubset]))
+               min.tmp <- min(ylim[[frame]][1],dat.range,na.rm=TRUE)
+               max.tmp <- max(ylim[[frame]][2],dat.range,na.rm=TRUE)
                ylim[[frame]] <<- structure(c(min.tmp,max.tmp),fixed=fixed)
              }
            })

@@ -71,6 +71,8 @@ Ad(x)
 
 seriesHi(x)
 seriesLo(x)
+seriesIncr(x, thresh=0, diff.=1L)
+seriesDecr(x, thresh=0, diff.=1L)
 
 OpCl(x)
 ClCl(x)
@@ -88,6 +90,8 @@ OHLC(x)
 \arguments{
   \item{x}{ A data object with columns containing
    data to be extracted. }
+  \item{thresh}{ noise threshold (seriesIncr/seriesDecr) }
+  \item{diff.}{ differencing (seriesIncr/seriesDecr) }
 }
 \details{
 Internally, the code uses grep to locate the appropriate

@@ -28,8 +28,8 @@ function (..., on = NA, legend = "auto")
         chobTA@on <- on
     }
     chobTA@call <- match.call()
-    legend.name <- gsub("^.*[(]", " Chaikin Acc/Dist (", deparse(match.call()), 
-        extended = TRUE)
+    legend.name <- gsub("^.*[(]", " Chaikin Acc/Dist (", deparse(match.call()))
+        #extended = TRUE)
     gpars <- c(list(...), list(col = 11))[unique(names(c(list(col = 11), 
         list(...))))]
     chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 
@@ -74,8 +74,8 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
         chobTA@on <- on
     }
     chobTA@call <- match.call()
-    legend.name <- gsub("^.*[(]", " Chaikin Volatility (", deparse(match.call()), 
-        extended = TRUE)
+    legend.name <- gsub("^.*[(]", " Chaikin Volatility (", deparse(match.call()))#, 
+        #extended = TRUE)
     gpars <- c(list(...), list(col = 8))[unique(names(c(list(col = 8), 
         list(...))))]
     chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 
