@@ -26,8 +26,8 @@ function (..., on = NA, legend = "auto")
         chobTA@on <- on
     }
     chobTA@call <- match.call()
-    legend.name <- gsub("^.*[(]", " On Balance Volume (", deparse(match.call()), 
-        extended = TRUE)
+    legend.name <- gsub("^.*[(]", " On Balance Volume (", deparse(match.call()))#, 
+        #extended = TRUE)
     gpars <- c(list(...), list(col=4))[unique(names(c(list(col=4), list(...))))]
     chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 
         colors = lchob@colors, color.vol = lchob@color.vol, multi.col = lchob@multi.col, 

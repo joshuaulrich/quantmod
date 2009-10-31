@@ -28,7 +28,7 @@ function (..., on = NA, legend = "auto")
     }
     chobTA@call <- match.call()
     legend.name <- gsub("^.*[(]", " Close Location Value (", 
-        deparse(match.call()), extended = TRUE)
+        deparse(match.call()))#, extended = TRUE)
     gpars <- c(list(...), list(col=5, type = "h"))[unique(names(c(list(col=5, type = "h"), 
         list(...))))]
     chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 

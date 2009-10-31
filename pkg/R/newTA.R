@@ -35,7 +35,8 @@
   # add ability to customize legend.name, still retaining legend color/last value
   if(!missing(legend.name) && is.character(legend.name)) {
     .body[22] <- paste("legend.name <- gsub('^.*[(]',",paste('\'',legend.name,'(\''),
-                       ",deparse(match.call()),extended=TRUE)")
+                       #",deparse(match.call()),extended=TRUE)")
+                       ",deparse(match.call()))")
   }  
 
   # cdots: should the newTA object have a ... arg?

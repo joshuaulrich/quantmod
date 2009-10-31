@@ -250,32 +250,39 @@ chart_Series <- function(x,
     }
     ticks
   }
-  cs$add(expression(segments(axTicksByTime2(xdata[xsubset]),
+  cs$add(expression(atbt <- axTicksByTime2(xdata[xsubset]),
+                    segments(atbt, #axTicksByTime2(xdata[xsubset]),
                              get_ylim()[[2]][1],
-                             axTicksByTime2(xdata[xsubset]),
-                             get_ylim()[[2]][2], col=theme$grid, lwd=grid.ticks.lwd)),clip=FALSE,expr=TRUE)
-  cs$add(expression(axt <- axis_ticks(xdata,xsubset),
+                             atbt, #axTicksByTime2(xdata[xsubset]),
+                             get_ylim()[[2]][2], col=theme$grid, lwd=grid.ticks.lwd),
+                    axt <- axis_ticks(xdata,xsubset),
                     text(as.numeric(axt),
                          par('usr')[3]-0.2*min(strheight(axt)),
                          names(axt),xpd=TRUE,cex=0.9,pos=3)),
-         expr=TRUE,clip=FALSE)
-                  
+                    clip=FALSE,expr=TRUE)
+#  cs$add(expression(axt <- axis_ticks(xdata,xsubset),
+#                    text(as.numeric(axt),
+#                         par('usr')[3]-0.2*min(strheight(axt)),
+#                         names(axt),xpd=TRUE,cex=0.9,pos=3)),
+#         expr=TRUE,clip=FALSE)
+#                  
                   
   cs$set_frame(-1)
   # background of main window
-  cs$add(expression(rect(par("usr")[1],
-                         par("usr")[3],
-                         par("usr")[2],
-                         par("usr")[4],border=NA,col=theme$bg)),expr=TRUE)
+  #cs$add(expression(rect(par("usr")[1],
+  #                       par("usr")[3],
+  #                       par("usr")[2],
+  #                       par("usr")[4],border=NA,col=theme$bg)),expr=TRUE)
   cs$add_frame(0,ylim=c(0,1),asp=0.2)
   cs$set_frame(1)
 
   #cs$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=theme$grid))
-  cs$add(expression(if(length(xsubset)<400) {axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid,tcl=0.3)}),expr=TRUE)
+  cs$add(expression(if(length(xsubset)<400) {axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid2,tcl=0.3)}),expr=TRUE)
 
   # add "month" or "month.abb"
-  cs$add(expression(axis(1,at=axTicksByTime(xdata[xsubset]),
-                labels=names(axTicksByTime(xdata[xsubset],format.labels=format.labels)),
+  cs$add(expression(axt <- axTicksByTime(xdata[xsubset],format.labels=format.labels),
+                axis(1,at=axt, #axTicksByTime(xdata[xsubset]),
+                labels=names(axt), #axTicksByTime(xdata[xsubset],format.labels=format.labels)),
                 las=1,lwd.ticks=1,mgp=c(3,1.5,0),tcl=-0.4,cex.axis=.9)),
          expr=TRUE)
   cs$Env$name <- name
@@ -290,6 +297,7 @@ chart_Series <- function(x,
     axTicksByValue(na.omit(xdata[xsubset]))
   }
   #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
+  cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
 
   # add $1 gridlines
   cs$set_frame(-2)
@@ -301,19 +309,20 @@ chart_Series <- function(x,
   #cs$add(expression(abline(h=axTicksByValue(xdata[xsubset],gt=10),col=theme$grid2)),expr=TRUE)
   cs$set_frame(2)
   # add main gridlines
-  cs$add(expression(abline(h=axis_labels(xdata,xsubset),col=theme$grid)),expr=TRUE)
+  #cs$add(expression(abline(h=axis_labels(xdata,xsubset),col=theme$grid)),expr=TRUE)
+  cs$add(expression(abline(h=alabels,col=theme$grid)),expr=TRUE)
   # left axis labels
   if(theme$lylab) {
-    cs$add(expression(text(1-1/3-max(strwidth(axis_labels(xdata,xsubset))),
-                axis_labels(xdata,xsubset), 
-                noquote(format(axis_labels(xdata,xsubset),justify="right")), 
+    cs$add(expression(text(1-1/3-max(strwidth(alabels)),
+                alabels, #axis_labels(xdata,xsubset), 
+                noquote(format(alabels,justify="right")), 
                 col=theme$labels,offset=0,cex=0.9,pos=4)),expr=TRUE)
   }
   # right axis labels
   if(theme$rylab) {
     cs$add(expression(text(length(xsubset)+1/3,
-                axis_labels(xdata,xsubset), 
-                noquote(format(axis_labels(xdata,xsubset),justify="right")),
+                alabels, 
+                noquote(format(alabels,justify="right")),
                 col=theme$labels,offset=0,cex=0.9,pos=4)),expr=TRUE)
   }
   # add main series
@@ -427,8 +436,8 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
     if(is.logical(ta)) {
       ta <- merge(ta, xdata, join="right",retside=c(TRUE,FALSE))[xsubset]
       shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
-print(par("usr"))
-      rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], ...) 
+      if(length(shade$start) > 0) # all FALSE cause zero-length results
+        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], ...) 
     } else {
       # we can add points that are not necessarily at the points
       # on the main series

@@ -8,15 +8,15 @@ seriesDecel <- function(x)
   diff(x, diff=2L, na.pad=TRUE) < 0
 }
 
-seriesIncr <- function(x, thresh=0)
+seriesIncr <- function(x, thresh=0, diff.=1L)
 {
-  diff(x, diff=1L, na.pad=TRUE) > thresh
+  diff(x, diff=diff., na.pad=TRUE) > thresh
 }
 
 
-seriesDecr <- function(x, thresh=0)
+seriesDecr <- function(x, thresh=0, diff.=1L)
 {
-  diff(x, diff=1L, na.pad=TRUE) < thresh
+  diff(x, diff=diff., na.pad=TRUE) < thresh
 }
 
 `seriesHi` <-

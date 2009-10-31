@@ -28,8 +28,8 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
         chobTA@on <- on
     }
     chobTA@call <- match.call()
-    legend.name <- gsub("^.*[(]", " Ease of Movement (", deparse(match.call()), 
-        extended = TRUE)
+    legend.name <- gsub("^.*[(]", " Ease of Movement (", deparse(match.call()))#, 
+        #extended = TRUE)
     gpars <- c(list(...), list(col = 6:7))[unique(names(c(list(col = 6:7), 
         list(...))))]
     chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 
