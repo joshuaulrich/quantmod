@@ -164,17 +164,39 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   # prepare window to draw
   set_window()
   # return
-  structure(list(Env=Env, 
-                 set_window=set_window,
-                 add=add, replot=replot,
-                 get_actions, subset=subset,
-                 update_frames=update_frames,
-                 set_frame=set_frame, get_frame=get_frame, next_frame=next_frame,
-                 add_frame=add_frame, remove_frame=remove_frame,
-                 set_asp=set_asp, get_asp=get_asp,
-                 set_xlim=set_xlim, get_xlim=get_xlim,
-                 reset_ylim=reset_ylim, set_ylim=set_ylim, get_ylim=get_ylim),
-            class="replot")
+  replot_env <- new.env()
+  class(replot_env) <- c("replot","environment")
+  replot_env$Env <- Env
+  replot_env$set_window <- set_window
+  replot_env$add <- add
+  replot_env$replot <- replot
+  replot_env$get_actions <- get_actions
+  replot_env$subset <- subset
+  replot_env$update_frames <- update_frames
+  replot_env$set_frame <- set_frame
+  replot_env$get_frame <- get_frame
+  replot_env$next_frame <- next_frame
+  replot_env$add_frame <- add_frame
+  replot_env$remove_frame <- remove_frame
+  replot_env$set_asp <- set_asp
+  replot_env$get_asp <- get_asp
+  replot_env$set_xlim <- set_xlim
+  replot_env$get_xlim <- get_xlim
+  replot_env$reset_ylim <- reset_ylim
+  replot_env$set_ylim <- set_ylim
+  replot_env$get_ylim <- get_ylim
+  return(replot_env)
+#  structure(list(Env=Env, 
+#                 set_window=set_window,
+#                 add=add, replot=replot,
+#                 get_actions, subset=subset,
+#                 update_frames=update_frames,
+#                 set_frame=set_frame, get_frame=get_frame, next_frame=next_frame,
+#                 add_frame=add_frame, remove_frame=remove_frame,
+#                 set_asp=set_asp, get_asp=get_asp,
+#                 set_xlim=set_xlim, get_xlim=get_xlim,
+#                 reset_ylim=reset_ylim, set_ylim=set_ylim, get_ylim=get_ylim),
+#            class="replot")
 } # }}}
 
 str.replot <- function(x, ...) {

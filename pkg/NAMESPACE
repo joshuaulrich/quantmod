@@ -13,6 +13,16 @@ importFrom(stats,resid)
 importFrom(stats,anova)
 importFrom(zoo,as.zoo)
 
+# new plotting functions (experimental)
+export(new.replot,
+       chart_Series,
+       add_Vo,
+       add_MACD)
+export(axTicksByValue)
+export(axTicksByTime2)
+S3method(plot, replot)
+S3method(print, replot)
+
 #export(.chob,write.chob,get.chob,release.chob)
 
 export(.chob)
