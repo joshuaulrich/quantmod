@@ -99,27 +99,26 @@ function(x, type="", spacing=1, line.col="darkorange",
     bar.border[is.na(bar.border)] <- up.border
   }
 
-  segments(x.pos, Lows, x.pos, apply(cbind(Opens,Closes),1,min),col=bar.border,lwd=1.5,lend=3)
-  segments(x.pos, Highs, x.pos, apply(cbind(Opens,Closes),1,max),col=bar.border,lwd=1.5,lend=3)
+  segments(x.pos, Lows, x.pos, apply(cbind(Opens,Closes),1,min),col=bar.border,lwd=1.2,lend=3)
+  segments(x.pos, Highs, x.pos, apply(cbind(Opens,Closes),1,max),col=bar.border,lwd=1.2,lend=3)
 
   if (type == "candlesticks") {
      rect(x.pos - spacing/3, Opens, x.pos + spacing/3, 
-          Closes, col = bar.col, border = bar.border)
+          Closes, col = bar.col, border = bar.border, lwd=0.2)
   } else 
   if (type == "matchsticks") {
     bar.col[is.na(bar.col)] <- up.col
-    segments(x.pos, Opens, x.pos, Closes, col=bar.col,lwd=1.5,lend=3)
+    segments(x.pos, Opens, x.pos, Closes, col=bar.col,lwd=1.2,lend=3)
   } else
   if (type == "ohlc") {
-    segments(x.pos, Opens, x.pos, Closes, col=bar.border,lwd=1.5,lend=3)
-    segments(x.pos-1/3, Opens, x.pos, Opens, col=bar.border,lwd=1.5,lend=3) 
-    segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.5,lend=3) 
+    segments(x.pos, Opens, x.pos, Closes, col=bar.border,lwd=1.2,lend=3)
+    segments(x.pos-1/3, Opens, x.pos, Opens, col=bar.border,lwd=1.2,lend=3) 
+    segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.2,lend=3) 
   } else
   if (type == "hlc") {
-    segments(x.pos, Opens, x.pos, Closes, col=bar.border,lwd=1.5,lend=3)
-    segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.5,lend=3) 
+    segments(x.pos, Opens, x.pos, Closes, col=bar.border,lwd=1.2,lend=3)
+    segments(x.pos, Closes, x.pos+1/3, Closes, col=bar.border,lwd=1.2,lend=3) 
   }
-  
 } # }}}
 
 # {{{ chart_theme
@@ -250,6 +249,7 @@ chart_Series <- function(x,
     }
     ticks
   }
+  # need to add if(upper.x.label) to allow for finer control
   cs$add(expression(atbt <- axTicksByTime2(xdata[xsubset]),
                     segments(atbt, #axTicksByTime2(xdata[xsubset]),
                              get_ylim()[[2]][1],
@@ -276,7 +276,7 @@ chart_Series <- function(x,
   cs$add_frame(0,ylim=c(0,1),asp=0.2)
   cs$set_frame(1)
 
-  #cs$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=theme$grid))
+  # add observation level ticks on x-axis if < 400 obs.
   cs$add(expression(if(length(xsubset)<400) {axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid2,tcl=0.3)}),expr=TRUE)
 
   # add "month" or "month.abb"
@@ -299,18 +299,20 @@ chart_Series <- function(x,
   #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
   cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
 
-  # add $1 gridlines
+  # add $1 grid lines if appropriate
   cs$set_frame(-2)
 
-  # add minor grid lines
-  cs$add(expression(if(diff(range(xdata[xsubset]))<100) abline(h=seq(min(xdata[xsubset]%/%1,na.rm=TRUE),
-                                 max(xdata[xsubset]%/%1,na.rm=TRUE),1),
-                           col=theme$grid2)),expr=TRUE)
-  #cs$add(expression(abline(h=axTicksByValue(xdata[xsubset],gt=10),col=theme$grid2)),expr=TRUE)
+  # add minor y-grid lines
+  cs$add(expression(if(diff(range(xdata[xsubset])) < 50)
+                    segments(1,seq(min(xdata[xsubset]%/%1,na.rm=TRUE),
+                                   max(xdata[xsubset]%/%1,na.rm=TRUE),1),
+                             length(xsubset),
+                               seq(min(xdata[xsubset]%/%1,na.rm=TRUE),
+                                   max(xdata[xsubset]%/%1,na.rm=TRUE),1),
+                             col=theme$grid2, lty="dotted")), expr=TRUE)
   cs$set_frame(2)
-  # add main gridlines
-  #cs$add(expression(abline(h=axis_labels(xdata,xsubset),col=theme$grid)),expr=TRUE)
-  cs$add(expression(abline(h=alabels,col=theme$grid)),expr=TRUE)
+  # add main y-grid lines
+  cs$add(expression(segments(1,alabels,length(xsubset),alabels, col=theme$grid)),expr=TRUE)
   # left axis labels
   if(theme$lylab) {
     cs$add(expression(text(1-1/3-max(strwidth(alabels)),
@@ -334,8 +336,8 @@ chart_Series <- function(x,
          1,theme$line.col,theme$up.col,theme$dn.col,theme$up.border,theme$dn.border)),expr=TRUE)
   assign(".chob", cs, .GlobalEnv)
 
-  # handle TA="add_Vo()" as we would interactively
-  if(nchar(TA) > 0) {
+  # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
+  if(!is.null(TA) && nchar(TA) > 0) {
   TA <- parse(text=TA, srcfile=NULL)
   for( ta in 1:length(TA)) {
     if(length(TA[ta][[1]][-1]) > 0) {
@@ -626,9 +628,9 @@ add_RSI <- function (n=14, maType="EMA", ...) {
              0, #range(na.omit(rsi))[1], 
              axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
              100, col=x$Env$theme$grid) #range(na.omit(rsi))[2], col=x$Env$theme$grid)
-    lines(x.pos, rep(30,length(x.pos)), col=theme$col$lines, lwd=2,lty=2,lend=2,...) 
-    lines(x.pos, rep(70,length(x.pos)), col=theme$col$lines, lwd=2,lty=2,lend=2,...) 
-    lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=2.5,...) 
+    lines(x.pos, rep(30,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
+    lines(x.pos, rep(70,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
+    lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=1.5,...) 
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
         names(list(n=n,maType=maType,...)),
@@ -663,7 +665,9 @@ add_RSI <- function (n=14, maType="EMA", ...) {
   # add grid lines
   lenv$grid_lines <- function(xdata,x) { c(30,70) }
   # add grid lines
-  exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
+  #exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
+  exp <- c(expression(segments(1, grid_lines(xdata,xsubset),
+                               length(xsubset), grid_lines(xdata,xsubset), col=theme$grid)),exp,
   # add axis labels/boxes
            expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
@@ -718,7 +722,7 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
     if(histogram) {
       macd.hist <- macd[,1] - macd[,2]
       bar.col <- ifelse(macd.hist > 0, x$Env$theme$macd$up.col, x$Env$theme$macd$dn.col)
-      rect(x.pos-1/3, 0, x.pos+1/3, macd.hist, col=bar.col, border="grey",...)  # base graphics call
+      rect(x.pos-1/3, 0, x.pos+1/3, macd.hist, col=bar.col, border="grey", lwd=0.2, ...)  # base graphics call
     }
     lines(x.pos, macd[,1], col=x$Env$theme$macd$macd, lwd=2,,lty=1,...) 
     lines(x.pos, macd[,2], col=x$Env$theme$macd$signal, lty=3,...) 
@@ -768,7 +772,9 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   plot_object$next_frame()
 
   # add grid lines
-  exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
+  #exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
+  exp <- c(expression(segments(1,grid_lines(xdata,xsubset),length(xsubset),grid_lines(xdata,xsubset),
+                               col=theme$grid)), exp,
   # add axis labels/boxes
            expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
