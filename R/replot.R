@@ -81,6 +81,8 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
     actions
   }
 
+  # add_frame:
+  #   append a plot frame to the plot window
   add_frame <- function(after, ylim=c(0,0), asp=0, fixed=FALSE) {
     if(missing(after))
       after <- max(abs(sapply(Env$actions, function(x) attr(x,"frame"))))

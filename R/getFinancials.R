@@ -1,4 +1,55 @@
-`getFin` <-
+getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE) {
+  Symbol.name <- Symbol
+  google.fin <- "http://finance.google.com/finance?fstype=ii&q=" 
+  tmp <- tempfile()
+  download.file(paste(google.fin,Symbol,sep=""),quiet=TRUE,destfile=tmp)
+  Symbol <- readLines(tmp)
+
+  # thead contains the column names
+  # tbody contains the data
+  thead <- grep('thead', Symbol)
+  tbody <- grep('tbody', Symbol)
+
+  # extract the column names
+  c1 <- lapply(seq(1,11,2), function(x) Symbol[thead[x]:thead[x+1]])
+  c2 <- lapply(c1,gsub,pattern="<.*?>",replacement="")
+  cnames <- lapply(c2,function(x) x[-which(x=="")][-1])
+
+  # extract the data.  fnames if financial names (rownames)
+  d1 <- lapply(seq(1,11,2), function(x) { Symbol[tbody[x]:tbody[x+1]]})
+  d2 <- lapply(d1, gsub, pattern="<.*?>", replacement="")
+  d3 <- lapply(d2, function(x) x[-which(x=="")])
+  fnames <- lapply(d3, function(x) {
+                   x[grep("[A-Za-z]",x)]} )
+  # extract data and fill NAs where needed
+  vals   <- lapply(d3, function(x) {
+            as.numeric(gsub(",","",
+            gsub("^-$",NA,x[-grep("[A-Za-z]",x)]))) })
+
+  # convert to a matrix with correct dim and names
+  make_col_names <- function(name) {
+    substr(name, nchar(name)-9, nchar(name))
+  }
+  fin <- lapply(1:6,
+         function(x) {
+           structure(matrix(vals[[x]],nr=length(fnames[[x]]),byrow=TRUE),
+                     .Dimnames=list(fnames[[x]],make_col_names(cnames[[x]])),
+                     col_desc=cnames[[x]])})
+  fin <- list(IS=list(Q=fin[[1]], A=fin[[2]]),
+              BS=list(Q=fin[[3]], A=fin[[4]]),
+              CF=list(Q=fin[[5]], A=fin[[6]]))
+  if (auto.assign) {
+    assign(paste(gsub(":", ".", Symbol.name), "f", sep = "."), 
+           structure(fin, symbol = Symbol.name, class = "financials", 
+           src = "google", updated = Sys.time()), env)
+    return(paste(gsub(":", ".", Symbol.name), "f", sep = "."))
+  } else {
+    return(structure(fin, symbol = Symbol.name, class = "financials", 
+           src = "google", updated = Sys.time()))
+  }
+}
+
+`.getFin` <-
 function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
   tmp <- tempfile()
   download.file(paste('http://finance.google.com/finance?fstype=ii&q=',Symbol,sep=''),
