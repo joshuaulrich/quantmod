@@ -21,6 +21,7 @@ getSubset <- function() {
   c(list(ohlc),values)
 }
 
+# axTicksByValue {{{
 axTicksByValue <-
 function(x,
          match.to=c(500,300,200,150,100,
@@ -40,8 +41,9 @@ function(x,
   ticks1 <- do.call('seq.int', as.list(c(range(x)[1]%/%by*by,range(x)[2]%/%by*by,by)))
 #  if(length(ticks1) > 5) ticks1 <- ticks1[-c(1,length(ticks1))]
   ticks1
-}
+} # }}}
 
+# UNUSED heikin.ashi.bars {{{
 heikin.ashi.bars <- 
 function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.border=up.border) {
   if(is.OHLC(x)) {
@@ -65,7 +67,7 @@ function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.
           haCloses, col = bar.col, border = bar.border)
   } else segments(x.pos, haOpens, x.pos, haCloses, col='blue')
   
-}
+} # }}}
 
 # range.bars {{{
 range.bars <-
@@ -153,6 +155,19 @@ chart_pars <- function() {
 } # }}}
 
 # chart_Series {{{
+#  Updated: 2010-01-15
+#
+#  chart_Series now uses a new graphical extension
+#  called 'replot'.  This enables the accumulation
+#  of 'actions', in the form of (unevaluated) R 
+#  expressions, to be stored within a replot object.
+#  This object is an R closure, which contains
+#  all the methods which are needed to perform
+#  graphical operations.
+#
+#  Ideally all behavior is consistent with the
+#  original quantmod:::chartSeries, except the
+#  undesireable ones.
 chart_Series <- function(x, 
                          name=deparse(substitute(x)), 
                          type="candlesticks", 
@@ -160,10 +175,8 @@ chart_Series <- function(x,
                          TA="",
                          pars=chart_pars(), theme=chart_theme()) {
   cs <- new.replot()
-
-  cex <- pars$cex
-  mar <- pars$mar
-
+  #cex <- pars$cex
+  #mar <- pars$mar
   line.col <- theme$col$line.col
   up.col <- theme$col$up.col
   dn.col <- theme$col$dn.col
@@ -216,15 +229,15 @@ chart_Series <- function(x,
   } else cs$Env$xdata <- x
   subset <- match(.index(x[subset]), .index(x))
   cs$Env$xsubset <- subset
-  cs$Env$cex <- cex
-  cs$Env$mar <- mar
+  cs$Env$cex <- pars$cex
+  cs$Env$mar <- pars$mar
   cs$set_asp(3)
   cs$set_xlim(c(1,NROW(subset)))
   cs$set_ylim(list(structure(range(cs$Env$xdata[subset]),fixed=FALSE)))
   cs$set_frame(1,FALSE)
   cs$Env$theme$bbands <- theme$bbands
   cs$Env$theme$shading <- theme$shading
-  cs$Env$theme$line.col <- line.col
+  cs$Env$theme$line.col <- theme$col$line.col
   cs$Env$theme$up.col <- up.col
   cs$Env$theme$dn.col <- dn.col
   cs$Env$theme$up.border <- up.border
@@ -469,9 +482,10 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   #  should allow for any time not in the original to be merged in.
   #  probably need to subset xdata _before_ merging, else subset will be wrong
   #
-  tav <- merge(x, xdata, join="right",retside=c(TRUE,FALSE))
-  lenv$xdata <- tav
-  tav <- tav[xsubset]
+  #tav <- merge(x, xdata, join="right",retside=c(TRUE,FALSE))
+  #lenv$xdata <- tav
+  #tav <- tav[xsubset]
+  lenv$xdata <- merge(x,xdata,retside=c(TRUE,FALSE))
 
   if(is.na(on)) {
     plot_object$add_frame(ylim=c(0,1),asp=0.15)
@@ -482,7 +496,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
                          col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
     plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
-    plot_object$add_frame(ylim=range(na.omit(tav)),asp=1)  # need to have a value set for ylim
+    plot_object$add_frame(ylim=range(na.omit(xdata)),asp=1)  # need to have a value set for ylim
     plot_object$next_frame()
     lenv$grid_lines <- function(xdata,x) { 
       ticks <- axTicksByValue(xdata[x],lt=10,gt=3)
