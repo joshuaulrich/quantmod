@@ -17,7 +17,7 @@ getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE) {
 
   # extract the data.  fnames if financial names (rownames)
   d1 <- lapply(seq(1,11,2), function(x) { Symbol[tbody[x]:tbody[x+1]]})
-  d2 <- lapply(d1, gsub, pattern="<.*?>", replacement="")
+  d2 <- lapply(d1, gsub, pattern="<.*?>", replacement="", perl=TRUE)
   d3 <- lapply(d2, function(x) x[-which(x=="")])
   fnames <- lapply(d3, function(x) {
                    x[grep("[A-Za-z]",x)]} )
