@@ -18,7 +18,8 @@ viewFinancials(x, type=c('BS','IS','CF'), period=c('A','Q'),
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{Symbol}{ a valid google symbol }
+  \item{Symbol}{ one or more valid google symbol, as a character vector or
+  semi-colon delimited string }
   \item{env}{ where to create the object }
   \item{src}{ currently unused }
   \item{auto.assign}{ should results be loaded to the environment }

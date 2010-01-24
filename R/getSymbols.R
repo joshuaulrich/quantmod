@@ -832,11 +832,11 @@ function(Symbols,env,return.class='xts',
          }
        } else 
        if('timeSeries' %in% return.class) {
-         if("package:fSeries" %in% search() || suppressMessages(require("fSeries",quietly=TRUE))) {
+         if("package:timeSeries" %in% search() || suppressMessages(require("timeSeries",quietly=TRUE))) {
            fr <- timeSeries(coredata(fr), charvec=as.character(index(fr)))
            return(fr)
          } else {
-           warning(paste("'timeSeries' from package 'fSeries' could not be loaded:",
+           warning(paste("'timeSeries' from package 'timeSeries' could not be loaded:",
                    " 'xts' class returned"))
          }
        }
