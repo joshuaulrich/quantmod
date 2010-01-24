@@ -1,4 +1,7 @@
 getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE) {
+  Symbol <- strsplit(Symbol,";")[[1]]
+  if(length(Symbol)>1)
+    return(unlist(lapply(Symbol, getFin, env=env, src=src, auto.assign=auto.assign)))
   Symbol.name <- Symbol
   google.fin <- "http://finance.google.com/finance?fstype=ii&q=" 
   tmp <- tempfile()
@@ -20,7 +23,7 @@ getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE) {
   d2 <- lapply(d1, gsub, pattern="<.*?>", replacement="", perl=TRUE)
   d3 <- lapply(d2, function(x) x[-which(x=="")])
   fnames <- lapply(d3, function(x) {
-                   x[grep("[A-Za-z]",x)]} )
+                   gsub("&amp;","&",x[grep("[A-Za-z]",x)])} )
   # extract data and fill NAs where needed
   vals   <- lapply(d3, function(x) {
             as.numeric(gsub(",","",
