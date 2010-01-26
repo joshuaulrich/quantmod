@@ -1,5 +1,5 @@
 `getOptionChain` <-
-function(Symbols, Exp="2009-05", src="yahoo", ...) {
+function(Symbols, Exp=NULL, src="yahoo", ...) {
   Call <- paste("getOptionChain",src,sep=".")
   do.call(Call, list(Symbols=Symbols, Exp=Exp, ...))
 }
@@ -43,12 +43,13 @@ function(Symbols, Exp="2009-05", ...) {
   neg.put.chg <- which(sapply(strsplit(opt[extag[2]],"color:#"),substring,1,6)[-1] == "cc0000")
   puts  <- strsplit(gsub("<.*?>","---",opt[extag[2]],perl=TRUE),"---")[[1]] 
 
-  call.len <- length(grep("X$", calls, perl=TRUE))
+  call.len <- sum(nchar(calls) > 10) #length(grep("X$", calls, perl=TRUE))
   if(call.len > 0) {
     calls <- calls[-which(calls=="")][-(1:9)][seq(1,9*call.len)]
     call.mat <- matrix(calls,byrow=TRUE,nc=9)[,-4]
-    call.symbols <- gsub(".X$","",call.mat[,2],perl=TRUE)
-    call.mat <- call.mat[,-2]
+    call.symbols <- call.mat[,2]
+    call.symbols <- call.symbols[-(length(call.symbols)+c(-1,0))]
+    call.mat <- call.mat[1:length(call.symbols),-2]
     call.mat <- gsub(",","",call.mat)
     suppressWarnings(storage.mode(call.mat) <- "numeric")
     call.mat[neg.call.chg, 3] <- call.mat[neg.call.chg,3]*-1
@@ -56,12 +57,15 @@ function(Symbols, Exp="2009-05", ...) {
     colnames(calls) <- c("Strike","Last","Chg","Bid","Ask","Vol","OI")
   } else calls <- NULL
   
-  put.len <- length(grep("X$", puts, perl=TRUE))
+  put.len <- sum(nchar(puts) > 10) #length(grep("X$", puts, perl=TRUE))
   if(put.len > 0) {
     puts <- puts[-which(puts=="")][-(1:9)][seq(1,9*put.len)]
     put.mat <- matrix(puts,byrow=TRUE,nc=9)[,-4]
-    put.symbols <- gsub(".X$","",put.mat[,2],perl=TRUE)
-    put.mat <- put.mat[,-2]
+    put.symbols <- put.mat[,2]
+    # symbols now contains some additional lines 2 for call, 3 for puts
+    # remove here
+    put.symbols <- put.symbols[-(length(put.symbols)+c(-2,-1,0))] 
+    put.mat <- put.mat[1:length(put.symbols),-2]
     put.mat <- gsub(",","",put.mat)
     suppressWarnings(storage.mode(put.mat) <- "numeric")
     put.mat[neg.put.chg, 3] <- put.mat[neg.put.chg,3]*-1
