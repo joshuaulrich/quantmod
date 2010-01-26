@@ -1,11 +1,15 @@
 `getOptionChain` <-
 function(Symbols, Exp=NULL, src="yahoo", ...) {
   Call <- paste("getOptionChain",src,sep=".")
-  do.call(Call, list(Symbols=Symbols, Exp=Exp, ...))
+  if(missing(Exp)) {
+    do.call(Call, list(Symbols=Symbols, ...))
+  } else {
+    do.call(Call, list(Symbols=Symbols, Exp=Exp, ...))
+  }
 }
 
 `getOptionChain.yahoo` <-
-function(Symbols, Exp="2009-05", ...) {
+function(Symbols, Exp=NULL, ...) {
   parse.expiry <- function(x) {
     if(nchar(x)==5L) {
       #MonYR
@@ -17,6 +21,7 @@ function(Symbols, Exp="2009-05", ...) {
     }
     return(x)
   } 
+  missingExp <- ifelse(missing(Exp), TRUE, FALSE)
   if(is.null(Exp)) {
     opts <- try(readLines(paste("http://finance.yahoo.com/q/op?s=",
                            Symbols,"&m=",Exp,sep="")), silent=TRUE)
@@ -24,6 +29,8 @@ function(Symbols, Exp="2009-05", ...) {
       return(NULL)
     Exp <- unlist(strsplit(gsub("(CALL OPTIONS)| ","",gsub("<.*?>","",opts[grep("View By Expiration",opts)+1],perl=TRUE)),"\\|"))
   }
+  if(missingExp)
+    Exp <- Exp[1]
   if(length(Exp) > 1) {
     opt.list <- list()
     for(i in 1:length(Exp)) {
