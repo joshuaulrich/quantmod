@@ -6,12 +6,15 @@ Function to download option chain data from
 data providers.
 }
 \usage{
-getOptionChain(Symbols, Exp = "2009-05", src="yahoo", ...)
+getOptionChain(Symbols, Exp = NULL, src="yahoo", ...)
 }
 \arguments{
   \item{Symbols}{ The name of the underlying symbol }
-  \item{Exp}{ One or more expiration dates }
-  \item{src}{ Source }
+  \item{Exp}{ One or more expiration dates, or NULL.
+              If Exp is missing, the default is to
+              only return the front month contract.
+ }
+  \item{src}{ Source of data.  Currently only \sQuote{yahoo} is provided }
   \item{\dots}{ additional parameters }
 }
 \details{
@@ -27,7 +30,8 @@ Each element of this list will be named with the expiration
 month and year (for Yahoo sourced data).
 
 If \code{Exp} is set to \code{NULL}, all expirations
-will be returned.
+will be returned. Not explicitly setting will only
+return the front month.
 }
 \references{ \url{http://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }
