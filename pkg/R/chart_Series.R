@@ -24,7 +24,8 @@ getSubset <- function() {
 # axTicksByValue {{{
 axTicksByValue <-
 function(x,
-         match.to=c(500,300,200,150,100,
+         match.to=c(1e8,1e7,1e6,1e5,1e4,1e3,
+                    500,300,200,150,100,
                     50,20,10,
                     5,2,1,
                     0.50,0.25,0.20,0.10,
@@ -42,6 +43,8 @@ function(x,
 #  if(length(ticks1) > 5) ticks1 <- ticks1[-c(1,length(ticks1))]
   ticks1
 } # }}}
+
+#axTicksByValue <- function(x, ...) pretty(x)
 
 # UNUSED heikin.ashi.bars {{{
 heikin.ashi.bars <- 
@@ -138,6 +141,7 @@ chart_theme <- chart_theme_white <- function() {
                         up.border="#333333"),
                shading=1,
                format.labels=TRUE,
+               coarse.time=TRUE,
                rylab=TRUE,
                lylab=TRUE,
                grid.ticks.lwd=1,
@@ -171,9 +175,10 @@ chart_pars <- function() {
 chart_Series <- function(x, 
                          name=deparse(substitute(x)), 
                          type="candlesticks", 
-                         subset=1:NROW(x), 
+                         subset="", 
                          TA="",
-                         pars=chart_pars(), theme=chart_theme()) {
+                         pars=chart_pars(), theme=chart_theme(),
+                         clev=0) {
   cs <- new.replot()
   #cex <- pars$cex
   #mar <- pars$mar
@@ -193,12 +198,12 @@ chart_Series <- function(x,
   label.bg <- theme$col$label.bg
   
   cs$subset <- function(x) {
+    if(FALSE) {set_ylim <- get_ylim <- set_xlim <- Env<-function(){} }  # appease R parser?
     if(missing(x)) {
-      x <- 1:NROW(Env$xdata)
+      x <- "" #1:NROW(Env$xdata)
     }
-    x <- match(.index(Env$xdata[x]), .index(Env$xdata))
     Env$xsubset <<- x
-    set_xlim(c(1,length(x)))
+    set_xlim(c(1,NROW(Env$xdata[Env$xsubset])))
     ylim <- get_ylim()
     for(y in seq(2,length(ylim),by=2)) {
       if(!attr(ylim[[y]],'fixed'))
@@ -222,19 +227,22 @@ chart_Series <- function(x,
     set_ylim(ylim)
   }
   environment(cs$subset) <- environment(cs$get_asp)
+  if(is.character(x))
+    stop("'x' must be a time-series object")
   if(is.OHLC(x)) {
     cs$Env$xdata <- OHLC(x)
     if(has.Vo(x))
       cs$Env$vo <- Vo(x)
   } else cs$Env$xdata <- x
-  subset <- match(.index(x[subset]), .index(x))
+  #subset <- match(.index(x[subset]), .index(x))
   cs$Env$xsubset <- subset
   cs$Env$cex <- pars$cex
   cs$Env$mar <- pars$mar
   cs$set_asp(3)
-  cs$set_xlim(c(1,NROW(subset)))
+  cs$set_xlim(c(1,NROW(cs$Env$xdata[subset])))
   cs$set_ylim(list(structure(range(cs$Env$xdata[subset]),fixed=FALSE)))
   cs$set_frame(1,FALSE)
+  cs$Env$clev = min(clev+0.01,1) # (0,1]
   cs$Env$theme$bbands <- theme$bbands
   cs$Env$theme$shading <- theme$shading
   cs$Env$theme$line.col <- theme$col$line.col
@@ -256,7 +264,8 @@ chart_Series <- function(x,
   cs$Env$axis_ticks <- function(xdata,xsubset) {
     ticks <- diff(axTicksByTime2(xdata[xsubset],labels=FALSE))/2 + 
                   last(axTicksByTime2(xdata[xsubset],labels=TRUE),-1)
-    if(length(ticks) == 1) return(unname(ticks))
+    if(!theme$coarse.time || length(ticks) == 1)
+      return(unname(ticks))
     if(min(diff(ticks)) < max(strwidth(names(ticks)))) {
       ticks <- unname(ticks)
     }
@@ -273,13 +282,6 @@ chart_Series <- function(x,
                          par('usr')[3]-0.2*min(strheight(axt)),
                          names(axt),xpd=TRUE,cex=0.9,pos=3)),
                     clip=FALSE,expr=TRUE)
-#  cs$add(expression(axt <- axis_ticks(xdata,xsubset),
-#                    text(as.numeric(axt),
-#                         par('usr')[3]-0.2*min(strheight(axt)),
-#                         names(axt),xpd=TRUE,cex=0.9,pos=3)),
-#         expr=TRUE,clip=FALSE)
-#                  
-                  
   cs$set_frame(-1)
   # background of main window
   #cs$add(expression(rect(par("usr")[1],
@@ -290,7 +292,8 @@ chart_Series <- function(x,
   cs$set_frame(1)
 
   # add observation level ticks on x-axis if < 400 obs.
-  cs$add(expression(if(length(xsubset)<400) {axis(1,at=1:length(xsubset),labels=FALSE,col=theme$grid2,tcl=0.3)}),expr=TRUE)
+  cs$add(expression(if(NROW(xdata[xsubset])<400) 
+          {axis(1,at=1:NROW(xdata[xsubset]),labels=FALSE,col=theme$grid2,tcl=0.3)}),expr=TRUE)
 
   # add "month" or "month.abb"
   cs$add(expression(axt <- axTicksByTime(xdata[xsubset],format.labels=format.labels),
@@ -300,7 +303,7 @@ chart_Series <- function(x,
          expr=TRUE)
   cs$Env$name <- name
   text.exp <- c(expression(text(1-1/3,0.5,name,font=2,col='#444444',offset=0,cex=1.1,pos=4)),
-                expression(text(length(xsubset),0.5,
+                expression(text(NROW(xdata[xsubset]),0.5,
                            paste(start(xdata[xsubset]),end(xdata[xsubset]),sep=" / "),
                            col=1,adj=c(0,0),pos=2)))
   cs$add(text.exp, env=cs$Env, expr=TRUE)
@@ -325,7 +328,7 @@ chart_Series <- function(x,
                              col=theme$grid2, lty="dotted")), expr=TRUE)
   cs$set_frame(2)
   # add main y-grid lines
-  cs$add(expression(segments(1,alabels,length(xsubset),alabels, col=theme$grid)),expr=TRUE)
+  cs$add(expression(segments(1,alabels,NROW(xdata[xsubset]),alabels, col=theme$grid)),expr=TRUE)
   # left axis labels
   if(theme$lylab) {
     cs$add(expression(text(1-1/3-max(strwidth(alabels)),
@@ -335,7 +338,7 @@ chart_Series <- function(x,
   }
   # right axis labels
   if(theme$rylab) {
-    cs$add(expression(text(length(xsubset)+1/3,
+    cs$add(expression(text(NROW(xdata[xsubset])+1/3,
                 alabels, 
                 noquote(format(alabels,justify="right")),
                 col=theme$labels,offset=0,cex=0.9,pos=4)),expr=TRUE)
@@ -345,8 +348,13 @@ chart_Series <- function(x,
   # need to rename range.bars to something more generic, and allow type= to handle:
   #  ohlc, hlc, candles, ha-candles, line, area
   #  chart_Perf will be the call to handle relative performace plots
-  cs$add(expression(range.bars(xdata[xsubset], type,
-         1,theme$line.col,theme$up.col,theme$dn.col,theme$up.border,theme$dn.border)),expr=TRUE)
+  cs$add(expression(range.bars(xdata[xsubset], 
+                    type, 1,
+                    fade(theme$line.col,clev),
+                    fade(theme$up.col,clev),
+                    fade(theme$dn.col,clev),
+                    fade(theme$up.border,clev),
+                    fade(theme$dn.border,clev))),expr=TRUE)
   assign(".chob", cs, .GlobalEnv)
 
   # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
@@ -372,6 +380,10 @@ zoom_Chart <- function(subset) {
 }
 # }}}
 
+fade <- function(col, level) {
+  # adjust col toward white, (?background) by 0-1 range 
+  colorRampPalette(c(col, "white"))(99)[level*100]
+}
 
 current.chob <- function() get(".chob",.GlobalEnv)
 use.chob <- function(use=TRUE) {
@@ -385,7 +397,7 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_series <- function(x, series, type, ...) {
-    series <- merge(series, x$Env$xdata, join="left",retside=c(TRUE,FALSE))[x$Env$xsubset]
+    series <- merge(series, x$Env$xdata, join="outer",retside=c(TRUE,FALSE))[x$Env$xsubset]
     range.bars(series, type=type)
     #lines(x$Env$xsubset, series, ...)
   }
@@ -413,7 +425,7 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
                          0.5,
                          name,
                          col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
-    plot_object$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=NA))
+    #plot_object$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=NA))
     plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
     plot_object$add_frame(ylim=range(na.omit(OHLC(x))),asp=1)  # need to have a value set for ylim
@@ -425,7 +437,7 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
              expression(text(0,grid_lines(xdata,xsubset),
                         sprintf("%+d",grid_lines(xdata,xsubset)),
                         col=theme$labels,pos=2)),
-             expression(text(length(xsubset),grid_lines(xdata,xsubset),
+             expression(text(NROW(xdata[xsubset]),grid_lines(xdata,xsubset),
                         sprintf("%+d",grid_lines(xdata,xsubset)),
                         col=theme$labels,pos=4)),exp)
   } else { plot_object$set_frame(sign(on)*(abs(on)+1L)) }
@@ -435,7 +447,7 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   plot_object
 } #}}}
 # add_TA {{{
-add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) { 
+add_TA <- function(x, order=NULL, on=NA, legend="auto",  ...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_ta <- function(x, ta, on, ...) {
@@ -461,8 +473,9 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
       ta.adj <- merge(n=.xts(1:NROW(x$Env$xdata[x$Env$xsubset]),
                              .index(x$Env$xdata[x$Env$xsubset])),ta)[subset.range]
       ta.x <- as.numeric(na.approx(ta.adj[,1]))
-      ta.y <- ta.adj[,2]
-      lapply(1:NCOL(ta.y), function(NC) lines(ta.x, ta.y[,NC], ...))
+      ta.y <- ta.adj[,-1]
+      for(i in 1:NCOL(ta.y))
+        lines(ta.x, as.numeric(ta.y[,i]), ...)
     }
   }
   lenv$xdata <- x
@@ -490,28 +503,24 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto", ...) {
   if(is.na(on)) {
     plot_object$add_frame(ylim=c(0,1),asp=0.15)
     plot_object$next_frame()
-    text.exp <- expression(text(c(0, 0+strwidth(paste(name,sep=""))),
-                         0.3,
-                         labels=c(name,sprintf("%.4f",last(xdata[xsubset]))),
-                         col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
+    text.exp <- expression(text(x=0, y=0.3, labels=name, col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
     plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
     plot_object$add_frame(ylim=range(na.omit(xdata)),asp=1)  # need to have a value set for ylim
     plot_object$next_frame()
-    lenv$grid_lines <- function(xdata,x) { 
-      ticks <- axTicksByValue(xdata[x],lt=10,gt=3)
-      ticks
-    }
-    # add grid lines
-    exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)),
-    # add axis labels/boxes
-             expression(text(0,grid_lines(xdata,xsubset),
-                        grid_lines(xdata,xsubset),
-                        col=theme$labels,pos=2)),
-             expression(text(length(xsubset),grid_lines(xdata,xsubset),
-                        grid_lines(xdata,xsubset),
-                        col=theme$labels,pos=4)),exp)
-  #} else { plot_object$set_frame(sign(on)*(abs(on)+1L)) }
+  # add grid lines, using custom function for MACD gridlines
+  lenv$grid_lines <- function(xdata,xsubset) { 
+    pretty(xdata[xsubset])
+  }
+  exp <- c(expression(segments(1,grid_lines(xdata,xsubset),NROW(xdata[xsubset]),grid_lines(xdata,xsubset),
+                               col=theme$grid)), exp,  # NOTE 'exp' was defined earlier to be plot_macd
+  # add axis labels/boxes
+           expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
+                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
+                      col=theme$labels,offset=0,pos=4,cex=0.9)),
+           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
+                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
+                      col=theme$labels,offset=0,pos=4,cex=0.9)))
   } else { plot_object$set_frame(2*on) }
 
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
@@ -679,9 +688,8 @@ add_RSI <- function (n=14, maType="EMA", ...) {
   # add grid lines
   lenv$grid_lines <- function(xdata,x) { c(30,70) }
   # add grid lines
-  #exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
   exp <- c(expression(segments(1, grid_lines(xdata,xsubset),
-                               length(xsubset), grid_lines(xdata,xsubset), col=theme$grid)),exp,
+                               NROW(xdata[xsubset]), grid_lines(xdata,xsubset), col=theme$grid)),exp,
   # add axis labels/boxes
            expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
@@ -717,14 +725,14 @@ skeleton_TA <- function(on) {
 
 # add_MACD {{{
 add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
-  lenv <- new.env()
+  lenv <- new.env() # local environment for add_MACD call
   
   # plot_macd draws the indicator using the data from the first(only) call to
   # add_MACD.  This is a bit analogous to chartMACD in the first quantmod versions
   lenv$plot_macd <- function(x, fast, slow, signal, maType, histogram,...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    macd <- MACD(HLC(xdata),fast,slow,signal,maType)[xsubset]
+    macd <- macd[xsubset]
     # vertical grid lines
     segments(axTicksByTime2(xdata[xsubset]),
              par("usr")[3], #min(-10,range(na.omit(macd))[1]), 
@@ -738,36 +746,49 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
       bar.col <- ifelse(macd.hist > 0, x$Env$theme$macd$up.col, x$Env$theme$macd$dn.col)
       rect(x.pos-1/3, 0, x.pos+1/3, macd.hist, col=bar.col, border="grey", lwd=0.2, ...)  # base graphics call
     }
+    # macd line
     lines(x.pos, macd[,1], col=x$Env$theme$macd$macd, lwd=2,,lty=1,...) 
+    # signal line
     lines(x.pos, macd[,2], col=x$Env$theme$macd$signal, lty=3,...) 
   }
+
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
         names(list(fast=fast,slow=slow,signal=signal,maType=maType,histogram=histogram,...)),
               list(fast=fast,slow=slow,signal=signal,maType=maType,histogram=histogram,...))
+
+  # exp will be what is re-evaluated during redrawing (subset, new TA, etc)
+  # we need to build this piece by piece
   exp <- parse(text=gsub("list","plot_macd",
                as.expression(substitute(list(x=current.chob(),fast=fast,slow=slow,signal=signal,maType=maType,
                                              histogram=histogram,...)))),
                srcfile=NULL)
+
+  # plot_object is the current list of actions, and chart 'state'
   plot_object <- current.chob()
 
   # now we can evaluate plot_object, as the parse/substitute is behind us
+
+  # check if the theme has a macd component, if not set defaults here
   if(is.null(plot_object$Env$theme$macd)) {
     plot_object$Env$theme$macd$macd   <- "#555555"
     plot_object$Env$theme$macd$signal <- "black"
     plot_object$Env$theme$macd$up.col <- "green"
     plot_object$Env$theme$macd$dn.col <- "red"
   }
-  #theme <- NULL # keep R CMD check appeased
-  xdata <- plot_object$Env$xdata
-  xsubset <- plot_object$Env$xsubset
+
+  # copy some Env data to local, make it cleaner to read
+  xdata <- plot_object$Env$xdata        # original (OHLC) series
+  xsubset <- plot_object$Env$xsubset    # current subset
+
+  # calculate our indicator here
   macd <- MACD(HLC(xdata),fast,slow,signal,maType)
   lenv$xdata <- structure(cbind(macd,macd[,1]-macd[,2]),.Dimnames=list(NULL,c("macd","signal","histogram")))
   lenv$macd <- cbind(macd,macd[,1]-macd[,2])
   
   # text annotation
-  plot_object$add_frame(ylim=c(0,1),asp=0.15)
-  plot_object$next_frame()
+  plot_object$add_frame(ylim=c(0,1),asp=0.15)   # add the header frame
+  plot_object$next_frame()                      # move to header frame
   text.exp <- expression(text(x=c(0,
                                   0+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep="")),
                                   0+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""))+strwidth("5")*7),
@@ -775,28 +796,29 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
                               labels=c(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""),round(last(xdata[xsubset,1]),5),
                                        round(last(xdata[xsubset,2]),5)),
                               col=c(1,theme$macd$macd,theme$macd$signal),adj=c(0,0),cex=0.9,offset=0,pos=4))
-#  plot_object$add(expression(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=theme$grid)),expr=TRUE)
   plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
-#
+
   # main MACD plot from expression above
-  lenv$grid_lines <- function(xdata,x) { 
-    axTicksByValue(xdata[xsubset],c(5,4,3,2,1),gt=3)
-  }
   plot_object$add_frame(ylim=range(na.omit(lenv$macd[xsubset])),fixed=FALSE,asp=1)
   plot_object$next_frame()
 
-  # add grid lines
-  #exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)), exp,
+  # add grid lines, using custom function for MACD gridlines
+  lenv$grid_lines <- function(xdata,xsubset) { 
+    axTicksByValue(xdata[xsubset],c(5,4,3,2,1),gt=3)
+  }
   exp <- c(expression(segments(1,grid_lines(xdata,xsubset),length(xsubset),grid_lines(xdata,xsubset),
-                               col=theme$grid)), exp,
+                               col=theme$grid)), exp,  # NOTE 'exp' was defined earlier to be plot_macd
   # add axis labels/boxes
            expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)),
-           expression(text(length(xsubset)+1/3,grid_lines(xdata,xsubset),
+           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)))
+
+  # add 'exp' to actions list of plot_object
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+
   # return plot_object to allow for auto-printing
   plot_object
 } # }}}
@@ -874,6 +896,7 @@ add_Vo <- function(...) {
   plot_object <- current.chob()
   xdata <- plot_object$Env$vo
   xsubset <- plot_object$Env$xsubset
+  theme <- plot_object$theme
   vo <- xdata[xsubset]
   lenv$xdata <- xdata # xdata in lenv is 
     plot_object$add_frame(ylim=c(0,1),asp=0.15)
