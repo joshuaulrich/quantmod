@@ -240,7 +240,7 @@ chart_Series <- function(x,
   cs$Env$mar <- pars$mar
   cs$set_asp(3)
   cs$set_xlim(c(1,NROW(cs$Env$xdata[subset])))
-  cs$set_ylim(list(structure(range(cs$Env$xdata[subset]),fixed=FALSE)))
+  cs$set_ylim(list(structure(range(na.omit(cs$Env$xdata[subset])),fixed=FALSE)))
   cs$set_frame(1,FALSE)
   cs$Env$clev = min(clev+0.01,1) # (0,1]
   cs$Env$theme$bbands <- theme$bbands
@@ -397,6 +397,12 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_series <- function(x, series, type, ...) {
+    # vertical grid lines
+    segments(axTicksByTime2(xdata[xsubset]),
+             par("usr")[3], #min(-10,range(na.omit(macd))[1]), 
+             axTicksByTime2(xdata[xsubset]),
+             par("usr")[4], #max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
+             col=x$Env$theme$grid)
     series <- merge(series, x$Env$xdata, join="outer",retside=c(TRUE,FALSE))[x$Env$xsubset]
     range.bars(series, type=type)
     #lines(x$Env$xsubset, series, ...)
@@ -413,33 +419,41 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   xdata <- plot_object$Env$xdata
   xsubset <- plot_object$Env$xsubset
   tav <- merge(x, xdata, join="left",retside=c(TRUE,FALSE))
+  lenv$upper.env <- plot_object$Env
   lenv$xdata <- x
   x <- x[xsubset]
 
   if(is.na(on)) {
     plot_object$add_frame(ylim=c(0,1),asp=0.15)
     plot_object$next_frame()
-    text.exp <- expression(text(c(0,
-                                  0+strwidth(paste(name,sep="")),
-                                  0+strwidth(paste(name,sep=""))+strwidth("5.55555")+1),
-                         0.5,
-                         name,
-                         col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
-    #plot_object$add(rect(par("usr")[1],0,par("usr")[2],1,col=theme$label.bg,border=NA))
+    text.exp <- expression(text(x=c(1),y=0.3, name, col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
     plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
     plot_object$add_frame(ylim=range(na.omit(OHLC(x))),asp=1)  # need to have a value set for ylim
     plot_object$next_frame()
-    lenv$grid_lines <- function(xdata,x) { seq(-1,1) }
-    # add grid lines
-    exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)),
-    # add axis labels/boxes
-             expression(text(0,grid_lines(xdata,xsubset),
-                        sprintf("%+d",grid_lines(xdata,xsubset)),
-                        col=theme$labels,pos=2)),
-             expression(text(NROW(xdata[xsubset]),grid_lines(xdata,xsubset),
-                        sprintf("%+d",grid_lines(xdata,xsubset)),
-                        col=theme$labels,pos=4)),exp)
+    plot_object$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
+
+  # add main y-grid lines
+    plot_object$add(expression(segments(1,alabels,NROW(xdata[xsubset]),alabels, col=theme$grid)),expr=TRUE)
+  # left axis labels
+    exp <- c(expression(text(1-1/3-max(strwidth(alabels)),
+                alabels, #axis_labels(xdata,xsubset), 
+                noquote(format(alabels,justify="right")), 
+                col=theme$labels,offset=0,cex=0.9,pos=4)),
+             expression(text(NROW(upper.env$xdata[xsubset])+1/3,
+                alabels, 
+                noquote(format(alabels,justify="right")),
+                col=theme$labels,offset=0,cex=0.9,pos=4)),exp)
+#    lenv$grid_lines <- function(xdata,x) { seq(-1,1) }
+#    # add grid lines
+#    exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)),
+#    # add axis labels/boxes
+#             expression(text(0,grid_lines(xdata,xsubset),
+#                        sprintf("%+d",grid_lines(xdata,xsubset)),
+#                        col=theme$labels,pos=2)),
+#             expression(text(NROW(xdata[xsubset]),grid_lines(xdata,xsubset),
+#                        sprintf("%+d",grid_lines(xdata,xsubset)),
+#                        col=theme$labels,pos=4)),exp)
   } else { plot_object$set_frame(sign(on)*(abs(on)+1L)) }
 
 
@@ -447,10 +461,10 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   plot_object
 } #}}}
 # add_TA {{{
-add_TA <- function(x, order=NULL, on=NA, legend="auto",  ...) { 
+add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
-  lenv$plot_ta <- function(x, ta, on, ...) {
+  lenv$plot_ta <- function(x, ta, on, taType, col=col,...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     if(is.na(on)) {
@@ -475,16 +489,16 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  ...) {
       ta.x <- as.numeric(na.approx(ta.adj[,1]))
       ta.y <- ta.adj[,-1]
       for(i in 1:NCOL(ta.y))
-        lines(ta.x, as.numeric(ta.y[,i]), ...)
+        lines(ta.x, as.numeric(ta.y[,i]), col=col,...)
     }
   }
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(x=x,order=order,on=on,legend=legend,...)),
-              list(x=x,order=order,on=on,legend=legend,...))
+        names(list(x=x,order=order,on=on,legend=legend,taType=taType,col=col,...)),
+              list(x=x,order=order,on=on,legend=legend,taType=taType,col=col,...))
   exp <- parse(text=gsub("list","plot_ta",
-               as.expression(substitute(list(x=current.chob(),ta=get("x"),on=on,...)))),
+               as.expression(substitute(list(x=current.chob(),ta=get("x"),on=on,taType=taType,col=col,...)))),
                srcfile=NULL)
   plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
@@ -498,12 +512,16 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  ...) {
   #tav <- merge(x, xdata, join="right",retside=c(TRUE,FALSE))
   #lenv$xdata <- tav
   #tav <- tav[xsubset]
+  lenv$col <- col
   lenv$xdata <- merge(x,xdata,retside=c(TRUE,FALSE))
 
   if(is.na(on)) {
     plot_object$add_frame(ylim=c(0,1),asp=0.15)
     plot_object$next_frame()
-    text.exp <- expression(text(x=0, y=0.3, labels=name, col=c(1),adj=c(0,0),cex=0.9,offset=0,pos=4))
+    text.exp <- expression(text(x=c(1,1+strwidth(name)),
+                                y=0.3,
+                                labels=c(name,round(last(xdata[xsubset]),5)),
+                                col=c(1,col),adj=c(0,0),cex=0.9,offset=0,pos=4))
     plot_object$add(text.exp, env=c(lenv,plot_object$Env), expr=TRUE)
 
     plot_object$add_frame(ylim=range(na.omit(xdata)),asp=1)  # need to have a value set for ylim
@@ -573,7 +591,7 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
     xsubset <- x$Env$xsubset
     smi <- SMI(HLC(xdata),n=n,nFast=nFast,nSlow=nSlow,nSig=nSig,
                maType=maType,bounded=bounded)
-    x.pos <- 1:length(xsubset)
+    x.pos <- 1:NROW(xdata[xsubset])
     segments(axTicksByTime2(xdata[xsubset]),
              range(na.omit(smi))[1], 
              axTicksByTime2(xdata[xsubset]),
@@ -602,9 +620,9 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
   plot_object$add_frame(ylim=c(0,1),asp=0.2)
   plot_object$next_frame()
   lenv$xdata <- structure(smi,.Dimnames=list(NULL, c("smi","signal")))
-  text.exp <- expression(text(c(0,
-                                0+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep="")),
-                                0+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep=""))+strwidth("-22.22222")),
+  text.exp <- expression(text(c(1,
+                                1+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep="")),
+                                1+strwidth(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep=""))+strwidth("-22.22222")),
                        0.3,
                        c(paste("SMI(",paste(n,nFast,nSlow,nSig,sep=","),"):",sep=""),
                          round(last(xdata[xsubset,1]),5),
@@ -623,7 +641,7 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
            expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)),
-           expression(text(length(xsubset)+1/3,grid_lines(xdata,xsubset),
+           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)))
 #  exp <- c(expression(abline(h=grid_lines(xdata,xsubset),col=theme$grid)),
@@ -647,10 +665,12 @@ add_RSI <- function (n=14, maType="EMA", ...) {
     rsi <- RSI(Cl(xdata),n=n,maType=maType)[xsubset]
     x.pos <- 1:NROW(rsi)
     theme <- x$Env$theme$rsi
-    segments(axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
-             0, #range(na.omit(rsi))[1], 
-             axTicksByTime(xdata[xsubset],ticks.on=x$Env$ticks.on),
-             100, col=x$Env$theme$grid) #range(na.omit(rsi))[2], col=x$Env$theme$grid)
+    # vertical grid lines
+    segments(axTicksByTime2(xdata[xsubset]),
+             par("usr")[3], #min(-10,range(na.omit(macd))[1]), 
+             axTicksByTime2(xdata[xsubset]),
+             par("usr")[4], #max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
+             col=x$Env$theme$grid)
     lines(x.pos, rep(30,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
     lines(x.pos, rep(70,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
     lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=1.5,...) 
@@ -673,8 +693,8 @@ add_RSI <- function (n=14, maType="EMA", ...) {
   plot_object$add_frame(ylim=c(0,1),asp=0.2)
   plot_object$next_frame()
   lenv$xdata <- structure(rsi,.Dimnames=list(NULL, "rsi"))
-  text.exp <- expression(text(c(0,
-                                0+strwidth(paste("RSI(",n,"):",sep=""))),
+  text.exp <- expression(text(c(1,
+                                1+strwidth(paste("RSI(",n,"):",sep=""))),
                        0.3,
                        c(paste("RSI(",n,"):",sep=""),
                          round(last(xdata[xsubset]),5)),
@@ -694,7 +714,7 @@ add_RSI <- function (n=14, maType="EMA", ...) {
            expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)),
-           expression(text(length(xsubset)+1/3,grid_lines(xdata,xsubset),
+           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -789,9 +809,9 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   # text annotation
   plot_object$add_frame(ylim=c(0,1),asp=0.15)   # add the header frame
   plot_object$next_frame()                      # move to header frame
-  text.exp <- expression(text(x=c(0,
-                                  0+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep="")),
-                                  0+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""))+strwidth("5")*7),
+  text.exp <- expression(text(x=c(1,
+                                  1+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep="")),
+                                  1+strwidth(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""))+strwidth("5")*7),
                               y=0.3,
                               labels=c(paste("MACD(",paste(fast,slow,signal,sep=","),"):",sep=""),round(last(xdata[xsubset,1]),5),
                                        round(last(xdata[xsubset,2]),5)),
