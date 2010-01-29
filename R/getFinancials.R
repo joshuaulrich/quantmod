@@ -1,4 +1,4 @@
-getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE) {
+getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE, ...) {
   Symbol <- strsplit(Symbol,";")[[1]]
   if(length(Symbol)>1)
     return(unlist(lapply(Symbol, getFin, env=env, src=src, auto.assign=auto.assign)))

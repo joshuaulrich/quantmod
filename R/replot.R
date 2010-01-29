@@ -56,7 +56,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
     frame <- abs(frame)
     asp   <- Env$asp
     xlim  <- Env$xlim
-    ylim  <- Env$ylim
+    ylim  <- lapply(Env$ylim, function(x) structure(x + (diff(x) * c(-0.05, 0.05)),fixed=attr(x,"fixed")))
     sr <- scale_ranges(frame, asp, ylim)
     if(frame == 1) {
       win <- list(xlim, c((ylim[[frame]][1] - sum(sr[-1])), ylim[[frame]][2]))
