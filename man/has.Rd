@@ -6,7 +6,9 @@
 \alias{has.Cl}
 \alias{has.Vo}
 \alias{has.OHLC}
+\alias{has.OHLCV}
 \alias{is.OHLC}
+\alias{is.OHLCV}
 \alias{has.HLC}
 \alias{is.HLC}
 \title{ Check For OHLC Data }
@@ -18,6 +20,9 @@ as the availability and position of those columns.
 \usage{
 is.OHLC(x)
 has.OHLC(x, which = FALSE)
+
+is.OHLCV(x)
+has.OHLCV(x, which = FALSE)
 
 is.HLC(x)
 has.HLC(x, which = FALSE)
