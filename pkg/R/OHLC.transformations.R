@@ -127,6 +127,11 @@ function(x)
 {
   all(has.Hi(x),has.Lo(x),has.Cl(x))# && has.HLC(x,TRUE) == seq(has.Hi(x,1),length.out=3)
 }
+is.OHLCV <- function(x)
+{
+  # test for OHLCV columns
+  all(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x),has.Vo(x))
+}
 `has.OHLC` <-
 function(x,which=FALSE)
 {
@@ -134,6 +139,14 @@ function(x,which=FALSE)
     c(has.Op(x,1),has.Hi(x,1),has.Lo(x,1),has.Cl(x,1))
   } else {
     c(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x))
+  }
+}
+has.OHLCV <- function(x,which=FALSE)
+{
+  if(which) {
+    c(has.Op(x,1),has.Hi(x,1),has.Lo(x,1),has.Cl(x,1),has.Vo(x,1))
+  } else {
+    c(has.Op(x),has.Hi(x),has.Lo(x),has.Cl(x),has.Vo(x))
   }
 }
 `has.HLC` <-
@@ -157,6 +170,12 @@ function(x)
 {
   if(is.OHLC(x))
     return(x[,has.OHLC(x,1)])
+  NULL
+}
+OHLCV <- function(x)
+{
+  if(is.OHLCV(x))
+    return(x[,has.OHLCV(x,1)])
   NULL
 }
 `Op` <-

@@ -467,7 +467,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...
   lenv$plot_ta <- function(x, ta, on, taType, col=col,...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    if(is.na(on)) {
+    if(all(is.na(on))) {
       segments(axTicksByTime2(xdata[xsubset]),
                par("usr")[3],
                axTicksByTime2(xdata[xsubset]),
@@ -478,7 +478,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...
       ta <- merge(ta, xdata, join="right",retside=c(TRUE,FALSE))[xsubset]
       shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
       if(length(shade$start) > 0) # all FALSE cause zero-length results
-        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], ...) 
+        rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], col=col,...) 
     } else {
       # we can add points that are not necessarily at the points
       # on the main series
@@ -539,9 +539,13 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...
            expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)))
-  } else { plot_object$set_frame(2*on) }
-
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
+  } else { 
+    for(i in 1:length(on)) {
+      plot_object$set_frame(2*on[i]) 
+      plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
+    }
+  }
   plot_object
 } #}}}
 

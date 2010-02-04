@@ -16,6 +16,7 @@
 \alias{Vo}
 \alias{HLC}
 \alias{OHLC}
+\alias{OHLCV}
 \alias{seriesHi}
 \alias{seriesLo}
 \alias{seriesIncr}
