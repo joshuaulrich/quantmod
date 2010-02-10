@@ -120,6 +120,15 @@ export(
        Vo, has.Vo,
        Ad, has.Ad,
 
+       # Price extraction functions
+       getPrice,
+       is.BBO, is.TBBO,
+       has.Bid,
+       has.Ask,
+       has.Price,
+       has.Trade,
+       has.Qty,
+
        OHLC, has.OHLC, is.OHLC, # OHLC extraction and test
        HLC, has.HLC, is.HLC,    # HLC  extraction and test
 
