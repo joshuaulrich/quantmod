@@ -15,10 +15,11 @@ importFrom(zoo,as.zoo)
 
 # new plotting functions (experimental)
 export(new.replot,
-       chart_Series,
+       chart_Series, add_Series,
        add_Vo,add_BBands,add_SMA,add_RSI,add_SMI,add_TA,
        chart_theme, chart_pars,
-       add_MACD)
+       add_MACD, zoom_Chart)
+
 export(axTicksByValue)
 export(axTicksByTime2)
 S3method(plot, replot)
