@@ -92,7 +92,9 @@ function(x, type="", spacing=1, line.col="darkorange",
       type <- "candlesticks"
     }
   } else {
-    lines(1:NROW(x),x[,1],lwd=3,col=line.col,lend=3,lty=1)
+    line.col <- rep(line.col, length.out=NCOL(x))
+    for(i in 1:NCOL(x))
+      lines(1:NROW(x),x[,i],lwd=2,col=line.col[i],lend=3,lty=1)
     return(NULL)
   }
   bar.col <- ifelse(Opens < Closes, up.col, dn.col)
@@ -313,7 +315,9 @@ chart_Series <- function(x,
     axTicksByValue(na.omit(xdata[xsubset]))
   }
   #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
-  cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
+  #cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
+  #cs$add(expression(assign("alabels", pretty(range(xdata[xsubset],na.rm=TRUE)))),expr=TRUE)
+  cs$add(expression(assign("alabels", pretty(get_ylim(get_frame())[[2]]))),expr=TRUE)
 
   # add $1 grid lines if appropriate
   cs$set_frame(-2)
@@ -382,7 +386,10 @@ zoom_Chart <- function(subset) {
 
 fade <- function(col, level) {
   # adjust col toward white, (?background) by 0-1 range 
-  colorRampPalette(c(col, "white"))(99)[level*100]
+  cols <- character(length(col))
+  for(i in 1:length(col))
+  cols[i] <- colorRampPalette(c(col[i], "white"))(99)[level*100]
+  cols
 }
 
 current.chob <- function() get(".chob",.GlobalEnv)
