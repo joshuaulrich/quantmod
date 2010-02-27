@@ -317,7 +317,7 @@ chart_Series <- function(x,
   #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
   #cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
   #cs$add(expression(assign("alabels", pretty(range(xdata[xsubset],na.rm=TRUE)))),expr=TRUE)
-  cs$add(expression(assign("alabels", pretty(get_ylim(get_frame())[[2]]))),expr=TRUE)
+  cs$add(expression(assign("alabels", pretty(get_ylim(get_frame())[[2]],10))),expr=TRUE)
 
   # add $1 grid lines if appropriate
   cs$set_frame(-2)
@@ -400,19 +400,20 @@ use.chob <- function(use=TRUE) {
 new_ta <- function(FUN, preFUN, postFUN, on=NA, ...) {}
 
 # add_Series {{{
-add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", ...) { 
+add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", theme=NULL,...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_series <- function(x, series, type, ...) {
     # vertical grid lines
+    if(FALSE) theme <- NULL
     segments(axTicksByTime2(xdata[xsubset]),
              par("usr")[3], #min(-10,range(na.omit(macd))[1]), 
              axTicksByTime2(xdata[xsubset]),
              par("usr")[4], #max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
-             col=x$Env$theme$grid)
+             col=theme$grid)
+             #col=x$Env$theme$grid)
     series <- merge(series, x$Env$xdata, join="outer",retside=c(TRUE,FALSE))[x$Env$xsubset]
     range.bars(series, type=type)
-    #lines(x$Env$xsubset, series, ...)
   }
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
@@ -423,6 +424,7 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
                as.expression(substitute(list(x=current.chob(),type=type,series=get("x"), ...)))),
                srcfile=NULL)
   plot_object <- current.chob()
+  lenv$theme <- if(is.null(theme)) plot_object$Env$theme else theme
   xdata <- plot_object$Env$xdata
   xsubset <- plot_object$Env$xsubset
   tav <- merge(x, xdata, join="left",retside=c(TRUE,FALSE))
@@ -468,7 +470,9 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   plot_object
 } #}}}
 # add_TA {{{
-add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...) { 
+add_TA <- function(x, order=NULL, on=NA, legend="auto",
+                   yaxis=list(NULL,NULL),
+                   col=1, taType=NULL, ...) { 
   lenv <- new.env()
   lenv$name <- deparse(substitute(x))
   lenv$plot_ta <- function(x, ta, on, taType, col=col,...) {
@@ -502,10 +506,14 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(x=x,order=order,on=on,legend=legend,taType=taType,col=col,...)),
-              list(x=x,order=order,on=on,legend=legend,taType=taType,col=col,...))
+        names(list(x=x,order=order,on=on,legend=legend,
+                   taType=taType,col=col,...)),
+              list(x=x,order=order,on=on,legend=legend,
+                   taType=taType,col=col,...))
   exp <- parse(text=gsub("list","plot_ta",
-               as.expression(substitute(list(x=current.chob(),ta=get("x"),on=on,taType=taType,col=col,...)))),
+               as.expression(substitute(list(x=current.chob(),
+                             ta=get("x"),on=on,
+                             taType=taType,col=col,...)))),
                srcfile=NULL)
   plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
@@ -549,7 +557,20 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",  col=1, taType=NULL, ...
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
   } else { 
     for(i in 1:length(on)) {
-      plot_object$set_frame(2*on[i]) 
+      plot_object$set_frame(2*on[i]) # this is defaulting to using headers, should it be optionable?
+      lenv$grid_lines <- function(xdata,xsubset) { 
+        pretty(xdata[xsubset])
+      }
+      exp <- c(exp,
+           # LHS
+           #expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
+           #           noquote(format(grid_lines(xdata,xsubset),justify="right")),
+           #           col=theme$labels,offset=0,pos=4,cex=0.9)),
+           # RHS
+           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
+                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
+                      col=theme$labels,offset=0,pos=4,cex=0.9)))
+      }
       plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
     }
   }
