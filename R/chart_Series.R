@@ -570,7 +570,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
            expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
                       noquote(format(grid_lines(xdata,xsubset),justify="right")),
                       col=theme$labels,offset=0,pos=4,cex=0.9)))
-      }
+      #}
       plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
     }
   }
