@@ -18,6 +18,7 @@ export(new.replot,
        chart_Series, add_Series,
        add_Vo,add_BBands,add_SMA,add_RSI,add_SMI,add_TA,
        chart_theme, chart_pars,
+       add_axis,
        add_MACD, zoom_Chart)
 
 export(axTicksByValue)
