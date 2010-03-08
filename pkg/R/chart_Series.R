@@ -323,7 +323,7 @@ chart_Series <- function(x,
   cs$set_frame(-2)
 
   # add minor y-grid lines
-  cs$add(expression(if(diff(range(xdata[xsubset])) < 50)
+  cs$add(expression(if(diff(range(xdata[xsubset],na.rm=TRUE)) < 50)
                     segments(1,seq(min(xdata[xsubset]%/%1,na.rm=TRUE),
                                    max(xdata[xsubset]%/%1,na.rm=TRUE),1),
                              length(xsubset),
