@@ -252,6 +252,8 @@ chart_Series <- function(x,
   cs$Env$theme$dn.col <- dn.col
   cs$Env$theme$up.border <- up.border
   cs$Env$theme$dn.border <- dn.border
+  cs$Env$theme$rylab <- theme$rylab
+  cs$Env$theme$lylab <- theme$lylab
   cs$Env$theme$bg <- theme$col$bg
   cs$Env$theme$grid <- theme$col$grid
   cs$Env$theme$grid2 <- theme$col$grid2
