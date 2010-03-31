@@ -7,6 +7,8 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   Env$usr   <- par("usr")
   Env$xlim  <- xlim
   Env$ylim  <- ylim
+  Env$pad1 <- -0 # bottom padding per frame
+  Env$pad3 <-  0 # top padding per frame 
   if(length(asp) != length(ylim))
     stop("'ylim' and 'asp' must be the same length")
 
@@ -19,6 +21,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   set_asp   <- function(asp) { Env$asp <<- asp }
   set_xlim  <- function(xlim) { Env$xlim <<- xlim }
   set_ylim  <- function(ylim) { Env$ylim <<- ylim }
+  set_pad   <- function(pad) { Env$pad1 <<- pad[1]; Env$pad3 <<- pad[2] }
   reset_ylim <- function() {
     ylim <- get_ylim()
     ylim <- rep(list(c(Inf,-Inf)),length(ylim))
@@ -43,6 +46,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   get_asp   <- function(asp) { Env$asp }
   get_xlim  <- function(xlim) { Env$xlim }
   get_ylim  <- function(ylim) { Env$ylim }
+  get_pad   <- function() c(Env$pad1,Env$pad3)
 
   # scale ylim based on current frame, and asp values
   scale_ranges <- function(frame, asp, ranges)
@@ -56,7 +60,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
     frame <- abs(frame)
     asp   <- Env$asp
     xlim  <- Env$xlim
-    ylim  <- lapply(Env$ylim, function(x) structure(x + (diff(x) * c(-0.05, 0.05)),fixed=attr(x,"fixed")))
+    ylim  <- lapply(Env$ylim, function(x) structure(x + (diff(x) * c(Env$pad1, Env$pad3)),fixed=attr(x,"fixed")))
     sr <- scale_ranges(frame, asp, ylim)
     if(frame == 1) {
       win <- list(xlim, c((ylim[[frame]][1] - sum(sr[-1])), ylim[[frame]][2]))
@@ -187,18 +191,8 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   replot_env$reset_ylim <- reset_ylim
   replot_env$set_ylim <- set_ylim
   replot_env$get_ylim <- get_ylim
+  replot_env$set_pad <- set_pad
   return(replot_env)
-#  structure(list(Env=Env, 
-#                 set_window=set_window,
-#                 add=add, replot=replot,
-#                 get_actions, subset=subset,
-#                 update_frames=update_frames,
-#                 set_frame=set_frame, get_frame=get_frame, next_frame=next_frame,
-#                 add_frame=add_frame, remove_frame=remove_frame,
-#                 set_asp=set_asp, get_asp=get_asp,
-#                 set_xlim=set_xlim, get_xlim=get_xlim,
-#                 reset_ylim=reset_ylim, set_ylim=set_ylim, get_ylim=get_ylim),
-#            class="replot")
 } # }}}
 
 str.replot <- function(x, ...) {

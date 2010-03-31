@@ -316,10 +316,15 @@ chart_Series <- function(x,
   cs$Env$axis_labels <- function(xdata,xsubset,scale=5) {
     axTicksByValue(na.omit(xdata[xsubset]))
   }
+  cs$Env$make_pretty_labels <- function(ylim) {
+    p <- pretty(ylim,10)
+    p[p > ylim[1] & p < ylim[2]]
+  }
   #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
   #cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
   #cs$add(expression(assign("alabels", pretty(range(xdata[xsubset],na.rm=TRUE)))),expr=TRUE)
-  cs$add(expression(assign("alabels", pretty(get_ylim(get_frame())[[2]],10))),expr=TRUE)
+  #cs$add(expression(assign("alabels", pretty(get_ylim(get_frame())[[2]],10))),expr=TRUE)
+  cs$add(expression(assign("alabels", make_pretty_labels(get_ylim(get_frame())[[2]]))),expr=TRUE)
 
   # add $1 grid lines if appropriate
   cs$set_frame(-2)
@@ -340,14 +345,14 @@ chart_Series <- function(x,
     cs$add(expression(text(1-1/3-max(strwidth(alabels)),
                 alabels, #axis_labels(xdata,xsubset), 
                 noquote(format(alabels,justify="right")), 
-                col=theme$labels,offset=0,cex=0.9,pos=4)),expr=TRUE)
+                col=theme$labels,offset=0,cex=0.9,pos=4,xpd=TRUE)),expr=TRUE)
   }
   # right axis labels
   if(theme$rylab) {
     cs$add(expression(text(NROW(xdata[xsubset])+1/3,
                 alabels, 
                 noquote(format(alabels,justify="right")),
-                col=theme$labels,offset=0,cex=0.9,pos=4)),expr=TRUE)
+                col=theme$labels,offset=0,cex=0.9,pos=4,xpd=TRUE)),expr=TRUE)
   }
   # add main series
   cs$set_frame(2)
@@ -394,7 +399,8 @@ fade <- function(col, level) {
   cols
 }
 
-current.chob <- function() get(".chob",.GlobalEnv)
+current.chob <- function() invisible(get(".chob",.GlobalEnv))
+
 use.chob <- function(use=TRUE) {
   options('global.chob'=use) 
 }
