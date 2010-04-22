@@ -8,77 +8,59 @@ function(Symbols, Exp=NULL, src="yahoo", ...) {
   }
 }
 
-`getOptionChain.yahoo` <-
-function(Symbols, Exp=NULL, ...) {
+
+getOptionChain.yahoo <- function(Symbols, Exp, ...)
+{
   parse.expiry <- function(x) {
-    if(nchar(x)==5L) {
-      #MonYR
-      x <- sprintf(substring(x,4,5),match(substring(x, 1, 3),month.abb),fmt="20%s-%02i")
-    } else
-    if(nchar(x)==6L) {
-      #CCYY-MM or CCYYMM
-      x <- paste(substring(x,1,4),substring(x,5,6),sep="-")
+    if(is.null(x))
+      return(NULL)
+    if (nchar(x) == 5L) {
+      x <- sprintf(substring(x, 4, 5), match(substring(x, 
+          1, 3), month.abb), fmt = "20%s-%02i")
+    }
+    else if (nchar(x) == 6L) {
+      x <- paste(substring(x, 1, 4), substring(x, 5, 6), 
+          sep = "-")
     }
     return(x)
-  } 
-  missingExp <- ifelse(missing(Exp), TRUE, FALSE)
-  if(is.null(Exp)) {
-    opts <- try(readLines(paste("http://finance.yahoo.com/q/op?s=",
-                           Symbols,"&m=",Exp,sep="")), silent=TRUE)
-    if(inherits(opts, "try-error"))
-      return(NULL)
-    Exp <- unlist(strsplit(gsub("(CALL OPTIONS)| ","",gsub("<.*?>","",opts[grep("View By Expiration",opts)+1],perl=TRUE)),"\\|"))
   }
-  if(missingExp)
-    Exp <- Exp[1]
-  if(length(Exp) > 1) {
-    opt.list <- list()
-    for(i in 1:length(Exp)) {
-      opt.list <- c(opt.list, list(getOptionChain(Symbols, parse.expiry(Exp[i]))))
-    }
-    names(opt.list) <- Exp
-    return(opt.list)
+  if(missing(Exp))
+    opt <- readLines(paste("http://finance.yahoo.com/q/op?s",Symbols,sep="="))
+  else
+    opt <- readLines(paste("http://finance.yahoo.com/q/op?s=",Symbols,"&m=",parse.expiry(Exp),sep=""))
+  opt <- opt[grep("Expire at",opt)]
+
+  if(!missing(Exp) && is.null(Exp)) {
+    allExp <- substr(strsplit(strsplit(opt,"<tr.*?>")[[1]][12],"m=")[[1]][-1],0,7)
+    return(structure(lapply(allExp, getOptionChain.yahoo, Symbols=Symbols), .Names=format(as.yearmon(allExp))))
   }
-  opt <- try(readLines(paste("http://finance.yahoo.com/q/op?s=",
-                         Symbols,"&m=",parse.expiry(Exp),sep="")), silent=TRUE)
-  if(inherits(opt, "try-error"))
-    return(NULL)
-  extag <- grep("Expire at", opt) + 1
-  neg.call.chg <- which(sapply(strsplit(opt[extag[1]],"color:#"),substring,1,6)[-1] == "cc0000")
-  calls <- strsplit(gsub("<.*?>","---",opt[extag[1]],perl=TRUE),"---")[[1]] 
 
-  neg.put.chg <- which(sapply(strsplit(opt[extag[2]],"color:#"),substring,1,6)[-1] == "cc0000")
-  puts  <- strsplit(gsub("<.*?>","---",opt[extag[2]],perl=TRUE),"---")[[1]] 
+  where <- cumsum(rle(sapply(gregexpr(Symbols,strsplit(opt, "<tr")[[1]]),
+                             function(x) if(x[1] > 0) TRUE else FALSE))[[1]])[c(5:8)]
+  CNAMES <- c("Strike","Last","Chg","Bid","Ask","Vol","OI")
 
-  call.len <- sum(nchar(calls) > 10) #length(grep("X$", calls, perl=TRUE))
-  if(call.len > 0) {
-    calls <- calls[-which(calls=="")][-(1:9)][seq(1,9*call.len)]
-    call.mat <- matrix(calls,byrow=TRUE,nc=9)[,-4]
-    call.symbols <- call.mat[,2]
-    call.symbols <- call.symbols[-(length(call.symbols)+c(-1,0))]
-    call.mat <- call.mat[1:length(call.symbols),-2]
-    call.mat <- gsub(",","",call.mat)
-    suppressWarnings(storage.mode(call.mat) <- "numeric")
-    call.mat[neg.call.chg, 3] <- call.mat[neg.call.chg,3]*-1
-    calls <- data.frame(call.mat, row.names=call.symbols)
-    colnames(calls) <- c("Strike","Last","Chg","Bid","Ask","Vol","OI")
-  } else calls <- NULL
-  
-  put.len <- sum(nchar(puts) > 10) #length(grep("X$", puts, perl=TRUE))
-  if(put.len > 0) {
-    puts <- puts[-which(puts=="")][-(1:9)][seq(1,9*put.len)]
-    put.mat <- matrix(puts,byrow=TRUE,nc=9)[,-4]
-    put.symbols <- put.mat[,2]
-    # symbols now contains some additional lines 2 for call, 3 for puts
-    # remove here
-    put.symbols <- put.symbols[-(length(put.symbols)+c(-2,-1,0))] 
-    put.mat <- put.mat[1:length(put.symbols),-2]
-    put.mat <- gsub(",","",put.mat)
-    suppressWarnings(storage.mode(put.mat) <- "numeric")
-    put.mat[neg.put.chg, 3] <- put.mat[neg.put.chg,3]*-1
-    puts <- data.frame(put.mat, row.names=put.symbols)
-    colnames(puts) <- c("Strike","Last","Chg","Bid","Ask","Vol","OI")
-  } else puts <- NULL
+  # calls
+  down <- grep("cc0000",strsplit(opt,"<tr.*?>")[[1]][seq(where[1],where[2])])-1
+  calls <- strsplit(gsub("\\s+"," ",gsub("<.*?>"," ",strsplit(opt,"<tr.*?>")[[1]][seq(where[1],where[2])]))," ")
+  calls <- do.call(rbind,calls[-1])[,-1]
+  callOSI <- calls[,2]
+  calls <- data.frame(calls[,-2])
+  calls <- apply(calls, 2, function(x) suppressWarnings(as.numeric(gsub(",","",x))))
+  calls[down,3] <- calls[down,3] * -1
+  colnames(calls) <- CNAMES
+  rownames(calls) <- callOSI
+
+  # puts
+  down <- grep("cc0000",strsplit(opt,"<tr.*?>")[[1]][seq(where[3],where[4])])-1
+  puts <- strsplit(gsub("\\s+"," ",gsub("<.*?>"," ",strsplit(opt,"<tr.*?>")[[1]][seq(where[3],where[4])]))," ")
+  puts <- do.call(rbind,puts[-1])[,-1]
+  putOSI <- puts[,2]
+  puts <- data.frame(puts[,-2])
+  puts <- apply(puts, 2, function(x) suppressWarnings(as.numeric(gsub(",","",x))))
+  puts[down,3] <- puts[down,3] * -1
+  colnames(puts) <- CNAMES
+  rownames(puts) <- putOSI
+
   list(calls=calls,puts=puts,symbol=Symbols)
 }
 
