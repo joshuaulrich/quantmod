@@ -35,7 +35,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     return(structure(lapply(allExp, getOptionChain.yahoo, Symbols=Symbols), .Names=format(as.yearmon(allExp))))
   }
 
-  where <- cumsum(rle(sapply(gregexpr(Symbols,strsplit(opt, "<tr")[[1]]),
+  where <- cumsum(rle(sapply(gregexpr(paste("s",Symbols,sep="="),strsplit(opt, "<tr")[[1]]),
                              function(x) if(x[1] > 0) TRUE else FALSE))[[1]])[c(5:8)]
   CNAMES <- c("Strike","Last","Chg","Bid","Ask","Vol","OI")
 
