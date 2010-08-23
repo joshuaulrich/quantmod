@@ -1,7 +1,4 @@
 # NAMESPACE file for quantmod
-import(Defaults)
-import(xts)
-import(TTR)
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)

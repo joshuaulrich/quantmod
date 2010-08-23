@@ -104,12 +104,12 @@ function(main=NULL, sub=NULL, xlab=NULL, ylab=NULL, line=NA, ...) {
     segments(nr-(1/8 * max(strwidth(labels))),at,
              nr+(1/8 * max(strwidth(labels))),at)
   }
-  if(missing(pos))
-    pos <- side
+  #if(missing(pos))
+  #  pos <- side
   mapply(function(name, value) {
       assign(name, value, envir = lenv)
-  }, names(list(side=side,at=at,labels=labels,font=font,pos=pos,col=col)),
-     list(side=side,at=at,labels=labels,font=font,pos=pos,col=col))
+  }, names(list(main=main,sub=sub,xlab=xlab,ylab=ylab,line=line)),
+     list(main=main,sub=sub,xlab=xlab,ylab=ylab,line=line))
   exp <- parse(text = gsub("list", "plot_axis", as.expression(substitute(list(x = current.chob(), 
                side=side, at=get("at"), labels=get("labels"), font=font,pos=pos, col=col)))), srcfile = NULL)
   plot_object <- quantmod:::current.chob()

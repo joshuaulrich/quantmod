@@ -32,6 +32,9 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
   if(!missing(Exp) && is.null(Exp)) {
     allExp <- substr(strsplit(strsplit(opt,"<tr.*?>")[[1]][12],"m=")[[1]][-1],0,7)
+    # fix for missing current month in links
+    allExp <- c(format(as.yearmon(allExp[1]) - 1/12, "%Y-%m"), allExp)
+
     return(structure(lapply(allExp, getOptionChain.yahoo, Symbols=Symbols), .Names=format(as.yearmon(allExp))))
   }
 
