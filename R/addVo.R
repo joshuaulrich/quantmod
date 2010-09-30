@@ -27,7 +27,7 @@
       last.Closes <- as.numeric(Lag(Closes))
       last.Closes[1] <- Closes[1]
       bar.col <- ifelse(Opens < Closes,
-                        ifelse(Opens > last.Closes,
+                        ifelse(Opens < last.Closes,
                                lchob@colors$dn.up.col,
                                lchob@colors$up.up.col),
                         ifelse(Opens < last.Closes,
