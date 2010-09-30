@@ -20,7 +20,7 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
     getLast  <- function(X) Cl(X)
   } else getFirst <- getLast <- function(X) X[,1]
 
-  FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
+  #FUN = eval(parse(text=paste('xts::to',period,sep='.'))) 
   on.opts <- list(daily='days',
                   weekly='weeks',
                   monthly='months',
@@ -28,10 +28,11 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
                   yearly='years',
                   annually='years')
   ep <- endpoints(xx, on=on.opts[[period]])
-  ret <- Delt(Cl(FUN(x,...)),type=type)
+  #ret <- Delt_(Cl(FUN(x,...)),type=type)
+  ret <- Delt_(Cl(to_period(x, period=on.opts[[period]],...)),type=type)
 
   if(leading) {
-    firstval <- as.numeric(Delt(getFirst(xx[1]),getLast(xx[ep[2]]),type=type))
+    firstval <- as.numeric(Delt_(getFirst(xx[1]),getLast(xx[ep[2]]),type=type))
     ret[1] <- firstval
   }
 

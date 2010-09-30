@@ -433,6 +433,32 @@ function(x,k=1)
     lag(x,k)
 }
 
+Delt_ <- 
+function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
+{
+    x1 <- try.xts(x1, error=FALSE)
+    type <- match.arg(type[1],c('log','arithmetic'))
+    if(length(x2)!=length(x1) && !is.null(x2)) stop('x1 and x2 must be of same length');
+    if(is.null(x2)){
+        x2 <- x1 #copy for same symbol deltas
+        if(length(k) < 2) {
+            k <- max(1,k)
+        }
+    }
+    dim(x2) <- NULL  # allow for multiple k matrix math to happen
+    if(type=='log') {
+        xx <- lapply(k, function(K.) {
+                log(unclass(x2)/lag(x1,K.))
+              })
+    } else {
+        xx <- lapply(k, function(K.) {
+                unclass(x2)/lag(x1,K.)-1
+              })
+    }
+    xx <- do.call("cbind", xx)
+    colnames(xx) <- paste("Delt",k,type,sep=".")
+    reclass(xx,x1)
+}
 `Delt` <-
 function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
 {
