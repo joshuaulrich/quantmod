@@ -697,7 +697,7 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
 } # }}}
 
 # add_RSI {{{
-add_RSI <- function (n=14, maType="EMA", ...) {
+add_RSI <- function (n=14, maType="EMA", ..., RSIup=70, RSIdn=30) {
   lenv <- new.env()
   lenv$plot_rsi <- function(x, n, maType, ...) {
     xdata <- x$Env$xdata
@@ -711,8 +711,8 @@ add_RSI <- function (n=14, maType="EMA", ...) {
              axTicksByTime2(xdata[xsubset]),
              par("usr")[4], #max(10,range(na.omit(macd))[2]), col=x$Env$theme$grid)
              col=x$Env$theme$grid)
-    lines(x.pos, rep(30,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
-    lines(x.pos, rep(70,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
+    lines(x.pos, rep(RSIdn,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
+    lines(x.pos, rep(RSIup,length(x.pos)), col=theme$col$lines, lwd=1,lty=2,lend=2,...) 
     lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=1.5,...) 
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
@@ -746,7 +746,7 @@ add_RSI <- function (n=14, maType="EMA", ...) {
   plot_object$next_frame()
 
   # add grid lines
-  lenv$grid_lines <- function(xdata,x) { c(30,70) }
+  lenv$grid_lines <- function(xdata,x) { c(RSIdn,RSIup) }
   # add grid lines
   exp <- c(expression(segments(1, grid_lines(xdata,xsubset),
                                NROW(xdata[xsubset]), grid_lines(xdata,xsubset), col=theme$grid)),exp,
