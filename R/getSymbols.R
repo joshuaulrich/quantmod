@@ -116,9 +116,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
        from <- getSymbolLookup()[[Symbols[[i]]]]$from
-       from <- ifelse(is.null(from),default.from,from)
+       from <- if(is.null(from)) default.from else from
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
-       to <- ifelse(is.null(to),default.to,to)
+       to <- if(is.null(to)) default.to else to
    
        from.y <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][1])
        from.m <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][2])-1
