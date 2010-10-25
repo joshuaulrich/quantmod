@@ -8,6 +8,8 @@
 \alias{add_SMA}
 \alias{add_TA}
 \alias{add_Vo}
+\alias{add_axis}
+\alias{zoom_Chart}
 \alias{chart_theme}
 \alias{chart_pars}
 \alias{axTicksByTime2}
