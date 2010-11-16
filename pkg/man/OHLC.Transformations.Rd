@@ -1,5 +1,6 @@
 \name{OHLC.Transformations}
 \alias{OHLC.Transformations}
+\alias{getPrice}
 \alias{Ad}
 \alias{Cl}
 \alias{ClCl}
