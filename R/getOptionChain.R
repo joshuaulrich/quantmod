@@ -30,9 +30,9 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     return(x)
   }
   if(missing(Exp))
-    opt <- readLines(paste("http://finance.yahoo.com/q/op?s",Symbols,sep="="))
+    opt <- readLines(paste(paste("http://finance.yahoo.com/q/op?s",Symbols,sep="="),"Options",sep="+"))
   else
-    opt <- readLines(paste("http://finance.yahoo.com/q/op?s=",Symbols,"&m=",parse.expiry(Exp),sep=""))
+    opt <- readLines(paste(paste("http://finance.yahoo.com/q/op?s=",Symbols,"&m=",parse.expiry(Exp),sep=""),"Options",sep="+"))
   opt <- opt[grep("Expire at",opt)]
   opt <- gsub("%5E","",opt)
 
