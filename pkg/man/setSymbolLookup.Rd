@@ -59,6 +59,10 @@ as well as passed parameters like \code{dbname} and
 specific getSymbols function related to the source
 in question for more details of each implementation.
 
+If a single named list is passed into the function without naming 
+the list as a parameter, the names of this list will be presumed 
+to be symbol names to be added to the current list of symbols. 
+
 All changes are made to the current list, and will
 persist \emph{only} until the end of the session. To \emph{always}
 use the same defaults it is necessary to call
