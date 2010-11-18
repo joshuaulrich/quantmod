@@ -1,7 +1,7 @@
-"setSymbolLookup" <-
-function(...)
+setSymbolLookup <- function(...)
 {
   new.symbols <- list(...)
+  if(length(new.symbols)==1 && is.null(names(new.symbols)) && is.list(new.symbols[[1]])) new.symbols<-new.symbols[[1]]
   all.symbols <- getOption("getSymbols.sources")
   for(each.symbol in names(new.symbols)) {
     if(length(new.symbols[[each.symbol]])==1 &
