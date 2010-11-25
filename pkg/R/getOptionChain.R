@@ -40,7 +40,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     ViewByExp <- grep("View By Expiration",strsplit(opt, "<tr.*?>")[[1]])
     allExp <- substr(strsplit(strsplit(opt,"<tr.*?>")[[1]][ViewByExp],"m=")[[1]][-1],0,7)
     # fix for missing current month in links
-    allExp <- c(format(as.yearmon(allExp[1]) - 1/12, "%Y-%m"), allExp)
+    # allExp <- c(format(as.yearmon(allExp[1]) - 1/12, "%Y-%m"), allExp)
 
     return(structure(lapply(allExp, getOptionChain.yahoo, Symbols=Symbols), .Names=format(as.yearmon(allExp))))
   }
