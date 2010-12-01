@@ -5,7 +5,9 @@
 #}
 
 setOldClass("zoo");
+setOldClass("xts");
 setOldClass("Date");
+setClassUnion("xtsORzoo", c("xts","zoo"))
 setClass("quantmod",representation(
                     model.id="character",
 		            model.spec="formula",
@@ -24,11 +26,11 @@ setClass("quantmod",representation(
                     )
         );
 setClass("quantmodReturn",representation(
-                    results="zoo",
-                    returns="zoo",
+                    results="xtsORzoo",
+                    returns="xtsORzoo",
                     CAGR="numeric",
                     HPR="numeric",
-                    accuracy="zoo",
+                    accuracy="xtsORzoo",
                     directional.accuracy="list",
                     dist.of.returns="list",
                     returnsBy="ANY"
