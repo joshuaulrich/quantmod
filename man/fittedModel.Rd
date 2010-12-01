@@ -22,7 +22,6 @@ calls can be extracted for further analysis.
 }
 \usage{
 fittedModel(object)
-fittedModel(object) <- value
 
 
 \method{formula}{quantmod}(x, \dots)
@@ -49,8 +48,7 @@ fittedModel(object) <- value
 }
 \arguments{
   \item{object}{ a \code{quantmod} object }
-  \item{x}{ a \code{quantmod} object }
-  \item{value}{ a new fitted model }
+  \item{x}{ a suitable object }
   \item{\dots}{ additional arguments }
 }
 \details{
