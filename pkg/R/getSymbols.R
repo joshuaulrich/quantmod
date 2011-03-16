@@ -497,6 +497,14 @@ function(Symbols,env,
     extension <- getSymbolLookup()[[Symbols[[i]]]]$extension
     extension <- ifelse(is.null(extension),default.extension,
                            extension)
+                   
+    format <- getSymbolLookup()[[Symbols[[i]]]]$format
+    if(is.null(format)) format<-''
+    if(!is.null(list('...')[['format']])) {
+        format<-list('...')[['format']] # dots overrides anything we stored in setSymbolLookup
+        list('...')[['format']]<-NULL # avoid R's "formal argument "format" matched by multiple actual arguments"
+    }
+
     if(verbose) cat("loading ",Symbols[[i]],".....")
     if(dir=="") {
       sym.file <- paste(Symbols[[i]],extension,sep=".")
@@ -511,7 +519,7 @@ function(Symbols,env,
     fr <- read.csv(sym.file)
     if(verbose)  
       cat("done.\n")
-    fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='csv',updated=Sys.time())
+    fr <- xts(fr[,-1],as.Date(fr[,1],format=format, ..., origin='1970-01-01'),src='csv',updated=Sys.time())
     colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
                           c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
