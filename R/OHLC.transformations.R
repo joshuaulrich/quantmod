@@ -189,10 +189,14 @@ function(x)
 `has.Op` <-
 function(x,which=FALSE)
 {
+  colAttr <- attr(x, "Op")
+  if(!is.null(colAttr))
+    return(if(which) colAttr else TRUE)
+
   loc <- grep('Open',colnames(x),ignore.case=TRUE)
-  if(!identical(loc,integer(0)))
-    return(ifelse(which,loc,TRUE))
-  ifelse(which,loc,FALSE)
+  if(!identical(loc,integer(0))) {
+    return(if(which) loc else TRUE)
+  } else FALSE
 }
 
 `Hi` <-
@@ -206,10 +210,14 @@ function(x)
 `has.Hi` <-
 function(x,which=FALSE)
 {
+  colAttr <- attr(x, "Hi")
+  if(!is.null(colAttr))
+    return(if(which) colAttr else TRUE)
+
   loc <- grep('High',colnames(x),ignore.case=TRUE)
-  if(!identical(loc,integer(0)))
-    return(ifelse(which,loc,TRUE))
-  ifelse(which,loc,FALSE)
+  if(!identical(loc,integer(0))) {
+    return(if(which) loc else TRUE)
+  } else FALSE
 }
 
 `Lo` <-
@@ -223,10 +231,14 @@ function(x)
 `has.Lo` <-
 function(x,which=FALSE)
 {
+  colAttr <- attr(x, "Lo")
+  if(!is.null(colAttr))
+    return(if(which) colAttr else TRUE)
+
   loc <- grep('Low',colnames(x),ignore.case=TRUE)
-  if(!identical(loc,integer(0)))
-    return(ifelse(which,loc,TRUE))
-  ifelse(which,loc,FALSE)
+  if(!identical(loc,integer(0))) {
+    return(if(which) loc else TRUE)
+  } else FALSE
 }
 
 `Cl` <-
@@ -239,10 +251,14 @@ function(x)
 `has.Cl` <-
 function(x,which=FALSE)
 {
+  colAttr <- attr(x, "Cl")
+  if(!is.null(colAttr))
+    return(if(which) colAttr else TRUE)
+
   loc <- grep('Close',colnames(x),ignore.case=TRUE)
-  if(!identical(loc,integer(0)))
-    return(ifelse(which,loc,TRUE))
-  ifelse(which,loc,FALSE)
+  if(!identical(loc,integer(0))) {
+    return(if(which) loc else TRUE)
+  } else FALSE
 }
 
 `Vo` <-
@@ -257,10 +273,14 @@ function(x)
 `has.Vo` <-
 function(x,which=FALSE)
 {
+  colAttr <- attr(x, "Vo")
+  if(!is.null(colAttr))
+    return(if(which) colAttr else TRUE)
+
   loc <- grep('Volume',colnames(x),ignore.case=TRUE)
-  if(!identical(loc,integer(0)))
-    return(ifelse(which,loc,TRUE))
-  ifelse(which,loc,FALSE)
+  if(!identical(loc,integer(0))) {
+    return(if(which) loc else TRUE)
+  } else FALSE
 }
 
 `Ad` <-
@@ -273,10 +293,14 @@ function(x)
 `has.Ad` <-
 function(x,which=FALSE)
 {
+  colAttr <- attr(x, "Ad")
+  if(!is.null(colAttr))
+    return(if(which) colAttr else TRUE)
+
   loc <- grep('Adjusted',colnames(x),ignore.case=TRUE)
-  if(!identical(loc,integer(0)))
-    return(ifelse(which,loc,TRUE))
-  ifelse(which,loc,FALSE)
+  if(!identical(loc,integer(0))) {
+    return(if(which) loc else TRUE)
+  } else FALSE
 }
 
 `OpCl` <-

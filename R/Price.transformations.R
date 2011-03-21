@@ -72,74 +72,81 @@ is.TBBO <- function (x)
 #' @export
 has.Bid <- function(x, which = FALSE)
 {
-   loc <- grep("Bid", colnames(x))
+   colAttr <- attr(x, "Bid")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   loc <- grep("bid.*price", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("bid", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   ifelse(which, loc, FALSE)
+       return(if(which) loc else TRUE)
+   } else FALSE
+}
+
+#' @export
+has.BidSize <- function(x, which = FALSE)
+{
+   colAttr <- attr(x, "BidSize")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   loc <- grep("bid.*size", colnames(x), ignore.case=TRUE)
+   if (!identical(loc, integer(0))) {
+       return(if(which) loc else TRUE)
+   } else FALSE
 }
 
 #' @export
 has.Ask <- function(x, which = FALSE)
 {
-   loc <- grep("Ask", colnames(x))
-   if (!identical(loc, integer(0))){
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("ask", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   loc <- grep("Offer", colnames(x))
+   colAttr <- attr(x, "Ask")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   loc <- grep("(ask|offer).*price", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("offer", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   ifelse(which, loc, FALSE)
+       return(if(which) loc else TRUE)
+   } else FALSE
+}
+
+#' @export
+has.AskSize <- function(x, which = FALSE)
+{
+   colAttr <- attr(x, "AskSize")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   loc <- grep("(ask|offer).*size", colnames(x), ignore.case=TRUE)
+   if (!identical(loc, integer(0))) {
+       return(if(which) loc else TRUE)
+   } else FALSE
 }
 
 #' @export
 has.Price <- function(x, which = FALSE)
 {
-   loc <- grep("Price", colnames(x))
+   colAttr <- attr(x, "Price")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   locBidAsk <- c(has.Bid(x, which=TRUE),has.Ask(x, which=TRUE))
+   loc <- grep("price", colnames(x), ignore.case=TRUE)
+   loc <- loc[!(loc %in% locBidAsk)]
    if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("price", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   ifelse(which, loc, FALSE)
+       return(if(which) loc else TRUE)
+   } else FALSE
 }
 
 #' @export
 has.Trade <- function(x, which = FALSE)
 {
-   loc <- grep("Trade", colnames(x))
+   colAttr <- attr(x, "Trade")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   loc <- grep("trade", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("trade", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   #trades are often represented by a Price column in TBBO data, e.g. Reuters and blotter
-   loc <- grep("Price", colnames(x))
-   if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("price", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   ifelse(which, loc, FALSE)
+       return(if(which) loc else TRUE)
+   } else FALSE
 }
 
 #' check for Trade, Bid, and Ask/Offer (BBO/TBBO), Quantity, and Price data
@@ -152,30 +159,99 @@ has.Trade <- function(x, which = FALSE)
 #' @aliases
 #' has.Trade
 #' has.Ask
+#' has.AskSize
 #' has.Bid
+#' has.BidSize
 #' has.Price
 #' is.BBO
 #' is.TBBO
 #' @export
 has.Qty <- function(x, which = FALSE)
 {
-   loc <- grep("Qty", colnames(x))
+   colAttr <- attr(x, "Qty")
+   if(!is.null(colAttr))
+     return(if(which) colAttr else TRUE)
+
+   loc <- grep("qty|quantity", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("qty", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   loc <- grep("Quantity", colnames(x))
-   if (!identical(loc, integer(0))) {
-       return(ifelse(which, loc, TRUE))
-   } else {
-       loc <- grep("quantity", colnames(x))
-       if (!identical(loc, integer(0)))
-           return(ifelse(which, loc, TRUE))
-   }
-   ifelse(which, loc, FALSE)
+       return(if(which) loc else TRUE)
+   } else FALSE
+}
+
+# Column setting functions
+set.AllColumns <- function(x) {
+  cols <- c("Op","Hi","Lo","Cl","Vo","Ad","Price","Trade","Qty",
+            "Bid","BidSize","Ask","AskSize")
+  for(col in cols) {
+    try(x <- do.call(paste("set",col,sep="."), list(x)), silent=TRUE )
+  }
+  return(x)
+}
+
+set.Ad <- function(x, error=TRUE) {
+  if(has.Ad(x))
+    attr(x,"Ad") <- has.Ad(x, which=TRUE)
+  return(x)
+}
+set.Bid <- function(x, error=TRUE) {
+  if(has.Bid(x))
+    attr(x,"Bid") <- has.Bid(x, which=TRUE)
+  return(x)
+}
+set.BidSize <- function(x, error=TRUE) {
+  if(has.BidSize(x))
+    attr(x,"BidSize") <- has.BidSize(x, which=TRUE)
+  return(x)
+}
+set.Hi <- function(x, error=TRUE) {
+  if(has.Hi(x))
+    attr(x,"Hi") <- has.Hi(x, which=TRUE)
+  return(x)
+}
+set.Lo <- function(x, error=TRUE) {
+  if(has.Lo(x))
+    attr(x,"Lo") <- has.Lo(x, which=TRUE)
+  return(x)
+}
+set.Op <- function(x, error=TRUE) {
+  if(has.Op(x))
+    attr(x,"Op") <- has.Op(x, which=TRUE)
+  return(x)
+}
+set.Qty <- function(x, error=TRUE) {
+  if(has.Qty(x))
+    attr(x,"Qty") <- has.Qty(x, which=TRUE)
+  return(x)
+}
+set.Vo <- function(x, error=TRUE) {
+  if(has.Vo(x))
+    attr(x,"Vo") <- has.Vo(x, which=TRUE)
+  return(x)
+}
+set.Ask <- function(x, error=TRUE) {
+  if(has.Ask(x))
+    attr(x,"Ask") <- has.Ask(x, which=TRUE)
+  return(x)
+}
+set.AskSize <- function(x, error=TRUE) {
+  if(has.AskSize(x))
+    attr(x,"AskSize") <- has.AskSize(x, which=TRUE)
+  return(x)
+}
+set.Cl <- function(x, error=TRUE) {
+  if(has.Cl(x))
+    attr(x,"Cl") <- has.Cl(x, which=TRUE)
+  return(x)
+}
+set.Price <- function(x, error=TRUE) {
+  if(has.Price(x))
+    attr(x,"Price") <- has.Price(x, which=TRUE)
+  return(x)
+}
+set.Trade <- function(x, error=TRUE) {
+  if(has.Trade(x))
+    attr(x,"Trade") <- has.Trade(x, which=TRUE)
+  return(x)
 }
 
 ###############################################################################
