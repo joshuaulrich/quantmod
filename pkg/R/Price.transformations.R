@@ -42,6 +42,7 @@ getPrice <- function (x, symbol=NULL, prefer=NULL)
               Cl =, close =, Close = { loc <- has.Cl(x,which=TRUE) },
               Bid =, bid = { loc <- has.Bid(x,which=TRUE) },
               Ask =, ask =, Offer =, offer = { loc <- has.Ask(x,which=TRUE) },
+              Mid =, mid =, Midpoint =, midpoint = { loc <- has.Mid(x,which=TRUE) },
               Trade =, trade = { loc <- has.Trade(x,which=TRUE) },
               Price =, price = { loc <- has.Price(x,which=TRUE) },
               {loc <- grep(prefer,colnames(x))}
@@ -70,13 +71,31 @@ is.TBBO <- function (x)
 }
 
 #' @export
+is.BAM <- function(x) {
+	if (all(has.Bid(x), has.Ask(x), has.Mid(x))) {
+        TRUE
+    }
+    else FALSE
+}
+
+#' @export
+is.BATM <- function(x) {
+	if (all(has.Bid(x), has.Ask(x), has.Trade(x), has.Mid(x))) {
+        TRUE
+    }
+    else FALSE
+}
+
+#' @export
 has.Bid <- function(x, which = FALSE)
 {
    colAttr <- attr(x, "Bid")
    if(!is.null(colAttr))
      return(if(which) colAttr else TRUE)
-
+   #first try with "price" for data that has both bid.size and bid.price
    loc <- grep("bid.*price", colnames(x), ignore.case=TRUE)
+   if (identical(loc, integer(0))) #If no column named bid.price
+     loc <- grep("bid", colnames(x), ignore.case=TRUE) #look for bid
    if (!identical(loc, integer(0))) {
        return(if(which) loc else TRUE)
    } else FALSE
@@ -89,7 +108,7 @@ has.BidSize <- function(x, which = FALSE)
    if(!is.null(colAttr))
      return(if(which) colAttr else TRUE)
 
-   loc <- grep("bid.*size", colnames(x), ignore.case=TRUE)
+   loc <- grep("bid.*(size|qty|quantity)", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) {
        return(if(which) loc else TRUE)
    } else FALSE
@@ -98,12 +117,14 @@ has.BidSize <- function(x, which = FALSE)
 #' @export
 has.Ask <- function(x, which = FALSE)
 {
-   colAttr <- attr(x, "Ask")
+   colAttr <- attr(x, "Ask") #case sensitive; doesn't work for SYMBOL.Ask :-(
    if(!is.null(colAttr))
      return(if(which) colAttr else TRUE)
-
-   loc <- grep("(ask|offer).*price", colnames(x), ignore.case=TRUE)
-   if (!identical(loc, integer(0))) {
+    #first try with "price" for data that has both ask.size and ask.price
+   loc <- grep("(ask|offer).*price", colnames(x), ignore.case=TRUE) 
+   if (identical(loc, integer(0))) #if that failed, try to find just "ask|offer"
+     loc <- grep("(ask|offer)", colnames(x), ignore.case=TRUE)
+   if (!identical(loc, integer(0))) { 
        return(if(which) loc else TRUE)
    } else FALSE
 }
@@ -115,7 +136,7 @@ has.AskSize <- function(x, which = FALSE)
    if(!is.null(colAttr))
      return(if(which) colAttr else TRUE)
 
-   loc <- grep("(ask|offer).*size", colnames(x), ignore.case=TRUE)
+   loc <- grep("(ask|offer).*(size|qty|quantity)", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) {
        return(if(which) loc else TRUE)
    } else FALSE
@@ -149,6 +170,36 @@ has.Trade <- function(x, which = FALSE)
    } else FALSE
 }
 
+has.Mid <- function(x, which=FALSE) {
+    colAttr <- attr(x, "Mid")
+    if(!is.null(colAttr))
+        return(if(which) colAttr else TRUE)
+
+	loc <- grep("Mid", colnames(x), ignore.case = TRUE)
+    if (!identical(loc, integer(0))) 
+        return(ifelse(which, loc, TRUE))
+    ifelse(which, loc, FALSE)
+}
+
+has.Chg <- function(x, which=FALSE) {
+    colAttr <- attr(x, "Chg")
+    if(!is.null(colAttr))
+        return(if(which) colAttr else TRUE)    
+	loc <- grep("(chg|change)", colnames(x), ignore.case=TRUE)
+    if (!identical(loc, integer(0))) 
+        return(ifelse(which, loc, TRUE))
+    ifelse(which, loc, FALSE)
+}
+
+#has.Un <- function(x, which=FALSE) {
+#	loc <- grep("Unadj", colnames(x), ignore.case = TRUE)
+#    if (!identical(loc, integer(0))) 
+#        return(ifelse(which, loc, TRUE))
+#    ifelse(which, loc, FALSE)
+#}
+
+
+
 #' check for Trade, Bid, and Ask/Offer (BBO/TBBO), Quantity, and Price data
 #'
 #' A set of functions to check for appropriate TBBO/BBO and price column
@@ -166,13 +217,16 @@ has.Trade <- function(x, which = FALSE)
 #' is.BBO
 #' is.TBBO
 #' @export
+
 has.Qty <- function(x, which = FALSE)
 {
    colAttr <- attr(x, "Qty")
    if(!is.null(colAttr))
      return(if(which) colAttr else TRUE)
 
-   loc <- grep("qty|quantity", colnames(x), ignore.case=TRUE)
+   locBidAsk <- c(has.Bid(x, which=TRUE),has.Ask(x, which=TRUE))
+   loc <- grep("qty", colnames(x), ignore.case=TRUE)
+   loc <- loc[!(loc %in% locBidAsk)]
    if (!identical(loc, integer(0))) {
        return(if(which) loc else TRUE)
    } else FALSE
@@ -181,11 +235,23 @@ has.Qty <- function(x, which = FALSE)
 # Column setting functions
 set.AllColumns <- function(x) {
   cols <- c("Op","Hi","Lo","Cl","Vo","Ad","Price","Trade","Qty",
-            "Bid","BidSize","Ask","AskSize")
+            "Bid","BidSize","Ask","AskSize","Mid","Chg")
   for(col in cols) {
     try(x <- do.call(paste("set",col,sep="."), list(x)), silent=TRUE )
   }
-  return(x)
+  return(names(x))
+}
+
+set.Chg <- function(x, error=TRUE) {
+    if(has.Chg(x))
+        attr(x,"Chg") <- has.Chg(x, which=TRUE)
+    return(x)
+}
+
+set.Mid <- function(x, error=TRUE) {
+    if(has.Mid(x))
+        attr(x,"Mid") <<- has.Mid(x, which=TRUE)
+    return(x)
 }
 
 set.Ad <- function(x, error=TRUE) {
@@ -193,6 +259,8 @@ set.Ad <- function(x, error=TRUE) {
     attr(x,"Ad") <- has.Ad(x, which=TRUE)
   return(x)
 }
+
+
 set.Bid <- function(x, error=TRUE) {
   if(has.Bid(x))
     attr(x,"Bid") <- has.Bid(x, which=TRUE)
