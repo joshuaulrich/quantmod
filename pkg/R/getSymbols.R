@@ -94,7 +94,6 @@ formals(loadSymbols) <- loadSymbols.formals
 function(Symbols,env,return.class='xts',index.class="Date",
          from='2007-01-01',
          to=Sys.Date(),
-         adjust=FALSE,
          ...)
 {
      importDefaults("getSymbols.yahoo")
@@ -103,6 +102,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+     if(!exists("adjust", environment()))
+       adjust <- FALSE
 
      default.return.class <- return.class
      default.from <- from
