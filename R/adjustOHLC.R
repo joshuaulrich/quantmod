@@ -2,10 +2,8 @@ adjustOHLC <-
 function(x, 
          adjust=c("split","dividend"), 
          use.Adjusted=FALSE, 
-         ratio=NULL) 
+         ratio=NULL, symbol.name=deparse(substitute(x))) 
 {
-  symbol.name <- deparse(substitute(x))
-
   if(is.null(ratio)) {
     if(use.Adjusted) {
       # infer from Yahoo! Ajusted column
