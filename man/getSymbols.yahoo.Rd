@@ -19,7 +19,6 @@ getSymbols.yahoo(Symbols,
                  index.class  = 'Date',
                  from = "2007-01-01",
                  to = Sys.Date(),
-                 adjust=FALSE,
                   ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -32,10 +31,6 @@ getSymbols.yahoo(Symbols,
        \item{from}{ Retrieve data no earlier than this date. 
                     (2007-01-01)}
        \item{to}{ Retrieve data through this date (Sys.Date())}
-       \item{adjust}{ Logical; if 'TRUE', the Open, High, Low,
-                      and Close prices will be adjusted for
-                      dividends and splits, and Volume will be
-                      adjusted for dividends. }
        \item{\dots}{ additional parameters }
 }
 \details{

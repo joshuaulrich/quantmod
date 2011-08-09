@@ -13,13 +13,15 @@ split and dividend.
 adjustOHLC(x,
            adjust = c("split","dividend"),
            use.Adjusted = FALSE,
-           ratio = NULL)
+           ratio = NULL,
+           symbol.name=deparse(substitute(x)))
 }
 \arguments{
   \item{x}{ An OHLC object }
   \item{adjust}{ adjust by split, dividend, or both (default) }
   \item{use.Adjusted}{ use the \sQuote{Adjusted} column in Yahoo! data to adjust }
   \item{ratio}{ ratio to adjust with, bypassing internal calculations }
+  \item{symbol.name}{ used if x is not named the same as the symbol adjusting }
 }
 \details{
 This function calculates the adjusted
