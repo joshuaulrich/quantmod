@@ -190,6 +190,7 @@ export(
     getSymbols.FRED,
     getSymbols.yahoo,
     getSymbols.oanda,
+    getSymbols.Bloomberg,
 #    getSymbols.IBrokers,
     getSymbols.csv,
     getSymbols.rda,
