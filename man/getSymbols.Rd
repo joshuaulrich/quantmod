@@ -1,5 +1,6 @@
 \name{getSymbols}
 \alias{getSymbols}
+\alias{getSymbols.Bloomberg}
 \alias{loadSymbols}
 \alias{showSymbols}
 \alias{removeSymbols}
