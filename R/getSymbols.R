@@ -198,7 +198,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(!exists("adjust", environment()))
+     if(!exists("adjust", environment(), inherits=FALSE))
        adjust <- FALSE
 
      default.return.class <- return.class
