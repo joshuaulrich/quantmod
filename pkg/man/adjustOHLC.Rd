@@ -37,7 +37,7 @@ may dispatch to custom methods following the \dQuote{.}
 methodology used by quantmod dispatch.  See \code{getSymbols}
 for information related to extending quantmod.
 This information is passed to
-\code{adjSplitDiv} from the \pkg{TTR} package, and
+\code{adjRatios} from the \pkg{TTR} package, and
 the resulting ratio calculations are used to adjust
 to observed historical prices.
 This is the most precise way to adjust a series.
