@@ -509,3 +509,28 @@ function(x1,x2=NULL,k=0,type=c('arithmetic','log'))
     colnames(xx) <- paste("Delt",k,type,sep=".")
     reclass(xx,x1)
 }
+
+
+.Delt <- function(x1, x2 = NULL, k = 0, type=c("arithmetic","log")) {
+  x1 <- try.xts(x1, error=FALSE)
+  type <- match.arg(type[1], c("arithmetic","log"))
+  if(length(x2) != length(x1) && !is.null(x2))
+    stop("x1 and x2 must be of the same length")
+  if(is.null(x2)) {
+    x2 <- x1
+    if(length(k) < 2) {
+      k <- max(1,k)
+    }
+  }
+  if(type=="log") {
+    #xx <- lapply(k, function(K) diff(log(x1), K))
+    xx <- lapply(k, function(K) log(x2/lag(x1, K)))
+  }
+  else {
+    #xx <- lapply(k, function(K) diff(x1,K) / lag(x1,K))
+    xx <- lapply(k, function(K) (x2 - lag(x1,K)) / lag(x1,K))
+  }
+  xx <- do.call(cbind,xx)
+  colnames(xx) <- paste("Delt",k,type,sep=".")
+  reclass(xx,x1)
+}
