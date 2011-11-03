@@ -617,7 +617,7 @@ function(Symbols,env,
     fr <- read.csv(sym.file)
     if(verbose)  
       cat("done.\n")
-    fr <- xts(fr[,-1],as.Date(fr[,1],format=format, ..., origin='1970-01-01'),src='csv',updated=Sys.time())
+    fr <- xts(fr[,-1],as.Date(fr[,1],format=format, origin='1970-01-01'),src='csv',updated=Sys.time())
     colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
                           c('Open','High','Low','Close','Volume','Adjusted'),
                              sep='.')
