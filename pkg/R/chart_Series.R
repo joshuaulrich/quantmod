@@ -842,7 +842,7 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   xsubset <- plot_object$Env$xsubset    # current subset
 
   # calculate our indicator here
-  macd <- MACD(HLC(xdata),fast,slow,signal,maType)
+  macd <- MACD(Cl(xdata),fast,slow,signal,maType)
   lenv$xdata <- structure(cbind(macd,macd[,1]-macd[,2]),.Dimnames=list(NULL,c("macd","signal","histogram")))
   lenv$macd <- cbind(macd,macd[,1]-macd[,2])
   
