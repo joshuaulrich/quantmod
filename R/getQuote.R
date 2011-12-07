@@ -27,7 +27,7 @@ function(Symbols,what=standardQuote(),...) {
     for(i in 1:length(all.symbols)) {
       Sys.sleep(0.5)
       cat(i,", ")
-      df <- rbind(df, getQuote.yahoo(all.symbols[[i]]))
+      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what))
     }
     cat("...done\n")
     return(df)
