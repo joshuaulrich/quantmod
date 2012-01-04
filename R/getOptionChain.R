@@ -29,6 +29,26 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
     return(x)
   }
+
+  parseOptionTable_ <- function(x) {
+    opt <- x
+    os <- lapply(as.list(lapply(strsplit(opt,"<tr>"), function(.) gsub(",","",gsub("N/A","NA",gsub("(^ )|( $)","",gsub("[ ]+"," ",gsub("<.*?>"," ", .))))))[[1]]), function(.) strsplit(.," ")[[1]])
+    which.opts <- sapply(os,function(.) length(.)==8)
+    up <- grep("Up", strsplit(opt, "<tr>")[[1]][which.opts])
+    dn <- grep("Down", strsplit(opt, "<tr>")[[1]][which.opts])
+    allcontracts <- do.call(rbind,os[sapply(os,function(.) length(.) == 8)])
+    rownames. <- allcontracts[,2]
+    allcontracts <- allcontracts[,-2]
+    suppressWarnings(storage.mode(allcontracts) <- "double")
+    allcontracts[dn,3] <- allcontracts[dn,3]*-1
+    allcontracts <- data.frame(allcontracts)
+    rownames(allcontracts) <- rownames.
+    colnames(allcontracts) <- c("Strike", "Last", "Chg", "Bid", "Ask", "Vol", "OI")
+  
+    call.rows <- which(substr(sprintf("%21s", rownames.),13,13) == "C")
+    list(allcontracts[call.rows,], allcontracts[-call.rows,])
+  }
+
   if(missing(Exp))
     opt <- readLines(paste(paste("http://finance.yahoo.com/q/op?s",Symbols,sep="="),"Options",sep="+"))
   else
@@ -44,33 +64,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
     return(structure(lapply(allExp, getOptionChain.yahoo, Symbols=Symbols), .Names=format(as.yearmon(allExp))))
   }
-
-  where <- cumsum(rle(sapply(gregexpr(paste("s",gsub("\\^","",Symbols),sep="="),strsplit(opt, "<tr")[[1]]),
-                             function(x) if(x[1] > 0) TRUE else FALSE))[[1]])[c(5:8)]
-  CNAMES <- c("Strike","Last","Chg","Bid","Ask","Vol","OI")
-
-  # calls
-  down <- grep("cc0000",strsplit(opt,"<tr.*?>")[[1]][seq(where[1],where[2])])-1
-  calls <- strsplit(gsub("\\s+"," ",gsub("<.*?>"," ",strsplit(opt,"<tr.*?>")[[1]][seq(where[1],where[2])]))," ")
-  calls <- do.call(rbind,calls[-1])[,-1]
-  callOSI <- calls[,2]
-  calls <- data.frame(calls[,-2])
-  calls <- apply(calls, 2, function(x) suppressWarnings(as.numeric(gsub(",","",x))))
-  calls[down,3] <- calls[down,3] * -1
-  colnames(calls) <- CNAMES
-  rownames(calls) <- callOSI
-
-  # puts
-  down <- grep("cc0000",strsplit(opt,"<tr.*?>")[[1]][seq(where[3],where[4])])-1
-  puts <- strsplit(gsub("\\s+"," ",gsub("<.*?>"," ",strsplit(opt,"<tr.*?>")[[1]][seq(where[3],where[4])]))," ")
-  puts <- do.call(rbind,puts[-1])[,-1]
-  putOSI <- puts[,2]
-  puts <- data.frame(puts[,-2])
-  puts <- apply(puts, 2, function(x) suppressWarnings(as.numeric(gsub(",","",x))))
-  puts[down,3] <- puts[down,3] * -1
-  colnames(puts) <- CNAMES
-  rownames(puts) <- putOSI
-
-  list(calls=calls,puts=puts,symbol=Symbols)
+  calls_puts <- parseOptionTable_(opt)
+  list(calls=calls_puts[[1]],puts=calls_puts[[2]],symbol=Symbols)
 }
 
