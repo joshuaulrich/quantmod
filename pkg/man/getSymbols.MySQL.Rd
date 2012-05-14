@@ -19,6 +19,8 @@ getSymbols.MySQL(Symbols,
                  user = NULL, 
                  password = NULL, 
                  dbname = NULL, 
+                 host = "localhost", 
+                 port = 3306, 
                  ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -35,6 +37,8 @@ getSymbols.MySQL(Symbols,
        \item{user}{ username to access database }
        \item{password}{ password to access database }
        \item{dbname}{ database name }
+       \item{host}{ database host }
+       \item{port}{ database port }
        \item{\dots}{ currently not used }
 }
 \details{
