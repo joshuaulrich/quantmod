@@ -14,8 +14,9 @@
 #' @param x A data object with columns containing data to be extracted
 #' @param symbol text string containing the symbol to extract
 #' @param prefer preference for any particular type of price, see Details
+#' @param \dots any other passthrough parameters
 #' @export
-getPrice <- function (x, symbol=NULL, prefer=NULL)
+getPrice <- function (x, symbol=NULL, prefer=NULL,...)
 {
    # first subset on symbol, if present
    if(!is.null(symbol)){
