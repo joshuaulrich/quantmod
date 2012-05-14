@@ -418,7 +418,7 @@ function(Symbols,env,return.class='xts',
 "getSymbols.MySQL" <- function(Symbols,env,return.class='xts',
                                db.fields=c('date','o','h','l','c','v','a'),
                                field.names = NULL,
-                               user=NULL,password=NULL,dbname=NULL,
+                               user=NULL,password=NULL,dbname=NULL,host='localhost',port=3306,
                                ...) {
      importDefaults("getSymbols.MySQL")
      this.env <- environment()
@@ -440,7 +440,7 @@ function(Symbols,env,return.class='xts',
               sQuote('password'),sQuote('dbname'),
               ") is not set"))
         }
-        con <- dbConnect(MySQL(),user=user,password=password,dbname=dbname)
+        con <- dbConnect(MySQL(),user=user,password=password,dbname=dbname,host=host,port=port)
         db.Symbols <- dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
           missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
