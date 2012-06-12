@@ -516,7 +516,7 @@ function(Symbols,env,return.class='xts',
 
 # getFX {{{
 `getFX` <-
-function(Currencies,from=Sys.Date()-500,to=Sys.Date(),
+function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
          env=.GlobalEnv,
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {

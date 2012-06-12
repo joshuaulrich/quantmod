@@ -29,11 +29,11 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
                   annually='years')
   ep <- endpoints(xx, on=on.opts[[period]])
   #ret <- Delt_(Cl(FUN(x,...)),type=type)
-  ret <- Delt_(Cl(to_period(x, period=on.opts[[period]],...)),type=type)
+  ret <- Delt_(Cl(to_period(xx, period=on.opts[[period]],...)),type=type)
 
   if(leading) {
     firstval <- as.numeric(Delt_(getFirst(xx[1]),getLast(xx[ep[2]]),type=type))
-    ret[1] <- firstval
+    ret[1,] <- firstval
   }
 
   colnames(ret) <- paste(period,'returns',sep='.')
