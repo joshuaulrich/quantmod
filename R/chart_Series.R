@@ -505,7 +505,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
                             end(x$Env$xdata[x$Env$xsubset]),sep="/")
       ta.adj <- merge(n=.xts(1:NROW(x$Env$xdata[x$Env$xsubset]),
                              .index(x$Env$xdata[x$Env$xsubset]), tzone=indexTZ(x$Env$xdata)),ta)[subset.range]
-      ta.x <- as.numeric(na.approx(ta.adj[,1]))
+      ta.x <- as.numeric(na.approx(ta.adj[,1], rule=2) )
       ta.y <- ta.adj[,-1]
       for(i in 1:NCOL(ta.y))
         lines(ta.x, as.numeric(ta.y[,i]), col=col,...)
