@@ -124,7 +124,7 @@ has.Ask <- function(x, which = FALSE)
     #first try with "price" for data that has both ask.size and ask.price
    loc <- grep("(ask|offer).*price", colnames(x), ignore.case=TRUE) 
    if (identical(loc, integer(0))) #if that failed, try to find just "ask|offer"
-     loc <- grep("(ask|offer)", colnames(x), ignore.case=TRUE)
+     loc <- grep("(ask|offer|ofr)", colnames(x), ignore.case=TRUE)
    if (!identical(loc, integer(0))) { 
        return(if(which) loc else TRUE)
    } else FALSE
@@ -240,7 +240,7 @@ set.AllColumns <- function(x) {
   for(col in cols) {
     try(x <- do.call(paste("set",col,sep="."), list(x)), silent=TRUE )
   }
-  return(names(x))
+  return(x)
 }
 
 set.Chg <- function(x, error=TRUE) {
@@ -251,7 +251,7 @@ set.Chg <- function(x, error=TRUE) {
 
 set.Mid <- function(x, error=TRUE) {
     if(has.Mid(x))
-        attr(x,"Mid") <<- has.Mid(x, which=TRUE)
+        attr(x,"Mid") <- has.Mid(x, which=TRUE)
     return(x)
 }
 
