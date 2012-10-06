@@ -6,7 +6,7 @@ function(x,
 {
   if(is.null(ratio)) {
     if(use.Adjusted) {
-      # infer from Yahoo! Ajusted column
+      # infer from Yahoo! Adjusted column
       if(!has.Ad(x))
         stop("no Adjusted column in 'x'")
       ratio <- Ad(x)/Cl(x)
@@ -14,7 +14,11 @@ function(x,
       # use actual split and/or dividend data
       div    <- getDividends(symbol.name)
       splits <- getSplits(symbol.name)
-      ratios <- adjRatios(splits, div, Cl(x))
+      # un-adjust dividends for splits
+      s.ratio <- adjRatios(splits=merge(splits, index(div)))[,1]
+      divAdj <- div * 1/s.ratio
+      # calculate adjustment ratios using unadjusted dividends
+      ratios <- adjRatios(splits, divAdj, Cl(x))
       if(length(adjust)==1 && adjust == "split") {
         ratio <- ratios[,1]
       } else if(length(adjust)==1 && adjust == "dividend") {
