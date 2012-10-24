@@ -1,11 +1,17 @@
 \name{addMA}
 \alias{addMA}
 \alias{addSMA}
+\alias{add_SMA}
 \alias{addEMA}
+\alias{add_EMA}
 \alias{addWMA}
+\alias{add_WMA}
 \alias{addDEMA}
+\alias{add_DEMA}
 \alias{addEVWMA}
 \alias{addZLEMA}
+\alias{add_VWAP}
+\alias{add_GMMA}
 \title{ Add Moving Average to Chart }
 \description{
 Add one or more moving averages to a chart.

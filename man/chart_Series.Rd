@@ -5,7 +5,6 @@
 \alias{add_BBands}
 \alias{add_RSI}
 \alias{add_SMI}
-\alias{add_SMA}
 \alias{add_TA}
 \alias{add_Vo}
 \alias{add_axis}
