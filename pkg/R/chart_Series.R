@@ -585,40 +585,116 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
   plot_object
 } #}}}
 
-# add_EMA {{{
-add_EMA <- function(n=10, on=1, ...) {
-  lenv <- new.env()
-  lenv$add_ema <- function(x, n, ...) {
-    xdata <- x$Env$xdata
-    xsubset <- x$Env$xsubset
-    ema <- EMA(Cl(xdata), n=n)[xsubset]
-    lines(1:NROW(xdata[xsubset]), ema, ...)
-  }
-  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,...)), list(n=n,...))
-  exp <- parse(text=gsub("list","add_ema",as.expression(substitute(list(x=current.chob(),n=n,...)))),
-               srcfile=NULL)
-  plot_object <- current.chob()
-  lenv$xdata <- EMA(Cl(plot_object$Env$xdata),n=n)
-  plot_object$set_frame(sign(on)*abs(on)+1L)
-  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
-  plot_object
-} # }}}
-
 # add_SMA {{{
-add_SMA <- function(n=10, on=1, ...) {
+add_SMA <- function(n=10, on=1, col='brown',...) {
   lenv <- new.env()
-  lenv$add_sma <- function(x, n, ...) {
+  lenv$add_sma <- function(x, n, col,...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     ema <- SMA(Cl(xdata), n=n)[xsubset]
-    lines(1:NROW(xdata[xsubset]), ema, ...)
+    lines(1:NROW(xdata[xsubset]), ema, col=col,...)
   }
-  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,...)), list(n=n,...))
-  exp <- parse(text=gsub("list","add_sma",as.expression(substitute(list(x=current.chob(),n=n,...)))),
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,...)), list(n=n,col=col,...))
+  exp <- parse(text=gsub("list","add_sma",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
                srcfile=NULL)
   plot_object <- current.chob()
   lenv$xdata <- SMA(Cl(plot_object$Env$xdata),n=n)
-  plot_object$set_frame(sign(on)*abs(on)+1L)
+  plot_object$set_frame(sign(on)*(abs(on)+1L))
+  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+  plot_object
+} # }}}
+# add_EMA {{{
+add_EMA <- function(n=10, on=1, col='blue',...) {
+  lenv <- new.env()
+  lenv$add_ema <- function(x, n, col,...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    ema <- EMA(Cl(xdata), n=n)[xsubset]
+    lines(1:NROW(xdata[xsubset]), ema, col=col, ...)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,...)), list(n=n,col=col,...))
+  exp <- parse(text=gsub("list","add_ema",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
+               srcfile=NULL)
+  plot_object <- current.chob()
+  lenv$xdata <- EMA(Cl(plot_object$Env$xdata),n=n)
+  plot_object$set_frame(sign(on)*(abs(on)+1L))
+  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+  plot_object
+} # }}}
+# add_WMA {{{
+add_WMA <- function(n=10, wts=1:n, on=1, col='green',...) {
+  lenv <- new.env()
+  lenv$add_wma <- function(x, n, wts, col, ...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    ema <- WMA(Cl(xdata), n=n, wts=wts)[xsubset]
+    lines(1:NROW(xdata[xsubset]), ema, col=col, ...)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,wts=wts,col=col,...)), list(n=n,wts=wts,col=col,...))
+  exp <- parse(text=gsub("list","add_wma",as.expression(substitute(list(x=current.chob(),n=n,wts=wts,col=col,...)))),
+               srcfile=NULL)
+  plot_object <- current.chob()
+  lenv$xdata <- WMA(Cl(plot_object$Env$xdata),n=n,wts=wts)
+  plot_object$set_frame(sign(on)*(abs(on)+1L))
+  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+  plot_object
+} # }}}
+# add_DEMA {{{
+add_DEMA <- function(n=10, on=1, col='pink', ...) {
+  lenv <- new.env()
+  lenv$add_dema <- function(x, n, col, ...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    dema <- DEMA(Cl(xdata), n=n)[xsubset]
+    lines(1:NROW(xdata[xsubset]), dema, col=col, ...)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,col=col,...)), list(n=n,col=col,...))
+  exp <- parse(text=gsub("list","add_dema",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
+               srcfile=NULL)
+  plot_object <- current.chob()
+  lenv$xdata <- DEMA(Cl(plot_object$Env$xdata),n=n)
+  plot_object$set_frame(sign(on)*(abs(on)+1L))
+  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+  plot_object
+} # }}}
+# add_VWAP {{{
+add_VWAP <- function(n=10, on=1, col='darkgrey', ...) {
+  lenv <- new.env()
+  lenv$add_vwap <- function(x, n, col, ...) {
+    xdata <- x$Env$xdata
+    xvo <- x$Env$vo
+    xsubset <- x$Env$xsubset
+    vwap <- VWAP(Cl(xdata),xvo, n=n)[xsubset]
+    lines(1:NROW(xdata[xsubset]), vwap, col=col, ...)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,col=col,...)), list(n=n,col=col,...))
+  exp <- parse(text=gsub("list","add_vwap",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
+               srcfile=NULL)
+  plot_object <- current.chob()
+  lenv$xdata <- VWAP(Cl(plot_object$Env$xdata),plot_object$Env$vo,n=n)
+  plot_object$set_frame(sign(on)*(abs(on)+1L))
+  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
+  plot_object
+} # }}}
+# add_GMMA {{{
+add_GMMA <- function(short=c(3,5,8,10,12,15),long=c(30,35,40,45,50,60), on=1, col=c('yellow','brown'),...) {
+#x, short = c(3, 5, 8, 10, 12, 15), long = c(30, 35, 
+#    40, 45, 50, 60), maType
+  lenv <- new.env()
+  lenv$add_gmma <- function(x, short, long, col,...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    gmma <- GMMA(Cl(xdata), short, long, maType="EMA")[xsubset]
+    col <- colorRampPalette(col)(length(short)+length(long))
+    for(i in 1:(length(short)+length(long)))
+      lines(1:NROW(xdata[xsubset]), gmma[,i], col=col[i],...)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(short=short,long=long,col=col,...)), list(short=short,long=long,col=col,...))
+  exp <- parse(text=gsub("list","add_gmma",as.expression(substitute(list(x=current.chob(),short=short,long=long,col=col,...)))),
+               srcfile=NULL)
+  plot_object <- current.chob()
+  lenv$xdata <- GMMA(Cl(plot_object$Env$xdata), short=short, long=long)
+  plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
   plot_object
 } # }}}
