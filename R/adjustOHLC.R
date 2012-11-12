@@ -14,11 +14,11 @@ function(x,
       # use actual split and/or dividend data
       div    <- getDividends(symbol.name)
       splits <- getSplits(symbol.name)
-      # un-adjust dividends for splits
-      s.ratio <- adjRatios(splits=merge(splits, index(div)))[,1]
-      divAdj <- div * 1/s.ratio
+      # un-adjust dividends for splits (Yahoo already adjusts div for splits)
+      if(is.xts(splits) && is.xts(div) && nrow(splits) > 0 && nrow(div) > 0)
+        div <- div * 1/adjRatios(splits=merge(splits, index(div)))[,1]
       # calculate adjustment ratios using unadjusted dividends
-      ratios <- adjRatios(splits, divAdj, Cl(x))
+      ratios <- adjRatios(splits, div, Cl(x))
       if(length(adjust)==1 && adjust == "split") {
         ratio <- ratios[,1]
       } else if(length(adjust)==1 && adjust == "dividend") {
