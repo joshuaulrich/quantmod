@@ -180,7 +180,8 @@ chart_Series <- function(x,
                          subset="", 
                          TA="",
                          pars=chart_pars(), theme=chart_theme(),
-                         clev=0) {
+                         clev=0,
+                         ...) {
   cs <- new.replot()
   #cex <- pars$cex
   #mar <- pars$mar
