@@ -6,11 +6,11 @@
 \title{ Download Current Stock Quote }
 \description{
 Fetch current stock quote(s) from specified source.  At present this only
-handle sourcing quotes from Yahoo Finance, but it will be extended to
+handles sourcing quotes from Yahoo Finance, but it will be extended to
 additional sources over time.
 }
 \usage{
-getQuote(Symbols, src = "yahoo", what = standardQuote(), ...)
+getQuote(Symbols, src = "yahoo", what, ...)
 
 standardQuote(src="yahoo")
 yahooQF(names)
@@ -18,7 +18,7 @@ yahooQuote.EOD
 }
 \arguments{
   \item{Symbols}{ character string of symbols, seperated by semi-colons }
-  \item{src}{ source of data (only yahoo is implemented) }
+  \item{src}{ source of data (only yahoo is implemented in \pkg{quantmod}) }
   \item{what}{ what should be retrieved }
   \item{names}{ which data should be retrieved }
   \item{\dots}{ currently unused }
@@ -32,14 +32,16 @@ and the results will be returned as one data object.
 \code{getQuote} returns a data frame with rows matching the number of Symbols
 requested, and the columns matching the requested columns.
 
-The \code{what} argument allows for specific data to be requested
-from yahoo, using Yahoo!'s formatting string.  A list and interactive
-selection tool can be seen with \code{yahooQF}.
+The \code{what} argument allows for specific data to be requested.  For
+\code{getQuote.yahoo}, the value of \code{what} should be a \code{quoteFormat}
+object like that returned by \code{standardQuote} which contains Yahoo!'s 
+formatting string.  If not provided, the   A list and interactive selection tool can be seen with 
+\code{yahooQF}.
 
 \code{standardQuote} currently only applied to Yahoo! data, and returns
 an object of class quoteFormat, for use within the \code{getQuote} function.
 
-\code{yahooQuote.EOD} is a constant that returns OHLCV data
+\code{yahooQuote.EOD} is a constant \code{quoteFormat} object for OHLCV data.
 }
 \references{ 
 Yahoo! Finance \url{finance.yahoo.com} 

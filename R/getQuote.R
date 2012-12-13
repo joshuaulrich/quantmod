@@ -5,9 +5,11 @@
 # getQuote.OpenTick
 
 `getQuote` <-
-function(Symbols,src='yahoo',what=standardQuote(), ...) {
-  if(src != 'yahoo') stop('no additional src methods available yet')
-  do.call(paste('getQuote',src,sep='.'), list(Symbols=Symbols,what=what,...))
+function(Symbols,src='yahoo',what, ...) {
+  args <- list(Symbols=Symbols,...)
+  if(!missing(what))
+      args$what <- what
+  do.call(paste('getQuote',src,sep='.'), args)
 }
 
 `getQuote.yahoo` <-
