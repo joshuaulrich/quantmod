@@ -9,6 +9,8 @@
 \alias{addDEMA}
 \alias{add_DEMA}
 \alias{addEVWMA}
+\alias{add_EVWMA}
+\alias{add_VMA}
 \alias{addZLEMA}
 \alias{add_VWAP}
 \alias{add_GMMA}
