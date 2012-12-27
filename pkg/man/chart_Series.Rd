@@ -31,7 +31,8 @@ chart_Series(x,
              TA = "", 
              pars = chart_pars(), 
              theme = chart_theme(), 
-             clev = 0)
+             clev = 0,
+             ...)
 }
 \arguments{
   \item{x}{
@@ -57,6 +58,9 @@ chart theme
 }
   \item{clev}{
 color level (experimental).  Indicates the degree of brightness 0 is darkest color.
+}
+  \item{\dots}{
+additional parameters
 }
 }
 \details{

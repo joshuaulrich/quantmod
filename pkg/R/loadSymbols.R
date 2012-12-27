@@ -59,8 +59,8 @@ function(desc,src='yahoo',optionSymbolsFile) {
                                 which(exp.codes==right,TRUE)[,1])]
 
   strike.codes <- rbind(
-                  matrix(rep(c(0,100,200,300,400,500),20),nr=20,byrow=TRUE)+seq(5,100,5),
-                  matrix(rep(seq(0,150,30),6),nr=6,byrow=TRUE)+seq(7.5,32.5,5))
+                  matrix(rep(c(0,100,200,300,400,500),20),nrow=20,byrow=TRUE)+seq(5,100,5),
+                  matrix(rep(seq(0,150,30),6),nrow=6,byrow=TRUE)+seq(7.5,32.5,5))
   strike.code <- LETTERS[which(strike.codes==strike,TRUE)[,1]]
 
   if(src=='yahoo') src <- ".X"

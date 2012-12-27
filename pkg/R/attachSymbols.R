@@ -3,7 +3,7 @@ function(cache.dir=tempdir(), cacheOK=TRUE, verbose=getOption('verbose')) {
   tmp <- file.path(cache.dir,'nasdaqlisted.txt')
   NASDAQ <- "http://ftp.nasdaqtrader.com/dynamic/SymDir/nasdaqlisted.txt"
   if(!file.exists(tmp))
-    download.file(NASDAQ, dest=tmp,quiet=!verbose)
+    download.file(NASDAQ, destfile=tmp,quiet=!verbose)
   NQ <- read.delim(tmp,sep="|",stringsAsFactors=FALSE)
   test_issues <- which(NQ[,4] != "N")
   NQ <- NQ[-test_issues,]
@@ -13,7 +13,7 @@ function(cache.dir=tempdir(), cacheOK=TRUE, verbose=getOption('verbose')) {
   tmp <- file.path(cache.dir,'otherlisted.txt')
   OTHER  <- "http://ftp.nasdaqtrader.com/dynamic/SymDir/otherlisted.txt"
   if(!file.exists(tmp))
-    download.file(OTHER, dest=tmp, quiet=!verbose)
+    download.file(OTHER, destfile=tmp, quiet=!verbose)
   OT <- read.delim(tmp,sep="|",stringsAsFactors=FALSE)
   
   test_issues <- which(OT[,7] != "N")
@@ -58,8 +58,8 @@ create.binding <- function(s, lsym, rsym, gsrc,
     if(mem.cache) {
       envir <- as.environment(envir)
       delayedAssign(lsym(s), { 
-                    assign(lsym(s),getSymbols(rsym(s),auto.assign=FALSE, src=gsrc, ...), env=envir)
-                    get(lsym(s), env=envir) },
+                    assign(lsym(s),getSymbols(rsym(s),auto.assign=FALSE, src=gsrc, ...), envir=envir)
+                    get(lsym(s), envir=envir) },
                     assign.env=envir)
     } else { # no cache
       f <- function(value) {

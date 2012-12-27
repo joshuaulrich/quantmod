@@ -184,7 +184,7 @@ function(x)
           for(indicator in 1:length(main.key)) {
             legend("topleft",
                    legend=c(rep('',indicator-1), paste(main.key[[indicator]][["legend"]],collapse="")),
-                   text.col=rev(main.key[[indicator]][["text.col"]])[1], bty='n', y.inter=0.95)
+                   text.col=rev(main.key[[indicator]][["text.col"]])[1], bty='n', y.intersp=0.95)
           }
         }
         main.key <- list()
@@ -217,7 +217,7 @@ function(x)
             for(indicator in (length(main.key)-length(underlay.text)):length(main.key)) {
               legend("topleft",
                      legend=c(rep('',indicator-1), paste(main.key[[indicator]][["legend"]],collapse="")),
-                     text.col=rev(main.key[[indicator]][["text.col"]])[1], bty='n', y.inter=0.95)
+                     text.col=rev(main.key[[indicator]][["text.col"]])[1], bty='n', y.intersp=0.95)
             }
           }
         } else
