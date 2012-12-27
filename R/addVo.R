@@ -130,7 +130,7 @@ function(x) {
            ))
     legend("topleft",
            legend=c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(Volumes)*vol.scale[[1]],big.mark=',')),
-           text.col=c(x@params$colors$fg.col, last(bar.col)), bty="n", y.inter=0.95)
+           text.col=c(x@params$colors$fg.col, last(bar.col)), bty="n", y.intersp=0.95)
 #   text(0, max(Volumes,na.rm=TRUE) * .9, "Volume:",pos=4)
 
 #   text(0, max(Volumes,na.rm=TRUE) * .9,

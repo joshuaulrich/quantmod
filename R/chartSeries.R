@@ -108,7 +108,7 @@ function(x,
       x.labels <- format(index(x)[ep + 1], "%b %d%n%H:%M")
 
   chob <- new("chob")
-  chob@call <- match.call(expand=TRUE)
+  chob@call <- match.call(expand.dots=TRUE)
   if(is.null(name)) name <- as.character(match.call()$x)
 
   chob@xdata <- xdata
@@ -137,7 +137,7 @@ function(x,
 
   chob@length <- NROW(x)
 
-  chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
+  chob@passed.args <- as.list(match.call(expand.dots=TRUE)[-1])
   if(!is.null(TA)) {
 
     # important to force eval of _current_ chob, not saved chob
@@ -146,8 +146,8 @@ function(x,
     chob@passed.args$TA <- list()
     for(ta in 1:length(TA)) {
       if(is.character(TA[[ta]])) {
-        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
-      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
+        chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),envir=thisEnv)
+      } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],envir=thisEnv)
     }
     chob@windows <- length(which(sapply(chob@passed.args$TA,function(x) x@new)))+1
     chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,function(x) x@name=="chartVo"))
@@ -474,7 +474,7 @@ function(x,
   x.labels <- names(ep)
 
   chob <- new("chob")
-  chob@call <- match.call(expand=TRUE)
+  chob@call <- match.call(expand.dots=TRUE)
   if(is.null(name)) name <- as.character(match.call()$x)
 
   chob@xdata <- xdata
@@ -509,7 +509,7 @@ function(x,
 
   chob@length <- NROW(x)
 
-  chob@passed.args <- as.list(match.call(expand=TRUE)[-1])
+  chob@passed.args <- as.list(match.call(expand.dots=TRUE)[-1])
   if(!is.null(TA)) {
 
     # important to force eval of _current_ chob, not saved chob
@@ -520,8 +520,8 @@ function(x,
     #if(length(TA) > 0) {
       for(ta in 1:length(TA)) {
         if(is.character(TA[[ta]])) {
-          chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),env=thisEnv)
-        } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],env=thisEnv)
+          chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),envir=thisEnv)
+        } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],envir=thisEnv)
       }
       # check if all args are indeed chobTA
       poss.new <- sapply(chob@passed.args$TA, function(x) 

@@ -244,7 +244,7 @@ function(object,data,...)
 function(method,package)
 {
   if(!package %in% .packages()) {
-    if(package %in% .packages(all=TRUE)) {
+    if(package %in% .packages(all.available=TRUE)) {
       cat(paste("loading required package:",package,"\n"))
       library(package,character.only=TRUE)
     } else {

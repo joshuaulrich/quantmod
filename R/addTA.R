@@ -1022,7 +1022,7 @@ function(x) {
                     paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""),
                     paste("MACD:",sprintf("%.3f",last(macd[,1]))),
                     paste("Signal:",sprintf("%.3f",last(macd[,2])))),
-           text.col=c(x@params$colors$fg.col, col[3], col[4]), bty='n', y.inter=0.95) 
+           text.col=c(x@params$colors$fg.col, col[3], col[4]), bty='n', y.intersp=0.95) 
 #   text(0, last(y.range)*.9,
 #        paste("Moving Average Convergence Divergence (",
 #        paste(x@params$fast,x@params$slow,x@params$signal,sep=','),"):", sep = ""), 
@@ -1311,7 +1311,7 @@ function(x) {
     ma.tmp <- cbind(ma.tmp,ma)
   }
 
-  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],nc=NCOL(ma.tmp))
+  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],ncol=NCOL(ma.tmp))
 
   chobTA@name <- "chartEMA"
   chobTA@call <- match.call()
@@ -1415,7 +1415,7 @@ function(x) {
     ma.tmp <- cbind(ma.tmp,ma)
   }
 
-  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],nc=NCOL(ma.tmp)) # single numeric vector
+  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],ncol=NCOL(ma.tmp)) # single numeric vector
   chobTA@name <- "chartSMA"
   chobTA@call <- match.call()
   chobTA@on <- on # used for deciding when to draw...
@@ -1879,14 +1879,14 @@ function(x) {
 
 # get.current.chob {{{
 `get.current.chob` <- function() {
-  first.chob <- which(sapply(sys.frames(),function(x) exists('chob',env=x)))[1]
+  first.chob <- which(sapply(sys.frames(),function(x) exists('chob',envir=x)))[1]
   if(!is.na(first.chob)) {
-    lchob <- get('chob',env=first.chob)
+    lchob <- get('chob',envir=first.chob)
 
-#  if(exists('chob',env=sys.frames()[[sys.parent()]])) {
+#  if(exists('chob',envir=sys.frames()[[sys.parent()]])) {
 #    if(identical(sys.frames()[[sys.parent()]],.GlobalEnv)) 
 #      stop("why are you calling this directly?")
-#    lchob <- get('chob',env=sys.frames()[[sys.parent()]])
+#    lchob <- get('chob',envir=sys.frames()[[sys.parent()]])
   } else {
     gchob <- get.chob()
     #protect against NULL device or windows not drawn to yet

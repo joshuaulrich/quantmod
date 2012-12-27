@@ -47,7 +47,7 @@ function(Symbols,what=standardQuote(),...) {
                 "http://finance.yahoo.com/d/quotes.csv?s=",
                 Symbols,
                 "&f=",QF,sep=""),
-                dest=tmp,quiet=TRUE)
+                destfile=tmp,quiet=TRUE)
   sq <- read.csv(file=tmp,sep=',',stringsAsFactors=FALSE,header=FALSE)
   unlink(tmp)
   Qposix <- strptime(paste(sq[,1],sq[,2]),format='%m/%d/%Y %H:%M')
