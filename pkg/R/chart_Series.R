@@ -875,7 +875,8 @@ add_RSI <- function (n=14, maType="EMA", ..., RSIup=70, RSIdn=30) {
   plot_object
 } # }}}
 
-skeleton_TA <- function(on) {
+skeleton_TA <- function(on, arg, ...) {
+  # NON-FUNCTIONING
   lenv <- new.env()
   lenv$plot_ta <- function(x, arg, ...) {
     # fill in body of low level plot calls here
