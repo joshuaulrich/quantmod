@@ -1,32 +1,37 @@
 `.chob` <- list(NULL)
+.chob <- new.env()
+.chob$.chob <- list(NULL)
 
 `write.chob` <-
 function(x,pos)
 {
   env <- as.environment("package:quantmod")
   environment(x) <- env
-  locked <- bindingIsLocked('.chob',env)
-  if(locked)
-    unlockBinding('.chob',env)
+  #locked <- bindingIsLocked('.chob',env)
+  #if(locked)
+  #  unlockBinding('.chob',env)
   orig.chob <- get.chob()
   if(missing(pos)) pos <- length(orig.chob)+1
   orig.chob[[pos]] <- x
-  assign('.chob',orig.chob,env)
-  if(locked) {
-    ow <- options("warn")
-    on.exit(options(ow))
-    options(warn=-1)
-    lockBinding('.chob',env)
-   }
+  .chob$.chob <- orig.chob
+  #assign('.chob',orig.chob,env)
+  #if(locked) {
+  #  ow <- options("warn")
+  #  on.exit(options(ow))
+  #  options(warn=-1)
+  #  lockBinding('.chob',env)
+  # }
   invisible(1)
 }
 
 `get.chob` <-
 function()
 {
-  x <- get('.chob',as.environment("package:quantmod"))
-  attr(x,'.Environment') <- NULL
+  x <- .chob$.chob
   return(x)
+  #x <- get('.chob',as.environment("package:quantmod"))
+  #attr(x,'.Environment') <- NULL
+  #return(x)
 }
 
 `release.chob` <-
@@ -39,16 +44,17 @@ function(n)
   }
   env <- as.environment("package:quantmod")
   environment(x) <- env
-  locked <- bindingIsLocked('.chob',env)
-  if(locked)
-    unlockBinding('.chob',env)
+  #locked <- bindingIsLocked('.chob',env)
+  #if(locked)
+  #  unlockBinding('.chob',env)
+  .chob$.chob <- x
   assign('.chob',x,env)
-  if(locked) {
-    ow <- options("warn")
-    on.exit(options(ow))
-    options(warn=-1)
-    lockBinding('.chob',env)
-   }
+  #if(locked) {
+  #  ow <- options("warn")
+  #  on.exit(options(ow))
+  #  options(warn=-1)
+  #  lockBinding('.chob',env)
+  # }
   invisible(1)
 }
 

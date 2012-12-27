@@ -338,6 +338,8 @@ function(Symbols,env,return.class='xts',
        colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
+       # convert '-' to NAs
+       suppressWarnings(storage.mode(fr) <- "numeric")
        fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
@@ -599,10 +601,10 @@ function(Symbols,env,
                    
     format <- getSymbolLookup()[[Symbols[[i]]]]$format
     if(is.null(format)) format<-''
-    if(!is.null(list(...)[['format']])) {
-        format<-list(...)[['format']] # dots overrides anything we stored in setSymbolLookup
-        list(...)[['format']]<-NULL # avoid R's "formal argument "format" matched by multiple actual arguments"
-    }
+##    if(!is.null(list(...)[['format']])) {
+##        format<-list(...)[['format']] # dots overrides anything we stored in setSymbolLookup
+##        list(...)[['format']]<-NULL # avoid R's "formal argument "format" matched by multiple actual arguments"
+##    }
 
     if(verbose) cat("loading ",Symbols[[i]],".....")
     if(dir=="") {

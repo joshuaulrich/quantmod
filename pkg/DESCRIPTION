@@ -4,7 +4,7 @@ Title: Quantitative Financial Modelling Framework
 Version: 0.3-22
 Date: 2012-10-23
 Author: Jeffrey A. Ryan
-Depends: Defaults, xts(>= 0.8-3), zoo, TTR(>= 0.2), methods
+Depends: Defaults, xts(>= 0.9-0), zoo, TTR(>= 0.2), methods
 Suggests: DBI,RMySQL,RSQLite,timeSeries,its
 Maintainer: Jeffrey A. Ryan <jeff.a.ryan@gmail.com>
 Description: Specify, build, trade, and analyse quantitative financial trading strategies
