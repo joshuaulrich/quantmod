@@ -443,7 +443,7 @@ function(Symbols,env,return.class='xts',
               sQuote('password'),sQuote('dbname'),
               ") is not set"))
         }
-        con <- dbConnect(MySQL(),user=user,password=password,dbname=dbname,host=host,port=port)
+        con <- dbConnect("MySQL",user=user,password=password,dbname=dbname,host=host,port=port)
         db.Symbols <- dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
           missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]

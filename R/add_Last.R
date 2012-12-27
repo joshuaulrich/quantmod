@@ -83,7 +83,7 @@ function(side, at=NULL, labels=TRUE, tick=TRUE, line=NA, pos=NA, font=NA, col=NU
 add_title <-
 function(main=NULL, sub=NULL, xlab=NULL, ylab=NULL, line=NA, ...) {
   lenv <- new.env()
-  lenv$plot_title <- function(x,main,sub,xlab,ylab,line) {
+  lenv$plot_title <- function(x,main,sub,xlab,ylab,line,side,font,pos) {
     xdata <- x$Env$xdata
     if(is.OHLC(xdata))
       xdata <- OHLC(xdata)
@@ -110,7 +110,7 @@ function(main=NULL, sub=NULL, xlab=NULL, ylab=NULL, line=NA, ...) {
       assign(name, value, envir = lenv)
   }, names(list(main=main,sub=sub,xlab=xlab,ylab=ylab,line=line)),
      list(main=main,sub=sub,xlab=xlab,ylab=ylab,line=line))
-  exp <- parse(text = gsub("list", "plot_axis", as.expression(substitute(list(x = current.chob(), 
+  exp <- parse(text = gsub("list", "plot_title", as.expression(substitute(list(x = current.chob(), 
                side=side, at=get("at"), labels=get("labels"), font=font,pos=pos, col=col)))), srcfile = NULL)
   plot_object <- quantmod:::current.chob()
   lenv$xdata <- plot_object$Env$xdata
