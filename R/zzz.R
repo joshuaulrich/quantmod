@@ -3,6 +3,14 @@
 #  cat("Version 0.3-7, Revision 461\n")
 #  cat("http://www.quantmod.com\n\n")
 #}
+quantmodenv <- function() as.environment(".quantmodEnv")
+print.quantmodEnv <- function(x, ...) {
+  print("<environment: quantmodEnv>")
+}
+
+.onAttach <- function(libname,pkgname) {
+  attach(NULL, pos=2, name='.quantmodEnv')
+}
 
 setOldClass("zoo");
 setOldClass("xts");

@@ -23,7 +23,7 @@ assignment by default.
 }
 \usage{
 getSymbols(Symbols = NULL, 
-           env = .GlobalEnv,
+           env = parent.frame(),
            reload.Symbols = FALSE,
            verbose = FALSE,
            warnings = TRUE,
@@ -33,7 +33,7 @@ getSymbols(Symbols = NULL,
            ...)
 
 loadSymbols(Symbols = NULL, 
-            env = .GlobalEnv,
+            env = parent.frame(),
             reload.Symbols = FALSE,
             verbose = FALSE,
             warnings = TRUE,
@@ -42,11 +42,11 @@ loadSymbols(Symbols = NULL,
             auto.assign = TRUE,
             ...)
 
-showSymbols(env=.GlobalEnv)
-removeSymbols(Symbols=NULL,env=.GlobalEnv)
+showSymbols(env=parent.frame())
+removeSymbols(Symbols=NULL,env=parent.frame())
 saveSymbols(Symbols = NULL,
             file.path=stop("must specify 'file.path'"),
-            env = .GlobalEnv)
+            env = parent.frame())
 }
 \arguments{
        \item{Symbols}{ a character vector specifying
@@ -70,7 +70,7 @@ saveSymbols(Symbols = NULL,
 \code{getSymbols} is a wrapper to load data from
 different sources - be them local or remote. Data is
 fetched through one of the available \code{getSymbols} methods
-and saved in the \code{env} specified - the .GlobalEnv
+and saved in the \code{env} specified - the parent.frame()
 by default. Data is loaded in much the same way that \code{load}
 behaves. By default, it is assigned automatically
 to a variable in the specified environment, \emph{without} the
@@ -83,9 +83,10 @@ into a new environment by default - or the environment specified. This
 behavior can be overridden by setting auto.assign to FALSE,
 though it is not advised.
 
-Previous versions of getSymbols assigned each object into the user's
+The early (pre 2009) versions of getSymbols assigned each object into the user's
 .GlobalEnv by name.  This behavior is now supported by setting
-env=.GlobalEnv (the current transitional default),
+env=.GlobalEnv (the current default is to the calling \sQuote{parent.frame()},
+which in interactive use may be the global environment,
 or by using the wrapper \code{loadSymbols}.  Many
 thanks to Kurt Hornik and Achim Zeileis for suggesting this change.
 
@@ -101,8 +102,8 @@ or objects in the user's specified environment - with the
 loaded symbol(s) names returned upon exit if that environment
 is the .GlobalEnv.
 
-By default, a new environment is returned which contains
-all the objects loaded into it.
+%By default, a new environment is returned which contains
+%all the objects loaded into it.
 
 If auto.assign is set to FALSE
 the data will be returned from the call, and will require

@@ -10,7 +10,7 @@ getMetals(Metals,
       from = Sys.Date() - 500,
       to = Sys.Date(),
       base.currency="USD",
-      env = .GlobalEnv,
+      env = parent.frame(),
       verbose = FALSE,
       warning = TRUE,
       auto.assign = TRUE, ...)
@@ -41,7 +41,7 @@ See \code{getSymbols} and \code{getSymbls.oanda} for more detail.
 }
 \value{
 Data will be assigned
-automatically to the environment specified (global by default).
+automatically to the environment specified (parent by default).
 If auto.assign is set to FALSE, the data from a single metal
 request will simply be returned from the function call.
 
