@@ -1,6 +1,7 @@
 \name{quantmod-package}
 \alias{quantmod-package}
 \alias{quantmod}
+\alias{quantmodenv}
 \docType{package}
 \title{
 Quantitative Financial Modelling Framework
@@ -12,9 +13,9 @@ Quantitative Financial Modelling and Trading Framework for R
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.3-1\cr
-Date: \tab 2011-11-03\cr
-Depends: \tab xts(>=0.8),Defaults\cr
+Version: \tab 0.3-241\cr
+Date: \tab 2012-12-31\cr
+Depends: \tab xts(>=0.9-1),Defaults\cr
 Suggests: \tab DBI,RMySQL,TTR,fSeries,its\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL-3\cr
@@ -29,7 +30,8 @@ of statistically based trading models.
 
 \emph{What quantmod IS}
 
-A rapid prototyping environment,
+A rapid prototyping environment, with comprehensive
+tools for data management and visualization.
 where quant traders can quickly
 and cleanly explore and build trading models.
 

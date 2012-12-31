@@ -1,7 +1,7 @@
 # getSymbols {{{
 "getSymbols" <-
 function(Symbols=NULL,
-         env=.GlobalEnv,
+         env=parent.frame(),
          reload.Symbols=FALSE,
          verbose=FALSE,
          warnings=TRUE,
@@ -74,9 +74,8 @@ function(Symbols=NULL,
         all.symbols <- c(all.symbols,old.Symbols)[unique(names(c(all.symbols,old.Symbols)))]
         if(auto.assign) {
           assign('.getSymbols',all.symbols,env);
-          if(identical(env, .GlobalEnv))
-            return(req.symbols)
-          return(env)
+          return(req.symbols)
+          #return(env)
         }
       } else {
         warning('no Symbols specified')
@@ -86,7 +85,6 @@ function(Symbols=NULL,
 
 loadSymbols <- getSymbols
 loadSymbols.formals <- formals(getSymbols)
-loadSymbols.formals$env <- substitute(.GlobalEnv)
 formals(loadSymbols) <- loadSymbols.formals
 
 
@@ -520,7 +518,7 @@ function(Symbols,env,return.class='xts',
 # getFX {{{
 `getFX` <-
 function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
-         env=.GlobalEnv,
+         env=parent.frame(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getFX")
@@ -546,7 +544,7 @@ function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
 # getMetals {{{
 `getMetals` <-
 function(Metals,from=Sys.Date()-500,to=Sys.Date(),
-         base.currency="USD",env=.GlobalEnv,
+         base.currency="USD",env=parent.frame(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getMetals")
@@ -953,7 +951,7 @@ function(Symbols,env,return.class='xts',
 
 # removeSymbols {{{
 "removeSymbols" <- 
-function(Symbols=NULL,env=.GlobalEnv) {
+function(Symbols=NULL,env=parent.frame()) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
     getSymbols <- get('.getSymbols',env,inherits=FALSE)
       if(is.null(Symbols)) {
@@ -977,7 +975,7 @@ function(Symbols=NULL,env=.GlobalEnv) {
 
 # showSymbols {{{
 "showSymbols" <-
-function(env=.GlobalEnv) {
+function(env=parent.frame()) {
     if(exists('.getSymbols',env,inherits=FALSE)) {
         return(unlist(get('.getSymbols',env)))
     } else { return(NULL) }
@@ -986,7 +984,7 @@ function(env=.GlobalEnv) {
 
 # saveSymbols {{{
 "saveSymbols"<-
-function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=.GlobalEnv) {
+function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=parent.frame()) {
   if(exists('.getSymbols',env,inherits=FALSE)) {
     getSymbols <- get('.getSymbols',env,inherits=FALSE)
       if(is.null(Symbols)) {

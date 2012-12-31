@@ -9,7 +9,7 @@ Download exchange rates or metals prices from oanda.
 getFX(Currencies,
       from = Sys.Date() - 499,
       to = Sys.Date(),
-      env = .GlobalEnv,
+      env = parent.frame(),
       verbose = FALSE,
       warning = TRUE,
       auto.assign = TRUE, ...)
@@ -31,7 +31,7 @@ A convenience wrapper to \code{getSymbols(x,src='oanda')}. See
 }
 \value{
 The results of the call will be the data will be assigned
-automatically to the environment specified (global by default). Additionally
+automatically to the environment specified (parent by default). Additionally
 a vector of downloaded symbol names will be returned.
 
 See \code{getSymbols} and \code{getSymbols.oanda} for more detail.
