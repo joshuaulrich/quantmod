@@ -42,7 +42,7 @@ function(...,dir=NULL)
             this <- eval(parse(text=thisName));
             this <- stripModelData(this);
             thisName <- this@model.id;
-            assign(thisName,this,pos=1);
+            assign(thisName,this,.quantmodEnv);
         }
     }
 

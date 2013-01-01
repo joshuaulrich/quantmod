@@ -367,7 +367,7 @@ chart_Series <- function(x,
                     fade(theme$dn.col,clev),
                     fade(theme$up.border,clev),
                     fade(theme$dn.border,clev))),expr=TRUE)
-  assign(".chob", cs, .GlobalEnv)
+  assign(".chob", cs, .plotEnv)
 
   # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
   if(!is.null(TA) && nchar(TA) > 0) {
@@ -380,7 +380,7 @@ chart_Series <- function(x,
     }
   }
   }
-  assign(".chob", cs, .GlobalEnv)
+  assign(".chob", cs, .plotEnv)
   cs
 } #}}}
 
@@ -400,7 +400,7 @@ fade <- function(col, level) {
   cols
 }
 
-current.chob <- function() invisible(get(".chob",.GlobalEnv))
+current.chob <- function() invisible(get(".chob",.plotEnv))
 
 use.chob <- function(use=TRUE) {
   options('global.chob'=use) 
