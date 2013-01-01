@@ -9,7 +9,7 @@ from Yahoo! Finance.
 getDividends(Symbol, 
              from = "1970-01-01",
              to = Sys.Date(), 
-             env = .GlobalEnv, 
+             env = parent.frame(), 
              src = "yahoo", 
              auto.assign = FALSE, 
              auto.update = FALSE, 

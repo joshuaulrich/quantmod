@@ -203,7 +203,8 @@ str.replot <- function(x, ...) {
 print.replot <- function(x, ...) plot(x,...)
 plot.replot <- function(x, ...) {
   plot.new()
-  assign(".chob",x,.GlobalEnv)
+  #assign(".chob",x,.GlobalEnv)
+  assign(".chob",x,.plotEnv)
   cex <- par(cex=x$Env$cex)
   mar <- par(mar=x$Env$mar)
   if(.Device=="X11") # only reasonable way to fix X11/quartz issue
@@ -262,7 +263,7 @@ scale.ranges <- function(frame, asp, ranges)
 }
 
 `+.replot` <- function(e1, e2) {
-  assign(".chob",e1,.GlobalEnv)
+  assign(".chob",e1,.plotEnv)
   e2 <- eval(e2)
   e2
 }

@@ -3,13 +3,17 @@
 #  cat("Version 0.3-7, Revision 461\n")
 #  cat("http://www.quantmod.com\n\n")
 #}
+.plotEnv <- new.env()
+.quantmodEnv <- new.env()
+ 
 quantmodenv <- function() as.environment(".quantmodEnv")
 print.quantmodEnv <- function(x, ...) {
   print("<environment: quantmodEnv>")
 }
 
 .onAttach <- function(libname,pkgname) {
-  attach(NULL, pos=2, name='.quantmodEnv')
+  # --as-cran check is complaining of this, as a NOTE
+  #attach(NULL, name='.quantmodEnv')  
 }
 
 setOldClass("zoo");

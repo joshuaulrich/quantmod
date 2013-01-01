@@ -1,4 +1,4 @@
-getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE, ...) {
+getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
   Symbol <- strsplit(Symbol,";")[[1]]
   if(length(Symbol)>1)
     return(unlist(lapply(Symbol, getFin, env=env, src=src, auto.assign=auto.assign)))
@@ -53,7 +53,7 @@ getFin <- function(Symbol, env=.GlobalEnv, src="google", auto.assign=TRUE, ...) 
 }
 
 `.getFin` <-
-function(Symbol, env = .GlobalEnv, src='google', auto.assign = TRUE, ...) {
+function(Symbol, env = parent.frame(), src='google', auto.assign = TRUE, ...) {
   tmp <- tempfile()
   download.file(paste('http://finance.google.com/finance?fstype=ii&q=',Symbol,sep=''),
                 quiet=TRUE,destfile=tmp)

@@ -9,7 +9,7 @@ Download Income Statement, Balance Sheet, and
 Cash Flow Statements from Google Finance.
 }
 \usage{
-getFinancials(Symbol, env = .GlobalEnv, src = "google", 
+getFinancials(Symbol, env = parent.frame(), src = "google", 
               auto.assign = TRUE,
               ...)
 
