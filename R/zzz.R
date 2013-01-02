@@ -12,6 +12,7 @@ print.quantmodEnv <- function(x, ...) {
 }
 
 .onAttach <- function(libname,pkgname) {
+  packageStartupMessage("Version 0.4-0 included new data defaults. See ?getSymbols.")
   # --as-cran check is complaining of this, as a NOTE
   #attach(NULL, name='.quantmodEnv')  
 }

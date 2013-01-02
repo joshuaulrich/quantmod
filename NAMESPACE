@@ -1,4 +1,4 @@
-export(quantmodenv)
+export(quantmodenv, .quantmodEnv)
 S3method(print, quantmodEnv)
 
 # NAMESPACE file for quantmod
