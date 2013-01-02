@@ -9,7 +9,17 @@ function(Symbols=NULL,
          symbol.lookup=TRUE,
          auto.assign=TRUE,
          ...)  {
+      if(is.null(.quantmodEnv$options$newEnvmessage)) {
+        # transition message for 0.4-0 to 0.5-0
+        message(paste('    As of 0.4-0,',sQuote('getSymbols'),'uses env=parent.frame() by default.\n',
+                'This behavior will be phased out in 0.5-0 when the call will check\n',
+                'getOptions("getSymbols")$env for default value. If NULL, auto.assign will\n',
+                'be set to FALSE.  This message is only shown once per session.'))
+        .quantmodEnv$options$newEnvmessage <- TRUE 
+      }
       importDefaults("getSymbols")
+      if(is.null(env)) # default as of 0.5-0
+        auto.assign <- FALSE
       if(!auto.assign && length(Symbols)>1)
         stop("must use auto.assign=TRUE for multiple Symbols requests")
       force(Symbols)  # need to check if symbol lookup defined _within_ call
@@ -40,7 +50,7 @@ function(Symbols=NULL,
         Symbols <- tmp.Symbols
       }
       old.Symbols <- NULL
-      if(exists('.getSymbols',env,inherits=FALSE)) {
+      if(auto.assign && exists('.getSymbols',env,inherits=FALSE)) {
         old.Symbols <- get('.getSymbols',env)
       }
       if(reload.Symbols) {
