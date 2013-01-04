@@ -2,6 +2,10 @@
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
          auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...) {
 
+  if(missing(env))
+    env <- parent.frame(1)
+  if(is.null(env))
+    auto.assign <- FALSE
   Symbol.name <- ifelse(!is.character(Symbol),
                         deparse(substitute(Symbol)),
                         as.character(Symbol))

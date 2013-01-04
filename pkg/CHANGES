@@ -1,3 +1,20 @@
+0.4-0
+MAJOR CHANGES
+
+- getSymbols now uses parent.frame() when auto.assign=TRUE. This
+  will cause slightly different behavior than previous versions
+  using .GlobalEnv, but is more functional in design.
+
+- getSymbols now allows for env=NULL, which will behave
+  as if auto.assign=FALSE is set.
+
+- Upcoming changes for version 0.5-0 will include deprecating
+  auto assignment from within getSymbols calls. This will instead
+  be moved to the loadSymbols function, to better match get/load
+  behaviors in base R.  For the transition, auto.assign will be
+  available to force pre 0.5-0 behaviors, but will be discouraged.
+  The env= arg will be used for multiple symbol assigns.
+
 0.3-7
 - addTA now handles logical vectors or logical xtsible objects
   by drawing bands on chart window

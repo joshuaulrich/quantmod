@@ -1,4 +1,8 @@
 getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
+  if(missing(env))
+    env <- parent.frame(1)
+  if(is.null(env))
+    auto.assign <- FALSE
   Symbol <- strsplit(Symbol,";")[[1]]
   if(length(Symbol)>1)
     return(unlist(lapply(Symbol, getFin, env=env, src=src, auto.assign=auto.assign)))
