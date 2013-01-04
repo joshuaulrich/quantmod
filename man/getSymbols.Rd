@@ -208,7 +208,7 @@ ls.str(data.env)
 
 # constrain to local scope
 local( {
-  getSymbols("AAPL")
+  getSymbols("AAPL")  # or getSymbols("AAPL", env=environment())
   str(AAPL)
   })
 
@@ -218,6 +218,7 @@ exists("AAPL")  # FALSE
 attach(NULL, name="DATA.ENV")
 getSymbols("AAPL", env=as.environment("DATA.ENV"))
 ls("DATA.ENV")
+detach("DATA.ENV")
 
 # directly return to caller
 str( getSymbols("AAPL", env=NULL) )

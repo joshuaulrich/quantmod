@@ -1,7 +1,8 @@
 # getSymbols {{{
 "getSymbols" <-
 function(Symbols=NULL,
-         env=parent.frame(),
+         env=parent.frame(),  ### 0.4-0
+         #env=NULL,          ### 0.5-0
          reload.Symbols=FALSE,
          verbose=FALSE,
          warnings=TRUE,
@@ -13,11 +14,30 @@ function(Symbols=NULL,
         # transition message for 0.4-0 to 0.5-0
         message(paste('    As of 0.4-0,',sQuote('getSymbols'),'uses env=parent.frame() by default.\n',
                 'This behavior will be phased out in 0.5-0 when the call will check\n',
-                'getOptions("getSymbols")$env for default value. If NULL, auto.assign will\n',
-                'be set to FALSE.  This message is only shown once per session.'))
+                'getOption("getSymbols")$env for default value. If NULL, auto.assign will\n',
+                'be set to FALSE.  This message is only shown once per session.',
+                '\nSee ?quantmodNEWS for more.'))
         .quantmodEnv$options$newEnvmessage <- TRUE 
       }
+      getSymbols_options_ <- function(option) {
+        gso <- getOption("getSymbols")
+        if(is.list(gso))
+          gso[[option]]
+        else NULL
+      }
       importDefaults("getSymbols")
+      #  to enable as-it-was behavior, set this:
+      #  options(getSymbols=list(env=substitute(parent.frame(3))))
+
+      #if(missing(env))
+      #  env <- eval(getOption("getSymbols")$env)    ### 0.5-0
+
+      if(missing(env))
+        env <- parent.frame(1)                      ### 0.4-0
+
+      #env_ <- getSymbols_options_("env")
+      #if(missing(env) && !is.null(env_))
+      #  env <- env_
       if(is.null(env)) # default as of 0.5-0
         auto.assign <- FALSE
       if(!auto.assign && length(Symbols)>1)
@@ -532,6 +552,10 @@ function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getFX")
+  if(missing(env))
+    env <- parent.frame(1)
+  if(is.null(env))
+    auto.assign <- FALSE
   if(!auto.assign && length(Currencies) > 1)
     stop("must use auto.assign=TRUE for multiple currency requests")
   #src <- c('oanda','FRED')[pmatch(src,c('oanda','FRED'))[1]]
@@ -558,6 +582,10 @@ function(Metals,from=Sys.Date()-500,to=Sys.Date(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
   importDefaults("getMetals")
+  if(missing(env))
+    env <- parent.frame(1)
+  if(is.null(env))
+    auto.assign <- FALSE
   metals <- c("XAU-GOLD","XPD-PALLADIUM","XPT-PLATINUM","XAG-SILVER")
   metals <- metals[sapply(Metals, function(x) grep(x,metals,ignore.case=TRUE))]
   metals <- as.character(sapply(metals,
