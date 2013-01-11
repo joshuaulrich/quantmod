@@ -29,7 +29,7 @@ getSymbols(Symbols = NULL,
            warnings = TRUE,
            src = "yahoo",
            symbol.lookup = TRUE,
-           auto.assign = TRUE,
+           auto.assign = getOption('getSymbols.auto.assign',TRUE),
            ...)
 
 loadSymbols(Symbols = NULL, 
@@ -39,7 +39,7 @@ loadSymbols(Symbols = NULL,
             warnings = TRUE,
             src = "yahoo",
             symbol.lookup = TRUE,
-            auto.assign = TRUE,
+            auto.assign = getOption('getSymbols.auto.assign',TRUE),
             ...)
 
 showSymbols(env=parent.frame())
@@ -63,7 +63,8 @@ saveSymbols(Symbols = NULL,
                              from external lookup (TRUE) }
        \item{auto.assign}{ should results be loaded to \code{env}
                            If \code{FALSE}, return results instead.
-                           As of 0.4-0, this is the same as setting env=NULL }
+                           As of 0.4-0, this is the same as setting env=NULL.
+                           Defaults to \code{TRUE} }
        \item{file.path}{ character string of file location }
        \item{\dots}{ additional parameters }
 }
@@ -93,7 +94,8 @@ env=.GlobalEnv. As of version 0.4-0, the environment is set
 to parent.frame(), which preserved the user workspace when
 called within another scope. 
 
-\emph{This behavior is expect to change as of 0.5-0, and all results will instead be explicitly returned to the caller
+\emph{This behavior is expect to change as of 0.5-0, and all
+results will instead be explicitly returned to the caller
 unless a valid \code{env=} argument is passed or set.}
 Many thanks to Kurt Hornik and Achim Zeileis for suggesting this change, and
 further thanks to Dirk Eddebuettel for encouraging the move to a more functional
