@@ -4,7 +4,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   Env <- new.env()
   Env$frame <- frame
   Env$asp   <- asp
-  Env$usr   <- NULL # par("usr")
+  Env$usr   <- par("usr")
   Env$xlim  <- xlim
   Env$ylim  <- ylim
   Env$pad1 <- -0 # bottom padding per frame
@@ -192,7 +192,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   replot_env$set_ylim <- set_ylim
   replot_env$get_ylim <- get_ylim
   replot_env$set_pad <- set_pad
-  invisible(replot_env)
+  return(replot_env)
 } # }}}
 
 str.replot <- function(x, ...) {
