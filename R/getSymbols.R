@@ -8,22 +8,20 @@ function(Symbols=NULL,
          warnings=TRUE,
          src="yahoo",
          symbol.lookup=TRUE,
-         auto.assign=TRUE,
+         auto.assign=getOption('getSymbols.auto.assign',TRUE),
          ...)  {
-      if(is.null(.quantmodEnv$options$newEnvmessage)) {
+      if(getOption("getSymbols.warning4.0",TRUE)) {
         # transition message for 0.4-0 to 0.5-0
-        message(paste('    As of 0.4-0,',sQuote('getSymbols'),'uses env=parent.frame() by default.\n',
-                'This behavior will be phased out in 0.5-0 when the call will check\n',
-                'getOption("getSymbols")$env for default value. If NULL, auto.assign will\n',
-                'be set to FALSE.  This message is only shown once per session.',
-                '\nSee ?quantmodNEWS for more.'))
-        .quantmodEnv$options$newEnvmessage <- TRUE 
-      }
-      getSymbols_options_ <- function(option) {
-        gso <- getOption("getSymbols")
-        if(is.list(gso))
-          gso[[option]]
-        else NULL
+        message(paste(
+                '    As of 0.4-0,',sQuote('getSymbols'),'uses env=parent.frame() and\n',
+                'auto.assign=TRUE by default.\n\n',
+
+                'This  behavior  will be  phased out in 0.5-0  when the call  will\n',
+                'default to use auto.assign=FALSE. getOption("getSymbols.env") and \n',
+                'getOptions("getSymbols.auto.assign") are now checked for alternate defaults\n\n',
+                'This message is shown once per session and may be disabled by setting \n',
+                'options("getSymbols.warning4.0"=FALSE). See ?getSymbol for more details'))
+        options("getSymbols.warning4.0"=FALSE) 
       }
       importDefaults("getSymbols")
       #  to enable as-it-was behavior, set this:
@@ -32,8 +30,8 @@ function(Symbols=NULL,
       #if(missing(env))
       #  env <- eval(getOption("getSymbols")$env)    ### 0.5-0
 
-      if(missing(env))
-        env <- parent.frame(1)                      ### 0.4-0
+      if(missing(env) && !is.null(getOption("getSymbols.env")) )
+          env <- getOption("getSymbols.env")         ### 0.4-0
 
       #env_ <- getSymbols_options_("env")
       #if(missing(env) && !is.null(env_))
@@ -714,7 +712,7 @@ function(Symbols,env,
       next
     }
     #fr <- read.csv(sym.file)
-    fr <- .readRDS(sym.file)
+    fr <- readRDS(sym.file)
     if(verbose)  
       cat("done.\n")
     if(!is.xts(fr)) fr <- xts(fr[,-1],as.Date(fr[,1],origin='1970-01-01'),src='rda',updated=Sys.time())
