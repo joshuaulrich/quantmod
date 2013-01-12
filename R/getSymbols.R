@@ -112,7 +112,7 @@ function(Symbols=NULL,
 #}}}
 
 loadSymbols <- getSymbols
-loadSymbols.formals <- formals(getSymbols)
+loadSymbols.formals <- c(formals(getSymbols)[-(8:9)], alist(auto.assign=getOption("loadSymbols.auto.assign",TRUE),...=))
 formals(loadSymbols) <- loadSymbols.formals
 
 

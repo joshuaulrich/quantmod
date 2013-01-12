@@ -39,7 +39,7 @@ loadSymbols(Symbols = NULL,
             warnings = TRUE,
             src = "yahoo",
             symbol.lookup = TRUE,
-            auto.assign = getOption('getSymbols.auto.assign',TRUE),
+            auto.assign = getOption('loadSymbols.auto.assign',TRUE),
             ...)
 
 showSymbols(env=parent.frame())
