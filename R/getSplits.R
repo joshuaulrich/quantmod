@@ -27,28 +27,24 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
             to.y, "&g=v&y=0&z=30000", 
             sep = ""), destfile = tmp, quiet = !verbose)
   fr <- read.table(tmp, skip=1, fill=TRUE, as.is=TRUE, sep=",")
-  fr <- fr[order(fr[,"V2"]),]
   unlink(tmp)
+  fr <- fr[fr$V1=="SPLIT",c("V2","V3")]
 
-  spl <- data.frame( split=fr[fr[,"V1"]=="SPLIT","V3"],
-    row.names=as.Date(as.character(fr[fr[,"V1"]=="SPLIT","V2"]),"%Y%m%d"),
-    stringsAsFactors=FALSE )
-
-  if(NROW(spl)==0) {
-    spl <- NA
+  if(NROW(fr)==0) {
+    fr <- NA
   } else {
-    colnames(spl) <- paste(Symbol.name,'spl',sep='.')
-    spl[,1] <- sub(":","/", spl[,1])
-    spl[,1] <- 1 / sapply( parse( text=spl[,1] ), eval )
-    spl <- as.xts(spl)
+    fr$V3 <- sub(":","/", fr$V3)
+    fr$V3 <- 1 / sapply( parse( text=fr$V3 ), eval )
+    fr <- xts(fr$V3, as.Date(as.character(fr$V2),"%Y%m%d"))
+    colnames(fr) <- paste(Symbol.name,'spl',sep='.')
   }
 
   if(is.xts(Symbol)) {
     if(auto.update) {
-      xtsAttributes(Symbol) <- list(dividends=spl)
+      xtsAttributes(Symbol) <- list(splits=fr)
       assign(Symbol.name,Symbol,envir=env)
     }
   } else if(auto.assign) {
-      assign(paste(Symbol.name,'spl',sep='.'),spl,envir=env)
-  } else spl
+      assign(paste(Symbol.name,'spl',sep='.'),fr,envir=env)
+  } else fr
 }
