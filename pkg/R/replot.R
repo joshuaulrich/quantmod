@@ -4,7 +4,7 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   Env <- new.env()
   Env$frame <- frame
   Env$asp   <- asp
-  Env$usr   <- par("usr")
+  #Env$usr   <- par("usr")
   Env$xlim  <- xlim
   Env$ylim  <- ylim
   Env$pad1 <- -0 # bottom padding per frame

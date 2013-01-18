@@ -811,12 +811,13 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
 } # }}}
 
 # add_RSI {{{
-add_RSI <- function (n=14, maType="EMA", ..., RSIup=70, RSIdn=30) {
+add_RSI <- function (n=14, maType="EMA", wilder=TRUE, ..., RSIup=70, RSIdn=30) {
+  # added in wilder=TRUE to handle missingness behavior in original TTR::RSI call
   lenv <- new.env()
-  lenv$plot_rsi <- function(x, n, maType, ...) {
+  lenv$plot_rsi <- function(x, n, maType, wilder, ...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    rsi <- RSI(Cl(xdata),n=n,maType=maType)[xsubset]
+    rsi <- RSI(Cl(xdata),n=n,maType=maType,wilder=wilder)[xsubset]
     x.pos <- 1:NROW(rsi)
     theme <- x$Env$theme$rsi
     # vertical grid lines
@@ -830,11 +831,11 @@ add_RSI <- function (n=14, maType="EMA", ..., RSIup=70, RSIdn=30) {
     lines(x.pos, rsi[,1], col=x$Env$theme$rsi$col$rsi, lwd=1.5,...) 
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(n=n,maType=maType,...)),
-              list(n=n,maType=maType,...))
+        names(list(n=n,maType=maType,wilder=wilder,...)),
+              list(n=n,maType=maType,wilder=wilder,...))
   exp <- parse(text=gsub("list","plot_rsi",
                as.expression(substitute(list(x=current.chob(),
-                                             n=n,maType=maType,...)))),
+                                             n=n,maType=maType,wilder=wilder,...)))),
                srcfile=NULL)
 
   plot_object <- current.chob()
@@ -843,7 +844,7 @@ add_RSI <- function (n=14, maType="EMA", ..., RSIup=70, RSIdn=30) {
     plot_object$Env$theme$rsi$col$lines <- "orange2"
   }
   xsubset <- plot_object$Env$xsubset
-  rsi <- RSI(Cl(plot_object$Env$xdata),n=n,maType=maType)
+  rsi <- RSI(Cl(plot_object$Env$xdata),n=n,maType=maType,wilder=wilder)
   plot_object$add_frame(ylim=c(0,1),asp=0.2)
   plot_object$next_frame()
   lenv$xdata <- structure(rsi,.Dimnames=list(NULL, "rsi"))
