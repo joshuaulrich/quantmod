@@ -224,7 +224,7 @@ function(x,which=FALSE)
 function(x)
 {
   if(has.Lo(x))
-    return(x[,grep('Low',colnames(x),ignore.case=TRUE)])
+    return(x[,grep('\\.Low',colnames(x),ignore.case=TRUE)])
   stop('subscript out of bounds: no column name containing "Low"')
 }
 
@@ -235,7 +235,7 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Low',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\.Low',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE

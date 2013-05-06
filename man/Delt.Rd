@@ -15,7 +15,7 @@ Delt(x1, x2 = NULL, k = 0, type = c("arithmetic", "log"))
   \item{x1}{ \emph{m x 1} vector }
   \item{x2}{ \emph{m x 1} vector }
   \item{k}{ change over \code{k}-periods. default k=1 when x2 is NULL. }
-  \item{type}{ type of difference. log or arithmetic (defauly). }
+  \item{type}{ type of difference. log or arithmetic (default). }
 }
 \details{
 When called with only \code{x1}, the one period percent change of the
