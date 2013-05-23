@@ -287,6 +287,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
          fr[,3] <- fr[,3] * adj[,'Split'] * adj[,'Div']  # Low
          fr[,4] <- fr[,4] * adj[,'Split'] * adj[,'Div']  # Close
          fr[,5] <- fr[,5] * ( 1 / adj[,'Div'] )          # Volume
+         #fr <- adjustOHLC(fr, symbol.name=Symbols.name)
        }
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
@@ -920,7 +921,7 @@ function(Symbols,env,return.class='xts',
                        "&expr2=",currency.pair[2],
                        "&margin_fixed=0&SUBMIT=Get+Table&format=CSV&redirected=1",
                        sep=""),destfile=tmp,quiet=!verbose)
-       fr <- readLines(tmp)
+       fr <- readLines(tmp, warn=FALSE)
        unlink(tmp)
        fr <- unlist(strsplit(
                     gsub("<PRE>|</PRE>","",fr[(grep("PRE",fr)[1]):(grep("PRE",fr)[2])]),","))
