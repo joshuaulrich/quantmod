@@ -10,7 +10,7 @@ getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, .
   google.fin <- "http://finance.google.com/finance?fstype=ii&q=" 
   tmp <- tempfile()
   download.file(paste(google.fin,Symbol,sep=""),quiet=TRUE,destfile=tmp)
-  Symbol <- readLines(tmp)
+  Symbol <- readLines(tmp, warn=FALSE)
 
   # thead contains the column names
   # tbody contains the data
@@ -62,7 +62,7 @@ function(Symbol, env = parent.frame(), src='google', auto.assign = TRUE, ...) {
   download.file(paste('http://finance.google.com/finance?fstype=ii&q=',Symbol,sep=''),
                 quiet=TRUE,destfile=tmp)
   Symbol.name <- Symbol
-  Symbol <- readLines(tmp)
+  Symbol <- readLines(tmp, warn=FALSE)
 
   # strip all html and commas
   symbol <- gsub('(&nbsp;)|(<.*?>)|(,)','',Symbol,perl=TRUE)
