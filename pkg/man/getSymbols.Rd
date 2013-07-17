@@ -98,7 +98,7 @@ called within another scope.
 results will instead be explicitly returned to the caller
 unless a valid \code{env=} argument is passed or set.}
 Many thanks to Kurt Hornik and Achim Zeileis for suggesting this change, and
-further thanks to Dirk Eddebuettel for encouraging the move to a more functional
+further thanks to Dirk Eddelbuettel for encouraging the move to a more functional
 default by 0.5-0.
 
 Using auto.assign=TRUE, the variable chosen is an \R-legal name derived
