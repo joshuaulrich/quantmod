@@ -28,7 +28,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
             sep = ""), destfile = tmp, quiet = !verbose)
   fr <- read.table(tmp, skip=1, fill=TRUE, as.is=TRUE, sep=",")
   unlink(tmp)
-  fr <- fr[fr$V1=="SPLIT",c("V2","V3")]
+  fr <- fr[fr$V1=="SPLIT",]
 
   if(NROW(fr)==0) {
     fr <- NA
