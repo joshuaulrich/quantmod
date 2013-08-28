@@ -7,8 +7,7 @@
 `addMFI` <-
 function (n = 14, ..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     volume <- Vo(x)
     x <- HLC(x)

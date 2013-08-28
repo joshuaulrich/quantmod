@@ -17,7 +17,6 @@
 # addMomentum {{{
 `addMomentum` <- function(n=1) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -100,7 +99,6 @@ function(x) {
 # addCCI {{{
 `addCCI` <- function(n=20, maType="SMA", c=0.015) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -196,7 +194,6 @@ function(x) {
 # addADX {{{
 `addADX` <- function(n=14, maType="EMA", wilder=TRUE) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -270,7 +267,6 @@ function(x) {
 # addATR {{{
 `addATR` <- function(n=14, maType="EMA", ...) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -337,7 +333,6 @@ function(x) {
 # addTRIX {{{
 `addTRIX` <- function(n=20, signal=9, maType="EMA", percent=TRUE) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -412,7 +407,6 @@ function(x) {
 # addDPO {{{
 `addDPO` <- function(n=10, maType="EMA", shift=n/2+1, percent=FALSE) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -519,7 +513,6 @@ function(x) {
 # addRSI {{{
 `addRSI` <- function(n=14,maType='EMA',wilder=TRUE) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -600,7 +593,6 @@ function(x) {
 # addROC {{{
 `addROC` <- function(n=1,type=c('discrete','continuous'),col='red') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -667,7 +659,6 @@ function(x) {
 # addBBands {{{
 `addBBands` <- function(n=20,sd=2,maType='SMA',draw='bands',on=-1) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   draw.options <- c('bands','percent','width')
   draw <- draw.options[pmatch(draw,draw.options)]
@@ -814,7 +805,6 @@ function(x) {
 # addEnvelope {{{
 `addEnvelope` <- function(n=20,p=2.5,maType='SMA',...,on=1) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -893,7 +883,6 @@ function(x) {
 # addSAR {{{
 `addSAR` <- function(accel=c(0.02,0.2),col='blue') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -950,7 +939,6 @@ function(x) {
 # addMACD {{{
 `addMACD` <- function(fast=12,slow=26,signal=9,type='EMA',histogram=TRUE,col) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 
@@ -1053,7 +1041,7 @@ function(x) {
     POSIXindex <- index(x)
     if (missing(i)) 
         i <- 1:NROW(x)
-    if (xts:::timeBased(i)) 
+    if (timeBased(i)) 
         i <- as.character(as.POSIXct(i))
     if (is.character(i)) {
         i <- strsplit(i, ';')[[1]]
@@ -1273,7 +1261,6 @@ function(x) {
 # addEMA {{{
 `addEMA` <- function(n=10,wilder=FALSE,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='blue') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
@@ -1381,7 +1368,6 @@ function(x) {
 # addSMA {{{
 `addSMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='brown') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
@@ -1480,7 +1466,6 @@ function(x) {
 # addWMA {{{
 `addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='green') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
@@ -1565,7 +1550,6 @@ function(x) {
 # addDEMA {{{
 `addDEMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='pink') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
@@ -1650,7 +1634,6 @@ function(x) {
 # addEVWMA {{{
 `addEVWMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='yellow') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   chobTA <- new("chobTA")
@@ -1736,7 +1719,6 @@ function(x) {
 # addZLEMA {{{
 `addZLEMA` <- function(n=10,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='red') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   chobTA <- new("chobTA")

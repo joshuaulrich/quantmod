@@ -98,7 +98,7 @@ function(x,
     width <- 3
     if(NROW(x) > 60) width <- 1
   }
-  ep <- xts:::axTicksByTime0(x, major.ticks)
+  ep <- axTicksByTime(x, major.ticks)
   ep <- c(rev(rev(ep)[-1]),rev(ep)[1]-1)
 
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")

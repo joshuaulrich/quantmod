@@ -9,8 +9,7 @@
 `addChAD` <-
 function (..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- chaikinAD(HLC = HLC(x), volume = Vo(x))
     yrange <- NULL
@@ -55,8 +54,7 @@ function (..., on = NA, legend = "auto")
 `addChVol` <-
 function (n = 10, maType, ..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- chaikinVolatility(HL = HLC(x)[,-3], n = n, maType = maType)
     yrange <- NULL
