@@ -7,8 +7,7 @@
 `addOBV` <-
 function (..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- try.xts(lchob@xdata, error=FALSE)
     x <- OBV(price = Cl(x), volume = Vo(x))
     yrange <- NULL
@@ -40,7 +39,7 @@ function (..., on = NA, legend = "auto")
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
+        chartSeries.chob <- chartSeries.chob
         do.call("chartSeries.chob", list(lchob))
         invisible(chobTA)
     }

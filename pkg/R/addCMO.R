@@ -2,7 +2,6 @@
 # addCMO {{{
 `addCMO` <- function(n=14) {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
 

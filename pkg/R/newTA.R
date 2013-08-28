@@ -99,7 +99,7 @@
 
 `skeleton.TA` <- function(on)
 {
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     preFUN  <- ""
     FUN     <- ""
@@ -130,7 +130,7 @@
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
+        chartSeries.chob <- chartSeries.chob
         do.call('chartSeries.chob',list(lchob))
         invisible(chobTA)
     }

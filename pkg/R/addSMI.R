@@ -2,7 +2,6 @@
 # addSMI {{{
 `addSMI` <- function(n=13,slow=25,fast=2,signal=9,ma.type='EMA') {
 
-  stopifnot("package:TTR" %in% search() || require("TTR",quietly=TRUE))
 
   lchob <- get.current.chob()
   

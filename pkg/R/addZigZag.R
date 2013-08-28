@@ -8,7 +8,7 @@
 function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE, 
     ..., on = -1, legend = "auto") 
 {
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- cbind(Hi(x),Lo(x))
     x <- ZigZag(HL = x, change = change, percent = percent, retrace = retrace, 

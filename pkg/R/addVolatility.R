@@ -7,8 +7,7 @@
 `addVolatility` <-
 function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- OHLC(x)
     x <- volatility(OHLC = x, n = n, calc = calc, N = N)

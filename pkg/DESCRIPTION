@@ -1,7 +1,7 @@
 Package: quantmod
 Type: Package
 Title: Quantitative Financial Modelling Framework
-Version: 0.4-0
+Version: 0.4-1
 Date: 2013-01-01
 Author: Jeffrey A. Ryan
 Depends: Defaults, xts(>= 0.9-0), zoo, TTR(>= 0.2), methods

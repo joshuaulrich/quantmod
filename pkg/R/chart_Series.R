@@ -496,7 +496,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
     }
     if(is.logical(ta)) {
       ta <- merge(ta, xdata, join="right",retside=c(TRUE,FALSE))[xsubset]
-      shade <- quantmod:::shading(as.logical(ta,drop=FALSE))
+      shade <- shading(as.logical(ta,drop=FALSE))
       if(length(shade$start) > 0) # all FALSE cause zero-length results
         rect(shade$start-1/3, par("usr")[3] ,shade$end+1/3, par("usr")[4], col=col,...) 
     } else {

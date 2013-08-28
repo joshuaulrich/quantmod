@@ -94,9 +94,9 @@ env=.GlobalEnv. As of version 0.4-0, the environment is set
 to parent.frame(), which preserved the user workspace when
 called within another scope. 
 
-\emph{This behavior is expect to change as of 0.5-0, and all
+\emph{This behavior is expect to change for getSymbols as of 0.5-0, and all
 results will instead be explicitly returned to the caller
-unless a valid \code{env=} argument is passed or set.}
+unless a \code{auto.assign} is set to \code{TRUE}.}
 Many thanks to Kurt Hornik and Achim Zeileis for suggesting this change, and
 further thanks to Dirk Eddelbuettel for encouraging the move to a more functional
 default by 0.5-0.
@@ -105,7 +105,7 @@ Using auto.assign=TRUE, the variable chosen is an \R-legal name derived
 from the symbol being loaded. It is possible, using
 \code{setSymbolLookup} to specify an alternate
 name if the default is not desired. See that function for
-details. 
+details.
 
 If auto.assign=FALSE or env=NULL (as of 0.4-0)
 the data will be returned from the call, and will require
@@ -209,10 +209,10 @@ getSymbols("YHOO", env=data.env)
 ls.str(data.env)
 
 # constrain to local scope
-local( {
+try(local( {
   getSymbols("AAPL")  # or getSymbols("AAPL", env=environment())
   str(AAPL)
-  })
+  }))
 
 exists("AAPL")  # FALSE
 
@@ -224,6 +224,7 @@ detach("DATA.ENV")
 
 # directly return to caller
 str( getSymbols("AAPL", env=NULL) )
+str( getSymbols("AAPL", auto.assign=FALSE) )  # same
 
 }
 }

@@ -8,8 +8,7 @@
 `addAroon` <-
 function (n = 20, ..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- cbind(Hi(x),Lo(x))
     x <- aroon(HL = x, n = n)[,-3]
@@ -44,8 +43,7 @@ function (n = 20, ..., on = NA, legend = "auto")
 `addAroonOsc` <-
 function (n = 20, ..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- cbind(Hi(x),Lo(x))
     x <- aroon(HL = x, n = n)[,3]

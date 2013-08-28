@@ -9,8 +9,7 @@
 function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9, 
     maType, wts = 1:NROW(n), ..., on = NA, legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- coredata(Cl(x))
     x <- KST(price = x, n = n, nROC = nROC, nSig = nSig, maType = maType, 
@@ -44,7 +43,7 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
+        chartSeries.chob <- chartSeries.chob
         do.call("chartSeries.chob", list(lchob))
         invisible(chobTA)
     }

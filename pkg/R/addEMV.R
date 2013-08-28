@@ -8,8 +8,7 @@
 function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA, 
     legend = "auto") 
 {
-    stopifnot("package:TTR" %in% search() || require("TTR", quietly = TRUE))
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     x <- EMV(HL = HLC(x)[,-3], volume = Vo(x), n = n, maType = maType, 
         vol.divisor = vol.divisor)
@@ -43,7 +42,7 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
+        chartSeries.chob <- chartSeries.chob
         do.call("chartSeries.chob", list(lchob))
         invisible(chobTA)
     }
