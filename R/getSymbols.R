@@ -234,7 +234,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      if(missing(verbose)) verbose <- FALSE
      if(missing(auto.assign)) auto.assign <- TRUE
-     yahoo.URL <- "http://chart.yahoo.com/table.csv?"
+     yahoo.URL <- "http://ichart.finance.yahoo.com/table.csv?"
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
