@@ -12,8 +12,8 @@ function(x,
       ratio <- Ad(x)/Cl(x)
     } else {
       # use actual split and/or dividend data
-      div    <- getDividends(symbol.name)
-      splits <- getSplits(symbol.name)
+      div <- getDividends(symbol.name, from="1900-01-01")
+      splits <- getSplits(symbol.name, from="1900-01-01")
       # un-adjust dividends for splits (Yahoo already adjusts div for splits)
       if(is.xts(splits) && is.xts(div) && nrow(splits) > 0 && nrow(div) > 0)
         div <- div * 1/adjRatios(splits=merge(splits, index(div)))[,1]
