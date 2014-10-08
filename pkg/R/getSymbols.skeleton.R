@@ -4,7 +4,6 @@ function(Symbols,env,
          # additional source specific params
          return.class="zoo",
          ...) {
-  importDefaults("")
   this.env <- environment()
   for(var in names(list(...))) {
     assign(var,list(...)[[var]], this.env)

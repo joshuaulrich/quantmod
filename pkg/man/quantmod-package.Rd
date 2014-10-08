@@ -13,10 +13,10 @@ Quantitative Financial Modelling and Trading Framework for R
 \tabular{ll}{
 Package: \tab quantmod\cr
 Type: \tab Package\cr
-Version: \tab 0.3-241\cr
-Date: \tab 2012-12-31\cr
-Depends: \tab xts(>=0.9-1),Defaults\cr
-Suggests: \tab DBI,RMySQL,TTR,fSeries,its\cr
+Version: \tab 0.4-2\cr
+Date: \tab 2014-10-08\cr
+Depends: \tab xts(>= 0.9-0),zoo,TTR(>= 0.2),methods\cr
+Suggests: \tab DBI,RMySQL,RSQLite,timeSeries,its\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL-3\cr
 URL: \tab http://www.quantmod.com\cr
@@ -56,6 +56,6 @@ and performance analysis.
 \author{
 Jeffrey A. Ryan
 
-Maintainer: Jeffrey A. Ryan <jeff.a.ryan@gmail.com>
+Maintainer: Joshua M. Ulrich <josh.m.ulrich@gmail.com>
 }
 \keyword{ package }

@@ -2,6 +2,7 @@ export(quantmodenv, .quantmodEnv)
 S3method(print, quantmodEnv)
 
 # NAMESPACE file for quantmod
+import(methods, zoo, xts, TTR)
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)
@@ -14,7 +15,6 @@ importFrom(stats,logLik)
 importFrom(stats,residuals)
 importFrom(stats,resid)
 importFrom(stats,anova)
-importFrom(zoo,as.zoo)
 
 # new plotting functions (experimental)
 export(new.replot,

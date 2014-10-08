@@ -24,11 +24,8 @@ set to use the current chart's defaults.
 
 It is important to note that the \emph{current} device
 will be used to extract the list of TA arguments to apply.
-This is done with a call to listTA internally, and followed
-by calls to setDefaults of the appropriate functions.
-
-An additional way to set default TA arguments for subsequent
-charts is via \code{setDefaults}. See the examples.
+This is done with a call to \code{listTA} internally, and
+followed by calls to setDefaults of the appropriate functions.
 }
 \value{
 Called for its side-effect of setting the default
@@ -48,13 +45,6 @@ approach is what \code{setTA} wraps.
 \dontrun{
 listTA()
 setTA()
-
-# a longer way to accomplish the same
-setDefaults(chartSeries,TA=listTA())
-setDefaults(barCart,TA=listTA())
-setDefaults(candleChart,TA=listTA())
-
-setDefaults(chartSeries,TA=substitute(c(addVo(),addBBands())))
 }
 }
 \keyword{ utilities }
