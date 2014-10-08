@@ -63,8 +63,6 @@ getSymbols('MSFT',src='csv')
 
 
 ## Method #2
-setDefaults(getSymbols,src='csv')
-  # OR
 setSymbolLookup(MSFT='csv')
 
 getSymbols('MSFT')

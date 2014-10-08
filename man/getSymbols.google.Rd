@@ -76,8 +76,6 @@ getSymbols('MSFT',src='google')
 
 
 ## Method #2
-setDefaults(getSymbols,src='google')
-  # OR
 setSymbolLookup(MSFT='google')
 
 getSymbols('MSFT')

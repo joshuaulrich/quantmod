@@ -7,7 +7,7 @@ function (type = c("auto", "candlesticks", "matchsticks",
     yrange=NULL,
     up.col, dn.col, color.vol = TRUE, multi.col = FALSE, ...) 
 {
-  chob <- quantmod:::get.current.chob()
+  chob <- get.current.chob()
 
   #sys.TZ <- Sys.getenv('TZ')
   #Sys.setenv(TZ='GMT')
@@ -157,7 +157,7 @@ function (type = c("auto", "candlesticks", "matchsticks",
     function(x) eval(x@call)
   )   
 
-  quantmod:::chartSeries.chob(chob)
+  chartSeries.chob(chob)
 
   chob@device <- as.numeric(dev.cur())
 

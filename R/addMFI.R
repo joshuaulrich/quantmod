@@ -41,7 +41,6 @@ function (n = 14, ..., on = NA, legend = "auto")
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        chartSeries.chob <- quantmod:::chartSeries.chob
         do.call("chartSeries.chob", list(lchob))
         invisible(chobTA)
     }
