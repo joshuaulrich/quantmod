@@ -99,7 +99,9 @@
 
 `skeleton.TA` <- function(on)
 {
-    lchob <- get.current.chob()
+    # need explicit access to quantmod:::get.current.chob()
+    # so the function returned by newTA can access it
+    lchob <- quantmod:::get.current.chob()
     x <- as.matrix(lchob@xdata)
     preFUN  <- ""
     FUN     <- ""
@@ -130,7 +132,9 @@
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        chartSeries.chob <- chartSeries.chob
+        # need explicit access to quantmod:::chartSeries.chob
+        # so the function returned by newTA can access it
+        chartSeries.chob <- quantmod:::chartSeries.chob
         do.call('chartSeries.chob',list(lchob))
         invisible(chobTA)
     }
