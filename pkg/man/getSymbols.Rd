@@ -131,6 +131,11 @@ convention where getSymbols.NAME
 is used for your function NAME. See \code{getSymbols}
 source code.
 
+\code{setDefaults(getSymbols)} can be used to
+specify defaults for \code{getSymbols} arguments.
+\code{setDefaults(getSymbols.MySQL)} may be used for arguments
+specific to \code{getSymbols.MySQL}, etc.
+
 The \dQuote{sourcing} of data is managed internally
 through a complex lookup procedure. If \code{symbol.lookup}
 is TRUE (the default), a check is made if any symbol
@@ -138,7 +143,8 @@ has had its source specified by \code{setSymbolLookup}.
 
 If not set, the process continues by checking to see if
 \code{src} has been specified by the user in the
-function call.
+function call. If not, any \code{src} defined with
+\code{setDefaults(getSymbols,src=)} is used.
 
 Finally, if none of the other source rules apply
 the default \code{getSymbols} \code{src} method is
@@ -191,7 +197,7 @@ getSymbols(c('QQQ','SPY'))
 # loads Ford market data from yahoo (the formal default)
 getSymbols('F')       
 
-# loads symbol from MySQL database
+# loads symbol from MySQL database (set with setDefaults)
 getSymbols('DIA', verbose=TRUE, src='MySQL')                 
 
 # loads Ford as time series class ts 

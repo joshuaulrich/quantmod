@@ -23,6 +23,7 @@ function(Symbols=NULL,
                 'options("getSymbols.warning4.0"=FALSE). See ?getSymbol for more details'))
         options("getSymbols.warning4.0"=FALSE) 
       }
+      importDefaults("getSymbols")
       #  to enable as-it-was behavior, set this:
       #  options(getSymbols=list(env=substitute(parent.frame(3))))
 
@@ -122,6 +123,7 @@ formals(loadSymbols) <- loadSymbols.formals
 #                              bb.suffix="Equity",
 #                              bb.interval="5",
 #                              ...) {
+#    importDefaults("getSymbols.Bloomberg")
 #    this.env <- environment()
 #    for(var in names(list(...))) {
 #       # import all named elements that are NON formals
@@ -217,6 +219,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
          to=Sys.Date(),
          ...)
 {
+     importDefaults("getSymbols.yahoo")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -313,6 +316,7 @@ function(Symbols,env,return.class='xts',
          ...)
 {
      fix.google.bug <- TRUE
+     importDefaults("getSymbols.google")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -382,6 +386,7 @@ function(Symbols,env,return.class='xts',
                                dbname=NULL,
                                POSIX = TRUE,
                                ...) {
+     importDefaults("getSymbols.SQLite")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -445,6 +450,7 @@ function(Symbols,env,return.class='xts',
                                field.names = NULL,
                                user=NULL,password=NULL,dbname=NULL,host='localhost',port=3306,
                                ...) {
+     importDefaults("getSymbols.MySQL")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -501,6 +507,7 @@ function(Symbols,env,return.class='xts',
 # getSymbols.FRED {{{
 `getSymbols.FRED` <- function(Symbols,env,
      return.class="xts", ...) {
+     importDefaults("getSymbols.FRED")
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -543,6 +550,7 @@ function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
          env=parent.frame(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
+  importDefaults("getFX")
   if(missing(env))
     env <- parent.frame(1)
   if(is.null(env))
@@ -572,6 +580,7 @@ function(Metals,from=Sys.Date()-500,to=Sys.Date(),
          base.currency="USD",env=parent.frame(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
+  importDefaults("getMetals")
   if(missing(env))
     env <- parent.frame(1)
   if(is.null(env))
@@ -601,6 +610,7 @@ function(Symbols,env,
          return.class="xts",
          extension="csv",
          ...) {
+  importDefaults("getSymbols.csv")
   this.env <- environment()
   for(var in names(list(...))) {
     assign(var,list(...)[[var]], this.env)
@@ -668,6 +678,7 @@ function(Symbols,env,
          extension="rds",
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
          ...) {
+  importDefaults("getSymbols.rds")
   this.env <- environment()
   for(var in names(list(...))) {
     assign(var,list(...)[[var]], this.env)
@@ -726,6 +737,7 @@ function(Symbols,env,
          extension="rda",
          col.names=c('Open','High','Low','Close','Volume','Adjusted'),
          ...) {
+  importDefaults("getSymbols.rda")
   this.env <- environment()
   for(var in names(list(...))) {
     assign(var,list(...)[[var]], this.env)
@@ -786,6 +798,7 @@ function(Symbols,env,
 endDateTime, barSize='1 day', duration='1 M',
 useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
 {
+  importDefaults('getSymbols.IBrokers')
   this.env <- environment()
   for(var in names(list(...))) {
     assign(var, list(...)[[var]], this.env)
@@ -859,6 +872,7 @@ function(Symbols,env,return.class='xts',
          from=Sys.Date()-499,
          to=Sys.Date(),
          ...) {
+     importDefaults("getSymbols.oanda")
      if( (as.Date(to)-as.Date(from)) > 500 )
        stop("oanda.com limits data to 500 days per request", call.=FALSE)
      this.env <- environment()

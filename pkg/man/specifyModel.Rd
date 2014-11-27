@@ -38,7 +38,7 @@ list of objects to load through the \code{getSymbols}
 function. getSymbols retrieves each
 object specified by using information
 as to its location specified apriori 
-via \code{setSymbolLookup}.
+via \code{setDefaults} or \code{setSymbolLookup}.
 
 Internally all data is coerced to \code{zoo},\code{data.frame},
 or \code{numeric} classes.

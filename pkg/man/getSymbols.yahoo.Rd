@@ -67,6 +67,8 @@ getSymbols('MSFT',src='yahoo')
 
 
 ## Method #2
+setDefaults(getSymbols,src='yahoo')
+  # OR
 setSymbolLookup(MSFT='yahoo')
 
 getSymbols('MSFT')
