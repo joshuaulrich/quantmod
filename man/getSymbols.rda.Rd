@@ -64,6 +64,8 @@ getSymbols('MSFT',src='RData')
 
 
 ## Method #2
+setDefaults(getSymbols,src='rda')
+  # OR
 setSymbolLookup(MSFT='rda')
   # OR
 setSymbolLookup(MSFT=list(src='rda'))

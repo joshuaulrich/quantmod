@@ -2,7 +2,7 @@ export(quantmodenv, .quantmodEnv)
 S3method(print, quantmodEnv)
 
 # NAMESPACE file for quantmod
-import(methods, zoo, xts, TTR)
+import(methods, zoo, xts, TTR, Defaults)
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)

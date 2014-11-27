@@ -65,6 +65,8 @@ getSymbols('CPIAUCNS',src='FRED')
 
 
 ## Method #2
+setDefaults(getSymbols,src='FRED')
+  # OR
 setSymbolLookup(CPIAUCNS='FRED')
 
 getSymbols('CPIAUCNS')
