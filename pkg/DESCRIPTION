@@ -1,10 +1,10 @@
 Package: quantmod
 Type: Package
 Title: Quantitative Financial Modelling Framework
-Version: 0.4-2
-Date: 2014-10-08
+Version: 0.4-3
+Date: 2014-12-08
 Author: Jeffrey A. Ryan
-Depends: xts(>= 0.9-0), zoo, TTR(>= 0.2), methods, Defaults(>= 2.0-0)
+Depends: xts(>= 0.9-0), zoo, TTR(>= 0.2), methods
 Suggests: DBI,RMySQL,RSQLite,timeSeries,its
 Maintainer: Joshua M. Ulrich <josh.m.ulrich@gmail.com>
 Description: Specify, build, trade, and analyse quantitative financial trading strategies
