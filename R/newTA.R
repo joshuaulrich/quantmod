@@ -94,14 +94,14 @@
   .body[5] <- paste("x <-",funToFun(FUN,FUN.name,data.at, dots=fdots))
   if(.body[6] == 'postFUN <- ""') .body[6] <- ''
   if(.body[4] == 'preFUN <- ""' ) .body[4] <- ''
-  as.function(c(.formals,as.call(parse(text=.body))[[1]]),.GlobalEnv) 
+  as.function(c(.formals,as.call(parse(text=.body))[[1]]),
+              envir = asNamespace('quantmod'))
 }
 
+## Do not edit!  Some line numbers are referred to in newTA.
 `skeleton.TA` <- function(on)
 {
-    # need explicit access to quantmod:::get.current.chob()
-    # so the function returned by newTA can access it
-    lchob <- quantmod:::get.current.chob()
+    lchob <- get.current.chob()
     x <- as.matrix(lchob@xdata)
     preFUN  <- ""
     FUN     <- ""
@@ -122,6 +122,7 @@
     chobTA@call <- match.call()
     legend.name <- gsub('^add','',deparse(match.call()))
     gpars <- list()
+    ## safe to edit from here down
     chobTA@params <- list(xrange = lchob@xrange, yrange=yrange, colors = lchob@colors, 
         color.vol = lchob@color.vol, multi.col = lchob@multi.col, 
         spacing = lchob@spacing, width = lchob@width, bp = lchob@bp, 
@@ -132,10 +133,7 @@
         lchob@passed.args$TA <- c(TA, chobTA)
         lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
             0)
-        # need explicit access to quantmod:::chartSeries.chob
-        # so the function returned by newTA can access it
-        chartSeries.chob <- quantmod:::chartSeries.chob
-        do.call('chartSeries.chob',list(lchob))
+        do.call(chartSeries.chob,list(lchob))
         invisible(chobTA)
     }
     else {
