@@ -400,9 +400,9 @@ function(Symbols,env,return.class='xts',
         } else {
           stop(paste("package:",dQuote('DBI'),"cannot be loaded."))
         }
-        drv <- dbDriver("SQLite")
-        con <- dbConnect(drv,dbname=dbname)
-        db.Symbols <- dbListTables(con)
+        drv <- DBI::dbDriver("SQLite")
+        con <- DBI::dbConnect(drv,dbname=dbname)
+        db.Symbols <- DBI::dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
           missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
@@ -418,8 +418,8 @@ function(Symbols,env,return.class='xts',
                            paste(db.fields,collapse=','),
                            " FROM ",Symbols[[i]],
                            " ORDER BY row_names")
-            rs <- dbSendQuery(con, query)
-            fr <- fetch(rs, n=-1)
+            rs <- DBI::dbSendQuery(con, query)
+            fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
             if(POSIX) {
               d <- as.numeric(fr[,1])
@@ -436,7 +436,7 @@ function(Symbols,env,return.class='xts',
               assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
         }
-        dbDisconnect(con)
+        DBI::dbDisconnect(con)
         if(auto.assign)
           return(Symbols)
         return(fr)
@@ -470,8 +470,8 @@ function(Symbols,env,return.class='xts',
               sQuote('password'),sQuote('dbname'),
               ") is not set"))
         }
-        con <- dbConnect("MySQL",user=user,password=password,dbname=dbname,host=host,port=port)
-        db.Symbols <- dbListTables(con)
+        con <- DBI::dbConnect("MySQL",user=user,password=password,dbname=dbname,host=host,port=port)
+        db.Symbols <- DBI::dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
           missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
@@ -482,8 +482,8 @@ function(Symbols,env,return.class='xts',
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
             query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
-            rs <- dbSendQuery(con, query)
-            fr <- fetch(rs, n=-1)
+            rs <- DBI::dbSendQuery(con, query)
+            fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
             fr <- xts(as.matrix(fr[,-1]),
                       order.by=as.Date(fr[,1],origin='1970-01-01'),
@@ -496,7 +496,7 @@ function(Symbols,env,return.class='xts',
               assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
         }
-        dbDisconnect(con)
+        DBI::dbDisconnect(con)
         if(auto.assign)
           return(Symbols)
         return(fr)
@@ -977,7 +977,7 @@ function(Symbols,env,return.class='xts',
        } else 
        if('timeSeries' %in% return.class) {
          if("package:timeSeries" %in% search() || suppressMessages(require("timeSeries",quietly=TRUE))) {
-           fr <- timeSeries(coredata(fr), charvec=as.character(index(fr)))
+           fr <- timeSeries::timeSeries(coredata(fr), charvec=as.character(index(fr)))
            return(fr)
          } else {
            warning(paste("'timeSeries' from package 'timeSeries' could not be loaded:",
