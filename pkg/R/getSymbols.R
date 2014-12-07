@@ -810,7 +810,7 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
         fr <- do.call('reqHistoricalData',list(tws, Contract, endDateTime=endDateTime,
                                 barSize=barSize, duration=duration,
                                 useRTH=useRTH, whatToShow=whatToShow,
-                                time.format=time.format, verbose=verbose))
+                                timeFormat=time.format, verbose=verbose))
         fr <- convert.time.series(fr=fr, return.class=return.class)
         if(auto.assign)
           assign(Symbols[[i]], fr, env)
