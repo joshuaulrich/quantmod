@@ -2,7 +2,7 @@ export(quantmodenv, .quantmodEnv)
 S3method(print, quantmodEnv)
 
 # NAMESPACE file for quantmod
-import(methods, zoo, xts, TTR, Defaults)
+import(methods, zoo, xts, TTR)
 importFrom(graphics,plot)
 importFrom(stats,predict)
 importFrom(stats,lag)
@@ -256,6 +256,13 @@ export(
        matchChart
       )
 
+# Defaults functionality
+export( 
+       importDefaults,
+       setDefaults,
+       unsetDefaults,
+       getDefaults
+      )
 
 # S3 methods
 S3method(seriesHi,default)
