@@ -278,16 +278,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
                              sep='.')
        if(adjust) {
          # Adjustment algorithm by Joshua Ulrich
-         div <- getDividends(Symbols.name, from=from, to=to, auto.assign=FALSE)
-         spl <- getSplits(Symbols.name,    from=from, to=to, auto.assign=FALSE)
-         adj <- na.omit(adjRatios(spl, div, Cl(fr)))
-
-         fr[,1] <- fr[,1] * adj[,'Split'] * adj[,'Div']  # Open
-         fr[,2] <- fr[,2] * adj[,'Split'] * adj[,'Div']  # High
-         fr[,3] <- fr[,3] * adj[,'Split'] * adj[,'Div']  # Low
-         fr[,4] <- fr[,4] * adj[,'Split'] * adj[,'Div']  # Close
-         fr[,5] <- fr[,5] * ( 1 / adj[,'Div'] )          # Volume
-         #fr <- adjustOHLC(fr, symbol.name=Symbols.name)
+         fr <- adjustOHLC(fr, symbol.name=Symbols.name)
        }
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
