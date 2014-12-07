@@ -1024,7 +1024,7 @@ function(Symbols=NULL,file.path=stop("must specify 'file.path'"),env=parent.fram
     for(each.symbol in Symbols) {
       save(list=each.symbol,
            file=paste(file.path,'/',each.symbol,".RData",sep=''),
-           env=env)
+           envir=env)
     }    
   }
 }
