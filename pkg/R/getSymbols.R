@@ -232,8 +232,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
      default.from <- from
      default.to <- to
 
-     if(missing(verbose)) verbose <- FALSE
-     if(missing(auto.assign)) auto.assign <- TRUE
+     if(!hasArg(verbose)) verbose <- FALSE
+     if(!hasArg(auto.assign)) auto.assign <- TRUE
      yahoo.URL <- "http://ichart.finance.yahoo.com/table.csv?"
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -313,8 +313,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(missing(verbose)) verbose <- FALSE
-     if(missing(auto.assign)) auto.assign <- TRUE
+     if(!hasArg(verbose)) verbose <- FALSE
+     if(!hasArg(auto.assign)) auto.assign <- TRUE
      google.URL <- "http://finance.google.com/finance/historical?"
      from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
      from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
@@ -383,8 +383,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(missing(verbose)) verbose <- FALSE
-     if(missing(auto.assign)) auto.assign <- TRUE
+     if(!hasArg(verbose)) verbose <- FALSE
+     if(!hasArg(auto.assign)) auto.assign <- TRUE
         if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
           if('package:RSQLite' %in% search() || require('RSQLite',quietly=TRUE)) {
           } else { warning(paste("package:",dQuote("RSQLite"),"cannot be loaded" )) }
@@ -447,8 +447,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(missing(verbose)) verbose <- FALSE
-     if(missing(auto.assign)) auto.assign <- TRUE
+     if(!hasArg(verbose)) verbose <- FALSE
+     if(!hasArg(auto.assign)) auto.assign <- TRUE
         if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
           if('package:RMySQL' %in% search() || require('RMySQL',quietly=TRUE)) {
           } else { warning(paste("package:",dQuote("RMySQL"),"cannot be loaded" )) }
@@ -504,8 +504,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(missing(verbose)) verbose <- FALSE
-     if(missing(auto.assign)) auto.assign <- TRUE
+     if(!hasArg(verbose)) verbose <- FALSE
+     if(!hasArg(auto.assign)) auto.assign <- TRUE
      FRED.URL <- "http://research.stlouisfed.org/fred2/series"
      for(i in 1:length(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
@@ -611,8 +611,8 @@ function(Symbols,env,
   default.dir <- dir
   default.extension <- extension
 
-  if(missing(verbose)) verbose <- FALSE
-  if(missing(auto.assign)) auto.assign <- TRUE
+  if(!hasArg(verbose)) verbose <- FALSE
+  if(!hasArg(auto.assign)) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -679,8 +679,8 @@ function(Symbols,env,
   default.dir <- dir
   default.extension <- extension
 
-  if(missing(verbose)) verbose <- FALSE
-  if(missing(auto.assign)) auto.assign <- TRUE
+  if(!hasArg(verbose)) verbose <- FALSE
+  if(!hasArg(auto.assign)) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -738,8 +738,8 @@ function(Symbols,env,
   default.dir <- dir
   default.extension <- extension
 
-  if(missing(verbose)) verbose <- FALSE
-  if(missing(auto.assign)) auto.assign <- TRUE
+  if(!hasArg(verbose)) verbose <- FALSE
+  if(!hasArg(auto.assign)) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -794,9 +794,9 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
   for(var in names(list(...))) {
     assign(var, list(...)[[var]], this.env)
   }
-  if(missing(verbose))
+  if(!hasArg(verbose))
     verbose <- FALSE
-  if(missing(auto.assign))
+  if(!hasArg(auto.assign))
     auto.assign <- TRUE
   if(is.method.available("twsConnect","IBrokers")) {
     tws <- do.call('twsConnect',list(clientId=1001))
@@ -878,8 +878,8 @@ function(Symbols,env,return.class='xts',
      default.from <- from
      default.to <- to
 
-     if(missing(verbose)) verbose <- FALSE
-     if(missing(auto.assign)) auto.assign <- TRUE
+     if(!hasArg(verbose)) verbose <- FALSE
+     if(!hasArg(auto.assign)) auto.assign <- TRUE
 
      oanda.URL <- "http://www.oanda.com/convert/fxhistory?lang=en&"
      for(i in 1:length(Symbols)) {
