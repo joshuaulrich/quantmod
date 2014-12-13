@@ -8,63 +8,42 @@ function(Symbols, Exp=NULL, src="yahoo", ...) {
   }
 }
 
-
 getOptionChain.yahoo <- function(Symbols, Exp, ...)
 {
-  parse.expiry <- function(x) {
-    if(is.null(x))
-      return(NULL)
+  if(!require(XML, quietly=TRUE))
+    stop("package:",dQuote("XML"),"cannot be found.")
 
-    if(inherits(x, "Date") || inherits(x, "POSIXt"))
-      return(format(x, "%Y-%m"))
-
-    if (nchar(x) == 5L) {
-      x <- sprintf(substring(x, 4, 5), match(substring(x, 
-          1, 3), month.abb), fmt = "20%s-%02i")
+  thParse <- function(x) {
+    if (length(XML::xmlChildren(x)) > 1) {
+      XML::xmlValue(x[["div"]][["div"]])
+    } else {
+      XML::xmlValue(x)
     }
-    else if (nchar(x) == 6L) {
-      x <- paste(substring(x, 1, 4), substring(x, 5, 6), 
-          sep = "-")
-    }
-
-    return(x)
   }
-
-  parseOptionTable_ <- function(x) {
-    opt <- x
-    os <- lapply(as.list(lapply(strsplit(opt,"<tr>"), function(.) gsub(",","",gsub("N/A","NA",gsub("(^ )|( $)","",gsub("[ ]+"," ",gsub("<.*?>"," ", .))))))[[1]]), function(.) strsplit(.," ")[[1]])
-    which.opts <- sapply(os,function(.) length(.)==8)
-    up <- grep("Up", strsplit(opt, "<tr>")[[1]][which.opts])
-    dn <- grep("Down", strsplit(opt, "<tr>")[[1]][which.opts])
-    allcontracts <- do.call(rbind,os[sapply(os,function(.) length(.) == 8)])
-    rownames. <- allcontracts[,2]
-    allcontracts <- allcontracts[,-2]
-    suppressWarnings(storage.mode(allcontracts) <- "double")
-    allcontracts[dn,3] <- allcontracts[dn,3]*-1
-    allcontracts <- data.frame(allcontracts)
-    rownames(allcontracts) <- rownames.
-    colnames(allcontracts) <- c("Strike", "Last", "Chg", "Bid", "Ask", "Vol", "OI")
-  
-    call.rows <- which(substr(sprintf("%21s", rownames.),13,13) == "C")
-    list(allcontracts[call.rows,], allcontracts[-call.rows,])
+  NewToOld <- function(x) {
+    d <- with(x, data.frame(Strike, Last, Chg=Change, Bid, Ask, Vol=Volume,
+      OI=`Open Interest`, row.names=`Contract Name`, stringsAsFactors=FALSE))
+    d[] <- lapply(d, type.convert, as.is=TRUE)
+    d
   }
+  tbl <- XML::htmlParse(paste0("http://finance.yahoo.com/q/op?s=", Symbols[1], "&size=mini"), isURL=TRUE)
 
-  if(missing(Exp))
-    opt <- readLines(paste(paste("http://finance.yahoo.com/q/op?s",Symbols,sep="="),"Options",sep="+"), warn=FALSE)
-  else
-    opt <- readLines(paste(paste("http://finance.yahoo.com/q/op?s=",Symbols,"&m=",parse.expiry(Exp),sep=""),"Options",sep="+"), warn=FALSE)
-  opt <- opt[grep("Expire at",opt)]
-  opt <- gsub("%5E","",opt)
+  xpaths <- list()
+  xpaths$tables <- "//table[contains(@class, 'quote-table')]"
+  xpaths$table.names <- paste0(xpaths$tables, "/caption/text()")
+  xpaths$headers <- paste0(xpaths$tables, "/thead/tr[not(contains(@class, 'filterRangeRow'))]")
 
-  if(!missing(Exp) && is.null(Exp)) {
-    ViewByExp <- grep("View By Expiration",strsplit(opt, "<tr.*?>")[[1]])
-    allExp <- substr(strsplit(strsplit(opt,"<tr.*?>")[[1]][ViewByExp],"m=")[[1]][-1],0,7)
-    # fix for missing current month in links
-    # allExp <- c(format(as.yearmon(allExp[1]) - 1/12, "%Y-%m"), allExp)
+  table.names <- XML::xpathSApply(tbl, xpaths$table.names, XML::xmlValue)
+  table.names <- tolower(gsub("[[:space:]]", "", table.names))
+  table.headers <- XML::xpathApply(tbl, xpaths$headers, fun=function(x) sapply(x['th'], thParse))
 
-    return(structure(lapply(allExp, getOptionChain.yahoo, Symbols=Symbols), .Names=format(as.yearmon(allExp))))
-  }
-  calls_puts <- parseOptionTable_(opt)
-  list(calls=calls_puts[[1]],puts=calls_puts[[2]],symbol=Symbols)
+  dftables <- XML::xmlApply(XML::getNodeSet(tbl, xpaths$tables), XML::readHTMLTable, stringsAsFactors=FALSE)
+  names(dftables) <- table.names
+
+  XML::free(tbl)
+
+  dftables <- mapply(setNames, dftables, table.headers, SIMPLIFY=FALSE)
+  dftables <- lapply(dftables, NewToOld)
+  dftables
 }
 
