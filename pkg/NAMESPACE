@@ -201,6 +201,7 @@ export(
     getSymbols.mysql,
     getSymbols.FRED,
     getSymbols.yahoo,
+    getSymbols.yahooj,
     getSymbols.oanda,
     #getSymbols.Bloomberg,
     #getSymbols.IBrokers,

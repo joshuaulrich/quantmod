@@ -299,6 +299,162 @@ function(Symbols,env,return.class='xts',index.class="Date",
 }
 # }}}
 
+# getSymbols.yahooj {{{
+"getSymbols.yahooj" <-
+    function(Symbols, env=parent.frame(), return.class='xts', index.class="Date",
+             from='2007-01-01',
+             to=Sys.Date(),
+             ...)
+    {
+        importDefaults("getSymbols.yahooj")
+        this.env <- environment()
+        for(var in names(list(...))) {
+            # import all named elements that are NON formals
+            assign(var, list(...)[[var]], this.env)
+        }
+        if(!exists("adjust", environment(), inherits=FALSE))
+            adjust <- FALSE
+        
+        default.return.class <- return.class
+        default.from <- from
+        default.to <- to
+        
+        if(!hasArg(verbose)) verbose <- FALSE
+        if(!hasArg(auto.assign)) auto.assign <- TRUE
+
+        if(!('package:XML' %in% search() || require('XML',quietly=TRUE))) {
+            stop(paste("package:",dQuote("XML"),"cannot be loaded" ))
+        }
+
+        yahoo.URL <- "http://info.finance.yahoo.co.jp/history/"
+        for(i in 1:length(Symbols)) {
+            # The name of the symbol, which will actually be used as the
+            # variable name. It needs to start with YJ, and it will be appended
+            # if it does not.
+            symname <- toupper(Symbols[[i]])
+            
+            # The symbol actually sent to Yahoo Japan. This is without the
+            # starting YJ bit.
+            symbol <- symname
+            
+            # If it starts with YJ, try looking up defaults
+            if (grepl("^YJ", symname)) {
+                return.class <- getSymbolLookup()[[symname]]$return.class
+                return.class <- ifelse(is.null(return.class),default.return.class,
+                                       return.class)
+                from <- getSymbolLookup()[[symname]]$from
+                from <- if(is.null(from)) default.from else from
+                to <- getSymbolLookup()[[symname]]$to
+                to <- if(is.null(to)) default.to else to
+                
+                # Extract the actual symbol to be sent to Yahoo Japan
+                symbol <- substring(symname, 3)
+            } else {
+                return.class <- default.return.class
+                from <- default.from
+                to <- default.to
+                
+                # Prepend 'YJ' to the symbol and store it in symname
+                symname <- paste('YJ', symbol, sep="")
+            }
+
+            from.y <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][1])
+            from.m <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][2])
+            from.d <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][3])
+            to.y <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][1])
+            to.m <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][2])
+            to.d <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][3])
+            
+            Symbols.name <- getSymbolLookup()[[symname]]$name
+            Symbols.name <- ifelse(is.null(Symbols.name),symbol,Symbols.name)
+            if(verbose) cat("downloading ",Symbols.name,".....\n\n")
+            
+            page <- 1
+            totalrows <- c()
+            while (TRUE) {
+                tmp <- tempfile()
+                download.file(paste(yahoo.URL,
+                                    "?code=",Symbols.name,
+                                    "&sm=",from.m,
+                                    "&sd=",sprintf('%.2d',from.d),
+                                    "&sy=",from.y,
+                                    "&em=",to.m,
+                                    "&ed=",sprintf('%.2d',to.d),
+                                    "&ey=",to.y,
+                                    "&tm=d",
+                                    "&p=",page,
+                                    sep=''),destfile=tmp,quiet=!verbose)
+                
+                fdoc <- XML::htmlParse(tmp)
+                unlink(tmp)
+                
+                rows <- XML::xpathApply(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
+                if (length(rows) == 1) break
+                
+                totalrows <- c(totalrows, rows)
+                page <- page + 1
+            }
+            if(verbose) cat("done.\n")
+            
+            # Available columns
+            cols <- c('Open','High','Low','Close','Volume','Adjusted')
+            if (grepl(".O$", Symbols.name)) cols <- cols[-(5:6)]
+            
+            # Process from the start, for easier stocksplit management
+            totalrows <- rev(totalrows)
+            mat <- matrix(0, ncol=length(cols) + 1, nrow=0, byrow=TRUE)
+            for(row in totalrows) {
+                cells <- XML::getNodeSet(row, "td")
+                
+                # 2 cells means it is a stocksplit row
+                # So extract stocksplit data and recalculate the matrix we have so far
+                if (length(cells) == 2 & length(cols) == 6 & nrow(mat) > 1) {
+                    ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(XML::xmlValue(cells[[2]]), "[^0-9]+")))))
+                    factor <- ss.data[2] / ss.data[1]
+                    
+                    mat <- rbind(t(apply(mat[-nrow(mat),], 1, function(x) {
+                        x * c(1, rep(1/factor, 4), factor, 1)
+                    })), mat[nrow(mat),])
+                }
+                
+                if (length(cells) != length(cols) + 1) next
+                
+                # Parse the Japanese date format using UTF characters
+                # \u5e74 = 年
+                # \u6708 = 月
+                # \u65e5 = 日
+                date <- as.Date(XML::xmlValue(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
+                entry <- c(date)
+                for(n in 2:length(cells)) {
+                    entry <- cbind(entry, as.numeric(gsub(",", "", XML::xmlValue(cells[[n]]))))
+                }
+                
+                mat <- rbind(mat, entry)
+            }
+            
+            fr <- xts(mat[, -1], as.Date(mat[, 1]), src="yahooj", updated=Sys.time())
+            
+            colnames(fr) <- paste(symname, cols, sep='.')
+            
+            fr <- convert.time.series(fr=fr,return.class=return.class)
+            if(is.xts(fr))
+                indexClass(fr) <- index.class
+            
+            Symbols[[i]] <- symname
+            if(auto.assign)
+                assign(Symbols[[i]],fr,env)
+            if(i >= 5 && length(Symbols) > 5) {
+                message("pausing 1 second between requests for more than 5 symbols")
+                Sys.sleep(1)
+            }
+            
+        }
+        if(auto.assign)
+            return(Symbols)
+        return(fr)
+    }
+# }}}
+
 # getSymbols.google {{{
 "getSymbols.google" <-
 function(Symbols,env,return.class='xts',
