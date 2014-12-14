@@ -20,7 +20,7 @@ function(Symbols=NULL,
                 'default to use auto.assign=FALSE. getOption("getSymbols.env") and \n',
                 'getOptions("getSymbols.auto.assign") are now checked for alternate defaults\n\n',
                 'This message is shown once per session and may be disabled by setting \n',
-                'options("getSymbols.warning4.0"=FALSE). See ?getSymbol for more details'))
+                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for more details.'))
         options("getSymbols.warning4.0"=FALSE) 
       }
       importDefaults("getSymbols")
@@ -225,7 +225,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(!exists("adjust", environment(), inherits=FALSE))
+     if(!hasArg(adjust))
        adjust <- FALSE
 
      default.return.class <- return.class
@@ -312,7 +312,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
             # import all named elements that are NON formals
             assign(var, list(...)[[var]], this.env)
         }
-        if(!exists("adjust", environment(), inherits=FALSE))
+        if(!hasArg(adjust))
             adjust <- FALSE
         
         default.return.class <- return.class
