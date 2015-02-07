@@ -5,7 +5,6 @@
 \alias{swapTA}
 \alias{addTRIX}
 \alias{addATR}
-\alias{addCCI}
 \alias{addCMF}
 \alias{addDPO}
 \alias{addCMO}
