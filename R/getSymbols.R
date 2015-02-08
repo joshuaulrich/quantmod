@@ -1020,8 +1020,6 @@ function(Symbols,env,return.class='xts',
          to=Sys.Date(),
          ...) {
      importDefaults("getSymbols.oanda")
-     if( (as.Date(to)-as.Date(from)) > 500 )
-       stop("oanda.com limits data to 500 days per request", call.=FALSE)
      this.env <- environment()
      for(var in names(list(...))) {
         # import all named elements that are NON formals
@@ -1037,23 +1035,21 @@ function(Symbols,env,return.class='xts',
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-     oanda.URL <- "http://www.oanda.com/convert/fxhistory?lang=en&"
+     # Request minimum data from server to fulfill user's request
+     daySpans <- c(7, 30, 60, 90, 180, 364, 728, 1820)
+     dateStr <- c("d7", "d30", "d60", "d90", "d180", "y1", "y2", "y5")
+
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
        from <- getSymbolLookup()[[Symbols[[i]]]]$from
        from <- ifelse(is.null(from),default.from,from)
+       from <- as.Date(from, origin='1970-01-01')
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- ifelse(is.null(to),default.to,to)
-   
-       if(as.Date(to,origin='1970-01-01')-as.Date(from,origin='1970-01-01') > 499) stop("oanda limits data to 500 days")
-       # automatically break larger requests into equal sized smaller request at some point
-       # for now just let it remain
+       to <- as.Date(to, origin='1970-01-01')
 
-       from.date <- format(as.Date(from,origin='1970-01-01'),"date1=%m%%2F%d%%2F%y&")
-       to.date <- format(as.Date(to,origin='1970-01-01'),"date=%m%%2F%d%%2F%y&date_fmt=us&")
-       
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        currency.pair <- strsplit(toupper(Symbols.name),"/")[[1]]
@@ -1064,19 +1060,36 @@ function(Symbols,env,return.class='xts',
 
        if(verbose) cat("downloading ",Symbols.name,".....")
        tmp <- tempfile()
-       download.file(paste(oanda.URL,from.date,to.date,"exch=",currency.pair[1],
-                       "&expr2=",currency.pair[2],
-                       "&margin_fixed=0&SUBMIT=Get+Table&format=CSV&redirected=1",
-                       sep=""),destfile=tmp,quiet=!verbose)
-       fr <- readLines(tmp, warn=FALSE)
+       # Request minimum data from server to fulfill user's request
+       dateDiff <- difftime(to, from, units="days")
+       dateLoc <- which(daySpans >= dateDiff)
+       # throw warning, but return as much data as possible
+       if(!length(dateLoc)) {
+           warning("Oanda limits data to 5years. Symbol: ", Symbols[[i]])
+           dateLoc <- length(dateStr)
+       }
+       data_range <- dateStr[dateLoc[1]]
+       oanda.URL <- paste("http://www.oanda.com/currency/historical-rates/download?",
+         "quote_currency=", currency.pair[1],
+         "&end_date=", to,
+         "&start_date=", from,
+         "&period=daily&display=absolute&rate=0",
+         "&data_range=", data_range,
+         "&price=mid&view=table",
+         "&base_currency_0=", currency.pair[2],
+         "&base_currency_1=&base_currency_2=&base_currency_3=&base_currency_4=&download=csv",
+         sep="")
+       download.file(oanda.URL, destfile=tmp, quiet=!verbose)
+       fr <- read.csv(tmp, skip=4, as.is=TRUE, header=TRUE)
        unlink(tmp)
-       fr <- unlist(strsplit(
-                    gsub("<PRE>|</PRE>","",fr[(grep("PRE",fr)[1]):(grep("PRE",fr)[2])]),","))
+       fr[,1L] <- as.Date(fr[,1L], origin="1970-01-01")
+       fr <- na.omit(fr[,1:2])    # remove period mean/min/max from end of file
+       if(is.character(fr[,2L]))  # remove thousands seperator and convert
+         fr[,2L] <- as.numeric(gsub(",", "", fr[,2L], fixed=TRUE))
 
        if(verbose) cat("done.\n")
-       fr <- xts(as.numeric(fr[1:length(fr)%%2!=1]),as.Date(fr[1:length(fr)%%2==1],"%m/%d/%Y",origin='1970-01-01'),
-                 src='oanda',updated=Sys.time())
-       dim(fr) <- c(length(fr),1)
+       fr <- xts(fr[,-1L], fr[,1L], src='oanda', updated=Sys.time())
+       fr <- fr[paste(from, to, sep="/")]  # subset to requested timespan
        colnames(fr) <- gsub("/",".",Symbols[[i]])
        fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^|/','',Symbols[[i]])) 
