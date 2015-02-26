@@ -22,7 +22,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
   }
   NewToOld <- function(x) {
     d <- with(x, data.frame(Strike, Last, Chg=Change, Bid, Ask, Vol=Volume,
-      OI=`Open Interest`, row.names=`Contract Name`, stringsAsFactors=FALSE))
+      OI=`Open Interest`, IV=`Implied Volatility`, row.names=`Contract Name`, stringsAsFactors=FALSE))
     d[] <- lapply(d, type.convert, as.is=TRUE)
     d
   }
