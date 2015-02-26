@@ -26,7 +26,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     d[] <- lapply(d, type.convert, as.is=TRUE)
     d
   }
-  tbl <- XML::htmlParse(paste0("http://finance.yahoo.com/q/op?s=", Symbols[1], "&size=mini"), isURL=TRUE)
+  tbl <- XML::htmlParse(paste0("http://finance.yahoo.com/q/op?s=", Symbols[1]), isURL=TRUE)
 
   xpaths <- list()
   xpaths$tables <- "//table[contains(@class, 'quote-table')]"
