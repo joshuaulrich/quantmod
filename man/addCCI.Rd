@@ -1,5 +1,5 @@
-\name{addADX}
-\alias{addADX}
+\name{addCCI}
+\alias{addCCI}
 \title{ Add Commodity Channel Index }
 \description{
 Add Commodity Channel Index
