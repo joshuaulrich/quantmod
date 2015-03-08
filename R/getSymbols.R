@@ -322,9 +322,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
         if(!hasArg(verbose)) verbose <- FALSE
         if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-        if(!('package:XML' %in% search() || require('XML',quietly=TRUE))) {
-            stop(paste("package:",dQuote("XML"),"cannot be loaded" ))
-        }
+        if(!requireNamespace("XML", quietly=TRUE))
+          stop("package:",dQuote("XML"),"cannot be loaded.")
 
         yahoo.URL <- "http://info.finance.yahoo.co.jp/history/"
         for(i in 1:length(Symbols)) {
@@ -420,9 +419,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 if (length(cells) != length(cols) + 1) next
                 
                 # Parse the Japanese date format using UTF characters
-                # \u5e74 = 年
-                # \u6708 = 月
-                # \u65e5 = 日
+                # \u5e74 = "year"
+                # \u6708 = "month"
+                # \u65e5 = "day"
                 date <- as.Date(XML::xmlValue(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
                 entry <- c(date)
                 for(n in 2:length(cells)) {
@@ -541,12 +540,12 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
-        if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
-          if('package:RSQLite' %in% search() || require('RSQLite',quietly=TRUE)) {
-          } else { warning(paste("package:",dQuote("RSQLite"),"cannot be loaded" )) }
-        } else {
-          stop(paste("package:",dQuote('DBI'),"cannot be loaded."))
-        }
+
+     if(!requireNamespace("DBI", quietly=TRUE))
+       stop("package:",dQuote("DBI"),"cannot be loaded.")
+     if(!requireNamespace("RSQLite", quietly=TRUE))
+       stop("package:",dQuote("RSQLite"),"cannot be loaded.")
+
         drv <- DBI::dbDriver("SQLite")
         con <- DBI::dbConnect(drv,dbname=dbname)
         db.Symbols <- DBI::dbListTables(con)
@@ -605,12 +604,12 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
-        if('package:DBI' %in% search() || require('DBI',quietly=TRUE)) {
-          if('package:RMySQL' %in% search() || require('RMySQL',quietly=TRUE)) {
-          } else { warning(paste("package:",dQuote("RMySQL"),"cannot be loaded" )) }
-        } else {
-          stop(paste("package:",dQuote('DBI'),"cannot be loaded."))
-        }
+
+     if(!requireNamespace("DBI", quietly=TRUE))
+       stop("package:",dQuote("DBI"),"cannot be loaded.")
+     if(!requireNamespace("RMySQL", quietly=TRUE))
+       stop("package:",dQuote("RMySQL"),"cannot be loaded.")
+
         if(is.null(user) || is.null(password) || is.null(dbname)) {
           stop(paste(
               'At least one connection argument (',sQuote('user'),
@@ -1126,7 +1125,7 @@ function(Symbols,env,return.class='xts',
          return(fr)
        } else
        if('its' %in% return.class) {
-         if("package:its" %in% search() || suppressMessages(require("its", quietly=TRUE))) {
+         if(requireNamespace("its", quietly=TRUE)) {
            fr.dates <- as.POSIXct(as.character(index(fr)))
            fr <- its::its(coredata(fr),fr.dates)
            return(fr)
@@ -1136,7 +1135,7 @@ function(Symbols,env,return.class='xts',
          }
        } else 
        if('timeSeries' %in% return.class) {
-         if("package:timeSeries" %in% search() || suppressMessages(require("timeSeries",quietly=TRUE))) {
+         if(requireNamespace("timeSeries", quietly=TRUE)) {
            fr <- timeSeries::timeSeries(coredata(fr), charvec=as.character(index(fr)))
            return(fr)
          } else {
