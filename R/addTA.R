@@ -1271,7 +1271,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) || missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
@@ -1377,7 +1377,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
@@ -1475,7 +1475,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
@@ -1559,7 +1559,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
@@ -1643,7 +1643,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- cbind(do.call(with.col,list(x)),Vo(x))
@@ -1728,7 +1728,7 @@ function(x) {
   if(on==1) {
     x <- as.matrix(lchob@xdata)
 
-    if(!is.OHLC(x) | missing(with.col)) with.col <- 1
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
 
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
