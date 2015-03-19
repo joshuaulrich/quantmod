@@ -255,19 +255,26 @@ function(Symbols,env,return.class='xts',index.class="Date",
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
        tmp <- tempfile()
-       download.file(paste(yahoo.URL,
-                           "s=",Symbols.name,
-                           "&a=",from.m,
-                           "&b=",sprintf('%.2d',from.d),
-                           "&c=",from.y,
-                           "&d=",to.m,
-                           "&e=",sprintf('%.2d',to.d),
-                           "&f=",to.y,
-                           "&g=d&q=q&y=0",
-                           "&z=",Symbols.name,"&x=.csv",
-                           sep=''),destfile=tmp,quiet=!verbose)
-       fr <- read.csv(tmp)
-       unlink(tmp)
+       tryCatch(
+       {
+         download.file(paste(yahoo.URL,
+                  "s=",Symbols.name,
+                  "&a=",from.m,
+                  "&b=",sprintf('%.2d',from.d),
+                  "&c=",from.y,
+                  "&d=",to.m,
+                  "&e=",sprintf('%.2d',to.d),
+                  "&f=",to.y,
+                  "&g=d&q=q&y=0",
+                  "&z=",Symbols.name,"&x=.csv",
+                  sep=''),destfile=tmp,quiet=!verbose)
+         fr <- read.csv(tmp)
+       }, 
+       finally = 
+       {
+         unlink(tmp)
+       })
+       
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1]),
@@ -372,7 +379,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
             totalrows <- c()
             while (TRUE) {
                 tmp <- tempfile()
-                download.file(paste(yahoo.URL,
+                tryCatch(
+                {
+                  download.file(paste(yahoo.URL,
                                     "?code=",Symbols.name,
                                     "&sm=",from.m,
                                     "&sd=",sprintf('%.2d',from.d),
@@ -384,8 +393,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
                                     "&p=",page,
                                     sep=''),destfile=tmp,quiet=!verbose)
                 
-                fdoc <- XML::htmlParse(tmp)
-                unlink(tmp)
+                  fdoc <- XML::htmlParse(tmp)
+                }, 
+                finally = 
+                {
+                  unlink(tmp)
+                })
                 
                 rows <- XML::xpathApply(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
                 if (length(rows) == 1) break
@@ -482,7 +495,9 @@ function(Symbols,env,return.class='xts',
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
        tmp <- tempfile()
-       download.file(paste(google.URL,
+       tryCatch(
+       {
+         download.file(paste(google.URL,
                            "q=",Symbols.name,
                            "&startdate=",month.abb[from.m],
                            "+",sprintf('%.2d',from.d),
@@ -492,8 +507,13 @@ function(Symbols,env,return.class='xts',
                            ",+",to.y,
                            "&output=csv",
                            sep=''),destfile=tmp,quiet=!verbose)
-       fr <- read.csv(tmp)
-       unlink(tmp)
+         fr <- read.csv(tmp)
+       }, 
+       finally = 
+       {
+         unlink(tmp)
+       })
+       
        if(verbose) cat("done.\n")
        fr <- fr[nrow(fr):1,] #google data is backwards
        if(fix.google.bug) {
@@ -665,13 +685,19 @@ function(Symbols,env,return.class='xts',
      for(i in 1:length(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
        tmp <- tempfile()
-       download.file(paste(FRED.URL,"/",
+       tryCatch(
+       {
+         download.file(paste(FRED.URL,"/",
                             Symbols[[i]],"/",
                             "downloaddata/",
                             Symbols[[i]],".csv",sep=""),
                             destfile=tmp,quiet=!verbose)
-       fr <- read.csv(tmp,na.string=".")
-       unlink(tmp)
+         fr <- read.csv(tmp,na.string=".")
+       }, 
+       finally = 
+       {
+         unlink(tmp)
+       })
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1],origin='1970-01-01'),
@@ -1078,9 +1104,16 @@ function(Symbols,env,return.class='xts',
          "&base_currency_0=", currency.pair[2],
          "&base_currency_1=&base_currency_2=&base_currency_3=&base_currency_4=&download=csv",
          sep="")
-       download.file(oanda.URL, destfile=tmp, quiet=!verbose)
-       fr <- read.csv(tmp, skip=4, as.is=TRUE, header=TRUE)
-       unlink(tmp)
+         
+       tryCatch(
+       {
+         download.file(oanda.URL, destfile=tmp, quiet=!verbose)
+         fr <- read.csv(tmp, skip=4, as.is=TRUE, header=TRUE)
+       }, 
+       finally = 
+       {
+         unlink(tmp)
+       })
        fr[,1L] <- as.Date(fr[,1L], origin="1970-01-01")
        fr <- na.omit(fr[,1:2])    # remove period mean/min/max from end of file
        if(is.character(fr[,2L]))  # remove thousands seperator and convert
