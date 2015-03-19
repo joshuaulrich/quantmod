@@ -6,7 +6,10 @@ function(exchange, cache.file='', quiet=TRUE) {
   
   if(cache.file == '') {
     cache.file <- getOption('symbolNamesFile')
-    if(is.null(cache.file)) cache.file <- tempfile()
+    if(is.null(cache.file)) {
+      cache.file <- tempfile()
+      on.exit(unlink(cache.file))
+    }
   }
   if(!is.null(cache.file)) {
     eval(parse(text=

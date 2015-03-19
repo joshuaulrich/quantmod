@@ -19,13 +19,13 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   to.d <- as.numeric(strsplit(as.character(to), "-", )[[1]][3])
 
   tmp <- tempfile()
+  on.exit(unlink(tmp))
   download.file(paste(yahoo.URL,Symbol.name, "&a=", 
             from.m, "&b=", sprintf("%.2d", from.d), "&c=", from.y, 
             "&d=", to.m, "&e=", sprintf("%.2d", to.d), "&f=", 
             to.y, "&g=v&ignore=.csv", 
             sep = ""), destfile = tmp, quiet = !verbose)
   fr <- read.csv(tmp)
-  unlink(tmp)
   fr <- xts(fr[,2],as.Date(fr[,1]))
   if(is.xts(Symbol)) {
     if(auto.update) {
