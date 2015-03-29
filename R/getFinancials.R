@@ -9,6 +9,7 @@ getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, .
   Symbol.name <- Symbol
   google.fin <- "http://finance.google.com/finance?fstype=ii&q=" 
   tmp <- tempfile()
+  on.exit(unlink(tmp))
   download.file(paste(google.fin,Symbol,sep=""),quiet=TRUE,destfile=tmp)
   Symbol <- readLines(tmp, warn=FALSE)
 
@@ -59,6 +60,7 @@ getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, .
 `.getFin` <-
 function(Symbol, env = parent.frame(), src='google', auto.assign = TRUE, ...) {
   tmp <- tempfile()
+  on.exit(unlink(tmp))
   download.file(paste('http://finance.google.com/finance?fstype=ii&q=',Symbol,sep=''),
                 quiet=TRUE,destfile=tmp)
   Symbol.name <- Symbol
