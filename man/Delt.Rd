@@ -27,12 +27,11 @@ the two is returned.  That is, k=0. A one period difference would be
 specified by \code{k=1}. \code{k} may also be a vector to calculate
 more than one period at a time. The results will then be an m x length(k)
  
-Log differences are used by default:
-Lag = log(x2(t)/x1(t-k))
-
-
-Arithmetic differences are calculated:
+Arithmetic differences are used by default:
 Lag = (x2(t) - x1(t-k))/x1(t-k)
+
+Log differences are calculated:
+Lag = log(x2(t)/x1(t-k))
 }
 \value{
 An matrix of \code{length(x1)} rows and \code{length(k)} columns.
@@ -45,7 +44,8 @@ Stock.Close <- c(102.12,102.62,100.12,103.00,103.87,103.12,105.12)
 
 Delt(Stock.Open)                    #one period pct. price change
 Delt(Stock.Open,k=1)                #same
-Delt(Stock.Open,type='arithmetic')  #using arithmetic differences
+Delt(Stock.Open,type='arithmetic')  #using arithmetic differences (default)
+Delt(Stock.Open,type='log')         #using log differences
 
 Delt(Stock.Open,Stock.Close)        #Open to Close pct. change
 Delt(Stock.Open,Stock.Close,k=0:2)  #...for 0,1, and 2 periods
