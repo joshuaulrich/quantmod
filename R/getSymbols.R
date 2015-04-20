@@ -797,7 +797,8 @@ function(Symbols,env,
     if(verbose)  
       cat("done.\n")
 
-    asDateArgs <- list(x=fr[,1])
+    # ensure date column is character before calling as.Date
+    asDateArgs <- list(x=as.character(fr[,1]))
     # use format passed via '...', if specified
     if(hasArg("format"))
       asDateArgs$format <- format
