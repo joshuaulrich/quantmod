@@ -757,6 +757,7 @@ function(Symbols,env,
          dir="",
          return.class="xts",
          extension="csv",
+         col.names=c('Open','High','Low','Close','Volume','Adjusted'),
          ...) {
   importDefaults("getSymbols.csv")
   this.env <- environment()
@@ -807,9 +808,7 @@ function(Symbols,env,
       asDateArgs$format <- getSymbolLookup()[[Symbols[[i]]]]$format
 
     fr <- xts(fr[,-1],do.call("as.Date", asDateArgs),src='csv',updated=Sys.time())
-    colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),
-                          c('Open','High','Low','Close','Volume','Adjusted'),
-                             sep='.')
+    colnames(fr) <- paste(toupper(gsub('\\^','',Symbols[[i]])),col.names,sep='.')
     fr <- convert.time.series(fr=fr,return.class=return.class)
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
     if(auto.assign)
