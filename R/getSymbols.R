@@ -617,7 +617,7 @@ function(Symbols,env,return.class='xts',
               sQuote('password'),sQuote('dbname'),
               ") is not set"))
         }
-        con <- DBI::dbConnect("MySQL",user=user,password=password,dbname=dbname,host=host,port=port)
+        con <- DBI::dbConnect(RMySQL::MySQL(),user=user,password=password,dbname=dbname,host=host,port=port)
         db.Symbols <- DBI::dbListTables(con)
         if(length(Symbols) != sum(Symbols %in% db.Symbols)) {
           missing.db.symbol <- Symbols[!Symbols %in% db.Symbols]
