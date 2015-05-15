@@ -20,13 +20,15 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
       XML::xmlValue(x)
     }
   }
+
   NewToOld <- function(x) {
     d <- with(x, data.frame(Strike, Last, Chg=Change, Bid, Ask, Vol=Volume,
-      OI=`Open Interest`, row.names=`Contract Name`, stringsAsFactors=FALSE))
+      OI=`Open Interest`, ImpVol=NA,row.names=`Contract Name`, stringsAsFactors=FALSE))
+    d$ImpVol=substr(x$'Implied Vol',1,nchar(x$'Implied Vol')-1)
     d[] <- lapply(d, type.convert, as.is=TRUE)
     d
   }
-
+  
   # Don't check the expiry date if we're looping over dates we just scraped
   checkExp <- !hasArg(".expiry.known") || !match.call(expand.dots=TRUE)$.expiry.known
   # Construct URL
