@@ -15,6 +15,7 @@ function(Symbols,src='yahoo',what, ...) {
 `getQuote.yahoo` <-
 function(Symbols,what=standardQuote(),...) {
   tmp <- tempfile()
+  on.exit(unlink(tmp))
   if(length(Symbols) > 1 && is.character(Symbols))
     Symbols <- paste(Symbols,collapse=";")
   length.of.symbols <- length(unlist(strsplit(Symbols, ";")))
@@ -49,7 +50,6 @@ function(Symbols,what=standardQuote(),...) {
                 "&f=",QF,sep=""),
                 destfile=tmp,quiet=TRUE)
   sq <- read.csv(file=tmp,sep=',',stringsAsFactors=FALSE,header=FALSE)
-  unlink(tmp)
   Qposix <- strptime(paste(sq[,1],sq[,2]),format='%m/%d/%Y %H:%M')
   Symbols <- unlist(strsplit(Symbols,'\\+'))
   df <- data.frame(Qposix,sq[,3:NCOL(sq)])

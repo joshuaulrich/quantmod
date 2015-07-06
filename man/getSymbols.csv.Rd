@@ -18,6 +18,7 @@ getSymbols.csv(Symbols,
                  dir="",
                  return.class = "xts",
                  extension="csv",
+                 col.names=c("Open","High","Low","Close","Volume","Adjusted"),
                   ...)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -28,6 +29,7 @@ getSymbols.csv(Symbols,
        \item{dir}{ directory of csv file }
        \item{return.class}{ class of returned object }  
        \item{extension}{ extension of csv file }
+       \item{col.names}{ data column names }
        \item{\dots}{ additional parameters }
 }
 \details{
