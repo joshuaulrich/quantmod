@@ -397,8 +397,11 @@ function(Symbols,env,return.class='xts',index.class="Date",
             
             # Available columns
             cols <- c('Open','High','Low','Close','Volume','Adjusted')
-            if (grepl(".O$", Symbols.name)) cols <- cols[-(5:6)]
             
+            firstrow <- totalrows[[1]]
+            cells <- XML::getNodeSet(firstrow, "th")
+            if (length(cells) == 5) cols <- cols[-(5:6)]
+
             # Process from the start, for easier stocksplit management
             totalrows <- rev(totalrows)
             mat <- matrix(0, ncol=length(cols) + 1, nrow=0, byrow=TRUE)

@@ -2,3 +2,5 @@ src
 WISHLIST
 #R/replot.R
 #R/chart_Series.R
+^.*\.Rproj$
+^\.Rproj\.user$
