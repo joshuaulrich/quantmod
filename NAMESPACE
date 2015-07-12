@@ -3,18 +3,71 @@ S3method(print, quantmodEnv)
 
 # NAMESPACE file for quantmod
 import(methods, zoo, xts, TTR)
-importFrom(graphics,plot)
-importFrom(stats,predict)
-importFrom(stats,lag)
-importFrom(stats,fitted)
-importFrom(stats,fitted.values)
-importFrom(stats,coefficients)
-importFrom(stats,coef)
-importFrom(stats,vcov)
-importFrom(stats,logLik)
-importFrom(stats,residuals)
-importFrom(stats,resid)
-importFrom(stats,anova)
+
+importFrom(graphics,
+  abline,
+  axTicks,
+  axis,
+  box,
+  grid,
+  layout,
+  legend,
+  lines,
+  locator,
+  par,
+  plot,
+  plot.new,
+  plot.window,
+  points,
+  polygon,
+  rect,
+  segments,
+  strwidth,
+  text,
+  title)
+
+importFrom(grDevices,
+  colorRampPalette,
+  dev.cur,
+  dev.off)
+
+importFrom(stats,
+  anova,
+  as.formula,
+  as.ts,
+  coef,
+  coefficients,
+  end,
+  fitted,
+  fitted.values,
+  formula,
+  glm,
+  lag,
+  lm,
+  loess,
+  logLik,
+  model.frame,
+  na.exclude,
+  na.omit,
+  predict,
+  resid,
+  residuals,
+  sd,
+  setNames,
+  start,
+  step,
+  terms,
+  vcov)
+
+importFrom(utils,
+  browseURL,
+  download.file,
+  read.csv,
+  read.delim,
+  read.table,
+  select.list,
+  str,
+  type.convert)
 
 # new plotting functions (experimental)
 export(new.replot,
