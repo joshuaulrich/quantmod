@@ -78,16 +78,17 @@ function (name, ...)
     }
     else {
         env <- as.environment(-1)
+        default.deparse <- function(x) {
+          if (is.character(x))
+            # paste into single string (deparse may return length > 1)
+            paste(deparse(x), sep="", collapse="")
+          else
+            x
+        }
+        default.values <- lapply(all.and.matched, default.deparse)
+        default.list <- paste(names(all.and.matched), "=", default.values)
         eval(parse(text = paste("options(", default.name, "=list(", 
-            paste(paste(names(all.and.matched), "=", lapply(all.and.matched, 
-                function(x) {
-                  if (is.character(x)) {
-                    deparse(x)
-                  }
-                  else {
-                    x
-                  }
-                })), collapse = ","), "))", sep = "")), envir = env)
+            paste(default.list, collapse = ","), "))", sep = "")), envir = env)
     }
 }
 
