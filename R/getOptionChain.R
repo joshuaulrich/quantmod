@@ -21,10 +21,17 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     }
   }
   NewToOld <- function(x) {
-    d <- with(x, data.frame(Strike, Last, Chg=Change, Bid, Ask, Vol=Volume,
-      OI=`Open Interest`, row.names=`Contract Name`, stringsAsFactors=FALSE))
+    # clean up colnames, in case there's weirdness in the HTML
+    x <- setNames(x, make.names(names(x)))
+    # set cleaned up colnames to current output colnames
+    d <- with(x, data.frame(Strike=strike, Last=last, Chg=change,
+      Bid=bid, Ask=ask, Vol=volume, OI=openinterest,
+      row.names=`contractname`, stringsAsFactors=FALSE))
     d[] <- lapply(d, type.convert, as.is=TRUE)
     d
+  }
+  cleanNames <- function(x) {
+    tolower(gsub("[[:space:]]", "", x))
   }
 
   # Don't check the expiry date if we're looping over dates we just scraped
@@ -48,8 +55,9 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
   # Extract table names and headers
   table.names <- XML::xpathSApply(tbl, xpaths$table.names, XML::xmlValue)
-  table.names <- tolower(gsub("[[:space:]]", "", table.names))
+  table.names <- cleanNames(table.names)
   table.headers <- XML::xpathApply(tbl, xpaths$headers, fun=function(x) sapply(x['th'], thParse))
+  table.headers <- lapply(table.headers, cleanNames)
 
   # Only return nearest expiry (default served by Yahoo Finance), unless the user specified Exp
   if(!missing(Exp) && checkExp) {
