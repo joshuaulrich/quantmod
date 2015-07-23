@@ -49,6 +49,18 @@ environment one object for each
 by \code{return.class}. Presently this may be \code{ts},
 \code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
 }
+\note{
+FRED changed its URL scheme for the downloads from http:// to
+https://. If \code{getSymbols.FRED} fails for this reason, try
+one of the following solutions:
+  \enumerate{
+    \item{Explicitly pass \code{method} via the \code{getSymbols}
+          call (or via \code{setDefaults}).}
+    \item{Install \pkg{downloader}, which may be able to
+          automagically determine a suitable method.}
+    \item{Set the \code{download.file.method} global option.}
+  }
+}
 \references{ St. Louis Fed: Economic Data - FRED \url{http://research.stlouisfed.org/fred2/}
 }
 \author{ Jeffrey A. Ryan }
