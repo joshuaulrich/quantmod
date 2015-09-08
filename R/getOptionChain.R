@@ -20,13 +20,17 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
       XML::xmlValue(x)
     }
   }
-  NewToOld <- function(x) {
+  NewToOld <- function(x, nm) {
+    if(is.null(x))
+      return(x)
     # clean up colnames, in case there's weirdness in the HTML
-    x <- setNames(x, make.names(names(x)))
+    x <- setNames(x, make.names(nm))
     # set cleaned up colnames to current output colnames
     d <- with(x, data.frame(Strike=strike, Last=last, Chg=change,
       Bid=bid, Ask=ask, Vol=volume, OI=openinterest,
       row.names=`contractname`, stringsAsFactors=FALSE))
+    # remove commas from the numeric data
+    d[] <- lapply(d, gsub, pattern=",", replacement="", fixed=TRUE)
     d[] <- lapply(d, type.convert, as.is=TRUE)
     d
   }
@@ -100,8 +104,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
   dftables <- XML::xmlApply(XML::getNodeSet(tbl, xpaths$tables), XML::readHTMLTable, stringsAsFactors=FALSE)
   names(dftables) <- table.names
 
-  dftables <- mapply(setNames, dftables, table.headers, SIMPLIFY=FALSE)
-  dftables <- lapply(dftables, NewToOld)
+  dftables <- mapply(NewToOld, x=dftables, nm=table.headers, SIMPLIFY=FALSE)
   dftables
 }
 
