@@ -347,7 +347,7 @@ function(x) {
 
   trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
 
-  chobTA@TA.values <- trix[lchob@xsubset]
+  chobTA@TA.values <- trix[lchob@xsubset,]
 
   chobTA@name <- "chartTRIX"
   chobTA@call <- match.call()
