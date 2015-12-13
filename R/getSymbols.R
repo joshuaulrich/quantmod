@@ -567,7 +567,7 @@ function(Symbols,env,return.class='xts',
             query <- paste("SELECT ",
                            paste(db.fields,collapse=','),
                            " FROM ",Symbols[[i]],
-                           " ORDER BY row_names")
+                           " ORDER BY ", db.fields[1])
             rs <- DBI::dbSendQuery(con, query)
             fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
@@ -578,9 +578,9 @@ function(Symbols,env,return.class='xts',
             } else {
               fr <- xts(fr[,-1],order.by=as.Date(as.numeric(fr[,1]),origin='1970-01-01'))
             }
-            colnames(fr) <- paste(Symbols[[i]],
-                                  c('Open','High','Low','Close','Volume','Adjusted'),
-                                  sep='.')
+            # colnames(fr) <- paste(Symbols[[i]],
+                                  # c('Open','High','Low','Close','Volume','Adjusted'),
+                                  # sep='.')
             fr <- convert.time.series(fr=fr,return.class=return.class)
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
