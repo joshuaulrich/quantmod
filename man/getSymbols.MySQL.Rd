@@ -14,8 +14,9 @@ further user contributed data tools.
 getSymbols.MySQL(Symbols,
                  env, 
                  return.class = 'xts',
+                 Date_col="date",
                  db.fields = c("date", "o", "h", "l", "c", "v", "a"), 
-                 field.names = NULL,
+                 col.names = NULL,
                  user = NULL, 
                  password = NULL, 
                  dbname = NULL, 
@@ -31,9 +32,10 @@ getSymbols.MySQL(Symbols,
        \item{return.class}{ desired class of returned object.
                             Can be xts, 
                             zoo, data.frame, ts, or its. (zoo)}
+       \item{Date_col}{ column name of date in database }
        \item{db.fields}{ character vector indicating
                            names of fields to retrieve}
-       \item{field.names}{ names to assign to returned columns }
+       \item{col.names}{ names to assign to returned columns }
        \item{user}{ username to access database }
        \item{password}{ password to access database }
        \item{dbname}{ database name }

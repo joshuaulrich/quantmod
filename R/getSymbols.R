@@ -530,9 +530,10 @@ function(Symbols,env,return.class='xts',
 
 # getSymbols.SQLite {{{
 "getSymbols.SQLite" <- function(Symbols,env,return.class='xts',
+                                Date_col='row_names',
                                db.fields=c('row_names','Open','High',
                                            'Low','Close','Volume','Adjusted'),
-                               field.names = NULL,
+                               col.names = NULL,
                                dbname=NULL,
                                POSIX = TRUE,
                                ...) {
@@ -567,7 +568,7 @@ function(Symbols,env,return.class='xts',
             query <- paste("SELECT ",
                            paste(db.fields,collapse=','),
                            " FROM ",Symbols[[i]],
-                           " ORDER BY ", db.fields[1])
+                           " ORDER BY ", Date_col)
             rs <- DBI::dbSendQuery(con, query)
             fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
@@ -578,9 +579,12 @@ function(Symbols,env,return.class='xts',
             } else {
               fr <- xts(fr[,-1],order.by=as.Date(as.numeric(fr[,1]),origin='1970-01-01'))
             }
-            # colnames(fr) <- paste(Symbols[[i]],
-                                  # c('Open','High','Low','Close','Volume','Adjusted'),
-                                  # sep='.')
+            if (!is.null(col.names)){
+              colnames(fr) <- paste(Symbols[[i]],col.names , sep = ".")
+            }
+            else {
+              colnames(fr) <- paste(Symbols[[i]],db.fields[db.fields!=Date_col] , sep = ".")
+            }
             fr <- convert.time.series(fr=fr,return.class=return.class)
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
@@ -595,9 +599,9 @@ function(Symbols,env,return.class='xts',
 # }}}
 
 # getSymbols.MySQL {{{
-"getSymbols.MySQL" <- function(Symbols,env,return.class='xts',
+"getSymbols.MySQL" <- function(Symbols,env,return.class='xts',Date_col="date",
                                db.fields=c('date','o','h','l','c','v','a'),
-                               field.names = NULL,
+                               col.names = NULL,
                                user=NULL,password=NULL,dbname=NULL,host='localhost',port=3306,
                                ...) {
      importDefaults("getSymbols.MySQL")
@@ -631,16 +635,19 @@ function(Symbols,env,return.class='xts',
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
-            query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
+            query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY ",Date_col)
             rs <- DBI::dbSendQuery(con, query)
             fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
             fr <- xts(as.matrix(fr[,-1]),
                       order.by=as.Date(fr[,1],origin='1970-01-01'),
                       src=dbname,updated=Sys.time())
-            colnames(fr) <- paste(Symbols[[i]],
-                                  c('Open','High','Low','Close','Volume','Adjusted'),
-                                  sep='.')
+            if (!is.null(col.names)){
+              colnames(fr) <- paste(Symbols[[i]],col.names , sep = ".")
+            }
+            else {
+              colnames(fr) <- paste(Symbols[[i]],db.fields[db.fields!=Date_col] , sep = ".")
+            }
             fr <- convert.time.series(fr=fr,return.class=return.class)
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
