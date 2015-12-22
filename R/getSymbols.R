@@ -450,7 +450,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
             
             colnames(fr) <- paste(symname, cols, sep='.')
             
-            fr <- quantmod:::convert.time.series(fr=fr,return.class=return.class)
+            fr <- convert.time.series(fr=fr,return.class=return.class)
             if(is.xts(fr))
                 indexClass(fr) <- index.class
             
