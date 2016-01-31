@@ -62,6 +62,10 @@ specification process.  All columns may also be extracted
 through standard R methods.
 
 Assignment will not work at present.
+
+\code{getPrice} will attempt to extract price column(s) from a time series,
+using sensible defaults. Additionally, the user may provide by symbol and price
+preference.
 }
 \usage{
 Op(x)
@@ -88,6 +92,8 @@ OpOp(x)
 HLC(x)
 OHLC(x)
 OHLCV(x)
+
+getPrice(x, symbol=NULL, prefer=NULL, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -95,12 +101,21 @@ OHLCV(x)
    data to be extracted. }
   \item{thresh}{ noise threshold (seriesIncr/seriesDecr) }
   \item{diff.}{ differencing (seriesIncr/seriesDecr) }
+  \item{symbol}{ text string containing the symbol to extract }
+  \item{prefer}{ price type preference (see Details) }
+  \item{\dots}{ not currently used }
 }
 \details{
 Internally, the code uses grep to locate the appropriate
 columns. Therefore it is necessary to use inputs with
 column names matching the requirements in the description
 section, though the exact naming convention is not as important.
+
+\code{prefer} can be used with \code{getPrice} to extract many commonly used
+financial time series prices descriptions (e.g. open, high, low, close, bid,
+ask/offer, midpoint, trade, price). If the value of \code{prefer} does not
+match one of the currently supported types, it will be matched against the
+object column names using \code{grep}.
 }
 \value{
 Returns an object of the same class as the original
