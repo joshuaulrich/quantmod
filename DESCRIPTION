@@ -8,10 +8,17 @@ Authors@R: c(
   person(given=c("Joshua","M."), family="Ulrich", role=c("cre","ctb"), email="josh.m.ulrich@gmail.com"),
   person(given="Wouter", family="Thielen", role="ctb")
   )
-Depends: xts(>= 0.9-0), zoo, TTR(>= 0.2), methods
-Suggests: DBI,RMySQL,RSQLite,timeSeries,its,XML,downloader
-Description: Specify, build, trade, and analyse quantitative financial trading strategies.
+Depends:
+    xts(>= 0.9-0),
+    zoo,
+    TTR(>= 0.2),
+    methods
+Suggests:
+    DBI,RMySQL,RSQLite,timeSeries,its,XML,downloader
+Description: Specify, build, trade, and analyse quantitative financial trading
+    strategies.
 LazyLoad: yes
 License: GPL-3
 URL: http://www.quantmod.com https://github.com/joshuaulrich/quantmod
 BugReports: https://github.com/joshuaulrich/quantmod/issues
+RoxygenNote: 5.0.1
