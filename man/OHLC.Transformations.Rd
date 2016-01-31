@@ -1,6 +1,5 @@
 \name{OHLC.Transformations}
 \alias{OHLC.Transformations}
-\alias{getPrice}
 \alias{Ad}
 \alias{Cl}
 \alias{ClCl}
@@ -111,7 +110,7 @@ objects which will be returned as \code{zoo} objects, and calls to
 value instead of the original object type.
 }
 \author{ Jeffrey A. Ryan }
-\seealso{ \code{\link{specifyModel}}  }
+\seealso{ \code{\link{specifyModel} } }
 \examples{
 \dontrun{
 getSymbols('IBM',src='yahoo')

@@ -24,4 +24,7 @@ May be subset by symbol and preference.
 e.g. 'trade', 'close', 'bid', 'ask' with specific tests and matching for types and column names
 currently supported in R, but a default grep match will be performed if one of the supported types doesn't match.
 }
+\seealso{
+\code{\link{OHLC.Transformations}}
+}
 

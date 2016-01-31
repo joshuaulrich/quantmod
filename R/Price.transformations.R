@@ -15,6 +15,8 @@
 #' @param symbol text string containing the symbol to extract
 #' @param prefer preference for any particular type of price, see Details
 #' @param \dots any other passthrough parameters
+#' @seealso 
+#' \code{\link{OHLC.Transformations}}
 #' @export
 getPrice <- function (x, symbol=NULL, prefer=NULL,...)
 {
