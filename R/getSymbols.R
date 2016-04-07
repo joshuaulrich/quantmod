@@ -1073,7 +1073,7 @@ function(Symbols,env,return.class='xts',
            dateLoc <- length(dateStr)
        }
        data_range <- dateStr[dateLoc[1]]
-       oanda.URL <- paste("http://www.oanda.com/currency/historical-rates/download?",
+       oanda.URL <- paste("https://www.oanda.com/currency/historical-rates/download?",
          "quote_currency=", currency.pair[1],
          "&end_date=", to,
          "&start_date=", from,
