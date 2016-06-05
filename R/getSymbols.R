@@ -149,7 +149,7 @@ formals(loadSymbols) <- loadSymbols.formals
 #         stop(paste("package:",dQuote('RBloomberg'),"cannot be loaded."))
 #       }
 #       bbconn <- blpConnect()
-#       for(i in 1:length(Symbols)) {
+#       for(i in seq_along(Symbols)) {
 #           bbsym <- paste(Symbols[[i]],bb.suffix)
 #
 #           if(verbose) {
@@ -238,7 +238,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-     for(i in 1:length(Symbols)) {
+     for(i in seq_along(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
@@ -327,7 +327,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
           stop("package:",dQuote("XML"),"cannot be loaded.")
 
         yahoo.URL <- "http://info.finance.yahoo.co.jp/history/"
-        for(i in 1:length(Symbols)) {
+        for(i in seq_along(Symbols)) {
             # The name of the symbol, which will actually be used as the
             # variable name. It needs to start with YJ, and it will be appended
             # if it does not.
@@ -483,7 +483,7 @@ function(Symbols,env,return.class='xts',
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-     for(i in 1:length(Symbols)) {
+     for(i in seq_along(Symbols)) {
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
@@ -558,7 +558,7 @@ function(Symbols,env,return.class='xts',
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
                 Symbols <- Symbols[Symbols %in% db.Symbols]
         }
-        for(i in 1:length(Symbols)) {
+        for(i in seq_along(Symbols)) {
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],
                     paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),
@@ -627,7 +627,7 @@ function(Symbols,env,return.class='xts',
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
                 Symbols <- Symbols[Symbols %in% db.Symbols]
         }
-        for(i in 1:length(Symbols)) {
+        for(i in seq_along(Symbols)) {
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
@@ -669,7 +669,7 @@ function(Symbols,env,return.class='xts',
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-     for(i in 1:length(Symbols)) {
+     for(i in seq_along(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
        URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
        try.download.file(URL, destfile=tmp, quiet=!verbose, ...)
@@ -772,7 +772,7 @@ function(Symbols,env,
   if(!hasArg(verbose)) verbose <- FALSE
   if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-  for(i in 1:length(Symbols)) {
+  for(i in seq_along(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
     return.class <- ifelse(is.null(return.class),default.return.class,
                            return.class)
@@ -841,7 +841,7 @@ function(Symbols,env,
   if(!hasArg(verbose)) verbose <- FALSE
   if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-  for(i in 1:length(Symbols)) {
+  for(i in seq_along(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
     return.class <- ifelse(is.null(return.class),default.return.class,
                            return.class)
@@ -900,7 +900,7 @@ function(Symbols,env,
   if(!hasArg(verbose)) verbose <- FALSE
   if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-  for(i in 1:length(Symbols)) {
+  for(i in seq_along(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
     return.class <- ifelse(is.null(return.class),default.return.class,
                            return.class)
@@ -963,7 +963,7 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
   
     if(missing(endDateTime)) endDateTime <- NULL
   
-    for(i in 1:length(Symbols)) {
+    for(i in seq_along(Symbols)) {
       Contract <- getSymbolLookup()[[Symbols[i]]]$Contract
       if(inherits(Contract,'twsContract')) {
         fr <- do.call('reqHistoricalData',list(tws, Contract, endDateTime=endDateTime,
@@ -1044,7 +1044,7 @@ function(Symbols,env,return.class='xts',
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-     for(i in 1:length(Symbols)) {
+     for(i in seq_along(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
