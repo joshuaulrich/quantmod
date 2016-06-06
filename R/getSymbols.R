@@ -687,16 +687,18 @@ function(Symbols,env,return.class='xts',
         }
 
         db.Symbols <- DBI::dbListTables(con)
-        if(length(Symbols) != sum(tolower(Symbols) %in% db.Symbols)) {
-          missing.db.symbol <- Symbols[!tolower(Symbols) %in% db.Symbols]
+        if(length(Symbols) != sum(tolower(Symbols) %in% tolower(db.Symbols))) {
+          missing.db.symbol <- Symbols[!tolower(Symbols) %in% tolower(db.Symbols)]
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
-                Symbols <- Symbols[tolower(Symbols) %in% db.Symbols]
+                Symbols <- Symbols[tolower(Symbols) %in% tolower(db.Symbols)]
         }
         for(i in seq_along(Symbols)) {
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
-            query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
+            query <- paste0("SELECT ",paste(db.fields,collapse=',')," FROM \"",
+              if(any(Symbols[[i]] == tolower(db.Symbols))) { tolower(Symbols[[i]]) } else { toupper(Symbols[[i]]) }  
+            , "\" ORDER BY date")
             rs <- DBI::dbSendQuery(con, query)
             fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
