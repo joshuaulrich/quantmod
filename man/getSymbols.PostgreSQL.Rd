@@ -66,7 +66,6 @@ with class defined by \code{return.class}.
 \references{ 
 \itemize{
    \cite{PostgreSQL \url{https://www.postgresql.org}}
-
    \cite{R-SIG-DB. DBI: R Database Interface}
  }
  }
@@ -78,6 +77,18 @@ column names date,o,h,l,c,v,a. For table
 layout changes it is best to use
 \code{setDefaults(getSymbols.PostgreSQL,...)} with
 the new db.fields values specified.
+}
+\note{ 
+Also the user may have a PostgreSQL table named msft(lowercase). 
+In that situation the returned symbol will be msft(lowercase).
+The returned columns will be msft.Open, msft.High, etc.
+However, it is recommeded to work with upper case xts object 
+names e.g. MSFT to be consistent with the rest 
+of the quantmod workflow.
+In R an xts object and it's column uppercase 
+or lowercase names can be changed 
+with the functions tolower and toupper.
+Mixed case PostgreSQL table names are not supported.
 }
 \seealso{ \code{\link{getSymbols}},
           \code{\link{setSymbolLookup}} }
