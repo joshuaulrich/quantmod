@@ -79,7 +79,8 @@ layout changes it is best to use
 the new db.fields values specified.
 }
 \note{ 
-Also the user may have a PostgreSQL table named msft(lowercase). 
+Also in this particular getSymbols implementation,
+the user may have a PostgreSQL table named msft(lowercase). 
 In that situation the returned symbol will be msft(lowercase).
 The returned columns will be msft.Open, msft.High, etc.
 However, it is recommeded to work with upper case xts object 
@@ -89,6 +90,7 @@ In R an xts object and it's column uppercase
 or lowercase names can be changed 
 with the functions tolower and toupper.
 Mixed case PostgreSQL table names are not supported.
+Therefore, a PostgreSQL table named MsFt will cause an Error.
 }
 \seealso{ \code{\link{getSymbols}},
           \code{\link{setSymbolLookup}} }
