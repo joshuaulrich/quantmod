@@ -250,6 +250,7 @@ export(
     loadSymbols,
     getSymbols,
     getSymbols.MySQL,
+    getSymbols.PostgreSQL,
     getSymbols.SQLite,
     getSymbols.mysql,
     getSymbols.FRED,
