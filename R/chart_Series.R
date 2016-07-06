@@ -1,7 +1,7 @@
 findOHLC <- function() {
-  chob <- xts:::current.xts_chob()
+  chob <- current.chob()
   loc <- round(locator(1)$x)
-  ohlc <- chob$Env$xdata[chob$Env$xsubset][loc]
+  ohlc <- current.chob()$Env$xdata[current.chob()$Env$xsubset][loc]
   actions <- chob$Env$actions
   envs <- lapply(actions[which(!sapply(actions,attr,'frame')%%2)],attr,'env')
   values <- lapply(lapply(envs[sapply(envs,is.list)],`[[`,1),
@@ -10,10 +10,10 @@ findOHLC <- function() {
 }
 
 getSubset <- function() {
-  chob <- xts:::current.xts_chob()
+  chob <- current.chob()
   from <- round(locator(1)$x)
   to <- round(locator(1)$x)
-  ohlc <- chob$Env$xdata[chob$Env$xsubset][from:to]
+  ohlc <- current.chob()$Env$xdata[current.chob()$Env$xsubset][from:to]
   actions <- chob$Env$actions
   envs <- lapply(actions[which(!sapply(actions,attr,'frame')%%2)],attr,'env')
   values <- lapply(lapply(envs[sapply(envs,is.list)],`[[`,1),
@@ -182,48 +182,54 @@ chart_Series <- function(x,
                          pars=chart_pars(), theme=chart_theme(),
                          clev=0,
                          ...) {
-  type0 <- type
-  major.ticks = "weeks"
-  grid.ticks.on = "weeks"
-  p <- plot.xts(x,
-                ...,
-                subset = subset,
-                main = name,
-                ylim = range(x[, 1, drop = FALSE]),
-                type = "n",
-                observation.based = TRUE,
-                major.ticks = major.ticks,
-                grid.ticks.on = grid.ticks.on)
-  if(is.character(x))
-    stop("'x' must be a time-series object")
-  if(is.OHLC(x)) {
-    p$Env$xdata <- OHLC(x)
-    if(has.Vo(x))
-      p$Env$vo <- Vo(x)
-  } else p$Env$xdata <- x
-
   line.col <- theme$col$line.col
   up.col <- theme$col$up.col
   dn.col <- theme$col$dn.col
   up.border <- theme$col$up.border
   dn.border <- theme$col$dn.border
   format.labels <- theme$format.labels
-  p$Env$theme$bbands <- theme$bbands
-  p$Env$theme$shading <- theme$shading
-  p$Env$theme$line.col <- line.col
-  p$Env$theme$up.col <- up.col
-  p$Env$theme$dn.col <- dn.col
-  p$Env$theme$up.border <- up.border
-  p$Env$theme$dn.border <- dn.border
-  p$Env$theme$rylab <- theme$rylab
-  p$Env$theme$lylab <- theme$lylab
-  p$Env$theme$bg <- theme$col$bg
-  p$Env$theme$grid <- theme$col$grid
-  p$Env$theme$grid2 <- theme$col$grid2
-  p$Env$theme$labels <- "#333333"
-  p$Env$ticks.on <- grid.ticks.on
+  label.bg <- theme$col$label.bg
+
+  if(is.OHLC(x)) {
+    yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
+  } else yrange <- range(x[, 1], na.rm=TRUE)
+  cs <- plot.xts(x,
+                ...,
+                subset = subset,
+                main = name,
+                ylim = yrange,
+                type = "n",
+                observation.based = TRUE,
+                major.ticks = "auto",
+                grid.ticks.on = "auto")
+  if(is.character(x))
+    stop("'x' must be a time-series object")
+  if(is.OHLC(x)) {
+    cs$Env$xdata <- OHLC(x)
+    if(has.Vo(x))
+      cs$Env$vo <- Vo(x)
+  } else cs$Env$xdata <- x
+  cs$Env$theme$bbands <- theme$bbands
+  cs$Env$theme$shading <- theme$shading
+  cs$Env$theme$line.col <- theme$col$line.col
+  cs$Env$theme$up.col <- up.col
+  cs$Env$theme$dn.col <- dn.col
+  cs$Env$theme$up.border <- up.border
+  cs$Env$theme$dn.border <- dn.border
+  cs$Env$theme$rylab <- theme$rylab
+  cs$Env$theme$lylab <- theme$lylab
+  cs$Env$theme$bg <- theme$col$bg
+  cs$Env$theme$grid <- theme$col$grid
+  cs$Env$theme$grid2 <- theme$col$grid2
+  cs$Env$theme$labels <- "#333333"
+  cs$Env$theme$label.bg <- label.bg
+  cs$Env$format.labels <- format.labels
+  cs$Env$ticks.on <- cs$Env$grid.ticks.on
+  cs$Env$grid.ticks.lwd <- theme$grid.ticks.lwd
+  cs$Env$range.bars.type <- type
+
   # axis_ticks function to label lower frequency ranges/grid lines
-  p$Env$axis_ticks <- function(xdata,xsubset) {
+  cs$Env$axis_ticks <- function(xdata,xsubset) {
     ticks <- diff(axTicksByTime2(xdata[xsubset],labels=FALSE))/2 + 
                   last(axTicksByTime2(xdata[xsubset],labels=TRUE),-1)
     if(!theme$coarse.time || length(ticks) == 1)
@@ -234,42 +240,36 @@ chart_Series <- function(x,
     ticks
   }
   # need to add if(upper.x.label) to allow for finer control
-  p$add(expression(atbt <- axTicksByTime2(xdata[xsubset]),
+  cs$add(expression(atbt <- axTicksByTime2(xdata[xsubset]),
                     axt <- axis_ticks(xdata,xsubset),
-                    text(x=as.numeric(axt),
-                         y=par('usr')[3]-0.2*min(strheight(axt)),
-                         labels=unique(names(atbt)),xpd=TRUE,cex=0.9,pos=3)),
-         clip=FALSE, expr=TRUE, env=p$Env)
-  # background of main window
-  #p$add(expression(rect(par("usr")[1],
-  #                       par("usr")[3],
-  #                       par("usr")[2],
-  #                       par("usr")[4],border=NA,col=theme$bg)),expr=TRUE)
+                    text(as.numeric(axt),
+                         par('usr')[3]-0.2*min(strheight(axt)),
+                         names(axt),xpd=TRUE,cex=0.9,pos=3)),
+                    clip=FALSE,expr=TRUE)
 
   if(!hasArg(spacing))
-    spacing = 1
-  p$Env$spacing = spacing
-  p$Env$line.col = line.col
-  p$Env$up.col = up.col
-  p$Env$dn.col = dn.col
-  p$Env$up.border = up.border
-  p$Env$type0 <- type0
-  p$Env$range.bars <- quantmod:::range.bars
+    spacing <- 1
+  cs$Env$spacing <- spacing
+  cs$Env$line.col <- line.col
+  cs$Env$up.col <- up.col
+  cs$Env$dn.col <- dn.col
+  cs$Env$up.border <- up.border
+  cs$Env$range.bars <- range.bars
   exp <- expression(range.bars(xdata[xsubset],
-                               type=type0,
+                               type=range.bars.type,
                                spacing=spacing,
                                line.col=line.col,
                                up.col=up.col,
                                dn.col=dn.col,
                                up.border=up.border,
                                dn.border=up.border))
-  p$add(exp, expr = TRUE, env = p$Env)
-  return(p)
+  cs$add(exp, expr = TRUE, env = cs$Env)
+  cs
 } #}}}
 
 # zoom_Chart {{{
 zoom_Chart <- function(subset) {
-  chob <- xts:::current.xts_chob()
+  chob <- current.chob()
   chob$subset(subset)
   chob
 }
@@ -283,7 +283,7 @@ fade <- function(col, level) {
   cols
 }
 
-current.chob <- function() invisible(get(".chob",.plotEnv))
+current.chob <- function() invisible(xts:::current.xts_chob())
 
 use.chob <- function(use=TRUE) {
   options('global.chob'=use) 
@@ -313,9 +313,9 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
         names(list(x=x,type=type,order=order,on=on,legend=legend,...)),
               list(x=x,type=type,order=order,on=on,legend=legend,...))
   exp <- parse(text=gsub("list","plot_series",
-               as.expression(substitute(list(x=xts:::current.xts_chob(),type=type,series=get("x"), ...)))),
+               as.expression(substitute(list(x=current.chob(),type=type,series=get("x"), ...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$theme <- if(is.null(theme)) plot_object$Env$theme else theme
   xdata <- plot_object$Env$xdata
   xsubset <- plot_object$Env$xsubset
@@ -338,11 +338,11 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
     plot_object$add(expression(segments(1,alabels,NROW(xdata[xsubset]),alabels, col=theme$grid)),expr=TRUE)
   # left axis labels
     exp <- c(expression(text(1-1/3-max(strwidth(alabels)),
-                alabels, #axis_labels(xdata,xsubset),
-                noquote(format(alabels,justify="right")),
+                alabels, #axis_labels(xdata,xsubset), 
+                noquote(format(alabels,justify="right")), 
                 col=theme$labels,offset=0,cex=0.9,pos=4)),
              expression(text(NROW(upper.env$xdata[xsubset])+1/3,
-                alabels,
+                alabels, 
                 noquote(format(alabels,justify="right")),
                 col=theme$labels,offset=0,cex=0.9,pos=4)),exp)
 #    lenv$grid_lines <- function(xdata,x) { seq(-1,1) }
@@ -403,11 +403,11 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
               list(x=x,order=order,on=on,legend=legend,
                    taType=taType,col=col,...))
   exp <- parse(text=gsub("list","plot_ta",
-               as.expression(substitute(list(x=xts:::current.xts_chob(),
+               as.expression(substitute(list(x=current.chob(),
                              ta=get("x"),on=on,
                              taType=taType,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   xdata <- plot_object$Env$xdata
   xsubset <- plot_object$Env$xsubset
   if(is.logical(x)) no.update <- TRUE else no.update <- FALSE
@@ -434,7 +434,7 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
     plot_object$add_frame(ylim=range(na.omit(xdata)),asp=1)  # need to have a value set for ylim
     plot_object$next_frame()
   # add grid lines, using custom function for MACD gridlines
-  lenv$grid_lines <- function(xdata,xsubset) {
+  lenv$grid_lines <- function(xdata,xsubset) { 
     pretty(xdata[xsubset])
   }
   exp <- c(expression(segments(1,grid_lines(xdata,xsubset),NROW(xdata[xsubset]),grid_lines(xdata,xsubset),
@@ -479,9 +479,9 @@ add_SMA <- function(n=10, on=1, col='brown',...) {
     lines(1:NROW(xdata[xsubset]), ema, col=col,...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,...)), list(n=n,col=col,...))
-  exp <- parse(text=gsub("list","add_sma",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,col=col,...)))),
+  exp <- parse(text=gsub("list","add_sma",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- SMA(Cl(plot_object$Env$xdata),n=n)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -497,9 +497,9 @@ add_EMA <- function(n=10, on=1, col='blue',...) {
     lines(1:NROW(xdata[xsubset]), ema, col=col, ...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,...)), list(n=n,col=col,...))
-  exp <- parse(text=gsub("list","add_ema",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,col=col,...)))),
+  exp <- parse(text=gsub("list","add_ema",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- EMA(Cl(plot_object$Env$xdata),n=n)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -515,9 +515,9 @@ add_WMA <- function(n=10, wts=1:n, on=1, col='green',...) {
     lines(1:NROW(xdata[xsubset]), ema, col=col, ...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,wts=wts,col=col,...)), list(n=n,wts=wts,col=col,...))
-  exp <- parse(text=gsub("list","add_wma",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,wts=wts,col=col,...)))),
+  exp <- parse(text=gsub("list","add_wma",as.expression(substitute(list(x=current.chob(),n=n,wts=wts,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- WMA(Cl(plot_object$Env$xdata),n=n,wts=wts)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -533,9 +533,9 @@ add_VMA <- function(w, ratio=1, on=1, col='green',...) {
     lines(1:NROW(xdata[xsubset]), vma, col=col, ...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(w=w,ratio=ratio,col=col,...)), list(w=w,ratio=ratio,col=col,...))
-  exp <- parse(text=gsub("list","add_wma",as.expression(substitute(list(x=xts:::current.xts_chob(),w=w,ratio=ratio,col=col,...)))),
+  exp <- parse(text=gsub("list","add_wma",as.expression(substitute(list(x=current.chob(),w=w,ratio=ratio,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- VMA(Cl(plot_object$Env$xdata),w=w,ratio=ratio)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -551,9 +551,9 @@ add_DEMA <- function(n=10, on=1, col='pink', ...) {
     lines(1:NROW(xdata[xsubset]), dema, col=col, ...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,col=col,...)), list(n=n,col=col,...))
-  exp <- parse(text=gsub("list","add_dema",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,col=col,...)))),
+  exp <- parse(text=gsub("list","add_dema",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- DEMA(Cl(plot_object$Env$xdata),n=n)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -570,9 +570,9 @@ add_VWAP <- function(n=10, on=1, col='darkgrey', ...) {
     lines(1:NROW(xdata[xsubset]), vwap, col=col, ...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,col=col,...)), list(n=n,col=col,...))
-  exp <- parse(text=gsub("list","add_vwap",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,col=col,...)))),
+  exp <- parse(text=gsub("list","add_vwap",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- VWAP(Cl(plot_object$Env$xdata),plot_object$Env$vo,n=n)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -589,9 +589,9 @@ add_EVWMA <- function(n=10, on=1, col='darkgrey', ...) {
     lines(1:NROW(xdata[xsubset]), evwma, col=col, ...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(n=n,col=col,...)), list(n=n,col=col,...))
-  exp <- parse(text=gsub("list","add_evwma",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,col=col,...)))),
+  exp <- parse(text=gsub("list","add_evwma",as.expression(substitute(list(x=current.chob(),n=n,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- EVWMA(Cl(plot_object$Env$xdata),plot_object$Env$vo,n=n)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -611,9 +611,9 @@ add_GMMA <- function(short=c(3,5,8,10,12,15),long=c(30,35,40,45,50,60), on=1, co
       lines(1:NROW(xdata[xsubset]), gmma[,i], col=col[i],...)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(short=short,long=long,col=col,...)), list(short=short,long=long,col=col,...))
-  exp <- parse(text=gsub("list","add_gmma",as.expression(substitute(list(x=xts:::current.xts_chob(),short=short,long=long,col=col,...)))),
+  exp <- parse(text=gsub("list","add_gmma",as.expression(substitute(list(x=current.chob(),short=short,long=long,col=col,...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   lenv$xdata <- GMMA(Cl(plot_object$Env$xdata), short=short, long=long)
   plot_object$set_frame(sign(on)*(abs(on)+1L))
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
@@ -640,13 +640,13 @@ add_SMI <- function (n=13, nFast=25, nSlow=2, nSig=9, maType="EMA", bounded=TRUE
         names(list(n=n,nFast=nFast,nSlow=nSlow,nSig=nSig,maType=maType,bounded=bounded,...)),
               list(n=n,nFast=nFast,nSlow=nSlow,nSig=nSig,maType=maType,bounded=bounded,...))
   exp <- parse(text=gsub("list","plot_smi",
-               as.expression(substitute(list(x=xts:::current.xts_chob(),
+               as.expression(substitute(list(x=current.chob(),
                                              n=n,nFast=nFast,
                                              nSlow=nSlow,nSig=nSig,
                                              maType=maType,bounded=bounded,...)))),
                srcfile=NULL)
 
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   if(is.null(plot_object$Env$theme$smi)) {
     plot_object$Env$theme$smi$col$smi   <- "orange"
     plot_object$Env$theme$smi$col$signal <- "darkgrey"
@@ -717,11 +717,11 @@ add_RSI <- function (n=14, maType="EMA", wilder=TRUE, ..., RSIup=70, RSIdn=30) {
         names(list(n=n,maType=maType,wilder=wilder,...)),
               list(n=n,maType=maType,wilder=wilder,...))
   exp <- parse(text=gsub("list","plot_rsi",
-               as.expression(substitute(list(x=xts:::current.xts_chob(),
+               as.expression(substitute(list(x=current.chob(),
                                              n=n,maType=maType,wilder=wilder,...)))),
                srcfile=NULL)
 
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   if(is.null(plot_object$Env$theme$rsi)) {
     plot_object$Env$theme$rsi$col$rsi   <- "saddlebrown"
     plot_object$Env$theme$rsi$col$lines <- "orange2"
@@ -770,10 +770,10 @@ skeleton_TA <- function(on, arg, ...) {
          names(list(arg=arg,...)),
                list(arg=arg,...))
   exp <- parse(text=gsub("list","plot_ta",
-               as.expression(substitute(list(x=xts:::current.xts_chob(),
+               as.expression(substitute(list(x=current.chob(),
                                         arg=arg,
                                         ...)))), srcfile=NULL)
-  chob <- xts:::current.xts_chob()
+  chob <- current.chob()
   xsubset <- chob$Env$xsubset
   preFUN <- ""
   FUN <- ""
@@ -819,12 +819,12 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
   # exp will be what is re-evaluated during redrawing (subset, new TA, etc)
   # we need to build this piece by piece
   exp <- parse(text=gsub("list","plot_macd",
-               as.expression(substitute(list(x=xts:::current.xts_chob(),fast=fast,slow=slow,signal=signal,maType=maType,
+               as.expression(substitute(list(x=current.chob(),fast=fast,slow=slow,signal=signal,maType=maType,
                                              histogram=histogram,...)))),
                srcfile=NULL)
 
   # plot_object is the current list of actions, and chart 'state'
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
 
   # now we can evaluate plot_object, as the parse/substitute is behind us
 
@@ -905,10 +905,10 @@ add_BBands <- function(n=20, maType="SMA", sd=2, on=-1, ...) {
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) },
          names(list(n=n,maType=maType,sd=sd,on=on,...)), list(n=n,maType=maType,sd=sd,on=on,...))
-  exp <- parse(text=gsub("list","plot_bbands",as.expression(substitute(list(x=xts:::current.xts_chob(),n=n,maType=maType,
+  exp <- parse(text=gsub("list","plot_bbands",as.expression(substitute(list(x=current.chob(),n=n,maType=maType,
                sd=sd,on=on,...)))),srcfile=NULL)
   # save data that is drawn on charts
-  chob <- xts:::current.xts_chob()
+  chob <- current.chob()
   xdata <- chob$Env$xdata
   lenv$xdata <- BBands(Cl(xdata),n=n, maType,sd)[,-4]  # pctB is bad for ylim calculation on subset
 
@@ -950,9 +950,9 @@ add_Vo <- function(...) {
 
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(...)), list(...))
-  exp <- parse(text=gsub("list","plot_vo",as.expression(substitute(list(x=xts:::current.xts_chob(),...)))),
+  exp <- parse(text=gsub("list","plot_vo",as.expression(substitute(list(x=current.chob(),...)))),
                srcfile=NULL)
-  plot_object <- xts:::current.xts_chob()
+  plot_object <- current.chob()
   xdata <- plot_object$Env$vo
   xsubset <- plot_object$Env$xsubset
   theme <- plot_object$theme
