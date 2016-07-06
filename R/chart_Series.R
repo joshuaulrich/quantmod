@@ -243,11 +243,10 @@ chart_Series <- function(x,
     ticks
   }
   # need to add if(upper.x.label) to allow for finer control
-  cs$add(expression(atbt <- axTicksByTime2(xdata[xsubset]),
-                    axt <- axis_ticks(xdata,xsubset),
+  cs$add(expression(axt <- axis_ticks(xdata,xsubset),
                     text(as.numeric(axt),
                          par('usr')[3]-0.2*min(strheight(axt)),
-                         names(axt),xpd=TRUE,cex=0.9,pos=3)),
+                         names(axt),xpd=TRUE,cex=0.9,pos=3,col=theme$labels)),
                     clip=FALSE,expr=TRUE)
 
   if(!hasArg(spacing))
