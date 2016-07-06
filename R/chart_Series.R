@@ -266,6 +266,18 @@ chart_Series <- function(x,
                                up.border=up.border,
                                dn.border=up.border))
   cs$add(exp, expr = TRUE, env = cs$Env)
+  # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
+  if(!is.null(TA) && nchar(TA) > 0) {
+    TA <- parse(text=TA, srcfile=NULL)
+    for(ta in seq_along(TA)) {
+      if(length(TA[ta][[1]][-1]) > 0) {
+        cs <- eval(TA[ta])
+      } else {
+        cs <- eval(TA[ta])
+      }
+    }
+  }
+  assign(".xts_chob", cs, xts:::.plotxtsEnv)
   cs
 } #}}}
 
