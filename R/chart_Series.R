@@ -209,6 +209,7 @@ chart_Series <- function(x,
     if(has.Vo(x))
       cs$Env$vo <- Vo(x)
   } else cs$Env$xdata <- x
+  cs$Env$clev = min(clev+0.01,1) # (0,1]
   cs$Env$theme$bbands <- theme$bbands
   cs$Env$theme$shading <- theme$shading
   cs$Env$theme$line.col <- theme$col$line.col
@@ -260,11 +261,11 @@ chart_Series <- function(x,
   exp <- expression(range.bars(xdata[xsubset],
                                type=range.bars.type,
                                spacing=spacing,
-                               line.col=line.col,
-                               up.col=up.col,
-                               dn.col=dn.col,
-                               up.border=up.border,
-                               dn.border=up.border))
+                               line.col=fade(line.col, clev),
+                               up.col=fade(up.col, clev),
+                               dn.col=fade(dn.col, clev),
+                               up.border=fade(up.border, clev),
+                               dn.border=fade(up.border, clev)))
   cs$add(exp, expr = TRUE, env = cs$Env)
   # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
   if(!is.null(TA) && nchar(TA) > 0) {
