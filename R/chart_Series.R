@@ -227,6 +227,8 @@ chart_Series <- function(x,
   cs$Env$ticks.on <- cs$Env$grid.ticks.on
   cs$Env$grid.ticks.lwd <- theme$grid.ticks.lwd
   cs$Env$range.bars.type <- type
+  cs$Env$cex <- pars$cex
+  cs$Env$mar <- pars$mar
 
   # axis_ticks function to label lower frequency ranges/grid lines
   cs$Env$axis_ticks <- function(xdata,xsubset) {
