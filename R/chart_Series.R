@@ -97,8 +97,43 @@ function(x, type="", spacing=1, line.col="darkorange",
       lines(1:NROW(x),x[,i],lwd=2,col=line.col[i],lend=3,lty=1)
     return(NULL)
   }
-  bar.col <- ifelse(Opens < Closes, up.col, dn.col)
-  bar.border <- ifelse(Opens < Closes, up.border, dn.border)
+  # masked from chartSeries.chob to handle multi.col
+  # create a vector of colors
+  cs <- current.chob()
+  dn.up.col <- cs$Env$theme$dn.up.col
+  up.up.col <- cs$Env$theme$up.up.col
+  up.dn.col <- cs$Env$theme$up.dn.col
+  dn.dn.col <- cs$Env$theme$dn.dn.col
+  
+  dn.up.border <- cs$Env$theme$dn.up.border
+  up.up.border <- cs$Env$theme$up.up.border
+  up.dn.border <- cs$Env$theme$up.dn.border
+  dn.dn.border <- cs$Env$theme$dn.dn.border
+  multi.col <- cs$Env$multi.col
+  range.bars.type <- cs$Env$range.bars.type
+  if(isTRUE(multi.col) && range.bars.type != "line") {
+    last.Closes <- as.numeric(quantmod::Lag(Closes))
+    last.Closes[1] <- Closes[1]
+    # create vector of appropriate bar colors
+    bar.col <- ifelse(Opens < Closes,
+                      ifelse(Opens < last.Closes,
+                             dn.up.col,
+                             up.up.col),
+                      ifelse(Opens < last.Closes,
+                             dn.dn.col,
+                             up.dn.col))
+    # create vector of appropriate border colors
+    bar.border <- ifelse(Opens < Closes,
+                         ifelse(Opens < last.Closes,
+                                dn.up.border,
+                                up.up.border),
+                         ifelse(Opens < last.Closes,
+                                dn.dn.border,
+                                up.dn.border))
+  } else {
+    bar.col <- ifelse(Opens < Closes, up.col, dn.col)
+    bar.border <- ifelse(Opens < Closes, up.border, dn.border)
+  }
   
   x.pos <- spacing*(1:NROW(x))
   if( type %in% c("ohlc", "hlc")) {
@@ -251,20 +286,16 @@ chart_Series <- function(x,
 
   if(!hasArg(spacing))
     spacing <- 1
-  cs$Env$spacing <- spacing
-  cs$Env$line.col <- line.col
-  cs$Env$up.col <- up.col
-  cs$Env$dn.col <- dn.col
-  cs$Env$up.border <- up.border
+  cs$Env$theme$spacing <- spacing
   cs$Env$range.bars <- range.bars
   exp <- expression(range.bars(xdata[xsubset],
                                type=range.bars.type,
-                               spacing=spacing,
-                               line.col=fade(line.col, clev),
-                               up.col=fade(up.col, clev),
-                               dn.col=fade(dn.col, clev),
-                               up.border=fade(up.border, clev),
-                               dn.border=fade(up.border, clev)))
+                               spacing=theme$spacing,
+                               line.col=fade(theme$line.col, clev),
+                               up.col=fade(theme$up.col, clev),
+                               dn.col=fade(theme$dn.col, clev),
+                               up.border=fade(theme$up.border, clev),
+                               dn.border=fade(theme$up.border, clev)))
   cs$add(exp, expr = TRUE, env = cs$Env)
   # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
   if(!is.null(TA) && nchar(TA) > 0) {
