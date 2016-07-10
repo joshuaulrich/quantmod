@@ -402,7 +402,7 @@ function(x,
       sub.index <- index(do.call(subsetvec[1],list(x,subset.n)))
       xsubset <- which(index(x) %in% sub.index)
     } else xsubset <- which(index(x) %in% index(x[subset]))  
-  } else xsubset <- 1:NROW(x)
+  } else xsubset <- ""
 
   xdata <- x
   x <- x[xsubset]
@@ -457,101 +457,82 @@ function(x,
     chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
   }
   if(chart[1]=="candlesticks") {
-    spacing <- 3
+    #spacing <- 3
     width <- 3 
   } else
   if(chart[1]=="matchsticks" || chart[1]=='line') {
-    spacing <- 1
+    #spacing <- 1
     width <- 1
   } else 
   if(chart[1]=="bars") {
-    spacing <- 4
+    #spacing <- 4
     width <- 3
     if(NROW(x) > 60) width <- 1
   }
-  ep <- axTicksByTime(x,major.ticks)
 
-  x.labels <- names(ep)
-
-  chob <- new("chob")
-  chob@call <- match.call(expand.dots=TRUE)
   if(is.null(name)) name <- as.character(match.call()$x)
+  cs <- chart_Series(x = xdata, name = name, type = chart[1],
+                     subset = xsubset, yaxis.left = FALSE, ...)
 
-  chob@xdata <- xdata
-  chob@xsubset <- xsubset
-  chob@name <- name
-  chob@type <- chart[1]
-
-  chob@xrange <- c(1,NROW(x))
   if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
-  } else chob@yrange <- range(x[,1],na.rm=TRUE)
+    cs$Env$ylim[[2]] <- structure(c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE)), fixed = TRUE)
+  } else cs$Env$ylim[[2]] <- structure(range(x[,1],na.rm=TRUE), fixed = TRUE)
   
   if(!is.null(yrange) && length(yrange)==2)
-    chob@yrange <- yrange
+    cs$Env$ylim[[2]] <- structure(yrange, fixed = TRUE)
 
-  chob@log.scale <- log.scale
-
-  chob@color.vol <- color.vol
-  chob@multi.col <- multi.col
-  chob@show.vol <- show.vol
-  chob@bar.type <- bar.type
-  chob@line.type <- line.type
-  chob@spacing <- spacing
-  chob@width <- width
-  chob@bp <- ep
-  chob@x.labels <- x.labels
-  chob@colors <- theme
-  chob@layout <- layout
-  chob@time.scale <- time.scale
-  chob@minor.ticks <- minor.ticks
-  chob@major.ticks <- major.ticks
-
-  chob@length <- NROW(x)
-
-  chob@passed.args <- as.list(match.call(expand.dots=TRUE)[-1])
-  if(!is.null(TA)) {
-
-    # important to force eval of _current_ chob, not saved chob
-    thisEnv <- environment()
-    if(is.character(TA)) TA <- as.list(strsplit(TA,TAsep)[[1]])
-    #if(!has.Vo(x)) TA <- TA[-which(TA=='addVo()')] # remove addVo if no volume
-    chob@passed.args$TA <- list()
-    #if(length(TA) > 0) {
-      for(ta in 1:length(TA)) {
-        if(is.character(TA[[ta]])) {
-          chob@passed.args$TA[[ta]] <- eval(parse(text=TA[[ta]]),envir=thisEnv)
-        } else chob@passed.args$TA[[ta]] <- eval(TA[[ta]],envir=thisEnv)
-      }
-      # check if all args are indeed chobTA
-      poss.new <- sapply(chob@passed.args$TA, function(x) 
-                          {
-                            if(isS4(x) && is(x, 'chobTA')) 
-                              return(x@new) 
-                            stop('improper TA argument/call in chartSeries', call.=FALSE)
-                          } )
-      if(length(poss.new) > 0)
-        poss.new <- which(poss.new)
-      chob@windows <- length(poss.new) + 1
-      #chob@windows <- length(which(sapply(chob@passed.args$TA,
-      #                           function(x) ifelse(is.null(x),FALSE,x@new))))+1
-      chob@passed.args$show.vol <- any(sapply(chob@passed.args$TA,
-                                     function(x) x@name=="chartVo"))
-    #} else {
-    #  chob@windows <- 1
-    #  chob@passed.args$TA <- NULL
-    #}
-  } else chob@windows <- 1
+  cs$Env$log.scale <- log.scale # special handling needed
   
-  #if(debug) return(str(chob))
-  # re-evaluate the TA list, as it will be using stale data,
-  chob@passed.args$TA <- sapply(chob@passed.args$TA, function(x) { eval(x@call) } )
+  cs$Env$theme$up.col <- theme$up.col
+  cs$Env$theme$dn.col <- theme$dn.col
+  
+  # set bar color
+  cs$Env$theme$dn.up.col <- theme$dn.up.col
+  cs$Env$theme$up.up.col <- theme$up.up.col
+  cs$Env$theme$up.dn.col <- theme$up.dn.col
+  cs$Env$theme$dn.dn.col <- theme$dn.dn.col
+  
+  # set border color
+  cs$Env$theme$dn.up.border <- theme$dn.up.border
+  cs$Env$theme$up.up.border <- theme$up.up.border
+  cs$Env$theme$up.dn.border <- theme$up.dn.border
+  cs$Env$theme$dn.dn.border <- theme$dn.dn.border
+
+  cs$Env$theme$bg <- theme$bg.col
+  cs$Env$theme$fg <- theme$fg.col
+  cs$Env$theme$labels <- theme$major.tick
+  # deprecated arguments(?
+  #cs$Env$theme$border
+  #cs$Env$theme$minor.tick
+  #cs$Env$theme$main.color
+  #cs$Env$theme$sub.col
+  #cs$Env$theme$fill
+  
+  cs$Env$color.vol <- color.vol
+  cs$Env$multi.col <- multi.col
+  cs$Env$show.vol <- show.vol
+  cs$Env$bar.type <- bar.type
+  cs$Env$line.type <- line.type
+  #cs$Env$theme$spacing <- spacing
+  cs$Env$theme$Expiry <- theme$Expiry
+  cs$Env$theme$width <- width
+  cs$Env$layout <- layout
+  cs$Env$time.scale <- time.scale
+  cs$Env$minor.ticks <- minor.ticks
+  cs$Env$major.ticks <- major.ticks
+  if(!show.grid){
+    cs$Env$theme$grid <- NULL
+    cs$Env$theme$grid2 <- NULL
+  } else {
+    cs$Env$theme$grid <- theme$grid.col
+    cs$Env$theme$grid2 <- theme$grid.col
+  }
+
+  cs$Env$length <- NROW(x)
+  cs$Env$theme$bbands$col$fill <- theme$BBands.fill
+  cs$Env$theme$bbands$col$upper <- theme$BBands.col
+  cs$Env$theme$bbands$col$lower <- theme$BBands.col
 
   if(plot) # draw the chart
-    do.call('chartSeries.chob',list(chob))
-
-  chob@device <- as.numeric(dev.cur())
-
-  write.chob(chob,chob@device)
-  invisible(chob)
+    cs
 } #}}}
