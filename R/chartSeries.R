@@ -533,6 +533,17 @@ function(x,
   cs$Env$theme$bbands$col$upper <- theme$BBands.col
   cs$Env$theme$bbands$col$lower <- theme$BBands.col
 
+  # add legend
+  text.exp <- expression(
+    Closes <- Cl(xdata),
+    lc <- xts:::legend.coords("topleft", xlim, get_ylim()[[2]]),
+    legend(x = lc$x, y = lc$y,
+           legend = paste("Last", last(Closes)), 
+           text.col = theme$up.col, 
+           bty='n', 
+           y.intersp=0.95))
+  cs$set_frame(2)
+  cs$add(text.exp, env=cs$Env, expr=TRUE)
   if(plot) # draw the chart
     cs
 } #}}}
