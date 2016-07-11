@@ -532,6 +532,16 @@ function(x,
   cs$Env$theme$bbands$col$fill <- theme$BBands.fill
   cs$Env$theme$bbands$col$upper <- theme$BBands.col
   cs$Env$theme$bbands$col$lower <- theme$BBands.col
+  
+  # change minor ticks to be downward
+  exp <- expression(if (NROW(xdata[xsubset]) < 400) { 
+    axis(1, at = xycoords$x, labels = FALSE, col = theme$grid2, 
+         col.axis = theme$grid2, tcl = -0.4)
+  })
+  exp <- structure(exp, frame = 1)
+  exp <- structure(exp, clip = TRUE)
+  exp <- structure(exp, env = cs$Env)
+  cs$Env$actions[[2]] <- exp
 
   # add legend
   text.exp <- expression(
