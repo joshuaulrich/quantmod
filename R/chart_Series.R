@@ -93,8 +93,12 @@ function(x, type="", spacing=1, line.col="darkorange",
     }
   } else {
     line.col <- rep(line.col, length.out=NCOL(x))
+    if(is.null(cs$Env$line.type))
+      line.type <- "l"
+    else
+      line.type <- cs$Env$line.type
     for(i in 1:NCOL(x))
-      lines(1:NROW(x),x[,i],lwd=2,col=line.col[i],lend=3,lty=1)
+      lines(1:NROW(x),x[,i],lwd=2,col=line.col[i],lend=3,lty=1,type=line.type)
     return(NULL)
   }
   # masked from chartSeries.chob to handle multi.col
@@ -136,7 +140,7 @@ function(x, type="", spacing=1, line.col="darkorange",
   }
   
   x.pos <- spacing*(1:NROW(x))
-  if( type %in% c("ohlc", "hlc")) {
+  if(type %in% c("ohlc", "hlc")) {
     bar.border <- bar.col
     bar.border[is.na(bar.border)] <- up.border
   }
