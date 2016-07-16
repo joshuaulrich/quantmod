@@ -473,6 +473,8 @@ function(x,
   if(is.null(name)) name <- as.character(match.call()$x)
   cs <- chart_Series(x = xdata, name = name, type = chart[1],
                      subset = xsubset, yaxis.left = FALSE, ...)
+  # remove x-axis grid line
+  cs$Env$actions[[1]] <- NULL
 
   if(is.OHLC(x)) {
     cs$Env$ylim[[2]] <- structure(c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE)), fixed = TRUE)
@@ -502,11 +504,11 @@ function(x,
   cs$Env$theme$fg <- theme$fg.col
   cs$Env$theme$labels <- theme$major.tick
   # deprecated arguments(?
-  #cs$Env$theme$border
+  cs$Env$theme$border <- theme$border
   #cs$Env$theme$minor.tick
   #cs$Env$theme$main.color
   #cs$Env$theme$sub.col
-  #cs$Env$theme$fill
+  cs$Env$theme$fill <- theme$fill
   
   cs$Env$color.vol <- color.vol
   cs$Env$multi.col <- multi.col
@@ -541,7 +543,21 @@ function(x,
   exp <- structure(exp, frame = 1)
   exp <- structure(exp, clip = TRUE)
   exp <- structure(exp, env = cs$Env)
-  cs$Env$actions[[2]] <- exp
+  cs$Env$actions[[1]] <- exp
+  
+  # add border
+  exp.border <- expression(rect(xlim[1], get_ylim()[[2]][1], xlim[2], get_ylim()[[2]][2],col=theme$fill),
+                           segments(xlim[1], y_grid_lines(get_ylim()[[2]]), xlim[2], 
+                                    y_grid_lines(get_ylim()[[2]]), col = theme$grid, lwd = grid.ticks.lwd, 
+                                    lty = grid.ticks.lty), text(xlim[2] + xstep * 2/3, y_grid_lines(get_ylim()[[2]]), 
+                                                                noquote(format(y_grid_lines(get_ylim()[[2]]), justify = "right")), 
+                                                                col = theme$labels, srt = theme$srt, offset = 0, pos = 4, 
+                                                                cex = theme$cex.axis, xpd = TRUE),
+                           rect(xlim[1], get_ylim()[[2]][1], xlim[2], get_ylim()[[2]][2],border=theme$labels))
+  exp.border <- structure(exp.border, frame = 2)
+  exp.border <- structure(exp.border, clip = TRUE)
+  exp.border <- structure(exp.border, env = cs$Env)
+  cs$Env$actions[[4]] <- exp.border
 
   # add legend
   text.exp <- expression(
