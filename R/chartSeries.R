@@ -473,6 +473,9 @@ function(x,
   if(is.null(name)) name <- as.character(match.call()$x)
   cs <- chart_Series(x = xdata, name = name, type = chart[1],
                      subset = xsubset, yaxis.left = FALSE, ...)
+  # set xlim to reserve space
+  xlim <- cs$get_xlim()
+  cs$set_xlim(c(xlim[1]-xlim[2]*0.04,xlim[2]+xlim[2]*0.04))
   # remove x-axis grid line
   cs$Env$actions[[1]] <- NULL
 
@@ -508,7 +511,7 @@ function(x,
   #cs$Env$theme$minor.tick
   #cs$Env$theme$main.color
   #cs$Env$theme$sub.col
-  cs$Env$theme$fill <- theme$fill
+  cs$Env$theme$fill <- theme$area
   
   cs$Env$color.vol <- color.vol
   cs$Env$multi.col <- multi.col
@@ -546,8 +549,7 @@ function(x,
   cs$Env$actions[[1]] <- exp
   
   # add border
-  exp.border <- expression(rect(xlim[1], get_ylim()[[2]][1], xlim[2], get_ylim()[[2]][2],col=theme$fill),
-                           segments(xlim[1], y_grid_lines(get_ylim()[[2]]), xlim[2], 
+  exp.border <- expression(segments(xlim[1], y_grid_lines(get_ylim()[[2]]), xlim[2], 
                                     y_grid_lines(get_ylim()[[2]]), col = theme$grid, lwd = grid.ticks.lwd, 
                                     lty = grid.ticks.lty), text(xlim[2] + xstep * 2/3, y_grid_lines(get_ylim()[[2]]), 
                                                                 noquote(format(y_grid_lines(get_ylim()[[2]]), justify = "right")), 
@@ -559,6 +561,11 @@ function(x,
   exp.border <- structure(exp.border, env = cs$Env)
   cs$Env$actions[[4]] <- exp.border
 
+  # add inbox color
+  exp.area <- expression(rect(xlim[1], get_ylim()[[2]][1], xlim[2], get_ylim()[[2]][2],col=theme$fill))
+  cs$set_frame(-2)
+  cs$add(exp.area, env=cs$Env, expr=TRUE)
+  
   # add legend
   text.exp <- expression(
     Closes <- Cl(xdata),
