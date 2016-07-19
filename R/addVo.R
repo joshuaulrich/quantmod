@@ -1,13 +1,81 @@
 
 # addVo {{{
-`addVo` <- function(log.scale=FALSE) {
-   lchob <- get.current.chob() 
-  x <- as.matrix(lchob@xdata)
-  if(!lchob@show.vol || !has.Vo(x))
-    return(invisible(new('chobTA', new=FALSE, name="chartNULL", call=match.call())))
- 
-  Volumes <- Vo(x)
-  max.vol <- max(Volumes,na.rm=TRUE)
+`addVo` <- function(log.scale=FALSE, ...) {
+  lenv <- new.env()
+  
+  lenv$chartVo <- function(x, ...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    vo <- x$Env$vo
+    
+    spacing <- x$Env$theme$spacing
+    width <- x$Env$theme$width
+    
+    x.range <- x$get_xlim()
+    x.range <- seq(x.range[1],x.range[2]*spacing)
+    
+    #    multi.col <- x$Env$multi.col
+    color.vol <- x$Env$color.vol
+    log.scale <- ifelse(x$Env$log.scale,"y","")
+    
+    vol.scale <- x$Env$vol.scale
+    
+    x.pos <- 1 + spacing * (1:length(vo) - 1)
+    
+    bar.col <- if(x$Env$color.vol) {
+      x$Env$theme$bar.col
+    } else x$Env$theme$border.col
+    
+    border.col <- x$Env$theme$border.col
+    min.vol <- min(vo)
+    
+    if(x$Env$theme$thin) {
+      # plot thin volume bars if appropriate
+      segments(x.pos,min.vol,x.pos,vo,col=bar.col)
+    } else {
+      rect(x.pos-spacing/3,min.vol,x.pos+spacing/3,vo,
+           col=bar.col,border=border.col)
+    }
+    legend.text <- list(list(
+      legend=c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(vo)*vol.scale[[1]],big.mark=',')),
+      text.col=c(x$Env$theme$fg, last(bar.col))
+    ))
+    lc <- xts:::legend.coords("topleft", x$Env$xlim, range(vo))
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(x$Env$TA.values)*vol.scale[[1]],big.mark=',')), 
+           text.col = c(x$Env$theme$fg, last(bar.col)), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)
+  }
+  
+  # map all passed args (if any) to 'lenv' environment
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(...)), list(...))
+  exp <- parse(text=gsub("list","chartVo",as.expression(substitute(list(x=current.chob(),...)))),
+               srcfile=NULL)
+  lchob <- current.chob() 
+  xdata <- lchob$Env$vo
+  xsubset <- lchob$Env$xsubset
+  x <- lchob$Env$xdata
+  theme <- lchob$Env$theme
+  vo <- xdata[xsubset]
+  lenv$xdata <- xdata
+  
+  lenv$grid_lines <- function(xdata,x) { seq(0,1) }
+  # add inbox color
+  exp <- c(expression(rect(xlim[1], range(vo)[1], xlim[2], range(vo)[2],col=theme$fill)),
+           # add grid lines and left-side axis labels
+           expression(segments(xlim[1], y_grid_lines(range(vo)), xlim[2], 
+                               y_grid_lines(range(vo)), col = theme$grid, lwd = grid.ticks.lwd, 
+                               lty = 3), 
+                      text(xlim[1], y_grid_lines(range(vo)), y_grid_lines(range(TA.values)), 
+                           col = theme$labels, srt = theme$srt, 
+                           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)),
+           # add border of plotting area
+           expression(rect(xlim[1], range(vo)[1], xlim[2], range(vo)[2],border=theme$labels)),exp)
+  
+  max.vol <- max(vo,na.rm=TRUE)
   vol.scale <- list(100, "100s")
   if (max.vol > 10000) 
     vol.scale <- list(1000, "1000s")
@@ -18,66 +86,47 @@
   if (max.vol > 1e+07) 
     vol.scale <- list(1e+06, "millions")
   
-  if(lchob@color.vol & is.OHLC(x)) {
+  if(lchob$Env$color.vol) {
     # calculate colors for bars, if applicable.
     Opens  <- Op(x)
     Closes <- Cl(x)
-    if(lchob@multi.col) {
+    if(lchob$Env$multi.col) {
       # colored bars - 4 color
       last.Closes <- as.numeric(Lag(Closes))
       last.Closes[1] <- Closes[1]
       bar.col <- ifelse(Opens < Closes,
                         ifelse(Opens < last.Closes,
-                               lchob@colors$dn.up.col,
-                               lchob@colors$up.up.col),
+                               lchob$Env$theme$dn.up.col,
+                               lchob$Env$theme$up.up.col),
                         ifelse(Opens < last.Closes,
-                               lchob@colors$dn.dn.col,
-                               lchob@colors$up.dn.col))
+                               lchob$Env$theme$dn.dn.col,
+                               lchob$Env$theme$up.dn.col))
     } else {
       # colored bars - 2 color
       bar.col <- ifelse(Opens < Closes,
-                        lchob@colors$up.col,
-                        lchob@colors$dn.col)
+                        lchob$Env$theme$up.col,
+                        lchob$Env$theme$dn.col)
     }
       # 1 color bars
-  } else bar.col <- ifelse(!is.null(lchob@colors$Vo.bar.col),
-                           lchob@colors$Vo.bar.col,lchob@colors$border)
-  border.col <- ifelse(is.null(lchob@colors$border),
-                       bar.col,lchob@colors$border)
+  } else bar.col <- ifelse(rep(!is.null(lchob$Env$theme$Vo.bar.col), NROW(x)),
+                           lchob$Env$theme$Vo.bar.col,lchob$Env$theme$border)
+  border.col <- ifelse(rep(is.null(lchob$Env$theme$border),NROW(x)),
+                       bar.col,lchob$Env$theme$border)
 
-  bar.col <- bar.col[lchob@xsubset]
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-
-  chobTA@TA.values <- (Volumes/vol.scale[[1]])[lchob@xsubset]
-  chobTA@name <- "chartVo"
-  chobTA@call <- match.call()
+  bar.col <- bar.col[lchob$Env$xsubset]
   
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        vol.scale=vol.scale,
-                        x.labels=lchob@x.labels,
-                        log.scale=log.scale,
-                        bar.col=bar.col,border.col=border.col,
-                        time.scale=lchob@time.scale)
+  lchob$Env$theme$border.col <- border.col
+  lchob$Env$theme$bar.col <- bar.col
 
-  chobTA@params$thin <- ifelse(lchob@type %in% c('bars','matchsticks'),TRUE,FALSE)
+  lchob$Env$vol.scale <- vol.scale
+  lchob$Env$TA.values <- vo/vol.scale[[1]]
 
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lchob$Env$theme$thin <- ifelse(lchob$Env$type %in% c('bars','matchsticks'),TRUE,FALSE)
+  
+  lchob$add_frame(ylim=range(vo),asp=1)  # need to have a value set for ylim
+  lchob$next_frame()
+  lchob$replot(exp,env=c(lenv, lchob$Env),expr=TRUE)
+  lchob
 } # }}}
 # chartVo {{{
 `chartVo` <-

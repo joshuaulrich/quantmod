@@ -3,12 +3,63 @@
 `addWPR` <- function(n=14) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartWPR <- function(x, n) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
+    } else if(is.null(dim(xdata))) {
+      xdata
+    } else {
+      xdata[,1] 
+    }
+    
+    
+    wpr <- WPR(xx,n=n)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(wpr) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05
+    theme <- x$Env$theme
+    
+    COLOR <- "#0033CC"
+    lines(x.pos,wpr,col=COLOR,lwd=1,type='l')
+    
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n)), 
+  list(n = n))
+  exp <- parse(text = gsub("list", "chartWPR", as.expression(substitute(list(x = current.chob(), 
+                                                                               n = n)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    COLOR <- "#0033CC", 
+    text(0, max(abs(wpr), na.rm = TRUE)*.9,
+         paste("Williams %R (", n,"):", sep = ""), col = theme$fg, 
+         pos = 4),
+    
+    text(0, max(abs(wpr), na.rm = TRUE)*.9,
+         paste("\n\n\n",sprintf("%.3f",last(wpr)), sep = ""), col = COLOR, 
+         pos = 4)))
+  exp <- c(expression(
+    # add inbox color
+    rect(xlim[1], max(abs(wpr), na.rm = TRUE) * 1.05, xlim[2], max(abs(wpr), na.rm = TRUE) * 1.05, col=theme$fill),
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), 
+             xlim[2], y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
+    text(xlim[1], y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
+    # add border of plotting area
+    rect(xlim[1], -0.1 * 1.05, xlim[2], max(abs(wpr), na.rm = TRUE) * 1.05, border=theme$labels)), exp)
+  
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
@@ -19,30 +70,12 @@
   }
 
 
-  wpr <- WPR(xx,n=n)
-
-  chobTA@TA.values <- as.numeric(wpr)[lchob@xsubset]
-  chobTA@name <- "chartWPR"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  wpr <- WPR(xx,n=n)[xsubset]
+  lchob$Env$wpr <- wpr
+  lchob$add_frame(ylim=c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05, asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartWPR {{{
 `chartWPR` <-

@@ -8,45 +8,73 @@
 function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA, 
     legend = "auto") 
 {
-    lchob <- get.current.chob()
-    x <- as.matrix(lchob@xdata)
-    x <- EMV(HL = HLC(x)[,-3], volume = Vo(x), n = n, maType = maType, 
-        vol.divisor = vol.divisor)
-    yrange <- NULL
-    chobTA <- new("chobTA")
-    if (NCOL(x) == 1) {
-        chobTA@TA.values <- x[lchob@xsubset]
+    lenv <- new.env()
+    lenv$chartEMV <- function(x, volume, n, maType, vol.divisor, ..., on, legend) {
+      xdata <- x$Env$xdata
+      xsubset <- x$Env$xsubset
+      volume <- x$Env$volume
+      emv <- EMV(HL=HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
+                 on = on, legend = legend)[xsubset]
+      spacing <- x$Env$theme$spacing
+      x.pos <- 1 + spacing * (1:NROW(emv) - 1)
+      xlim <- x$Env$xlim
+      ylim <- range(emv,na.rm=TRUE)*1.05
+      theme <- x$Env$theme
+
+      lines(x.pos, emv$emv, col = 6, lwd = 1, lend = 2, ...)
+      lines(x.pos, emv$maEMV, col = 7, lwd = 1, lend = 2, ...)
     }
-    else chobTA@TA.values <- x[lchob@xsubset, ]
-    chobTA@name <- "chartTA"
-    if (any(is.na(on))) {
-        chobTA@new <- TRUE
+    if(missing(volume)) volume <- lchob$Env$vo
+    if(missing(maType)) maType <- "SMA"
+    if(!is.character(legend) || legend == "auto")
+      legend <- gsub("^.*[(]", "Ease of Movement (", deparse(match.call()))
+    mapply(function(name, value) {
+      assign(name, value, envir = lenv)
+    }, names(list(volume = volume, n = n, maType = maType, vol.divisor = vol.divisor, ..., 
+                  on = on, legend = legend)), 
+    list(volume = volume, n = n, maType = maType, vol.divisor = vol.divisor, ..., 
+         on = on, legend = legend))
+    exp <- parse(text = gsub("list", "chartEMV", 
+                             as.expression(substitute(list(x = current.chob(), volume = volume, n = n, maType = maType, vol.divisor = vol.divisor, ..., 
+                                                           on = on, legend = legend)))), srcfile = NULL)
+    exp <- c(exp, expression(
+      lc <- xts:::legend.coords("topleft", xlim, range(emv,na.rm=TRUE)*1.05),
+      legend(x = lc$x, y = lc$y, 
+             legend = c(paste(legend, ":"),
+                        paste("emv :", sprintf("%.3f",last(emv$emv))),
+                        paste("maEMV :", sprintf("%.3f",last(emv$maEMV)))),
+             text.col = c(theme$fg, 6, 7), 
+             xjust = lc$xjust, 
+             yjust = lc$yjust, 
+             bty = "n", 
+             y.intersp=0.95)))
+    exp <- c(expression(
+      # add inbox color
+      rect(xlim[1], range(emv,na.rm=TRUE)[1]*1.05, xlim[2], range(emv,na.rm=TRUE)[2]*1.05, col=theme$fill),
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(range(emv,na.rm=TRUE)*1.05), 
+               xlim[2], y_grid_lines(range(emv,na.rm=TRUE)*1.05), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
+      text(xlim[1], y_grid_lines(range(emv,na.rm=TRUE)*1.05), y_grid_lines(range(emv,na.rm=TRUE)*1.05), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
+      # add border of plotting area
+      rect(xlim[1], range(emv,na.rm=TRUE)[1]*1.05, xlim[2], range(emv,na.rm=TRUE)[2]*1.05, border=theme$labels)), exp)
+    
+    lchob <- current.chob()
+    xdata <- lchob$Env$xdata
+    xsubset <- lchob$Env$xsubset
+    emv <- EMV(HL = HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
+               vol.divisor = vol.divisor)[xsubset]
+    lchob$Env$emv <- emv
+    lchob$Env$volume <- volume
+    if(is.na(on)) {
+      lchob$add_frame(ylim=range(emv,na.rm=TRUE)*1.05,asp=1,fixed=TRUE)
+      lchob$next_frame()
     }
     else {
-        chobTA@new <- FALSE
-        chobTA@on <- on
+      lchob$set_frame(sign(on)*abs(on))
     }
-    chobTA@call <- match.call()
-    legend.name <- gsub("^.*[(]", " Ease of Movement (", deparse(match.call()))#, 
-        #extended = TRUE)
-    gpars <- c(list(...), list(col = 6:7))[unique(names(c(list(col = 6:7), 
-        list(...))))]
-    chobTA@params <- list(xrange = lchob@xrange, yrange = yrange, 
-        colors = lchob@colors, color.vol = lchob@color.vol, multi.col = lchob@multi.col, 
-        spacing = lchob@spacing, width = lchob@width, bp = lchob@bp, 
-        x.labels = lchob@x.labels, time.scale = lchob@time.scale, 
-        isLogical = is.logical(x), legend = legend, legend.name = legend.name, 
-        pars = list(gpars))
-    if (is.null(sys.call(-1))) {
-        TA <- lchob@passed.args$TA
-        lchob@passed.args$TA <- c(TA, chobTA)
-        lchob@windows <- lchob@windows + ifelse(chobTA@new, 1, 
-            0)
-        chartSeries.chob <- chartSeries.chob
-        do.call("chartSeries.chob", list(lchob))
-        invisible(chobTA)
-    }
-    else {
-        return(chobTA)
-    }
+    lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+    lchob
 }
