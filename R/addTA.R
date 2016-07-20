@@ -194,40 +194,59 @@ function(x) {
 # addADX {{{
 `addADX` <- function(n=14, maType="EMA", wilder=TRUE) {
 
+  lenv <- new.env()
+  lenv$chartADX <- function(x, n, maType, wilder) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    adx <- ADX(cbind(Hi(xdata), Lo(xdata), Cl(xdata)), n=n, maType=maType, wilder=wilder)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(adx) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(min(adx*0.975, na.rm = TRUE), 
+              max(adx*1.05, na.rm = TRUE))
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    segments(xlim[1], 20, xlim[2], 20, col = "#666666", lty = "dotted")
+    segments(xlim[1], 40, xlim[2], 40, col = "#666666", lty = "dotted")
+    
+    # draw DIp
+    lines(x.pos,adx[,1],col='green',lwd=1,type='l')
+    # draw DIn
+    lines(x.pos,adx[,2],col='red',lwd=1,type='l')
+    # draw ADX
+    lines(x.pos,adx[,4],col='blue',lwd=2,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, wilder = wilder)), 
+  list(n = n, maType = maType, wilder = wilder))
+  exp <- parse(text = gsub("list", "chartADX", as.expression(substitute(list(x = current.chob(), 
+                                                                               n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
+  
+  lchob <- current.chob()
 
-  lchob <- get.current.chob()
-
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
-  adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
-
-  chobTA@TA.values <- adx[lchob@xsubset,]
-  chobTA@name <- "chartADX"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType,wilder=wilder)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)[xsubset]
+  lchob$Env$adx <- adx
+  lchob$add_frame(ylim=c(min(adx*0.975, na.rm = TRUE), 
+                         max(adx*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartADX {{{
 `chartADX` <-
