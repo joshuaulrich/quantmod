@@ -577,6 +577,20 @@ function(x,
            y.intersp=0.95))
   cs$set_frame(2)
   cs$add(text.exp, env=cs$Env, expr=TRUE)
+  
+  # handle TA="addVo()" as we would interactively FIXME: allow TA=NULL to work
+  if(!show.vol) TA <- TA[-grep("addVo()", TA)]
+  if(!is.null(TA) && length(TA) > 0) {
+    TA <- parse(text=TA, srcfile=NULL)
+    for(ta in seq_along(TA)) {
+      if(length(TA[ta][[1]][-1]) > 0) {
+        cs <- eval(TA[ta])
+      } else {
+        cs <- eval(TA[ta])
+      }
+    }
+  }
+  assign(".xts_chob", cs, xts:::.plotxtsEnv)
   if(plot) # draw the chart
     cs
 } #}}}
