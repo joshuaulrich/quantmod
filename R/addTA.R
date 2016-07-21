@@ -690,44 +690,170 @@ function(x) {
 `addBBands` <- function(n=20,sd=2,maType='SMA',draw='bands',on=-1) {
 
 
-  draw.options <- c('bands','percent','width')
-  draw <- draw.options[pmatch(draw,draw.options)]
-
-  lchob <- get.current.chob()
-
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  if(draw=='bands') {
-    chobTA@new <- FALSE
-    } else {
-      chobTA@new <- TRUE
-      on <- NULL
+  draw.options <- c("bands", "percent", "width")
+  draw <- draw.options[pmatch(draw, draw.options)]
+  lenv <- new.env()
+  lenv$chartBBands <- function(x, n, sd, maType, draw, on) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
+    } else xdata 
+    
+    bb <- BBands(xx,n=n,maType=maType,sd=sd)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(bb) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    bband.col <- ifelse(!is.null(theme$bbands$col),
+                        theme$bbands$col$upper,'red') 
+    bband.fill <- ifelse(!is.null(theme$bbands$col$fill),
+                         theme$bbands$col$fill,theme$bg)
+    
+    # bband col vector
+    # lower.band, middle.band, upper.band, %b, bb.width
+    if(length(bband.col) == 1) # no user specified
+      bband.col <- c(bband.col,'grey',rep(bband.col,3))
+    
+    if(draw == 'bands') {
+      # draw Bollinger Bands on price chart
+      if(on[1] > 0) {
+        lines(x.pos,
+              bb[,1],col=bband.col[1],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,3],col=bband.col[3],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,2],col=bband.col[2],lwd=1,lty='dotted')
+      } else {
+        
+        polygon(c(x.pos,rev(x.pos)),
+                c(as.numeric(bb[,1]),as.numeric(rev(bb[,3]))),col=bband.fill,border=NA)
+        lines(x.pos,
+              bb[,1],col=bband.col[1],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,3],col=bband.col[3],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,2],col=bband.col[2],lwd=1,lty='dotted')
+      }
+      
+      lc <- xts:::legend.coords("topleft", xlim, lchob$get_ylim()[[2]])
+      legend(lc$x,lc$y,
+             legend=paste("Bollinger Bands (",
+                          paste(n,sd,sep=","),") [Upper/Lower]: ",
+                          sprintf("%.3f",last(bb[,3])),"/",
+                          sprintf("%.3f",last(bb[,1])), sep = ""), 
+             text.col = bband.col[3],
+             xjust = lc$xjust, 
+             yjust = 1.5, 
+             bty = "n", 
+             y.intersp=0.95) 
+      
+    } else 
+      if(draw == 'percent') {
+        
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+        
+        # draw %B in new frame
+        y.range <- seq(min(bb[,4], na.rm = TRUE) * .9,
+                       max(abs(bb[,4]), na.rm = TRUE) * 1.05,
+                       length.out = length(x.pos))
+        
+        lines(x.pos, bb[,4], col=bband.col[4],lwd=1)
+        
+        text(0,last(y.range) * .9, paste("Bollinger %b (",
+                                         paste(n,sd,sep=","), "): ",
+                                         sep=""), pos=4, col=theme$fg)
+        text(0,last(y.range) * .9, paste("\n\n\n",
+                                         sprintf("%.3f",last(bb[,4])), sep = ""),
+             pos=4, col=bband.col[4])
+        
+      } else {
+        
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+        
+        # draw width in new frame
+        # (high band - low band) / middle band
+        bbw <- (bb[,3] - bb[,1]) / bb[,2]
+        
+        y.range <- seq(min(bbw, na.rm = TRUE) * .9,
+                       max(abs(bbw), na.rm = TRUE) * 1.05,
+                       length.out = length(x.pos))
+        
+        lines(x.pos, bbw, col=bband.col[5],lwd=1)
+        
+        text(0,last(y.range) * .9, paste("Bollinger Band Width (",
+                                         paste(n,sd,sep=","), "): ",
+                                         sep=""), pos=4, col=theme$fg)
+        text(0,last(y.range) * .9, paste("\n\n\n",
+                                         sprintf("%.3f",last(bbw)), sep = ""),
+             pos=4, col=bband.col[5])
+      }
   }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, sd = sd, maType = maType, draw = draw, on = on)), 
+  list(n = n, sd = sd, maType = maType, draw = draw, on = on))
+  exp <- parse(text = gsub("list", "chartBBands", as.expression(substitute(list(x = current.chob(), 
+                                                                                n = n, sd = sd, maType = maType, draw = draw, on = on)))), srcfile = NULL)
+#  draw.options <- c('bands','percent','width')
+#  draw <- draw.options[pmatch(draw,draw.options)]
 
+  lchob <- current.chob()
+
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
-  bb <- BBands(xx,n=n,maType=maType,sd=sd)
-  
-  chobTA@TA.values <- bb[lchob@xsubset,]
-  chobTA@name <- "chartBBands"
-  chobTA@call <- match.call()
-  chobTA@on <- on
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,ma=maType,sd=sd,
-                        draw=draw)
-  return(chobTA)
+  bb <- BBands(xx,n=n,maType=maType,sd=sd)[xsubset]
+  lchob$Env$bb <- bb
+  if(draw == 'bands') {
+    # draw Bollinger Bands on price chart
+    lchob$set_frame(-2)
+    
+  } else 
+    if(draw == 'percent') {
+      # draw %B in new frame
+      ylim <- c(min(bb[,4], na.rm = TRUE) * .9,
+                max(abs(bb[,4]), na.rm = TRUE) * 1.05)
+      
+      lchob$add_frame(ylim=c(ylim[1], ylim[2]),asp=1,fixed=TRUE)
+      lchob$next_frame()
+      
+    } else {
+      # draw width in new frame
+      # (high band - low band) / middle band
+      bbw <- (bb[,3] - bb[,1]) / bb[,2]
+      
+      ylim <- c(min(bbw, na.rm = TRUE) * .9,
+                     max(abs(bbw), na.rm = TRUE) * 1.05)
+      
+      lchob$add_frame(ylim=c(ylim[1], ylim[2]),asp=1,fixed=TRUE)
+      lchob$next_frame()
+    }
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartBBands {{{
 `chartBBands` <-
