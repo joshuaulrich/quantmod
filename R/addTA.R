@@ -100,41 +100,77 @@ function(x) {
 `addCCI` <- function(n=20, maType="SMA", c=0.015) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartCCI <- function(x, n, maType, c) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xx <- if(is.OHLC(xdata)) {
+      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
+    } else xdata 
+    cci <- CCI(xx,n=n,maType=maType,c=c)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(cci) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-max(abs(cci),na.rm=TRUE),
+              max(abs(cci),na.rm=TRUE))*1.05
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    # draw shading in -100:100 y-range 
+    rect(xlim[1],-100,xlim[2],100,col=theme$bbands$col$fill,border=theme$fg)
+    
+    # fill upper and lower areas
+    cci.above <- ifelse(cci >=  100,cci, 100)
+    cci.below <- ifelse(cci <= -100,cci,-100)
+    
+    polygon(c(x.pos,rev(x.pos)),cbind(cci.above,rep(100,length(cci))),col="red",border=theme$fg)
+    polygon(c(x.pos,rev(x.pos)),cbind(cci.below,rep(-100,length(cci))),col="red",border=theme$fg)
+    
+    # draw CCI
+    lines(x.pos,cci,col='red',lwd=1,type='l')
+    
+    # draw dotted guide line at 0
+    segments(xlim[1],0,xlim[2],0,col='#666666',lwd=1,lty='dotted')
+    
+    # add indicator name and last value
+    text(0, ylim[2]*.9,
+         paste("Commodity Channel Index (", n, ",",
+               c,"):",sep=''),col=theme$fg,pos=4)
+    text(0, ylim[2]*.9,
+         paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
+         pos = 4)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, c = c)), list(n = n, maType = maType, c = c))
+  exp <- parse(text = gsub("list", "chartCCI", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType, c = c)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
-  cci <- CCI(xx,n=n,maType=maType,c=c)
-
-  chobTA@TA.values <- cci[lchob@xsubset]
-  chobTA@name <- "chartCCI"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType,c=c)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  cci <- CCI(xx,n=n,maType=maType,c=c)[xsubset]
+  lchob$Env$cci <- cci
+  lchob$add_frame(ylim=c(-max(abs(cci), na.rm = TRUE), 
+                         max(abs(cci), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartCCI {{{
 `chartCCI` <-
