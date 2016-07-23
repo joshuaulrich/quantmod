@@ -474,44 +474,74 @@ function(x) {
 `addDPO` <- function(n=10, maType="EMA", shift=n/2+1, percent=FALSE) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartDPO <- function(x, n, maType, shift, percent) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata
+    dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(dpo) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-max(abs(dpo), na.rm = TRUE), 
+              max(abs(dpo), na.rm = TRUE))*1.05
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    segments(xlim[1], 0, xlim[2], 0, col = "#999999")
+    
+    dpo.tmp <- dpo
+    dpo.tmp[is.na(dpo)] <- 0
+    dpo.positive <- ifelse(dpo.tmp >= 0,dpo.tmp,0)
+    dpo.negative <- ifelse(dpo.tmp <  0,dpo.tmp,0)
+    
+    polygon(c(x.pos,rev(x.pos)),cbind(dpo.positive,rep(0,length(dpo))),col=theme$up.col, border="#999999")
+    polygon(c(x.pos,rev(x.pos)),cbind(dpo.negative,rep(0,length(dpo))),col=theme$dn.col, border="#999999")
+    
+    text(0, ylim[2]*.9,
+         paste("De-trended Price Oscillator (", n,"):", sep = ""), 
+         col = theme$fg, pos = 4)
+    
+    text(0, ylim[2]*.9,
+         paste("\n\n\n",sprintf("%.3f",last(na.omit(dpo))), sep = ""), 
+         col = ifelse(last(na.omit(dpo)) > 0,theme$up.col,theme$dn.col), 
+         pos = 4)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, shift = shift, percent = percent)), 
+  list(n = n, maType = maType, shift = shift, percent = percent))
+  exp <- parse(text = gsub("list", "chartDPO", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType, shift = shift, percent = percent)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
- 
   # should really allow for _any_ series to be used, like MA (FIXME)
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
-  dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)
-
-  chobTA@TA.values <- dpo[lchob@xsubset]
-
-  chobTA@name <- "chartDPO"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType,shift=shift,percent=percent)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)[xsubset]
+  lchob$Env$dpo <- dpo
+  lchob$add_frame(ylim=c(-max(abs(dpo), na.rm = TRUE), 
+                         max(abs(dpo), na.rm = TRUE)) * 1.05,asp=1,fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartDPO {{{
 `chartDPO` <-
