@@ -1028,44 +1028,68 @@ function(x) {
 `addEnvelope` <- function(n=20,p=2.5,maType='SMA',...,on=1) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartEnvelope <- function(x, n, p, maType, ..., on) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata 
+    
+    ma <- do.call(maType,list(xx,n=n,...))
+    mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))
+    
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(mae) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    if(on[1] > 0) {
+      lines(x.pos,mae[,1],col='blue',lwd=1,lty='dotted')
+      lines(x.pos,mae[,3],col='blue',lwd=1,lty='dotted')
+      #lines(x.pos,mae[,2],col='grey',lwd=1,lty='dotted')
+    } else {
+      xx <- x.pos
+      polygon(c(xx,rev(xx)), c(as.numeric(mae[,1]),rev(as.numeric(mae[,3]))),col='#282828',border=NA)
+      lines(x.pos,mae[,1],col='blue',lwd=1,lty='dotted')
+      lines(x.pos,mae[,3],col='blue',lwd=1,lty='dotted')
+      #lines(x.pos,mae[,2],col='grey',lwd=1,lty='dotted')
+    }
+    
+    lc <- xts:::legend.coords("topleft", xlim, lchob$get_ylim()[[2]])
+    legend(lc$x,lc$y,
+           legend=paste("Moving Ave. Envelope (",
+                        paste(n,p,sep=","),") [Upper/Lower]: ",
+                        sprintf("%.3f",last(mae[,3])),"/",
+                        sprintf("%.3f",last(mae[,1])), sep = ""), 
+           text.col = "blue",
+           xjust = lc$xjust, 
+           yjust = 1.5, 
+           bty = "n", 
+           y.intersp=0.95) 
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, p = p, maType = maType, ..., on = on)), 
+  list(n = n, p = p, maType = maType, ..., on = on))
+  exp <- parse(text = gsub("list", "chartEnvelope", as.expression(substitute(list(x = current.chob(), 
+                                                                                  n = n, p = p, maType = maType, ..., on = on)))), srcfile = NULL)
+  
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- FALSE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
   ma <- do.call(maType,list(xx,n=n,...))
-  mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))
-  
-  chobTA@TA.values <- mae[lchob@xsubset,]
-
-  chobTA@name <- "chartEnvelope"
-  chobTA@call <- match.call()
-  chobTA@on <- on
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,p=p,maType=maType)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))[xsubset]
+  lchob$Env$mae <- mae
+  lchob$set_frame(on+1)
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartEnvelope {{{
 `chartEnvelope` <-
