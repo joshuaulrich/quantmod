@@ -2072,41 +2072,33 @@ function(x) {
 
 # addExpiry {{{
 `addExpiry` <- function(type='options',lty='dotted') {
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- FALSE
-
-  # get the appropriate data - from the approp. src
-  #if(from.fig==1) {
-  x <- lchob@xdata
-
-  if(type=='options') {
-    index.of.exp <- options.expiry(x)
-  } else index.of.exp <- futures.expiry(x)
-
-  chobTA@TA.values <- index.of.exp[index.of.exp %in% lchob@xsubset] # single numeric vector
-  chobTA@name <- "chartExpiry"
-  chobTA@call <- match.call()
-  chobTA@on <- 1
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,lty=lty)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv <- new.env()
+  lenv$chartExpiry <- function(x, type, lty) {
+    
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xdata <- xdata[xsubset]
+    spacing <- x$Env$theme$spacing
+    theme <- x$Env$theme
+    
+    if(type=='options') {
+      index.of.exp <- options.expiry(xdata)
+    } else index.of.exp <- futures.expiry(xdata)
+    
+    for(ex in 1:length(index.of.exp)) {
+      abline(v=index.of.exp[ex]*spacing, lty=lty,col=theme$Expiry)
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(type=type,lty=lty)), list(type=type,lty=lty))
+  exp <- parse(text = gsub("list", "chartExpiry", as.expression(substitute(list(x = current.chob(), 
+                                                                                type=type,lty=lty)))), srcfile = NULL)
+  lchob <- current.chob()
+  
+  lchob$set_frame(-2)
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartExpiry {{{
 `chartExpiry` <-
