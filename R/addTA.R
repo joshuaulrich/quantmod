@@ -1186,37 +1186,79 @@ function(x) {
 `addMACD` <- function(fast=12,slow=26,signal=9,type='EMA',histogram=TRUE,col) {
 
 
-  lchob <- get.current.chob()
-
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-
+  
+  lenv <- new.env()
+  lenv$chartMACD <- function(x, fast, slow, signal, type, histogram, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata 
+    
+    macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(macd) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-max(abs(macd),na.rm=TRUE),
+              max(abs(macd),na.rm=TRUE))*1.05
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    if(histogram) {
+      cols <- ifelse((macd[,1]-macd[,2]) > 0, col[1],col[2])
+      rect(x.pos - spacing/5,0,x.pos + spacing/5, macd[,1]-macd[,2],
+           col=cols,border=cols)
+    } 
+    
+    lines(x.pos,macd[,1],col=col[3],lwd=1)
+    lines(x.pos,macd[,2],col=col[4],lwd=1,lty='dotted')
+    
+    lc <- xts:::legend.coords("topleft", xlim, ylim)
+    legend(lc$x, lc$y, 
+           legend=c(paste("Moving Average Convergence Divergence (",
+                          paste(fast,slow,signal,sep=','),"):", sep = ""),
+                    paste("MACD:",sprintf("%.3f",last(macd[,1]))),
+                    paste("Signal:",sprintf("%.3f",last(macd[,2])))),
+           text.col=c(theme$fg, col[3], col[4]),
+           xjust=lc$xjust,
+           yjust=lc$yjust,
+           bty='n',
+           y.intersp=0.95) 
+  }
   col <- if(missing(col)) col <- c('#999999','#777777',
-                              '#BBBBBB','#FF0000')
+                                   '#BBBBBB','#FF0000')
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col)), 
+  list(fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col))
+  exp <- parse(text = gsub("list", "chartMACD", as.expression(substitute(list(x = current.chob(), 
+                                                                             fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
-  macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
-  
-  chobTA@TA.values <- macd[lchob@xsubset,]
-
-  chobTA@name <- "chartMACD"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        fast=fast,slow=slow,signal=signal,
-                        col=col,histo=histogram
-                        )
-  return(chobTA)
+  macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)[xsubset]
+  lchob$Env$macd <- macd
+  lchob$add_frame(ylim=c(-max(abs(macd),na.rm=TRUE),
+                         max(abs(macd),na.rm=TRUE))*1.05, asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartMACD {{{
 `chartMACD` <-
