@@ -15,46 +15,74 @@
 #    CLV,CMD,OBV,KST,TDI,WHF,Aroon,ChAD,ChVol,WilliamsAD,
 #    Points, Stoch, SD, ...??? 
 # addMomentum {{{
-`addMomentum` <- function(n=1) {
+`addMomentum` <- function(n=1, with.col=Cl) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartMomentum <- function(x, n, with.col) {
+    xdata <- lchob$Env$xdata
+    xsubset <- lchob$Env$xsubset
+    if(is.OHLC(xdata) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      xx <- do.call(with.col,list(xdata))
+    } else xx <- xdata[,with.col]
+    
+    mom <- momentum(xx,n=n)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(mom) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-max(abs(mom),na.rm=TRUE),
+              max(abs(mom),na.rm=TRUE)) * 1.05
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    COLOR <- "#0033CC"
+    
+    segments(xlim[1],0,xlim[2],0,col="#666666",lwd=1,lty='dotted')
+    
+    lines(x.pos,mom,col=COLOR,lwd=2,type='l')
+    
+    text(0, ylim[2]*.9, 
+         paste("Momentum (", n, "):"),col=theme$fg, pos=4)
+    
+    text(0, ylim[2]*.9,
+         paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
+         col = COLOR, pos = 4)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, with.col = with.col)), list(n = n, with.col = with.col))
+  exp <- parse(text = gsub("list", "chartMomentum", as.expression(substitute(list(x = current.chob(), 
+                                                                                  n = n, with.col = with.col)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  if(is.OHLC(x) && missing(with.col)) with.col <- 1
+  
+  if(is.function(with.col)) {
+    xx <- do.call(with.col,list(x))
+  } else xx <- x[,with.col]
 
-  #  needs to accept any arguments for x, not just close
-
-  xx <- if(is.OHLC(x)) {
-    Cl(x)
-  } else x 
-
-  mom <- momentum(xx,n=n)
-
-  chobTA@TA.values <- mom[lchob@xsubset]
-  chobTA@name <- "chartMomentum"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  mom <- momentum(xx,n=n)[xsubset]
+  
+  lchob$add_frame(ylim=c(-max(abs(mom),na.rm=TRUE),
+                         max(abs(mom),na.rm=TRUE)) * 1.05, asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartMomentum {{{
 `chartMomentum` <-
