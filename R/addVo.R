@@ -60,20 +60,21 @@
   x <- lchob$Env$xdata
   theme <- lchob$Env$theme
   vo <- xdata[xsubset]
+  lchob$Env$vo <- vo
+  yrange <- c(range(vo, na.rm=TRUE)[1], range(vo, na.rm=TRUE)[2] * 1.05)
   lenv$xdata <- xdata
   
-  lenv$grid_lines <- function(xdata,x) { seq(0,1) }
   # add inbox color
-  exp <- c(expression(rect(xlim[1], range(vo)[1], xlim[2], range(vo)[2],col=theme$fill)),
+  exp <- c(expression(yrange <- c(range(vo, na.rm=TRUE)[1], range(vo, na.rm=TRUE)[2] * 1.05), rect(xlim[1], yrange[1], xlim[2], yrange[2],col=theme$fill)),
            # add grid lines and left-side axis labels
-           expression(segments(xlim[1], y_grid_lines(range(vo)), xlim[2], 
-                               y_grid_lines(range(vo)), col = theme$grid, lwd = grid.ticks.lwd, 
+           expression(segments(xlim[1], y_grid_lines(yrange), xlim[2], 
+                               y_grid_lines(yrange), col = theme$grid, lwd = grid.ticks.lwd, 
                                lty = 3), 
-                      text(xlim[1], y_grid_lines(range(vo)), y_grid_lines(range(TA.values)), 
+                      text(xlim[1], y_grid_lines(yrange), y_grid_lines(range(TA.values)), 
                            col = theme$labels, srt = theme$srt, 
                            offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)),
            # add border of plotting area
-           expression(rect(xlim[1], range(vo)[1], xlim[2], range(vo)[2],border=theme$labels)),exp)
+           expression(rect(xlim[1], yrange[1], xlim[2], yrange[2],border=theme$labels)),exp)
   
   max.vol <- max(vo,na.rm=TRUE)
   vol.scale <- list(100, "100s")
@@ -123,7 +124,7 @@
 
   lchob$Env$theme$thin <- ifelse(lchob$Env$type %in% c('bars','matchsticks'),TRUE,FALSE)
   
-  lchob$add_frame(ylim=range(vo),asp=1)  # need to have a value set for ylim
+  lchob$add_frame(ylim=yrange, asp=1, fixed=TRUE)  # need to have a value set for ylim
   lchob$next_frame()
   lchob$replot(exp,env=c(lenv, lchob$Env),expr=TRUE)
   lchob
