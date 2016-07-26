@@ -1496,47 +1496,80 @@ function(x) {
                         offset=1,col=2,bg=2,cex=1,
                         on=1,overlay=TRUE) {
  
-  lchob <- get.current.chob()
-  xdata <- as.matrix(lchob@xdata)
+  lenv <- new.env()
+  lenv$chartPoints <- function(x, type, pch, offset, col, bg, cex, on, overlay) {
+    xdata <- x$Env$xdata
+    x.points <- which(x$Env$xsubset %in% x$Env$x)
+    y.points <- x$Env$y
+    spacing <- x$Env$theme$spacing
+    
+    # if OHLC and above - get Hi, else Lo
+    # if univariate - get value
+    y.data <- if(is.OHLC(xdata)) {
+      if(offset > 1) {
+        Hi(xdata)
+      } else Lo(xdata)
+    } else xdata
+    
+    if(is.null(y.points)) y.points <- y.data[x.points] * offset
+    
+    if(!overlay) {
+      x.pos <- 1 + spacing * (1:NROW(x.points) - 1)
+      xlim <- x$Env$xlim
+      ylim <- x$get_ylim()[[2]]
+      theme <- x$Env$theme
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      segments(xlim[1], 0, xlim[2], 0, col = "#666666", lty = "dotted")
+    }
+    
+    points(x=x.pos, y=y.points, type=type,pch=pch,col=col,bg=bg,cex=cex)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, 
+         names(list(type = type, pch = pch, offset = offset, col = col, 
+                    bg = bg, cex = cex, on = on, overlay = overlay)), 
+         list(type = type, pch = pch, offset = offset, col = col, 
+              bg = bg, cex = cex, on = on, overlay = overlay))
+  exp <- parse(text=gsub("list","chartPoints",as.expression(substitute(list(x=current.chob(),
+                                                                            type = type, pch = pch, offset = offset, col = col, 
+                                                                            bg = bg, cex = cex, on = on, overlay = overlay)))),
+               srcfile=NULL)
+  lchob <- current.chob()
+  xdata <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
+  xdata <- xdata[xsubset]
 
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
 
   
-  chobTA@TA.values <- xdata[lchob@xsubset,]
-  chobTA@name <- "chartPoints"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-
   if(missing(bg)) bg <- col
 
-    xsubset <- x %in% lchob@xsubset
+    xsubset <- x %in% xsubset
     if(NROW(x) != NROW(y)) stop('x and y must be of equal lengths')
     x <- x[xsubset]
     if(!is.null(y))
       y <- y[xsubset]
+    
+    lchob$Env$x <- x
+    lchob$Env$y <- y
 
 
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        subset=lchob@xsubset,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        x=x,y=y,type=type,offset=offset,
-                        pch=pch,col=col,bg=bg,cex=cex)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+    if(overlay)
+      lchob$set_frame(on+1)
+    else {
+      lchob$add_frame(ylim=lchob$get_ylim()[[2]], asp=1, fixed=TRUE)
+      lchob$next_frame()
+    }
+    lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+    lchob
 } # }}}
 # chartPoints {{{
 `chartPoints` <-
