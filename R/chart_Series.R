@@ -230,8 +230,8 @@ chart_Series <- function(x,
   label.bg <- theme$col$label.bg
 
   if(is.OHLC(x)) {
-    yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
-  } else yrange <- range(x[, 1], na.rm=TRUE)
+    yrange <- c(min(Lo(x[subset]),na.rm=TRUE),max(Hi(x[subset]),na.rm=TRUE))
+  } else yrange <- range(x[subset, 1], na.rm=TRUE)
   cs <- plot.xts(x,
                 ...,
                 subset = subset,
