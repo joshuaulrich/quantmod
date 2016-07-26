@@ -638,41 +638,63 @@ function(x) {
 `addRSI` <- function(n=14,maType='EMA',wilder=TRUE) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartRSI <- function(x, n, maType, wilder) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata
+    rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(rsi) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    lines(x.pos,rsi,col='#0033CC',lwd=2,type='l')
+    lines(x.pos,rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
+    
+    text(0, ylim[2]*.9,
+         paste("Relative Strength Index (", n,"):", sep = ""), col = theme$fg,  
+         pos = 4)
+    
+    text(0, ylim[2]*.9,
+         paste("\n\n\n",sprintf("%.3f",last(rsi)), sep = ""), col = '#0033CC', 
+         pos = 4)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, wilder = wilder)), 
+  list(n = n, maType = maType, wilder = wilder))
+  exp <- parse(text = gsub("list", "chartRSI", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
-  rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)
-  chobTA@TA.values <- rsi[lchob@xsubset]
-  chobTA@name <- "chartRSI"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n, wilder=wilder,maType=maType)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)[xsubset]
+  lchob$Env$rsi <- rsi
+  lchob$add_frame(ylim=c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05),asp=1,fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartRSI {{{
 `chartRSI` <-
