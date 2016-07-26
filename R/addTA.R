@@ -718,42 +718,57 @@ function(x) {
 `addROC` <- function(n=1,type=c('discrete','continuous'),col='red') {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartROC <- function(x, n, type, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata 
+    
+    roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(roc) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-max(abs(roc), na.rm = TRUE), 
+              max(abs(roc), na.rm = TRUE))*1.05
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    lines(x.pos,roc,col=col,lwd=2,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, type = type, col = col)), list(n = n, type = type, col = col))
+  exp <- parse(text = gsub("list", "chartROC", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, type = type, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
-  type <- match.arg(type)
-
-  roc <- ROC(xx,n=n,type=type,na.pad=TRUE)
-
-  chobTA@TA.values <- roc[lchob@xsubset]
-  chobTA@name <- "chartROC"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,type=type,col=col)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)[xsubset]
+  lchob$Env$roc <- roc
+  lchob$add_frame(ylim=c(-max(abs(roc), na.rm = TRUE), 
+                         max(abs(roc), na.rm = TRUE))*1.05, asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartROC {{{
 `chartROC` <-
