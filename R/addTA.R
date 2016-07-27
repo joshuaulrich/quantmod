@@ -1195,41 +1195,33 @@ function(x) {
 `addSAR` <- function(accel=c(0.02,0.2),col='blue') {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartSAR <- function(x, accel, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    sar <- SAR(cbind(Hi(xdata),Lo(xdata)),accel=accel)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(sar) - 1)
 
-  x <- as.matrix(lchob@xdata)
+    points(x.pos,sar,col=col,cex=1)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(accel = accel, col = col)), list(accel = accel, col = col))
+  exp <- parse(text = gsub("list", "chartSAR", as.expression(substitute(list(x = current.chob(), 
+                                                                             accel = accel, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  chobTA <- new("chobTA")
-  chobTA@new <- FALSE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   if(!is.OHLC(x)) stop("SAR requires HL series") 
 
-  sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)
-
-  chobTA@TA.values <- sar[lchob@xsubset]
-
-  chobTA@name <- "chartSAR"
-  chobTA@call <- match.call()
-  chobTA@on <- 1
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        accel=accel,col=col)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)[xsubset]
+  lchob$Env$sar <- sar
+  lchob$set_frame(2)
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartSAR {{{
 `chartSAR` <-
