@@ -428,42 +428,60 @@ function(x) {
 `addTRIX` <- function(n=20, signal=9, maType="EMA", percent=TRUE) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartTRIX <- function(x, n, signal, maType, percent) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata
+    
+    trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(trix) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(min(trix[,1]*.975,na.rm=TRUE),
+              max(trix[,1]*1.05,na.rm=TRUE))
+    theme <- x$Env$theme
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    # draw TRIX
+    lines(x.pos,trix[,1],col='green',lwd=1,type='l')
+    # draw Signal
+    lines(x.pos,trix[,2],col='#999999',lwd=1,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, signal = signal, maType = maType, percent = TRUE)), 
+  list(n = n, signal = signal, maType = maType, percent = TRUE))
+  exp <- parse(text = gsub("list", "chartTRIX", as.expression(substitute(list(x = current.chob(), 
+                                                                              n = n, signal = signal, maType = maType, percent = TRUE)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
-  trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
-
-  chobTA@TA.values <- trix[lchob@xsubset,]
-
-  chobTA@name <- "chartTRIX"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,signal=signal,maType=maType,percent=percent)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)[xsubset]
+  lchob$add_frame(ylim=c(min(trix[,1]*.975,na.rm=TRUE),
+                         max(trix[,1]*1.05,na.rm=TRUE)), asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartTRIX {{{
 `chartTRIX` <-
