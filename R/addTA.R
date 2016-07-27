@@ -1376,69 +1376,87 @@ function(x) {
 # addShading {{{
 `addShading` <- function(when,on=-1,overlay=TRUE,col='blue') {
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-    x <- lchob@xdata
+  lenv <- new.env()
+  lenv$chartShading <- function(x, when, on, overlay, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xdata <- xdata[xsubset]
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    spacing <- theme$spacing
+    width <- theme$width
     i <- when
-    indexClass(x) <- "POSIXct"
-    POSIXindex <- index(x)
+    indexClass(xdata) <- "POSIXct"
+    POSIXindex <- index(xdata)
     if (missing(i)) 
-        i <- 1:NROW(x)
+      i <- 1:NROW(xdata)
     if (timeBased(i)) 
-        i <- as.character(as.POSIXct(i))
+      i <- as.character(as.POSIXct(i))
     if (is.character(i)) {
-        i <- strsplit(i, ';')[[1]]
-        i.tmp <- NULL
-        for (ii in i) {
-            if (!identical(grep("::", ii), integer(0))) {
-                dates <- strsplit(ii, "::")[[1]]
-                first.time <- ifelse(dates[1] == "", POSIXindex[1], 
-                  do.call("firstof", as.list(as.numeric(strsplit(dates[1], 
-                    ":|-|/| ")[[1]]))))
-                last.time <- ifelse(length(dates) == 1, POSIXindex[length(POSIXindex)], 
-                  do.call("lastof", as.list(as.numeric(strsplit(dates[2], 
-                    ":|-|/| ")[[1]]))))
-            }
-            else {
-                dates <- ii
-                first.time <- do.call("firstof", as.list(as.numeric(strsplit(dates, 
-                  ":|-|/| ")[[1]])))
-                last.time <- do.call("lastof", as.list(as.numeric(strsplit(dates, 
-                  ":|-|/| ")[[1]])))
-            }
-            i.tmp <- c(i.tmp, which(POSIXindex <= last.time & 
-                POSIXindex >= first.time))
+      i <- strsplit(i, ';')[[1]]
+      i.tmp <- NULL
+      for (ii in i) {
+        if (!identical(grep("::", ii), integer(0))) {
+          dates <- strsplit(ii, "::")[[1]]
+          first.time <- ifelse(dates[1] == "", POSIXindex[1], 
+                               do.call("firstof", as.list(as.numeric(strsplit(dates[1], 
+                                                                              ":|-|/| ")[[1]]))))
+          last.time <- ifelse(length(dates) == 1, POSIXindex[length(POSIXindex)], 
+                              do.call("lastof", as.list(as.numeric(strsplit(dates[2], 
+                                                                            ":|-|/| ")[[1]]))))
         }
-        i <- i.tmp
+        else {
+          dates <- ii
+          first.time <- do.call("firstof", as.list(as.numeric(strsplit(dates, 
+                                                                       ":|-|/| ")[[1]])))
+          last.time <- do.call("lastof", as.list(as.numeric(strsplit(dates, 
+                                                                     ":|-|/| ")[[1]])))
+        }
+        i.tmp <- c(i.tmp, which(POSIXindex <= last.time & 
+                                  POSIXindex >= first.time))
+      }
+      i <- i.tmp
     }
+    
+    xstart <- unique(c(i[1],i[which(diff(i) != 1)+1]))
+    xend   <- unique(c(i[which(diff(i) != 1)-1], rev(i)[1]))
+    
+    if(!overlay) {
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    }
+    
+    rect(((xstart-1)*spacing+1)-width/2, rep(ylim[1],length(xstart)),
+         ((xend-1)*spacing+1)+width/2, rep(ylim[2],length(xend)),
+         col=c(theme$bbands$col$fill),border=NA)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(when = when, on = on, overlay = overlay, col = col)), 
+  list(when = when, on = on, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartShading", as.expression(substitute(list(x = current.chob(), 
+                                                                                 when = when, on = on, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
 
-  xstart <- unique(c(i[1],i[which(diff(i) != 1)+1]))
-  xend   <- unique(c(i[which(diff(i) != 1)-1], rev(i)[1]))
-
-  chobTA@TA.values <- x
-  chobTA@name <- "chartShading"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        yrange=lchob@yrange,
-                        colors=lchob@colors,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        xsubset=lchob@xsubset,
-                        time.scale=lchob@time.scale,
-                        xstart=xstart,xend=xend
-                        )
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+    if(overlay) {
+      lchob$set_frame(sign(on)*(abs(on)+1L))
+    } else {
+      lchob$add_frame(ylim=c(lchob$get_ylim()[[abs(on)+1L]][1], 
+                             lchob$get_ylim()[[abs(on)+1L]][2]), asp=1, fixed=TRUE)
+      lchob$next_frame()
+    }
+    lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+    lchob
 } # }}}
 # chartShading {{{
 `chartShading` <-
