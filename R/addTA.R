@@ -1898,55 +1898,88 @@ function(x) {
 `addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='green') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-  # get the appropriate data - from the approp. src
-  if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
-    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
-  } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-    x <- as.matrix(target.TA@TA.values)
-
-    if(missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
+  lenv <- new.env()
+  lenv$chartWMA <- function(x, n, wts, on, with.col, overlay, col) {
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- lchob$Env$xdata
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
+      target.TA <- names(x$Env)[which.TA]
+      xdata <- get(target.TA, envir = x$Env)
+      
+      if(missing(with.col)) with.col <- 1
+      
+      #    if(is.function(with.col)) {
+      #      x.tmp <- do.call(with.col,list(x))
+      #    } else x.tmp <- x[,with.col]
+      #  }
+      x.tmp <- xdata
+    }
+    xsubset <- x$Env$xsubset
+    x.tmp <- x.tmp[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    if(length(n) < length(col)) {
+      colors <- 3:10
+    } else colors <- col
+    
+    for(li in 1:length(n)) {
+      ma <- WMA(x.tmp,n=n[li],wts=wts)[xsubset]
+      if(!overlay) {
+        ylim <- c(min(ma*0.975, na.rm=TRUE), max(ma*1.05, na.rm=TRUE))
+        # add inbox color
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      }
+      lines(x.pos,ma,col=colors[li],lwd=1,type='l')
+    }
   }
-
-  chobTA@TA.values <- x.tmp[lchob@xsubset]
-  chobTA@name <- "chartWMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n,wts=wts)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartWMA", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
+  if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+  
+  if(is.function(with.col)) {
+    x.tmp <- do.call(with.col,list(x))
+  } else x.tmp <- x[,with.col]
+  
+  if(overlay)
+    lchob$set_frame(on+1)
+  else {
+    for(li in 1:length(n)) {
+      ma <- WMA(x.tmp,n=n[li],wts=wts)[xsubset]
+      lchob$add_frame(ylim=c(min(ma*0.975, na.rm=TRUE), 
+                             max(ma*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
+      lchob$next_frame()
+    }
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartWMA {{{
 `chartWMA` <-
@@ -1968,7 +2001,7 @@ function(x) {
       ma <- WMA(x@TA.values,n=x@params$n[li],wts=x@params$wts)
       if(x@new) {
         par(new=TRUE)
-        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+        plot(x.range,seq(min(ma*.975, na.rm=TRUE),max(ma*1.05, na.rm=TRUE),length.out=length(x.range)),
              type='n',axes=FALSE,ann=FALSE)
         title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
         axis(2)
