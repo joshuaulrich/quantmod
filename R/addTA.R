@@ -1501,33 +1501,62 @@ function(x) {
   if(missing(h)) h <- NULL
   if(missing(v)) v <- NULL
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
+  lenv <- new.env()
+  lenv$chartLines <- function(x, h, v, on, overlay, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xdata <- cbind(Hi(xdata),Lo(xdata))
+    lines <- x$Env$lines
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:nrow(lines) - 1)
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    
+    if(!overlay) {
+      ylim <- range(lines[,1], na.rm=TRUE) * 1.05
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    }
+    if(!is.null(lines)) {
+      # draw lines given positions specified in x
+      lines(x.pos, lines[,1],col=col)  
+    }
+    if(!is.null(h)) {
+      # draw horizontal lines given positions specified in h
+      segments(xlim[1],h,xlim[2],h,col=col)
+    }
+    if(!is.null(v)) {
+      # draw vertical lines given positions specified in v
+      segments((v-1)*spacing+1,ylim[1],(v-1)*spacing+1,ylim[2],col=col)
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(h = h, v = v, on = on, overlay = overlay, col = col)), 
+  list(h = h, v = v, on = on, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartLines", as.expression(substitute(list(x = current.chob(), 
+                                                                               h = h, v = v, on = on, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  lchob$Env$lines <- x
 
-  chobTA@TA.values <- NULL # single numeric vector
-  chobTA@name <- "chartLines"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,h=h,x=x,v=v)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
+  if(overlay) {
+    lchob$set_frame(sign(on)*(abs(on)+1L))
   } else {
-   return(chobTA)
-  } 
+    lchob$add_frame(ylim=range(x, na.rm=TRUE) * 1.05, aps=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartLines {{{
 `chartLines` <-
