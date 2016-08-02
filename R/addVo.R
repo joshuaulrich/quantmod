@@ -6,27 +6,30 @@
   lenv$chartVo <- function(x, ...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    vo <- x$Env$vo
+    vo <- x$Env$vo[xsubset]
     
     spacing <- x$Env$theme$spacing
     width <- x$Env$theme$width
     
-    x.range <- x$get_xlim()
-    x.range <- seq(x.range[1],x.range[2]*spacing)
+    x.pos <- 1 + spacing * (1:NROW(vo) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(min(vo, na.rm=TRUE), max(vo, na.rm=TRUE) * 1.05)
+    theme <- x$Env$theme
+    
+    vol.scale <- x$Env$vol.scale
+    TA.values <- x$Env$TA.values
+    
+    thin <- theme$thin
     
     #    multi.col <- x$Env$multi.col
     color.vol <- x$Env$color.vol
     log.scale <- ifelse(x$Env$log.scale,"y","")
     
-    vol.scale <- x$Env$vol.scale
+    bar.col <- if(color.vol) {
+      theme$bar.col
+    } else theme$border.col
     
-    x.pos <- 1 + spacing * (1:length(vo) - 1)
-    
-    bar.col <- if(x$Env$color.vol) {
-      x$Env$theme$bar.col
-    } else x$Env$theme$border.col
-    
-    border.col <- x$Env$theme$border.col
+    border.col <- theme$border.col
     min.vol <- min(vo)
     
     if(x$Env$theme$thin) {
@@ -36,56 +39,40 @@
       rect(x.pos-spacing/3,min.vol,x.pos+spacing/3,vo,
            col=bar.col,border=border.col)
     }
-    legend.text <- list(list(
-      legend=c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(vo)*vol.scale[[1]],big.mark=',')),
-      text.col=c(x$Env$theme$fg, last(bar.col))
-    ))
-    lc <- xts:::legend.coords("topleft", x$Env$xlim, range(vo))
-    legend(x = lc$x, y = lc$y, 
-           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(x$Env$TA.values)*vol.scale[[1]],big.mark=',')), 
-           text.col = c(x$Env$theme$fg, last(bar.col)), 
-           xjust = lc$xjust, 
-           yjust = lc$yjust, 
-           bty = "n", 
-           y.intersp=0.95)
   }
   
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(...)), list(...))
   exp <- parse(text=gsub("list","chartVo",as.expression(substitute(list(x=current.chob(),...)))),
                srcfile=NULL)
+  exp <- c(exp, expression(
+    lc <- xts:::legend.coords("topleft", xlim, range(vo,na.rm=TRUE)),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(TA.values)*vol.scale[[1]],big.mark=',')), 
+           text.col = c(theme$fg, last(theme$bar.col)), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  exp <- c(expression(    
+    # add inbox color
+    rect(xlim[1], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[1], xlim[2], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[2], col=theme$fill),
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), 
+             xlim[2], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
+    text(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), y_grid_lines(range(TA.values, na.rm=TRUE)), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
+    # add border of plotting area
+    rect(xlim[1], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[1], xlim[2], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[2], border=theme$labels)), exp)
+  
   lchob <- current.chob() 
   xdata <- lchob$Env$vo
   xsubset <- lchob$Env$xsubset
   x <- lchob$Env$xdata
   theme <- lchob$Env$theme
   vo <- xdata[xsubset]
-  lchob$Env$vo <- vo
-  yrange <- c(range(vo, na.rm=TRUE)[1], range(vo, na.rm=TRUE)[2] * 1.05)
-  lenv$xdata <- xdata
-  
-  # add inbox color
-  exp <- c(expression(yrange <- c(range(vo, na.rm=TRUE)[1], range(vo, na.rm=TRUE)[2] * 1.05), rect(xlim[1], yrange[1], xlim[2], yrange[2],col=theme$fill)),
-           # add grid lines and left-side axis labels
-           expression(segments(xlim[1], y_grid_lines(yrange), xlim[2], 
-                               y_grid_lines(yrange), col = theme$grid, lwd = grid.ticks.lwd, 
-                               lty = 3), 
-                      text(xlim[1], y_grid_lines(yrange), y_grid_lines(range(TA.values)), 
-                           col = theme$labels, srt = theme$srt, 
-                           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)),
-           # add border of plotting area
-           expression(rect(xlim[1], yrange[1], xlim[2], yrange[2],border=theme$labels)),exp)
-  
-  max.vol <- max(vo,na.rm=TRUE)
-  vol.scale <- list(100, "100s")
-  if (max.vol > 10000) 
-    vol.scale <- list(1000, "1000s")
-  if (max.vol > 1e+05) 
-    vol.scale <- list(10000, "10,000s")
-  if (max.vol > 1e+06) 
-    vol.scale <- list(1e+05, "100,000s")
-  if (max.vol > 1e+07) 
-    vol.scale <- list(1e+06, "millions")
   
   if(lchob$Env$color.vol) {
     # calculate colors for bars, if applicable.
@@ -108,23 +95,33 @@
                         lchob$Env$theme$up.col,
                         lchob$Env$theme$dn.col)
     }
-      # 1 color bars
-  } else bar.col <- ifelse(rep(!is.null(lchob$Env$theme$Vo.bar.col), NROW(x)),
+    # 1 color bars
+  } else bar.col <- ifelse(rep(!is.null(lchob$Env$theme$Vo.bar.col), NROW(xdata[,1])),
                            lchob$Env$theme$Vo.bar.col,lchob$Env$theme$border)
-  border.col <- ifelse(rep(is.null(lchob$Env$theme$border),NROW(x)),
+  border.col <- ifelse(rep(is.null(lchob$Env$theme$border),NROW(xdata[,1])),
                        bar.col,lchob$Env$theme$border)
-
+  
   bar.col <- bar.col[lchob$Env$xsubset]
   
   lchob$Env$theme$border.col <- border.col
   lchob$Env$theme$bar.col <- bar.col
-
-  lchob$Env$vol.scale <- vol.scale
-  lchob$Env$TA.values <- vo/vol.scale[[1]]
-
+  
   lchob$Env$theme$thin <- ifelse(lchob$Env$type %in% c('bars','matchsticks'),TRUE,FALSE)
   
-  lchob$add_frame(ylim=yrange, asp=1, fixed=TRUE)  # need to have a value set for ylim
+  max.vol <- max(vo,na.rm=TRUE)
+  vol.scale <- list(100, "100s")
+  if (max.vol > 10000) 
+    vol.scale <- list(1000, "1000s")
+  if (max.vol > 1e+05) 
+    vol.scale <- list(10000, "10,000s")
+  if (max.vol > 1e+06) 
+    vol.scale <- list(1e+05, "100,000s")
+  if (max.vol > 1e+07) 
+    vol.scale <- list(1e+06, "millions")
+  lchob$Env$vol.scale <- vol.scale
+  lchob$Env$TA.values <- vo/vol.scale[[1]]
+  
+  lchob$add_frame(ylim=c(min(vo, na.rm=TRUE), max(vo, na.rm=TRUE) * 1.05), asp=1, fixed=TRUE)  # need to have a value set for ylim
   lchob$next_frame()
   lchob$replot(exp,env=c(lenv, lchob$Env),expr=TRUE)
   lchob
