@@ -318,8 +318,47 @@ chart_Series <- function(x,
 
 # zoom_Chart {{{
 zoom_Chart <- function(subset) {
+  # refactor xts:::chart.lines to make subset functionality work
+  chart.lines <- function (x, type = "l", lty = 1, lwd = 2, lend = 1, col = 1:10, 
+                           up.col = NULL, dn.col = NULL, legend.loc = NULL, ...) 
+  {
+    if (is.null(up.col)) 
+      up.col <- "green"
+    if (is.null(dn.col)) 
+      dn.col <- "red"
+    xx <- xts:::current.xts_chob()
+    switch(type, h = {
+      colors <- ifelse(x[, 1] < 0, dn.col, up.col)
+      lines(xx$Env$xycoords$x[match(index(x), index(xx$Env$xdata))], x[, 1], lwd = 2, col = colors, 
+            lend = lend, lty = 1, type = "h", ...)
+    }, p = , l = , b = , c = , o = , s = , S = , n = {
+      if (length(lty) < NCOL(x)) lty <- rep(lty, length.out = NCOL(x))
+      if (length(lwd) < NCOL(x)) lwd <- rep(lwd, length.out = NCOL(x))
+      if (length(col) < NCOL(x)) col <- rep(col, length.out = NCOL(x))
+      for (i in NCOL(x):1) {
+        lines(xx$Env$xycoords$x[match(index(x), index(xx$Env$xdata))], x[, i], type = type, lend = lend, 
+              col = col[i], lty = lty[i], lwd = lwd[i], ...)
+      }
+    }, {
+      warning(paste(type, "not recognized. Type must be one of\n
+                  'p', 'l', 'b, 'c', 'o', 'h', 's', 'S', 'n'.\n
+                  plot.xts supports the same types as plot.default,\n
+                  see ?plot for valid arguments for type"))
+    })
+    if (!is.null(legend.loc)) {
+      lc <- legend.coords(legend.loc, xx$Env$xlim, range(x, 
+                                                         na.rm = TRUE))
+      legend(x = lc$x, y = lc$y, legend = colnames(x), xjust = lc$xjust, 
+             yjust = lc$yjust, fill = col[1:NCOL(x)], bty = "n")
+    }
+  }
   chob <- current.chob()
+  x <- chob$Env$xdata
+  x.pos <- 1:NROW(x[subset])
+  chob$Env$chart.lines <- chart.lines
   chob$subset(subset)
+  chob$Env$xlim <- range(x.pos)
+  chob$Env$ylim[[2]] <- structure(range(x[subset], na.rm=TRUE), fixed=TRUE)
   chob
 }
 # }}}
