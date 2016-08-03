@@ -540,7 +540,7 @@ function(x,
   
   # change minor ticks to be downward
   exp <- expression(if (NROW(xdata[xsubset]) < 400) { 
-    axis(1, at = xycoords$x, labels = FALSE, col = theme$grid2, 
+    axis(1, at = xycoords$x[1:NROW(xsubset)], labels = FALSE, col = theme$grid2, 
          col.axis = theme$grid2, tcl = -0.4)
   })
   exp <- structure(exp, frame = 1)
