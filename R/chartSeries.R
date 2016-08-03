@@ -402,7 +402,7 @@ function(x,
       sub.index <- index(do.call(subsetvec[1],list(x,subset.n)))
       xsubset <- which(index(x) %in% sub.index)
     } else xsubset <- which(index(x) %in% index(x[subset]))  
-  } else xsubset <- ""
+  } else xsubset <- 1:NROW(x)
 
   xdata <- x
   x <- x[xsubset]
