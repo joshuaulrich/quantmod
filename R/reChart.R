@@ -52,11 +52,11 @@ function (type = c("auto", "candlesticks", "matchsticks",
   ########### end name ###########
 
   ########### type ###########
-  if(!missing(type)) {
+#  if(!missing(type)) {
     chart.options <- c("auto","candlesticks","matchsticks","line","bars")
     chart <- chart.options[pmatch(type,chart.options)]
     if(chart[1]=="auto") {
-      chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
+      chart <- ifelse(NROW(x[subset]) > 300,"matchsticks","candlesticks")
     }
     if(chart[1]=="candlesticks") {
       spacing <- 3
@@ -69,12 +69,12 @@ function (type = c("auto", "candlesticks", "matchsticks",
     if(chart[1]=="bars") {
       spacing <- 4
       width <- 3
-      if(NROW(x) > 60) width <- 1
+      if(NROW(x[subset]) > 60) width <- 1
     }
 #    chob@spacing <- spacing
     chob$Env$theme$width <- width
     chob$Env$range.bars.type <- chart[1]
-  }
+#  }
   ########### end type ###########
 
   ########### subset ##########
