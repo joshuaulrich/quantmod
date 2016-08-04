@@ -292,6 +292,7 @@ chart_Series <- function(x,
     spacing <- 1
   cs$Env$theme$spacing <- spacing
   cs$Env$range.bars <- range.bars
+  cs$Env$fade <- fade
   exp <- expression(range.bars(xdata[xsubset],
                                type=range.bars.type,
                                spacing=theme$spacing,
