@@ -40,6 +40,7 @@
            bty = "n", 
            y.intersp=0.95)))
   exp <- c(expression(
+    cmo <- TA$cmo,
     # add inbox color
     rect(xlim[1], -max(abs(cmo), na.rm = TRUE)*1.05, xlim[2], max(abs(cmo), na.rm = TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -54,6 +55,8 @@
     segments(xlim[1], 0, xlim[2], 0, col = "#666666", lty = "dotted")), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -69,7 +72,7 @@
   }
 
   cmo <- CMO(xx,n=n)[xsubset]
-  lchob$Env$cmo <- cmo
+  lchob$Env$TA$cmo <- cmo
   if(!is.character(legend) || legend == "auto")
     lchob$Env$legend <- paste("Chande Momentum Oscillator (", n, ") ", sep="")
   lchob$add_frame(ylim=c(-max(abs(cmo), na.rm = TRUE), 

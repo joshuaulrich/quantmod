@@ -43,6 +43,7 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(
+      tdi <- TA$tdi, 
       # add inbox color
       rect(xlim[1], range(tdi, na.rm=TRUE)[1]*1.05, xlim[2], range(tdi, na.rm=TRUE)[2]*1.05, col=theme$fill),
       # add grid lines and left-side axis labels
@@ -56,11 +57,13 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
       rect(xlim[1], range(tdi, na.rm=TRUE)[1]*1.05, xlim[2], range(tdi, na.rm=TRUE)[2]*1.05, border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- Cl(x)
     tdi <- TDI(price = x, n = n, multiple = multiple)[xsubset]
-    lchob$Env$tdi <- tdi
+    lchob$Env$TA$tdi <- tdi
     if (any(is.na(on))) {
         lchob$add_frame(ylim=range(tdi, na.rm=TRUE)*1.05, asp=1, fixed=TRUE)
         lchob$next_frame()

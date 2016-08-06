@@ -57,6 +57,7 @@
                sprintf("%.3f",last(smi[,2])), sep = ""), col = SIGNAL, 
          pos = 4)))
   exp <- c(expression(
+    smi <- TA$smi,
     # add inbox color
     rect(xlim[1], -max(abs(smi[,1]), na.rm = TRUE)*1.05, xlim[2], max(abs(smi[,1]), na.rm = TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -70,6 +71,8 @@
     rect(xlim[1], -max(abs(smi[,1]), na.rm = TRUE)*1.05, xlim[2], max(abs(smi[,1]), na.rm = TRUE)*1.05, border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -84,7 +87,7 @@
 
   smi <- SMI(xx, n=n, nFast=fast,
              nSlow=slow, nSig=signal, maType=ma.type)[xsubset]
-  lchob$Env$smi <- smi
+  lchob$Env$TA$smi <- smi
   
   lchob$add_frame(ylim=c(-max(abs(smi[,1]), na.rm = TRUE), 
                          max(abs(smi[,1]), na.rm = TRUE))*1.05, asp=1, fixed=TRUE)

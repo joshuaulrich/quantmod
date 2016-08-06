@@ -44,6 +44,7 @@
          paste("\n\n\n",sprintf("%.3f",last(wpr)), sep = ""), col = COLOR, 
          pos = 4)))
   exp <- c(expression(
+    wpr <- TA$wpr,
     # add inbox color
     rect(xlim[1], max(abs(wpr), na.rm = TRUE) * 1.05, xlim[2], max(abs(wpr), na.rm = TRUE) * 1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -57,6 +58,8 @@
     rect(xlim[1], -0.1 * 1.05, xlim[2], max(abs(wpr), na.rm = TRUE) * 1.05, border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -71,7 +74,7 @@
 
 
   wpr <- WPR(xx,n=n)[xsubset]
-  lchob$Env$wpr <- wpr
+  lchob$Env$TA$wpr <- wpr
   lchob$add_frame(ylim=c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05, asp=1, fixed=TRUE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)

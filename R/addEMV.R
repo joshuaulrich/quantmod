@@ -12,9 +12,9 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
     lenv$chartEMV <- function(x, volume, n, maType, vol.divisor, ..., on, legend) {
       xdata <- x$Env$xdata
       xsubset <- x$Env$xsubset
-      volume <- x$Env$volume
+      volume <- x$Env$TA$volume
       emv <- EMV(HL=HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
-                 on = on, legend = legend)[xsubset]
+                 legend = legend)[xsubset]
       spacing <- x$Env$theme$spacing
       x.pos <- 1 + spacing * (1:NROW(emv) - 1)
       xlim <- x$Env$xlim
@@ -24,6 +24,9 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
       lines(x.pos, emv$emv, col = 6, lwd = 1, lend = 2, ...)
       lines(x.pos, emv$maEMV, col = 7, lwd = 1, lend = 2, ...)
     }
+    lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     if(missing(volume)) volume <- lchob$Env$vo
     if(missing(maType)) maType <- "SMA"
     if(!is.character(legend) || legend == "auto")
@@ -49,6 +52,7 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(
+      emv <- TA$emv,
       # add inbox color
       rect(xlim[1], range(emv,na.rm=TRUE)[1]*1.05, xlim[2], range(emv,na.rm=TRUE)[2]*1.05, col=theme$fill),
       # add grid lines and left-side axis labels
@@ -61,13 +65,12 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
       # add border of plotting area
       rect(xlim[1], range(emv,na.rm=TRUE)[1]*1.05, xlim[2], range(emv,na.rm=TRUE)[2]*1.05, border=theme$labels)), exp)
     
-    lchob <- current.chob()
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     emv <- EMV(HL = HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
                vol.divisor = vol.divisor)[xsubset]
-    lchob$Env$emv <- emv
-    lchob$Env$volume <- volume
+    lchob$Env$TA$emv <- emv
+    lchob$Env$TA$volume <- volume
     if(is.na(on)) {
       lchob$add_frame(ylim=range(emv,na.rm=TRUE)*1.05,asp=1,fixed=TRUE)
       lchob$next_frame()

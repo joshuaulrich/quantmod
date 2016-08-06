@@ -41,6 +41,7 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(
+      vol <- TA$vol,
       # add inbox color
       rect(xlim[1], min(vol, na.rm=TRUE) * 0.95, xlim[2], max(vol, na.rm=TRUE) * 1.05, col=theme$fill),
       # add grid lines and left-side axis labels
@@ -54,11 +55,13 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
       rect(xlim[1], min(vol, na.rm=TRUE) * 0.95, xlim[2], max(vol, na.rm=TRUE) * 1.05, border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- OHLC(x)
     vol <- volatility(OHLC = x, n = n, calc = calc, N = N)[xsubset]
-    lchob$Env$vol <- vol
+    lchob$Env$TA$vol <- vol
     if (any(is.na(on))) {
         lchob$add_frame(ylim=c(min(vol, na.rm=TRUE) * 0.95, 
                                max(vol, na.rm=TRUE) * 1.05), asp=1, fixed=TRUE)

@@ -41,6 +41,7 @@ function (n = 14, ..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(
+      mfi <- TA$mfi,
       # add inbox color
       rect(xlim[1], 0, xlim[2], 100, col=theme$fill),
       # add grid lines and left-side axis labels
@@ -54,12 +55,14 @@ function (n = 14, ..., on = NA, legend = "auto")
       rect(xlim[1], 0, xlim[2], 100, border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     volume <- lchob$Env$vo
     x <- HLC(x)
     mfi <- MFI(HLC = x, volume = volume, n = n)[xsubset]
-    lchob$Env$mfi <- mfi
+    lchob$Env$TA$mfi <- mfi
     if(any(is.na(on))) {
       lchob$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)
       lchob$next_frame()

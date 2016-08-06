@@ -40,6 +40,7 @@ function (..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(      
+      clv <- TA$clv,
       # add inbox color
       rect(xlim[1], range(clv, na.rm=TRUE)[1], xlim[2], range(clv, na.rm=TRUE)[2], col=theme$fill),
       # add grid lines and left-side axis labels
@@ -53,13 +54,15 @@ function (..., on = NA, legend = "auto")
       rect(xlim[1], range(clv, na.rm=TRUE)[1], xlim[2], range(clv, na.rm=TRUE)[2], border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     if (is.null(lchob$Env$theme$clv$col)) {
       lchob$Env$theme$clv$col <- 5
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     clv <- CLV(HLC=HLC(xdata))[xsubset]
-    lchob$Env$clv <- clv
+    lchob$Env$TA$clv <- clv
     if(is.na(on)) {
       lchob$add_frame(ylim=range(clv,na.rm=TRUE),asp=1,fixed=TRUE)
       lchob$next_frame()

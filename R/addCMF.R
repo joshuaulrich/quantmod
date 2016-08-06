@@ -38,6 +38,7 @@
            bty = "n", 
            y.intersp=0.95)))
   exp <- c(expression(    
+    cmf <- TA$cmf,
     # add inbox color
     rect(xlim[1], -max(abs(cmf), na.rm = TRUE)*1.05, xlim[2], max(abs(cmf), na.rm = TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -52,6 +53,8 @@
     segments(xlim[1], 0, xlim[2], 0, col = "#999999")), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   xdata <- lchob$Env$xdata
   xdata <- if(is.OHLC(xdata)) {
     cbind(Hi(xdata),Lo(xdata),Cl(xdata))
@@ -60,7 +63,7 @@
   vo <- lchob$Env$vo
 
   cmf <- CMF(xdata,vo,n=n)[xsubset]
-  lchob$Env$cmf <- cmf
+  lchob$Env$TA$cmf <- cmf
   if(!is.character(legend) || legend == "auto")
     lchob$Env$legend <- paste("Chaikin Money Flow (", n, ")", sep="")
   lchob$add_frame(ylim=c(-max(abs(cmf), na.rm = TRUE), 

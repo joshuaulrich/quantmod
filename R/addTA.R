@@ -55,6 +55,7 @@
          paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
          col = COLOR, pos = 4)))
   exp <- c(expression(
+    mom <- TA$mom,
     # add inbox color
     rect(xlim[1], -max(abs(mom),na.rm=TRUE) * 1.05, xlim[2], max(abs(mom),na.rm=TRUE) * 1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -69,6 +70,8 @@
     segments(xlim[1],0,xlim[2],0,col="#666666",lwd=1,lty='dotted')), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -80,7 +83,7 @@
   } else xx <- x[,with.col]
 
   mom <- momentum(xx,n=n)[xsubset]
-  lchob$Env$mom <- mom
+  lchob$Env$TA$mom <- mom
   
   lchob$add_frame(ylim=c(-max(abs(mom),na.rm=TRUE),
                          max(abs(mom),na.rm=TRUE)) * 1.05, asp=1, fixed=TRUE)
@@ -175,6 +178,7 @@ function(x) {
          paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
          pos = 4)))
   exp <- c(expression(
+    cci <- TA$cci,
     # add inbox color
     rect(xlim[1], -max(abs(cci),na.rm=TRUE)*1.05, xlim[2], max(abs(cci),na.rm=TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -190,6 +194,8 @@ function(x) {
     rect(xlim[1],-100,xlim[2],100,col=theme$bbands$col$fill,border=theme$fg)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -199,7 +205,7 @@ function(x) {
   } else x 
 
   cci <- CCI(xx,n=n,maType=maType,c=c)[xsubset]
-  lchob$Env$cci <- cci
+  lchob$Env$TA$cci <- cci
   lchob$add_frame(ylim=c(-max(abs(cci), na.rm = TRUE), 
                          max(abs(cci), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
   lchob$next_frame()
@@ -291,6 +297,7 @@ function(x) {
                                                                                n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
   
   exp <- c(expression(
+    adx <- TA$adx,
     # add inbox color
     rect(xlim[1], min(adx*0.975, na.rm = TRUE), xlim[2], max(adx*1.05, na.rm = TRUE), col=theme$fill),
     # add grid lines and left-side axis labels
@@ -306,6 +313,8 @@ function(x) {
     segments(xlim[1], 40, xlim[2], 40, col = "#666666", lty = "dotted")), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -313,7 +322,7 @@ function(x) {
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
   adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)[xsubset]
-  lchob$Env$adx <- adx
+  lchob$Env$TA$adx <- adx
   lchob$add_frame(ylim=c(min(adx*0.975, na.rm = TRUE), 
                          max(adx*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
   lchob$next_frame()
@@ -379,6 +388,7 @@ function(x) {
                                                                              n = n, maType = maType)))), srcfile = NULL)
   
   exp <- c(expression(
+    atr <- TA$atr,
     # add inbox color
     rect(xlim[1], min(atr[,2]*0.975, na.rm = TRUE), xlim[2], max(atr[,2]*1.05, na.rm = TRUE), col=theme$fill),
     # add grid lines and left-side axis labels
@@ -392,6 +402,8 @@ function(x) {
     rect(xlim[1], min(atr[,2]*0.975, na.rm = TRUE), xlim[2], max(atr[,2]*1.05, na.rm = TRUE), border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -399,7 +411,7 @@ function(x) {
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
   atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,...)[xsubset]
-  lchob$Env$atr <- atr
+  lchob$Env$TA$atr <- atr
   lchob$add_frame(ylim=c(min(atr[,2]*0.975, na.rm = TRUE), 
                          max(atr[,2]*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
   lchob$next_frame()
@@ -467,6 +479,7 @@ function(x) {
   exp <- parse(text = gsub("list", "chartTRIX", as.expression(substitute(list(x = current.chob(), 
                                                                               n = n, signal = signal, maType = maType, percent = TRUE)))), srcfile = NULL)
   exp <- c(expression(
+    trix <- TA$trix,
     # add inbox color
     rect(xlim[1], min(trix[,1]*.975,na.rm=TRUE), xlim[2], max(trix[,1]*1.05,na.rm=TRUE), col=theme$fill),
     # add grid lines and left-side axis labels
@@ -480,6 +493,8 @@ function(x) {
     rect(xlim[1], min(trix[,1]*.975,na.rm=TRUE), xlim[2], max(trix[,1]*1.05,na.rm=TRUE), border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -489,7 +504,7 @@ function(x) {
   } else x 
 
   trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)[xsubset]
-  lchob$Env$trix <- trix
+  lchob$Env$TA$trix <- trix
   lchob$add_frame(ylim=c(min(trix[,1]*.975,na.rm=TRUE),
                          max(trix[,1]*1.05,na.rm=TRUE)), asp=1, fixed=TRUE)
   lchob$next_frame()
@@ -574,6 +589,7 @@ function(x) {
          pos = 4)))
   
   exp <- c(expression(
+    dpo <- TA$dpo,
     # add inbox color
     rect(xlim[1], -max(abs(dpo), na.rm = TRUE) * 1.05, xlim[2], max(abs(dpo), na.rm = TRUE) * 1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -588,6 +604,8 @@ function(x) {
     segments(xlim[1], 0, xlim[2], 0, col = "#999999")), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -599,7 +617,7 @@ function(x) {
   } else x 
 
   dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)[xsubset]
-  lchob$Env$dpo <- dpo
+  lchob$Env$TA$dpo <- dpo
   lchob$add_frame(ylim=c(-max(abs(dpo), na.rm = TRUE), 
                          max(abs(dpo), na.rm = TRUE)) * 1.05,asp=1,fixed=TRUE)
   lchob$next_frame()
@@ -706,6 +724,7 @@ function(x) {
          paste("\n\n\n",sprintf("%.3f",last(rsi)), sep = ""), col = '#0033CC', 
          pos = 4)))
   exp <- c(expression(
+    rsi <- TA$rsi,
     # add inbox color
     rect(xlim[1], min(rsi,na.rm=TRUE)*.975, xlim[2], max(rsi,na.rm=TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -719,6 +738,8 @@ function(x) {
     rect(xlim[1], min(rsi,na.rm=TRUE)*.975, xlim[2], max(rsi,na.rm=TRUE)*1.05, border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -728,7 +749,7 @@ function(x) {
   } else x 
 
   rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)[xsubset]
-  lchob$Env$rsi <- rsi
+  lchob$Env$TA$rsi <- rsi
   lchob$add_frame(ylim=c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05),asp=1,fixed=TRUE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
@@ -803,6 +824,7 @@ function(x) {
   exp <- parse(text = gsub("list", "chartROC", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, type = type, col = col)))), srcfile = NULL)
   exp <- c(expression(
+    roc <- TA$roc,
     # add inbox color
     rect(xlim[1], -max(abs(roc), na.rm = TRUE)*1.05, xlim[2], max(abs(roc), na.rm = TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -816,6 +838,8 @@ function(x) {
     rect(xlim[1], -max(abs(roc), na.rm = TRUE)*1.05, xlim[2], max(abs(roc), na.rm = TRUE)*1.05, border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -825,7 +849,7 @@ function(x) {
   } else x 
 
   roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)[xsubset]
-  lchob$Env$roc <- roc
+  lchob$Env$TA$roc <- roc
   lchob$add_frame(ylim=c(-max(abs(roc), na.rm = TRUE), 
                          max(abs(roc), na.rm = TRUE))*1.05, asp=1, fixed=TRUE)
   lchob$next_frame()
@@ -989,6 +1013,8 @@ function(x) {
 #  draw <- draw.options[pmatch(draw,draw.options)]
 
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -998,7 +1024,7 @@ function(x) {
   } else x 
 
   bb <- BBands(xx,n=n,maType=maType,sd=sd)[xsubset]
-  lchob$Env$bb <- bb
+  lchob$Env$TA$bb <- bb
   if(draw == 'bands') {
     # draw Bollinger Bands on price chart
     lchob$set_frame(-2)
@@ -1181,6 +1207,8 @@ function(x) {
                                                                                   n = n, p = p, maType = maType, ..., on = on)))), srcfile = NULL)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -1191,7 +1219,7 @@ function(x) {
 
   ma <- do.call(maType,list(xx,n=n,...))
   mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))[xsubset]
-  lchob$Env$mae <- mae
+  lchob$Env$TA$mae <- mae
   lchob$set_frame(on+1)
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -1251,6 +1279,8 @@ function(x) {
   exp <- parse(text = gsub("list", "chartSAR", as.expression(substitute(list(x = current.chob(), 
                                                                              accel = accel, col = col)))), srcfile = NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -1258,7 +1288,7 @@ function(x) {
   if(!is.OHLC(x)) stop("SAR requires HL series") 
 
   sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)[xsubset]
-  lchob$Env$sar <- sar
+  lchob$Env$TA$sar <- sar
   lchob$set_frame(2)
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -1333,6 +1363,7 @@ function(x) {
            bty='n',
            y.intersp=0.95)))
   exp <- c(expression(
+    macd <- TA$macd,
     # add inbox color
     rect(xlim[1], -max(abs(macd),na.rm=TRUE)*1.05, xlim[2], max(abs(macd),na.rm=TRUE)*1.05, col=theme$fill),
     # add grid lines and left-side axis labels
@@ -1346,6 +1377,8 @@ function(x) {
     rect(xlim[1], -max(abs(macd),na.rm=TRUE)*1.05, xlim[2], max(abs(macd),na.rm=TRUE)*1.05, border=theme$labels)), exp)
   
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -1355,7 +1388,7 @@ function(x) {
   } else x 
 
   macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)[xsubset]
-  lchob$Env$macd <- macd
+  lchob$Env$TA$macd <- macd
   lchob$add_frame(ylim=c(-max(abs(macd),na.rm=TRUE),
                          max(abs(macd),na.rm=TRUE))*1.05, asp=1, fixed=TRUE)
   lchob$next_frame()
@@ -1493,6 +1526,8 @@ function(x) {
   exp <- parse(text = gsub("list", "chartShading", as.expression(substitute(list(x = current.chob(), 
                                                                                  when = when, on = on, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
     if(overlay) {
       lchob$set_frame(sign(on)*(abs(on)+1L))
@@ -1534,7 +1569,7 @@ function(x) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     xdata <- cbind(Hi(xdata),Lo(xdata))
-    lines <- x$Env$lines[xsubset]
+    lines <- x$Env$TA$lines[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:nrow(lines) - 1)
     xlim <- x$Env$xlim
@@ -1576,7 +1611,9 @@ function(x) {
   exp <- parse(text = gsub("list", "chartLines", as.expression(substitute(list(x = current.chob(), 
                                                                                h = h, v = v, on = on, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
-  lchob$Env$lines <- x
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  lchob$Env$TA$lines <- x
 
   if(overlay) {
     lchob$set_frame(sign(on)*(abs(on)+1L))
@@ -1669,6 +1706,8 @@ function(x) {
                                                                             bg = bg, cex = cex, on = on, overlay = overlay)))),
                srcfile=NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   xdata <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
   xdata <- xdata[xsubset]
@@ -1747,9 +1786,9 @@ function(x) {
     } else {
       # get values from TA...
       name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
-      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
-      target.TA <- names(x$Env)[which.TA]
-      xdata <- get(target.TA, envir = x$Env)
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
       
       if(missing(with.col)) with.col <- 1
       
@@ -1770,6 +1809,7 @@ function(x) {
     
     for(li in 1:length(n)) {
       ma <- EMA(x.tmp,n=n[li],wilder=wilder[1],ratio=ratio[1])[xsubset]
+      ma.tmp <- cbind(ma.tmp, ma)
       if(!overlay) {
         ylim <- c(min(ma*0.975, na.rm=TRUE), max(ma*1.05, na.rm=TRUE))
         # add inbox color
@@ -1806,24 +1846,34 @@ function(x) {
   exp <- parse(text = gsub("list", "chartEMA", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, wilder = wilder, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
-  x <- lchob$Env$xdata
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
   xsubset <- lchob$Env$xsubset
-  if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-  
-  if(is.function(with.col)) {
-    x.tmp <- do.call(with.col,list(x))
-  } else x.tmp <- x[,with.col]
   
   ma.tmp <- NULL
-  
+  for(i in 1:length(n)) {
+    ma <- EMA(x.tmp,n=n[i],wilder=wilder[1],
+              ratio=ratio[1])[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$ema <- ma.tmp
   if(overlay)
     lchob$set_frame(on+1)
   else {
-    for(i in 1:length(n)) {
-      ma <- EMA(x.tmp,n=n[i],wilder=wilder[1],
-                ratio=ratio[1])[xsubset]
-      ma.tmp <- cbind(ma.tmp, ma)
-    }
     lchob$add_frame(ylim=c(min(ma.tmp*0.975, na.rm=TRUE), 
                            max(ma.tmp*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
     lchob$next_frame()
@@ -1891,9 +1941,9 @@ function(x) {
     } else {
       # get values from TA...
       name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
-      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
-      target.TA <- names(x$Env)[which.TA]
-      xdata <- get(target.TA, envir = x$Env)
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
       
       if(missing(with.col)) with.col <- 1
       
@@ -1942,6 +1992,31 @@ function(x) {
   exp <- parse(text = gsub("list", "chartSMA", as.expression(substitute(list(x = current.chob(), 
                                                                               n = n, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  
+  ma.tmp <- NULL
+  for(i in 1:length(n)) {
+    ma <- SMA(x.tmp,n=n[i])[xsubset]
+    ma.tmp <- cbind(ma.tmp,ma)
+  }
+  lchob$Env$TA$sma <- ma.tmp
+  
   if(overlay) {
     lchob$set_frame(sign(on)*(abs(on)+1L))
   } else {
@@ -2007,9 +2082,9 @@ function(x) {
     } else {
       # get values from TA...
       name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
-      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
-      target.TA <- names(x$Env)[which.TA]
-      xdata <- get(target.TA, envir = x$Env)
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
       
       if(missing(with.col)) with.col <- 1
       
@@ -2055,23 +2130,36 @@ function(x) {
   exp <- parse(text = gsub("list", "chartWMA", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
-  x <- lchob$Env$xdata
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
   xsubset <- lchob$Env$xsubset
-  if(!is.OHLC(x) && missing(with.col)) with.col <- 1
   
-  if(is.function(with.col)) {
-    x.tmp <- do.call(with.col,list(x))
-  } else x.tmp <- x[,with.col]
-  
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- WMA(x.tmp,n=n[li],wts=wts)[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$wma <- ma.tmp
   if(overlay)
     lchob$set_frame(on+1)
   else {
-    for(li in 1:length(n)) {
-      ma <- WMA(x.tmp,n=n[li],wts=wts)[xsubset]
       lchob$add_frame(ylim=c(min(ma*0.975, na.rm=TRUE), 
                              max(ma*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
       lchob$next_frame()
-    }
   }
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -2124,9 +2212,9 @@ function(x) {
     } else {
       # get values from TA...
       name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
-      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
-      target.TA <- names(x$Env)[which.TA]
-      xdata <- get(target.TA, envir = x$Env)
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
 
       if(missing(with.col)) with.col <- 1
       
@@ -2180,6 +2268,30 @@ function(x) {
   exp <- parse(text = gsub("list", "chartDEMA", as.expression(substitute(list(x = current.chob(), 
                                                                               n = n, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- DEMA(x.tmp,n=n[li])[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$dema <- ma.tmp
   if(overlay) {
     lchob$set_frame(on+1)
   } else {
@@ -2234,14 +2346,14 @@ function(x) {
       if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
       
       if(is.function(with.col)) {
-        x.tmp <- cbind(do.call(with.col,list(xdata)),vo)
+        x.tmp <- do.call(with.col,list(xdata))
       } else x.tmp <- xdata[,with.col]
     } else {
       # get values from TA...
       name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
-      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
-      target.TA <- names(x$Env)[which.TA]
-      xdata <- get(target.TA, envir = x$Env)
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
       
       if(missing(with.col)) with.col <- 1
       
@@ -2250,6 +2362,7 @@ function(x) {
 #      } else x.tmp <- xdata[,with.col]
       x.tmp <- xdata
     }
+    x.tmp <- cbind(x.tmp, vo)
     
     if(!has.Vo(x.tmp)) return()
     
@@ -2298,6 +2411,32 @@ function(x) {
   exp <- parse(text = gsub("list", "chartEVWMA", as.expression(substitute(list(x = current.chob(), 
                                                                               n = n, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  vo <- lchob$Env$vo
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  x.tmp <- cbind(x.tmp, vo)
+
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- EVWMA(x.tmp[, 1],x.tmp[, 2],n=n[li])[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$evwma <- ma.tmp
   if(overlay) {
     lchob$set_frame(on+1)
   } else {
@@ -2355,9 +2494,9 @@ function(x) {
     } else {
       # get values from TA...
       name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
-      which.TA <- which(tolower(names(x$Env)) == tolower(name.TA))
-      target.TA <- names(x$Env)[which.TA]
-      xdata <- get(target.TA, envir = x$Env)
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
       
       if(missing(with.col)) with.col <- 1
 
@@ -2414,22 +2553,33 @@ function(x) {
   exp <- parse(text = gsub("list", "chartZLEMA", as.expression(substitute(list(x = current.chob(), 
                                                                                n = n, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
-  x <- lchob$Env$xdata
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
+  } else {
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
   xsubset <- lchob$Env$xsubset
   
-  if(is.function(with.col)) {
-    x.tmp <- do.call(with.col,list(x))
-  } else x.tmp <- x[,with.col]
-  
   ma.tmp <- NULL
-  
+  for(li in 1:length(n)) {
+    ma <- ZLEMA(x.tmp,n=n[li],ratio=ratio)
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$zlema <- ma.tmp
   if(overlay)
     lchob$set_frame(on+1)
   else {
-    for(li in 1:length(n)) {
-      ma <- ZLEMA(x.tmp,n=n[li],ratio=ratio)
-      ma.tmp <- cbind(ma.tmp, ma)
-    }
     lchob$add_frame(ylim=c(min(ma.tmp*0.975, na.rm=TRUE), 
                            max(ma.tmp*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
     lchob$next_frame()
@@ -2492,6 +2642,8 @@ function(x) {
   exp <- parse(text = gsub("list", "chartExpiry", as.expression(substitute(list(x = current.chob(), 
                                                                                 type=type,lty=lty)))), srcfile = NULL)
   lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   
   lchob$set_frame(-2)
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)

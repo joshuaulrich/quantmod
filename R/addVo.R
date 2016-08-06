@@ -55,6 +55,7 @@
            bty = "n", 
            y.intersp=0.95)))
   exp <- c(expression(    
+    vo <- TA$vo, 
     # add inbox color
     rect(xlim[1], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[1], xlim[2], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[2], col=theme$fill),
     # add grid lines and left-side axis labels
@@ -67,12 +68,15 @@
     # add border of plotting area
     rect(xlim[1], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[1], xlim[2], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[2], border=theme$labels)), exp)
   
-  lchob <- current.chob() 
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   xdata <- lchob$Env$vo
   xsubset <- lchob$Env$xsubset
   x <- lchob$Env$xdata
   theme <- lchob$Env$theme
   vo <- xdata[xsubset]
+  lchob$Env$TA$vo <- vo
   
   if(lchob$Env$color.vol) {
     # calculate colors for bars, if applicable.

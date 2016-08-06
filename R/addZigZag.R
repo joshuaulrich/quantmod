@@ -62,12 +62,14 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
     exp <- parse(text = gsub("list", "chartZigZag", as.expression(substitute(list(x = current.chob(), 
                                                                                   change = change, percent = percent, retrace = retrace, lastExtreme = lastExtreme, ..., on = on, legend = legend)))), srcfile = NULL)
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- cbind(Hi(x),Lo(x))
     zigzag <- ZigZag(HL = x, change = change, percent = percent, retrace = retrace, 
         lastExtreme = lastExtreme)[xsubset]
-    lchob$Env$zigzag <- zigzag
+    lchob$Env$TA$zigzag <- zigzag
     
     if (any(is.na(on))) {
         lchob$add_frame(ylim=c(min(zigzag, na.rm=TRUE)*0.975, 

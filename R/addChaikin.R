@@ -43,6 +43,7 @@ function (..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(      
+      ChaikinAD <- TA$ChaikinAD,
       # add inbox color
       rect(xlim[1], range(ChaikinAD, na.rm=TRUE)[1], xlim[2], range(ChaikinAD, na.rm=TRUE)[2], col=theme$fill),
       # add grid lines and left-side axis labels
@@ -56,6 +57,8 @@ function (..., on = NA, legend = "auto")
       rect(xlim[1], range(ChaikinAD, na.rm=TRUE)[1], xlim[2], range(ChaikinAD, na.rm=TRUE)[2], border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     if (is.null(lchob$Env$theme$chaikin$col$chaikinad)) {
       lchob$Env$theme$chaikin$col$chaikinad <- 3
     }
@@ -63,7 +66,7 @@ function (..., on = NA, legend = "auto")
     xsubset <- lchob$Env$xsubset
     vo <- lchob$Env$vo
     ChaikinAD <- chaikinAD(HLC = HLC(xdata), volume = vo)[xsubset]
-    lchob$Env$ChaikinAD <- ChaikinAD
+    lchob$Env$TA$ChaikinAD <- ChaikinAD
     if(is.na(on)) {
       lchob$add_frame(ylim=range(ChaikinAD,na.rm=TRUE),asp=1,fixed=TRUE)
       lchob$next_frame()
@@ -111,7 +114,8 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
              yjust = lc$yjust, 
              bty = "n", 
              y.intersp=0.95)))
-    exp <- c(expression(      
+    exp <- c(expression(   
+      ChaikinVol <- TA$ChaikinVol,
       # add inbox color
       rect(xlim[1], range(ChaikinVol, na.rm=TRUE)[1], xlim[2], range(ChaikinVol, na.rm=TRUE)[2], col=theme$fill),
       # add grid lines and left-side axis labels
@@ -124,13 +128,15 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
       # add border of plotting area
       rect(xlim[1], range(ChaikinVol, na.rm=TRUE)[1], xlim[2], range(ChaikinVol, na.rm=TRUE)[2], border=theme$labels)), exp)
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     if (is.null(lchob$Env$theme$chaikin$col$chaikinvol)) {
       lchob$Env$theme$chaikin$col$chaikinvol <- "#F5F5F5"
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     ChaikinVol <- chaikinVolatility(HL = HLC(xdata)[,-3], n = n, maType = maType)[xsubset]
-    lchob$Env$ChaikinVol <- ChaikinVol
+    lchob$Env$TA$ChaikinVol <- ChaikinVol
     if(is.na(on)) {
       lchob$add_frame(ylim=range(ChaikinVol,na.rm=TRUE),asp=1,fixed=TRUE)
       lchob$next_frame()

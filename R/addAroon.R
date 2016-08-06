@@ -45,6 +45,7 @@ function (n = 20, ..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(
+      Aroon <- TA$Aroon,
       # add inbox color
       rect(xlim[1], 0, xlim[2], 100, col=theme$fill),
       # add grid lines and left-side axis labels
@@ -58,6 +59,8 @@ function (n = 20, ..., on = NA, legend = "auto")
       rect(xlim[1], 0, xlim[2], 100, border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     if (is.null(lchob$Env$theme$aroon$col$arronUp)) {
       lchob$Env$theme$aroon$col$aroonUp <- 3
       lchob$Env$theme$aroon$col$aroonDn <- 4
@@ -66,7 +69,7 @@ function (n = 20, ..., on = NA, legend = "auto")
     xdata <- cbind(Hi(xdata),Lo(xdata))
     xsubset <- lchob$Env$xsubset
     Aroon <- aroon(HL=xdata,n=n)[xsubset,-3]
-    lchob$Env$Aroon <- Aroon
+    lchob$Env$TA$Aroon <- Aroon
 #    lenv$xdata <- structure(Aroon, .Dimnames = list(NULL, "aroon"))
     if(is.na(on)) {
       lchob$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)
@@ -116,6 +119,7 @@ function (n = 20, ..., on = NA, legend = "auto")
              bty = "n", 
              y.intersp=0.95)))
     exp <- c(expression(
+      AroonOsc <- TA$AroonOsc,
       # add inbox color
       rect(xlim[1], c(min(AroonOsc,na.rm=TRUE)*0.95, max(AroonOsc)*1.05)[1], xlim[2], c(min(AroonOsc,na.rm=TRUE)*0.95, max(AroonOsc)*1.05)[2], col=theme$fill),
       # add grid lines and left-side axis labels
@@ -129,6 +133,8 @@ function (n = 20, ..., on = NA, legend = "auto")
       rect(xlim[1], c(min(AroonOsc,na.rm=TRUE)*0.95, max(AroonOsc, na.rm=TRUE)*1.05)[1], xlim[2], c(min(AroonOsc,na.rm=TRUE)*0.95, max(AroonOsc, na.rm=TRUE)*1.05)[2], border=theme$labels)), exp)
     
     lchob <- current.chob()
+    ncalls <- length(lchob$Env$call_list)
+    lchob$Env$call_list[[ncalls + 1]] <- match.call()
     if (is.null(lchob$Env$theme$aroon$col$aroonOsc)) {
       lchob$Env$theme$aroon$col$aroonOsc <- 3
     }
@@ -136,7 +142,7 @@ function (n = 20, ..., on = NA, legend = "auto")
     xdata <- cbind(Hi(xdata),Lo(xdata))
     xsubset <- lchob$Env$xsubset
     AroonOsc <- aroon(HL=xdata,n=n)[xsubset,3]
-    lchob$Env$AroonOsc <- AroonOsc
+    lchob$Env$TA$AroonOsc <- AroonOsc
     if(is.na(on)) {
       lchob$add_frame(ylim=c(min(AroonOsc,na.rm=TRUE)*0.95, max(AroonOsc, na.rm=TRUE)*1.05),asp=1,fixed=TRUE)
       lchob$next_frame()
