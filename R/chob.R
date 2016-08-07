@@ -27,7 +27,7 @@ function(x,pos)
 `get.chob` <-
 function()
 {
-  x <- .chob$.chob
+  x <- xts:::.plotxtsEnv$.xts_chob
   return(x)
   #x <- get('.chob',as.environment("package:quantmod"))
   #attr(x,'.Environment') <- NULL

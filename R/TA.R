@@ -286,9 +286,11 @@ function(type=c('chartSeries','barChart','candleChart')) {
 }# }}}
 # listTA {{{
 `listTA` <-
-function(dev) {
-  if(missing(dev)) dev <- dev.cur()
-  sapply(get.chob()[[dev]]@passed.args$TA,function(x) x@call)
+function(chob) {
+  if(missing(chob)) chob <- get.chob()
+  # return function calls of addTA
+  chob$Env$call_list[-1]
+  #sapply(get.chob()[[dev]]@passed.args$TA,function(x) x@call)
 } # }}}
 
 chartNULL <- function(...) return(invisible(NULL))

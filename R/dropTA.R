@@ -61,18 +61,15 @@ function(ta,pos,occ=1,dev) {
 }
 
 `dropTA` <-
-function(ta,occ=1,dev,all=FALSE) {
+function(ta,occ=1,chob,all=FALSE) {
 
   if(all) return(do.call('dropTA', list(1:length(listTA()))))
 
   if(missing(ta)) stop("no TA indicator specified")
 
-  # default to the current device if none specified  
-  if(missing(dev)) dev <- dev.cur()
-  ta.list <- listTA(dev)
-
   # get the current chob
-  lchob <- get.chob()[[dev]]
+  if(missing(chob)) chob <- get.chob()
+  ta.list <- listTA(chob)
   
   sel.ta <- NULL
 
@@ -91,22 +88,34 @@ function(ta,occ=1,dev,all=FALSE) {
     if(!is.na(which.ta)) {
     
       # decrease window count if necessary
-      if(lchob@passed.args$TA[[which.ta]]@new)
-        lchob@windows <- lchob@windows - 1
+      #if(lchob@passed.args$TA[[which.ta]]@new)
+      #  lchob@windows <- lchob@windows - 1
    
       sel.ta <- c(sel.ta,which.ta)
+    } else {
+      stop("nothing to remove")
     }
   }
 
   if(is.null(sel.ta)) stop("nothing to remove")
 
   # remove TA from current list 
-  lchob@passed.args$TA <- lchob@passed.args$TA[-sel.ta]
-  if(length(lchob@passed.args$TA) < 1)
-    lchob@passed.args$TA <- list()
+  ta.list <- ta.list[-sel.ta]
+  for(li in sel.ta) {
+    # number of actions of chartSeries object without TA is 9
+    frame <- attr(chob$Env$actions[[9 + sel.ta]], "frame")
+    if(abs(frame)==2) 
+      chob$Env$actions[[9 + sel.ta]] <- NULL
+    else
+      chob$remove_frame(frame)
+    chob$Env$TA[[sel.ta]] <- NULL
+    ncalls <- length(chob$Env$call_list)
+    # plot.xts(...) is included in call_list but listTA() is not
+    chob$Env$call_list[1 + sel.ta] <- NULL
+  }
 
   # redraw chart
-  do.call("chartSeries.chob",list(lchob))
+  chob
 
-  write.chob(lchob,lchob@device)
+  #write.chob(lchob,lchob@device)
 }
