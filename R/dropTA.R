@@ -1,13 +1,13 @@
 `swapTA` <-
-function(ta1,ta2,occ1=1,occ2=1,dev) {
+function(ta1,ta2,occ1=1,occ2=1,chob) {
   if(missing(ta1) | missing(ta2)) stop("two TA indicator required")
 
-  # default to the current device if none specified  
-  if(missing(dev)) dev <- dev.cur()
-  ta.list <- listTA(dev)
+  # default to the current chob if none specified  
+  if(missing(chob)) chob <- get.chob()
+  ta.list <- listTA(chob)
 
   # get the current chob
-  lchob <- get.chob()[[dev]]
+  lchob <- chob
   
   # make indicator name match original call
   if(regexpr("^add",ta1) == -1) ta1 <- paste("add",ta1,sep='')
@@ -19,14 +19,25 @@ function(ta1,ta2,occ1=1,occ2=1,dev) {
   which.ta2 <- which(ta2==sapply(ta.list,
                              function(x) deparse(x[[1]])))[occ2]
 
-  tmp.ta1 <- lchob@passed.args$TA[[which.ta1]]
-  tmp.ta2 <- lchob@passed.args$TA[[which.ta2]]
+  ### swap two TAs without temporary storage
+  
+  ta.seq <- seq_along(ta.list)
+  ta.swap <- replace(ta.seq, c(which.ta1, which.ta2), ta.seq[c(which.ta2, which.ta1)])
+  lchob$Env$TA <- lchob$Env$TA[ta.swap]
+  lchob$Env$call_list[-1] <- lchob$Env$call_list[1 + ta.swap]
+  # swap frames
+  frame <- sapply(lchob$Env$actions[9+c(which.ta1, which.ta2)], function(x) attr(x, "frame"))
+  attr(lchob$Env$actions[[9+which.ta1]], "frame") <- frame[2]
+  attr(lchob$Env$actions[[9+which.ta2]], "frame") <- frame[1]
+  # swap actions
+  lchob$Env$actions[-c(1:9)] <- lchob$Env$actions[9+ta.swap]
+  # swap y limits
+  lchob$Env$ylim[frame] <- lchob$Env$ylim[rev(frame)]
+  
+  ### End swap
 
-  lchob@passed.args$TA[[which.ta1]] <- tmp.ta2
-  lchob@passed.args$TA[[which.ta2]] <- tmp.ta1
-
-  do.call("chartSeries.chob",list(lchob))
-  write.chob(lchob,lchob@device)
+  lchob
+  #write.chob(lchob,lchob@device)
 }
 
 `moveTA` <-
