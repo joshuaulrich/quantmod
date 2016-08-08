@@ -41,18 +41,18 @@ function(ta1,ta2,occ1=1,occ2=1,chob) {
 }
 
 `moveTA` <-
-function(ta,pos,occ=1,dev) {
+function(ta,pos,occ=1,chob) {
 
   pos <- pos - 1
 
   if(missing(ta)) stop("no TA indicator specified")
 
-  # default to the current device if none specified  
-  if(missing(dev)) dev <- dev.cur()
-  ta.list <- listTA(dev)
+  # default to the current chob if none specified  
+  if(missing(chob)) chob <- get.chob()
+  ta.list <- listTA(chob)
 
   # get the current chob
-  lchob <- get.chob()[[dev]]
+  lchob <- chob
   
   # make indicator name match original call
   if(regexpr("^add",ta) == -1) ta <- paste("add",ta,sep='')
@@ -63,12 +63,19 @@ function(ta,pos,occ=1,dev) {
 
   if(is.na(which.ta)) stop("no TA")
 
-  lchob@passed.args$TA <- append(lchob@passed.args$TA[-which.ta],
-                                 lchob@passed.args$TA[which.ta],
+  lchob$Env$TA <- append(lchob$Env$TA[-which.ta],
+                                 lchob$Env$TA[which.ta],
                                  after=pos)
-
-  do.call("chartSeries.chob",list(lchob))
-  write.chob(lchob,lchob@device)
+  lchob$Env$call_list <- append(lchob$Env$call_list[-(1+which.ta)],
+                                lchob$Env$call_list[1+which.ta],
+                                after=pos+1)
+  # move actions
+  lchob$Env$actions <- append(lchob$Env$actions[-(9+which.ta)],
+                              lchob$Env$actions[9+which.ta],
+                              after=pos+9)
+  
+  lchob
+  #write.chob(lchob,lchob@device)
 }
 
 `dropTA` <-
