@@ -579,7 +579,11 @@ function(x,
   cs$add(text.exp, env=cs$Env, expr=TRUE)
   
   # handle TA="addVo()" as we would interactively FIXME: allow TA=NULL to work
-  if(!show.vol) TA <- TA[-grep("addVo()", TA)]
+  TA <- unlist(strsplit(TA, TAsep))
+  if(!show.vol) {
+    which.vo <- match("addVo()", TA)
+    if(!is.na(which.vo)) TA <- TA[-which.vo]
+  }
   if(!is.null(TA) && length(TA) > 0) {
     TA <- parse(text=TA, srcfile=NULL)
     for(ta in seq_along(TA)) {
