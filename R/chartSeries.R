@@ -594,6 +594,16 @@ function(x,
       }
     }
   }
+  # Pass chart.layout settings
+  cs$Env$chart.layout <- chart.layout
+  if(!inherits(layout, "chart.layout")) {
+    cl <- chart.layout(length(cs$Env$ylim)-1)
+  } else
+    cl <- layout
+  # since xts::plot.xts is applied, chartSeries should now be layout free
+  # layout(cl$mat, cl$width, cl$height, respect=FALSE)
+  cs$Env$mar <- cl$par.list[[3]]$mar
+  
   assign(".xts_chob", cs, xts:::.plotxtsEnv)
   if(plot) # draw the chart
     cs
