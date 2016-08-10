@@ -542,15 +542,15 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
       lenv$grid_lines <- function(xdata,xsubset) { 
         pretty(xdata[xsubset])
       }
-      exp <- c(exp,
+      #exp <- c(exp,
            # LHS
            #expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
            #           noquote(format(grid_lines(xdata,xsubset),justify="right")),
            #           col=theme$labels,offset=0,pos=4,cex=0.9)),
            # RHS
-           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
-                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
-                      col=theme$labels,offset=0,pos=4,cex=0.9)))
+           #expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
+           #           noquote(format(grid_lines(xdata,xsubset),justify="right")),
+           #           col=theme$labels,offset=0,pos=4,cex=0.9)))
       #}
       plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
     }
