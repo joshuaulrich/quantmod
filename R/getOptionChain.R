@@ -13,11 +13,6 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
   library("XML")
   library("rjson")
   
-  millisToDate <- function(x)
-  {
-    return (as.Date(x / 86400000, origin = "1970-01-01"))
-  }
-  
   dateToMillis <- function(x)
   {
     as.numeric(x) * 86400000	/ 1000
