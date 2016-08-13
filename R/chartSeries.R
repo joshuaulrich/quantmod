@@ -568,10 +568,10 @@ function(x,
   
   # add legend
   text.exp <- expression(
-    Closes <- Cl(xdata),
+    Closes <- Cl(xdata[xsubset]),
     lc <- xts:::legend.coords("topleft", xlim, get_ylim()[[2]]),
     legend(x = lc$x, y = lc$y,
-           legend = paste("Last", last(Closes)), 
+           legend = paste("Last", sprintf("%.3f", last(Closes))), 
            text.col = theme$up.col, 
            bty='n', 
            y.intersp=0.95))
