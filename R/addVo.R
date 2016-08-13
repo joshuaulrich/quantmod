@@ -26,10 +26,10 @@
     log.scale <- ifelse(x$Env$log.scale,"y","")
     
     bar.col <- if(color.vol) {
-      theme$bar.col
-    } else theme$border.col
+      theme$bar.col[xsubset]
+    } else theme$border.col[xsubset]
     
-    border.col <- theme$border.col
+    border.col <- theme$border.col[xsubset]
     min.vol <- min(vo)
     
     if(x$Env$theme$thin) {
@@ -104,8 +104,6 @@
                            lchob$Env$theme$Vo.bar.col,lchob$Env$theme$border)
   border.col <- ifelse(rep(is.null(lchob$Env$theme$border),NROW(xdata[,1])),
                        bar.col,lchob$Env$theme$border)
-  
-  bar.col <- bar.col[lchob$Env$xsubset]
   
   lchob$Env$theme$border.col <- border.col
   lchob$Env$theme$bar.col <- bar.col
