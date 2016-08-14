@@ -68,7 +68,7 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
     xsubset <- lchob$Env$xsubset
     x <- cbind(Hi(x),Lo(x))
     zigzag <- ZigZag(HL = x, change = change, percent = percent, retrace = retrace, 
-        lastExtreme = lastExtreme)[xsubset]
+        lastExtreme = lastExtreme)
     lchob$Env$TA$zigzag <- zigzag
     
     if (any(is.na(on))) {

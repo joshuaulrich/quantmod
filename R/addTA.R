@@ -52,7 +52,7 @@
          paste("Momentum (", n, "):"),col=theme$fg, pos=4),
     
     text(0, max(abs(mom),na.rm=TRUE) *.9,
-         paste("\n\n\n",sprintf("%.2f",last(mom)),sep=''),
+         paste("\n\n\n",sprintf("%.2f",last(mom[xsubset])),sep=''),
          col = COLOR, pos = 4)))
   exp <- c(expression(
     mom <- TA$mom,
@@ -82,7 +82,7 @@
     xx <- do.call(with.col,list(x))
   } else xx <- x[,with.col]
 
-  mom <- momentum(xx,n=n)[xsubset]
+  mom <- momentum(xx,n=n)
   lchob$Env$TA$mom <- mom
   
   lchob$add_frame(ylim=c(-max(abs(mom),na.rm=TRUE),
@@ -175,7 +175,7 @@ function(x) {
          paste("Commodity Channel Index (", n, ",",
                c,"):",sep=''),col=theme$fg,pos=4),
     text(0, max(abs(cci),na.rm=TRUE)*.9,
-         paste("\n\n\n",sprintf("%.2f",last(cci)),sep=''), col = 'red', 
+         paste("\n\n\n",sprintf("%.2f",last(cci[xsubset])),sep=''), col = 'red', 
          pos = 4)))
   exp <- c(expression(
     cci <- TA$cci,
@@ -204,7 +204,7 @@ function(x) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
-  cci <- CCI(xx,n=n,maType=maType,c=c)[xsubset]
+  cci <- CCI(xx,n=n,maType=maType,c=c)
   lchob$Env$TA$cci <- cci
   lchob$add_frame(ylim=c(-max(abs(cci), na.rm = TRUE), 
                          max(abs(cci), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
@@ -321,7 +321,7 @@ function(x) {
 
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
-  adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)[xsubset]
+  adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
   lchob$Env$TA$adx <- adx
   lchob$add_frame(ylim=c(min(adx*0.975, na.rm = TRUE), 
                          max(adx*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
@@ -410,7 +410,7 @@ function(x) {
 
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
-  atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,...)[xsubset]
+  atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,...)
   lchob$Env$TA$atr <- atr
   lchob$add_frame(ylim=c(min(atr[,2]*0.975, na.rm = TRUE), 
                          max(atr[,2]*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
@@ -503,7 +503,7 @@ function(x) {
     Cl(x)
   } else x 
 
-  trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)[xsubset]
+  trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
   lchob$Env$TA$trix <- trix
   lchob$add_frame(ylim=c(min(trix[,1]*.975,na.rm=TRUE),
                          max(trix[,1]*1.05,na.rm=TRUE)), asp=1, fixed=TRUE)
@@ -584,8 +584,8 @@ function(x) {
          col = theme$fg, pos = 4),
     
     text(0, max(abs(dpo), na.rm = TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(na.omit(dpo))), sep = ""), 
-         col = ifelse(last(na.omit(dpo)) > 0,theme$up.col,theme$dn.col), 
+         paste("\n\n\n",sprintf("%.3f",last(na.omit(dpo[xsubset]))), sep = ""), 
+         col = ifelse(last(na.omit(dpo[xsubset])) > 0,theme$up.col,theme$dn.col), 
          pos = 4)))
   
   exp <- c(expression(
@@ -616,7 +616,7 @@ function(x) {
     Cl(x)
   } else x 
 
-  dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)[xsubset]
+  dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)
   lchob$Env$TA$dpo <- dpo
   lchob$add_frame(ylim=c(-max(abs(dpo), na.rm = TRUE), 
                          max(abs(dpo), na.rm = TRUE)) * 1.05,asp=1,fixed=TRUE)
@@ -721,7 +721,7 @@ function(x) {
          pos = 4),
     
     text(0, max(rsi,na.rm=TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(rsi)), sep = ""), col = '#0033CC', 
+         paste("\n\n\n",sprintf("%.3f",last(rsi[xsubset])), sep = ""), col = '#0033CC', 
          pos = 4)))
   exp <- c(expression(
     rsi <- TA$rsi,
@@ -748,7 +748,7 @@ function(x) {
     Cl(x)
   } else x 
 
-  rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)[xsubset]
+  rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)
   lchob$Env$TA$rsi <- rsi
   lchob$add_frame(ylim=c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05),asp=1,fixed=TRUE)
   lchob$next_frame()
@@ -848,7 +848,7 @@ function(x) {
     Cl(x)
   } else x 
 
-  roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)[xsubset]
+  roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)
   lchob$Env$TA$roc <- roc
   lchob$add_frame(ylim=c(-max(abs(roc), na.rm = TRUE), 
                          max(abs(roc), na.rm = TRUE))*1.05, asp=1, fixed=TRUE)
@@ -1355,8 +1355,8 @@ function(x) {
     legend(lc$x, lc$y, 
            legend=c(paste("Moving Average Convergence Divergence (",
                           paste(fast,slow,signal,sep=','),"):", sep = ""),
-                    paste("MACD:",sprintf("%.3f",last(macd[,1]))),
-                    paste("Signal:",sprintf("%.3f",last(macd[,2])))),
+                    paste("MACD:",sprintf("%.3f",last(macd[xsubset,1]))),
+                    paste("Signal:",sprintf("%.3f",last(macd[xsubset,2])))),
            text.col=c(theme$fg, col[3], col[4]),
            xjust=lc$xjust,
            yjust=lc$yjust,
@@ -1387,7 +1387,7 @@ function(x) {
     Cl(x)
   } else x 
 
-  macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)[xsubset]
+  macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
   lchob$Env$TA$macd <- macd
   lchob$add_frame(ylim=c(-max(abs(macd),na.rm=TRUE),
                          max(abs(macd),na.rm=TRUE))*1.05, asp=1, fixed=TRUE)
@@ -1571,7 +1571,6 @@ function(x) {
     xdata <- cbind(Hi(xdata),Lo(xdata))
     lines <- x$Env$TA$lines[xsubset]
     spacing <- x$Env$theme$spacing
-    x.pos <- 1 + spacing * (1:nrow(lines) - 1)
     xlim <- x$Env$xlim
     ylim <- x$get_ylim()[[abs(on)+1L]]
     theme <- x$Env$theme
@@ -1593,6 +1592,7 @@ function(x) {
     }
     if(!is.null(lines)) {
       # draw lines given positions specified in x
+      x.pos <- 1 + spacing * (1:nrow(lines) - 1)
       lines(x.pos, lines[,1],col=col)  
     }
     if(!is.null(h)) {
@@ -1652,7 +1652,7 @@ function(x) {
 } # }}}
 
 # addPoints {{{
-`addPoints` <- function(x,y=NULL,type='p',pch=20,
+`addPoints` <- function(x,y = NULL,type='p',pch=20,
                         offset=1,col=2,bg=2,cex=1,
                         on=1,overlay=TRUE) {
  
@@ -1710,17 +1710,18 @@ function(x) {
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
   xdata <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
-  xdata <- xdata[xsubset]
-
 
   
   if(missing(bg)) bg <- col
-
-    xsubset <- x %in% xsubset
+  
+  if(is.xts(x)) {
+    lchob$Env$x.points <- match(.index(x), .index(xdata))
+    lchob$Env$y.points <- x
+  } else {
     if(NROW(x) != NROW(y)) stop('x and y must be of equal lengths')
-    
     lchob$Env$x.points <- x
     lchob$Env$y.points <- y
+  }
 
 
     if(overlay)

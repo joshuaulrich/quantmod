@@ -37,8 +37,8 @@ function (n = 20, ..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(Aroon,na.rm=TRUE)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste("aroonUp :",format(last(Aroon[,1]),nsmall = 3L)), 
-                        paste("aroonDn :",format(last(Aroon[,2]),nsmall = 3L))),
+                        paste("aroonUp :",format(last(Aroon[xsubset,1]),nsmall = 3L)), 
+                        paste("aroonDn :",format(last(Aroon[xsubset,2]),nsmall = 3L))),
              text.col = c(theme$fg, theme$aroon$col$aroonUp, theme$aroon$col$aroonDn), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -68,7 +68,7 @@ function (n = 20, ..., on = NA, legend = "auto")
     xdata <- lchob$Env$xdata
     xdata <- cbind(Hi(xdata),Lo(xdata))
     xsubset <- lchob$Env$xsubset
-    Aroon <- aroon(HL=xdata,n=n)[xsubset,-3]
+    Aroon <- aroon(HL=xdata,n=n)[,-3]
     lchob$Env$TA$Aroon <- Aroon
 #    lenv$xdata <- structure(Aroon, .Dimnames = list(NULL, "aroon"))
     if(is.na(on)) {
@@ -112,7 +112,7 @@ function (n = 20, ..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(AroonOsc,na.rm=TRUE)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste(format(last(AroonOsc),nsmall = 3L))),
+                        paste(format(last(AroonOsc[xsubset]),nsmall = 3L))),
              text.col = c(theme$fg, 4), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -141,7 +141,7 @@ function (n = 20, ..., on = NA, legend = "auto")
     xdata <- lchob$Env$xdata
     xdata <- cbind(Hi(xdata),Lo(xdata))
     xsubset <- lchob$Env$xsubset
-    AroonOsc <- aroon(HL=xdata,n=n)[xsubset,3]
+    AroonOsc <- aroon(HL=xdata,n=n)[,3]
     lchob$Env$TA$AroonOsc <- AroonOsc
     if(is.na(on)) {
       lchob$add_frame(ylim=c(min(AroonOsc,na.rm=TRUE)*0.95, max(AroonOsc, na.rm=TRUE)*1.05),asp=1,fixed=TRUE)

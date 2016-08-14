@@ -35,8 +35,8 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(tdi, na.rm=TRUE)*1.05),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste("tdi :",format(last(tdi[,1]),nsmall = 3L)), 
-                        paste("di :",format(last(tdi[,1]),nsmall = 3L))),
+                        paste("tdi :",format(last(tdi[xsubset,1]),nsmall = 3L)), 
+                        paste("di :",format(last(tdi[xsubset,1]),nsmall = 3L))),
              text.col = c(theme$fg, 5, 6), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -62,7 +62,7 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- Cl(x)
-    tdi <- TDI(price = x, n = n, multiple = multiple)[xsubset]
+    tdi <- TDI(price = x, n = n, multiple = multiple)
     lchob$Env$TA$tdi <- tdi
     if (any(is.na(on))) {
         lchob$add_frame(ylim=range(tdi, na.rm=TRUE)*1.05, asp=1, fixed=TRUE)

@@ -34,7 +34,7 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, c(min(vol, na.rm=TRUE) * 0.95,max(vol, na.rm=TRUE) * 1.05)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        format(last(vol),nsmall = 3L)),
+                        sprintf("%.3f",last(vol[xsubset]))),
              text.col = c(theme$fg, 8), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -60,7 +60,7 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- OHLC(x)
-    vol <- volatility(OHLC = x, n = n, calc = calc, N = N)[xsubset]
+    vol <- volatility(OHLC = x, n = n, calc = calc, N = N)
     lchob$Env$TA$vol <- vol
     if (any(is.na(on))) {
         lchob$add_frame(ylim=c(min(vol, na.rm=TRUE) * 0.95, 

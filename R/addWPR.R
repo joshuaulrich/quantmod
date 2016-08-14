@@ -41,7 +41,7 @@
          pos = 4),
     
     text(0, max(abs(wpr), na.rm = TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(wpr)), sep = ""), col = COLOR, 
+         paste("\n\n\n",sprintf("%.3f",last(wpr[xsubset])), sep = ""), col = COLOR, 
          pos = 4)))
   exp <- c(expression(
     wpr <- TA$wpr,
@@ -73,7 +73,7 @@
   }
 
 
-  wpr <- WPR(xx,n=n)[xsubset]
+  wpr <- WPR(xx,n=n)
   lchob$Env$TA$wpr <- wpr
   lchob$add_frame(ylim=c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05, asp=1, fixed=TRUE)
   lchob$next_frame()

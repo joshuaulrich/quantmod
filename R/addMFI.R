@@ -34,7 +34,7 @@ function (n = 14, ..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, c(0,100)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste(format(last(mfi),nsmall = 3L))),
+                        paste(format(last(mfi[xsubset]),nsmall = 3L))),
              text.col = c(theme$fg, 8), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -61,7 +61,7 @@ function (n = 14, ..., on = NA, legend = "auto")
     xsubset <- lchob$Env$xsubset
     volume <- lchob$Env$vo
     x <- HLC(x)
-    mfi <- MFI(HLC = x, volume = volume, n = n)[xsubset]
+    mfi <- MFI(HLC = x, volume = volume, n = n)
     lchob$Env$TA$mfi <- mfi
     if(any(is.na(on))) {
       lchob$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)

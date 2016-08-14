@@ -31,8 +31,8 @@
     lc <- xts:::legend.coords("topleft", xlim, c(-max(abs(cmf), na.rm = TRUE),max(abs(cmf), na.rm = TRUE))*1.05),
     legend(x = lc$x, y = lc$y, 
            legend = c(paste(legend, ":"),
-                      paste(sprintf("%.3f",last(cmf)), sep = "")),
-           text.col = c(theme$fg, ifelse(last(cmf) > 0,theme$up.col,theme$dn.col)), 
+                      paste(sprintf("%.3f",last(cmf[xsubset])), sep = "")),
+           text.col = c(theme$fg, ifelse(last(cmf[xsubset]) > 0,theme$up.col,theme$dn.col)), 
            xjust = lc$xjust, 
            yjust = lc$yjust, 
            bty = "n", 
@@ -62,7 +62,7 @@
   xsubset <- lchob$Env$xsubset
   vo <- lchob$Env$vo
 
-  cmf <- CMF(xdata,vo,n=n)[xsubset]
+  cmf <- CMF(xdata,vo,n=n)
   lchob$Env$TA$cmf <- cmf
   if(!is.character(legend) || legend == "auto")
     lchob$Env$legend <- paste("Chaikin Money Flow (", n, ")", sep="")

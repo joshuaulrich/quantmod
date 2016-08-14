@@ -6,7 +6,7 @@
   lenv$chartVo <- function(x, ...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    vo <- x$Env$vo[xsubset]
+    vo <- x$Env$TA$vo[xsubset]
     
     spacing <- x$Env$theme$spacing
     width <- x$Env$theme$width
@@ -15,9 +15,6 @@
     xlim <- x$Env$xlim
     ylim <- c(min(vo, na.rm=TRUE), max(vo, na.rm=TRUE) * 1.05)
     theme <- x$Env$theme
-    
-    vol.scale <- x$Env$vol.scale
-    TA.values <- x$Env$TA.values
     
     thin <- theme$thin
     
@@ -48,7 +45,7 @@
   exp <- c(exp, expression(
     lc <- xts:::legend.coords("topleft", xlim, range(vo,na.rm=TRUE)),
     legend(x = lc$x, y = lc$y, 
-           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(TA.values)*vol.scale[[1]],big.mark=',')), 
+           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(vo[xsubset])*vol.scale[[1]],big.mark=',')), 
            text.col = c(theme$fg, last(theme$bar.col)), 
            xjust = lc$xjust, 
            yjust = lc$yjust, 
@@ -62,7 +59,7 @@
     segments(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), 
              xlim[2], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), 
              col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), y_grid_lines(range(TA.values, na.rm=TRUE)), 
+    text(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), y_grid_lines(range(vo, na.rm=TRUE)), 
          col = theme$labels, srt = theme$srt, 
          offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
     # add border of plotting area
@@ -75,8 +72,7 @@
   xsubset <- lchob$Env$xsubset
   x <- lchob$Env$xdata
   theme <- lchob$Env$theme
-  vo <- xdata[xsubset]
-  lchob$Env$TA$vo <- vo
+  vo <- xdata
   
   if(lchob$Env$color.vol) {
     # calculate colors for bars, if applicable.
@@ -121,9 +117,10 @@
   if (max.vol > 1e+07) 
     vol.scale <- list(1e+06, "millions")
   lchob$Env$vol.scale <- vol.scale
-  lchob$Env$TA.values <- vo/vol.scale[[1]]
+  lchob$Env$TA$vo <- vo/vol.scale[[1]]
   
-  lchob$add_frame(ylim=c(min(vo, na.rm=TRUE), max(vo, na.rm=TRUE) * 1.05), asp=1, fixed=TRUE)  # need to have a value set for ylim
+  lchob$add_frame(ylim=c(min(lchob$Env$TA$vo, na.rm=TRUE), 
+                         max(lchob$Env$TA$vo, na.rm=TRUE) * 1.05), asp=1, fixed=TRUE)  # need to have a value set for ylim
   lchob$next_frame()
   lchob$replot(exp,env=c(lenv, lchob$Env),expr=TRUE)
   lchob

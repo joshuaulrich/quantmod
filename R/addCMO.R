@@ -33,7 +33,7 @@
     lc <- xts:::legend.coords("topleft", xlim, c(-max(abs(cmo), na.rm = TRUE),max(abs(cmo), na.rm = TRUE))*1.05),
     legend(x = lc$x, y = lc$y, 
            legend = c(paste(legend, ":"),
-                      paste(sprintf("%.3f",last(cmo)), sep = "")),
+                      paste(sprintf("%.3f",last(cmo[xsubset])), sep = "")),
            text.col = c(theme$fg, "#0033CC"), 
            xjust = lc$xjust, 
            yjust = lc$yjust, 
@@ -71,7 +71,7 @@
     x[,1] 
   }
 
-  cmo <- CMO(xx,n=n)[xsubset]
+  cmo <- CMO(xx,n=n)
   lchob$Env$TA$cmo <- cmo
   if(!is.character(legend) || legend == "auto")
     lchob$Env$legend <- paste("Chande Momentum Oscillator (", n, ") ", sep="")

@@ -35,7 +35,7 @@ function (..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(obv, na.rm=TRUE) * 1.05),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste(format(last(obv),nsmall = 3L))),
+                        paste(format(last(obv[xsubset]),nsmall = 3L))),
              text.col = c(theme$fg, 4), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -61,7 +61,7 @@ function (..., on = NA, legend = "auto")
     x <- try.xts(lchob$Env$xdata, error=FALSE)
     xsubset <- lchob$Env$xsubset
     vo <- lchob$Env$vo
-    obv <- OBV(price = Cl(x), volume = vo)[xsubset]
+    obv <- OBV(price = Cl(x), volume = vo)
     lchob$Env$TA$obv <- obv
     if(is.na(on)) {
       lchob$add_frame(ylim=range(obv, na.rm=TRUE) * 1.05 ,asp=1,fixed=TRUE)

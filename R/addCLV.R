@@ -33,7 +33,7 @@ function (..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(clv,na.rm=TRUE)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste(format(last(clv),nsmall = 3L))),
+                        paste(format(last(clv[xsubset]),nsmall = 3L))),
              text.col = c(theme$fg, 5), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -61,7 +61,7 @@ function (..., on = NA, legend = "auto")
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
-    clv <- CLV(HLC=HLC(xdata))[xsubset]
+    clv <- CLV(HLC=HLC(xdata))
     lchob$Env$TA$clv <- clv
     if(is.na(on)) {
       lchob$add_frame(ylim=range(clv,na.rm=TRUE),asp=1,fixed=TRUE)

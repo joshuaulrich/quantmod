@@ -49,12 +49,12 @@
          pos = 4),
     
     text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
-         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[,1])), sep = ""), col = COLOR, 
+         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[xsubset,1])), sep = ""), col = COLOR, 
          pos = 4),
     
     text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
          paste("\n\n\n\n\nSignal: ",
-               sprintf("%.3f",last(smi[,2])), sep = ""), col = SIGNAL, 
+               sprintf("%.3f",last(smi[xsubset,2])), sep = ""), col = SIGNAL, 
          pos = 4)))
   exp <- c(expression(
     smi <- TA$smi,
@@ -86,7 +86,7 @@
   }
 
   smi <- SMI(xx, n=n, nFast=fast,
-             nSlow=slow, nSig=signal, maType=ma.type)[xsubset]
+             nSlow=slow, nSig=signal, maType=ma.type)
   lchob$Env$TA$smi <- smi
   
   lchob$add_frame(ylim=c(-max(abs(smi[,1]), na.rm = TRUE), 

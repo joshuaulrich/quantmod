@@ -44,8 +44,8 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
       lc <- xts:::legend.coords("topleft", xlim, range(emv,na.rm=TRUE)*1.05),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste("emv :", sprintf("%.3f",last(emv$emv))),
-                        paste("maEMV :", sprintf("%.3f",last(emv$maEMV)))),
+                        paste("emv :", sprintf("%.3f",last(emv$emv[xsubset]))),
+                        paste("maEMV :", sprintf("%.3f",last(emv$maEMV[xsubset])))),
              text.col = c(theme$fg, 6, 7), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -68,7 +68,7 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     emv <- EMV(HL = HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
-               vol.divisor = vol.divisor)[xsubset]
+               vol.divisor = vol.divisor)
     lchob$Env$TA$emv <- emv
     lchob$Env$TA$volume <- volume
     if(is.na(on)) {

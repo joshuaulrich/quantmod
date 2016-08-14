@@ -36,7 +36,7 @@ function (..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(ChaikinAD,na.rm=TRUE)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste(format(last(ChaikinAD),nsmall = 3L))),
+                        paste(format(last(ChaikinAD[xsubset]),nsmall = 3L))),
              text.col = c(theme$fg, theme$chaikin$col$chaikinad), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -65,7 +65,7 @@ function (..., on = NA, legend = "auto")
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     vo <- lchob$Env$vo
-    ChaikinAD <- chaikinAD(HLC = HLC(xdata), volume = vo)[xsubset]
+    ChaikinAD <- chaikinAD(HLC = HLC(xdata), volume = vo)
     lchob$Env$TA$ChaikinAD <- ChaikinAD
     if(is.na(on)) {
       lchob$add_frame(ylim=range(ChaikinAD,na.rm=TRUE),asp=1,fixed=TRUE)
@@ -108,7 +108,7 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
       lc <- xts:::legend.coords("topleft", xlim, range(ChaikinVol,na.rm=TRUE)),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
-                        paste(format(last(ChaikinVol),nsmall = 3L))),
+                        paste(format(last(ChaikinVol[xsubset]),nsmall = 3L))),
              text.col = c(theme$fg, theme$chaikin$col$chaikinvol), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -135,7 +135,7 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
-    ChaikinVol <- chaikinVolatility(HL = HLC(xdata)[,-3], n = n, maType = maType)[xsubset]
+    ChaikinVol <- chaikinVolatility(HL = HLC(xdata)[,-3], n = n, maType = maType)
     lchob$Env$TA$ChaikinVol <- ChaikinVol
     if(is.na(on)) {
       lchob$add_frame(ylim=range(ChaikinVol,na.rm=TRUE),asp=1,fixed=TRUE)

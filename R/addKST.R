@@ -13,10 +13,9 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
     lenv$chartKST <- function(x, n, nROC, nSig, maType, wts, ..., on, legend) {
       xdata <- x$Env$xdata
       xsubset <- x$Env$xsubset
-      xdata <- xdata[xsubset]
-      xdata <- coredata(Cl(xdata))
+      xdata <- Cl(xdata)
       kst <- KST(price = xdata, n = n, nROC = nROC, nSig = nSig, maType = maType, 
-                 wts = wts)
+                 wts = wts)[xsubset]
       spacing <- x$Env$theme$spacing
       x.pos <- 1 + spacing * (1:NROW(kst) - 1)
       xlim <- x$Env$xlim
@@ -42,8 +41,8 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
       lc <- xts:::legend.coords("topleft", xlim, range(kst, na.rm=TRUE) * 1.05),
       legend(x = lc$x, y = lc$y, 
              legend = c(legend,
-                        paste("kst :",format(last(kst[,1]),nsmall = 3L)), 
-                        paste("signal :",format(last(kst[,2]),nsmall = 3L))),
+                        paste("kst :",format(last(kst[xsubset,1]),nsmall = 3L)), 
+                        paste("signal :",format(last(kst[xsubset,2]),nsmall = 3L))),
              text.col = c(theme$fg, 6, 7), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
@@ -68,8 +67,7 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
-    x <- x[xsubset]
-    x <- coredata(Cl(x))
+    x <- Cl(x)
     kst <- KST(price = x, n = n, nROC = nROC, nSig = nSig, maType = maType, 
         wts = wts)
     lchob$Env$TA$kst <- kst
