@@ -276,7 +276,10 @@ function(x,subset = NULL,
                                 fill="#F7F7F7",
                                 Expiry='#C9C9C9',
                                 BBands.col='#666666',BBands.fill="#F7F7F7",
-                                BBands=list(col='#666666',fill='#F7F7F7'),
+                                BBands=list(col=list(upper='#666666',
+                                                     lower='#666666',
+                                                     fill='#F7F7F7',
+                                                     ma='#D5D5D5')),
                                 theme.name='white.mono'
                                 ),
                       'black'=
@@ -294,7 +297,10 @@ function(x,subset = NULL,
                                 fill="#282828",
                                 Expiry='#383838',
                                 BBands.col='red',BBands.fill="#282828",
-                                BBands=list(col='red',fill='#282828'),
+                                BBands=list(col=list(upper='red',
+                                                     lower='red',
+                                                     fill='#282828',
+                                                     ma='#D5D5D5')),
                                 theme.name='black'
                                 ),
                       'black.mono'=
@@ -310,7 +316,10 @@ function(x,subset = NULL,
                                 main.col="#999999",sub.col="#999999",
                                 fill="#777777",
                                 Expiry='#383838',
-                                BBands=list(col='#DDDDDD',fill='#777777'),
+                                BBands=list(col=list(upper='#DDDDDD',
+                                                     lower='#DDDDDD',
+                                                     fill='#777777',
+                                                     ma='#D5D5D5')),
                                 BBands.col='#DDDDDD',BBands.fill="#777777",
                                 theme.name='black.mono'
                                 ),
@@ -328,7 +337,10 @@ function(x,subset = NULL,
                                 fill="#F5F5F5",
                                 Expiry='#C9C9C9',
                                 BBands.col='orange',BBands.fill='#F5F5DF',
-                                BBands=list(col='orange',fill='#F5F5DF'),
+                                BBands=list(col=list(upper='orange',
+                                                     lower='orange',
+                                                     fill='#F5F5DF',
+                                                     ma='#D5D5D5')),
                                 theme.name='beige'
                                 ),
                        'wsj'= 
@@ -534,9 +546,17 @@ function(x,
   }
 
   cs$Env$length <- NROW(x)
-  cs$Env$theme$bbands$col$fill <- theme$BBands.fill
-  cs$Env$theme$bbands$col$upper <- theme$BBands.col
-  cs$Env$theme$bbands$col$lower <- theme$BBands.col
+  cs$Env$theme$BBands$col$fill <- theme$BBands$col$fill
+  cs$Env$theme$BBands$col$upper <- theme$BBands$col$upper
+  cs$Env$theme$BBands$col$lower <- theme$BBands$col$lower
+  cs$Env$theme$BBands$col$ma <- theme$BBands$col$ma
+  
+  # allow custom settings to TAs color
+  # use chartTheme() to enter
+  which.TA <- grep("add", names(theme))
+  names(theme)[which.TA] <- gsub("^add", "", names(theme)[which.TA])
+  cs$Env$theme <- append(cs$Env$theme, theme[which.TA])
+  
   
   # change minor ticks to be downward
   exp <- expression(if (NROW(xdata[xsubset]) < 400) { 
