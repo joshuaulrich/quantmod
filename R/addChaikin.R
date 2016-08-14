@@ -21,7 +21,7 @@ function (..., on = NA, legend = "auto")
       ylim <- range(ChaikinAD,na.rm=TRUE)
       theme <- x$Env$theme
 
-      lines(x.pos, ChaikinAD, col = theme$chaikin$col$chaikinad, 
+      lines(x.pos, ChaikinAD, col = theme$ChAD$col$chaikinAD, 
             lwd = 1, lend = 2, ...)
     }
     if(!is.character(legend) || legend == "auto")
@@ -37,7 +37,7 @@ function (..., on = NA, legend = "auto")
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste(format(last(ChaikinAD[xsubset]),nsmall = 3L))),
-             text.col = c(theme$fg, theme$chaikin$col$chaikinad), 
+             text.col = c(theme$fg, theme$ChAD$col$chaikinAD), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -59,8 +59,8 @@ function (..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
-    if (is.null(lchob$Env$theme$chaikin$col$chaikinad)) {
-      lchob$Env$theme$chaikin$col$chaikinad <- 3
+    if (is.null(lchob$Env$theme$ChAD)) {
+      lchob$Env$theme$ChAD$col$chaikinAD <- 3
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
@@ -92,7 +92,7 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
       ylim <- range(ChaikinVol,na.rm=TRUE)
       theme <- x$Env$theme
       
-      lines(x.pos, ChaikinVol, col = theme$chaikin$col$chaikinvol, 
+      lines(x.pos, ChaikinVol, col = theme$ChVol$col$chaikinVol, 
             lwd = 1, lend = 2, ...)
     }
     if(missing(maType)) maType <- "SMA"
@@ -109,7 +109,7 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste(format(last(ChaikinVol[xsubset]),nsmall = 3L))),
-             text.col = c(theme$fg, theme$chaikin$col$chaikinvol), 
+             text.col = c(theme$fg, theme$ChVol$col$chaikinVol), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -130,8 +130,8 @@ function (n = 10, maType, ..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
-    if (is.null(lchob$Env$theme$chaikin$col$chaikinvol)) {
-      lchob$Env$theme$chaikin$col$chaikinvol <- "#F5F5F5"
+    if (is.null(lchob$Env$theme$ChVol)) {
+      lchob$Env$theme$ChVol$col$chaikinVol <- "#F5F5F5"
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset

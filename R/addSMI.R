@@ -26,11 +26,8 @@
                 max(abs(smi[,1]), na.rm = TRUE))*1.05
     theme <- x$Env$theme
     
-    COLOR <- "#0033CC"
-    SIGNAL <- "#BFCFFF"
-    
-    lines(x.pos,smi[,1],col=COLOR,lwd=1,type='l')
-    lines(x.pos,smi[,2],col=SIGNAL,lwd=1,lty='dotted',type='l')
+    lines(x.pos,smi[,1],col=theme$SMI$col$smi,lwd=1,type='l')
+    lines(x.pos,smi[,2],col=theme$SMI$col$signal,lwd=1,lty='dotted',type='l')
     
   }
   mapply(function(name, value) {
@@ -40,8 +37,6 @@
   exp <- parse(text = gsub("list", "chartSMI", as.expression(substitute(list(x = current.chob(), 
                                                                               n = n,fast = fast,slow = slow,signal = signal,ma.type = ma.type)))), srcfile = NULL)
   exp <- c(exp, expression(
-    COLOR <- "#0033CC",
-    SIGNAL <- "#BFCFFF",
     text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
          paste("Stochastic Momentum Index (",
                paste(n,fast,slow,signal,sep=','),
@@ -49,13 +44,13 @@
          pos = 4),
     
     text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
-         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[xsubset,1])), sep = ""), col = COLOR, 
-         pos = 4),
+         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[xsubset,1])), sep = ""), 
+         col = theme$SMI$col$smi, pos = 4),
     
     text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
          paste("\n\n\n\n\nSignal: ",
-               sprintf("%.3f",last(smi[xsubset,2])), sep = ""), col = SIGNAL, 
-         pos = 4)))
+               sprintf("%.3f",last(smi[xsubset,2])), sep = ""), 
+         col = theme$SMI$col$signal, pos = 4)))
   exp <- c(expression(
     smi <- TA$smi,
     # add inbox color
@@ -73,6 +68,10 @@
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$SMI)) {
+    lchob$Env$theme$SMI$col$smi <- "#0033CC"
+      lchob$Env$theme$SMI$col$signal <- "#BFCFFF"
+  }
   
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset

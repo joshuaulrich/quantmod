@@ -18,7 +18,7 @@ function (..., on = NA, legend = "auto")
       ylim <- range(clv,na.rm=TRUE)
       theme <- x$Env$theme
       
-      lines(x.pos, clv, type = "h", col = theme$clv$col, 
+      lines(x.pos, clv, type = "h", col = theme$CLV$col, 
             lwd = 1, lend = 2, ...)
     }
     if(!is.character(legend) || legend == "auto")
@@ -34,7 +34,7 @@ function (..., on = NA, legend = "auto")
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste(format(last(clv[xsubset]),nsmall = 3L))),
-             text.col = c(theme$fg, 5), 
+             text.col = c(theme$fg, theme$CLV$col), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -56,8 +56,8 @@ function (..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
-    if (is.null(lchob$Env$theme$clv$col)) {
-      lchob$Env$theme$clv$col <- 5
+    if (is.null(lchob$Env$theme$CLV)) {
+      lchob$Env$theme$CLV$col <- 5
     }
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset

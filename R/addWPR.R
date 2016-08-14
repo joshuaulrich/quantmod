@@ -24,8 +24,7 @@
     ylim <- c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05
     theme <- x$Env$theme
     
-    COLOR <- "#0033CC"
-    lines(x.pos,wpr,col=COLOR,lwd=1,type='l')
+    lines(x.pos,wpr,col=theme$WPR$col,lwd=1,type='l')
     
   }
   mapply(function(name, value) {
@@ -35,13 +34,12 @@
   exp <- parse(text = gsub("list", "chartWPR", as.expression(substitute(list(x = current.chob(), 
                                                                                n = n)))), srcfile = NULL)
   exp <- c(exp, expression(
-    COLOR <- "#0033CC", 
     text(0, max(abs(wpr), na.rm = TRUE)*.9,
          paste("Williams %R (", n,"):", sep = ""), col = theme$fg, 
          pos = 4),
     
     text(0, max(abs(wpr), na.rm = TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(wpr[xsubset])), sep = ""), col = COLOR, 
+         paste("\n\n\n",sprintf("%.3f",last(wpr[xsubset])), sep = ""), col = theme$WPR$col, 
          pos = 4)))
   exp <- c(expression(
     wpr <- TA$wpr,
@@ -60,6 +58,9 @@
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$WPR)) {
+    lchob$Env$theme$WPR$col <- "#0033CC"
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset

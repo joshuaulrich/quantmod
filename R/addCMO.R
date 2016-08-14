@@ -22,7 +22,7 @@
               max(abs(cmo), na.rm = TRUE))*1.05
     theme <- x$Env$theme
     
-    lines(x.pos, cmo, col = "#0033CC", lwd = 1, lend = 2)
+    lines(x.pos, cmo, col = theme$CMO$col, lwd = 1, lend = 2)
   }
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
@@ -34,7 +34,7 @@
     legend(x = lc$x, y = lc$y, 
            legend = c(paste(legend, ":"),
                       paste(sprintf("%.3f",last(cmo[xsubset])), sep = "")),
-           text.col = c(theme$fg, "#0033CC"), 
+           text.col = c(theme$fg, theme$CMO$col), 
            xjust = lc$xjust, 
            yjust = lc$yjust, 
            bty = "n", 
@@ -57,6 +57,9 @@
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$CMO)) {
+    lchob$Env$theme$CMO$col <- "#0033CC"
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset

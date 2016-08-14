@@ -40,14 +40,13 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
       } else {
         ylim <- x$get_ylim()[[2]]
         legend.name <- paste(legend, ":", format(last(na.omit(zigzag)),nsmall = 3L))
-        text.col <- 4
         yjust <- 1.5
       }
-      lines(x.pos, zigzag, col = 4, lwd = 4, lend = 2, ...)
+      lines(x.pos, zigzag, col = theme$ZigZag$col, lwd = 4, lend = 2, ...)
       lc <- xts:::legend.coords("topleft", xlim, ylim)
       legend(x = lc$x, y = lc$y, 
              legend = legend.name,
-             text.col = text.col, 
+             text.col = theme$ZigZag$col, 
              xjust = lc$xjust, 
              yjust = yjust, 
              bty = "n", 
@@ -64,6 +63,9 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
+    if (is.null(lchob$Env$theme$ZigZag)) {
+      lchob$Env$theme$ZigZag$col <- 4
+    }
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- cbind(Hi(x),Lo(x))

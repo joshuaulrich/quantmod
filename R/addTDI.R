@@ -19,8 +19,8 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
       ylim <- range(tdi, na.rm=TRUE)*1.05
       theme <- x$Env$theme
       
-      lines(x.pos, tdi[,1], col = 5, lwd = 1, lend = 2, ...)
-      lines(x.pos, tdi[,2], col = 6, lwd = 1, lend = 2, ...)
+      lines(x.pos, tdi[,1], col = theme$TDI$col$tdi, lwd = 1, lend = 2, ...)
+      lines(x.pos, tdi[,2], col = theme$TDI$col$di, lwd = 1, lend = 2, ...)
       
     }
     if(!is.character(legend) || legend == "auto")
@@ -37,7 +37,7 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
              legend = c(paste(legend, ":"),
                         paste("tdi :",format(last(tdi[xsubset,1]),nsmall = 3L)), 
                         paste("di :",format(last(tdi[xsubset,1]),nsmall = 3L))),
-             text.col = c(theme$fg, 5, 6), 
+             text.col = c(theme$fg, theme$TDI$col$tdi, theme$TDI$col$di), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -59,6 +59,10 @@ function (n = 20, multiple = 2, ..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
+    if (is.null(lchob$Env$theme$TDI)) {
+      lchob$Env$theme$TDI$col$tdi <- 5
+      lchob$Env$theme$TDI$col$di <- 6
+    }
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- Cl(x)

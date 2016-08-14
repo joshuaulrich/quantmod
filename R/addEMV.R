@@ -21,12 +21,16 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
       ylim <- range(emv,na.rm=TRUE)*1.05
       theme <- x$Env$theme
 
-      lines(x.pos, emv$emv, col = 6, lwd = 1, lend = 2, ...)
-      lines(x.pos, emv$maEMV, col = 7, lwd = 1, lend = 2, ...)
+      lines(x.pos, emv$emv, col = theme$EMV$col$emv, lwd = 1, lend = 2, ...)
+      lines(x.pos, emv$maEMV, col = theme$EMV$col$maEMV, lwd = 1, lend = 2, ...)
     }
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
+    if (is.null(lchob$Env$theme$EMV)) {
+      lchob$Env$theme$EMV$col$emv <- 6
+      lchob$Env$theme$EMV$col$maEMV <- 7
+    }
     if(missing(volume)) volume <- lchob$Env$vo
     if(missing(maType)) maType <- "SMA"
     if(!is.character(legend) || legend == "auto")
@@ -46,7 +50,7 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
              legend = c(paste(legend, ":"),
                         paste("emv :", sprintf("%.3f",last(emv$emv[xsubset]))),
                         paste("maEMV :", sprintf("%.3f",last(emv$maEMV[xsubset])))),
-             text.col = c(theme$fg, 6, 7), 
+             text.col = c(theme$fg, theme$EMV$col$emv, theme$EMV$col$maEMV), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 

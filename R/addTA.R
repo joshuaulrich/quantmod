@@ -35,10 +35,8 @@
     ylim <- c(-max(abs(mom),na.rm=TRUE),
               max(abs(mom),na.rm=TRUE)) * 1.05
     theme <- x$Env$theme
-
-    COLOR <- "#0033CC"
     
-    lines(x.pos,mom,col=COLOR,lwd=2,type='l')
+    lines(x.pos,mom,col=theme$Momentum$col,lwd=2,type='l')
     
   }
   mapply(function(name, value) {
@@ -47,13 +45,12 @@
   exp <- parse(text = gsub("list", "chartMomentum", as.expression(substitute(list(x = current.chob(), 
                                                                                   n = n, with.col = with.col)))), srcfile = NULL)
   exp <- c(exp, expression(
-    COLOR <- "#0033CC",
     text(0, max(abs(mom),na.rm=TRUE) *.9, 
          paste("Momentum (", n, "):"),col=theme$fg, pos=4),
     
     text(0, max(abs(mom),na.rm=TRUE) *.9,
          paste("\n\n\n",sprintf("%.2f",last(mom[xsubset])),sep=''),
-         col = COLOR, pos = 4)))
+         col = theme$Momentum$col, pos = 4)))
   exp <- c(expression(
     mom <- TA$mom,
     # add inbox color
@@ -72,6 +69,9 @@
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$Momentum)) {
+    lchob$Env$theme$Momentum$col <- "#0033CC"
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -154,11 +154,11 @@ function(x) {
     cci.above <- ifelse(cci >=  100,cci, 100)
     cci.below <- ifelse(cci <= -100,cci,-100)
     
-    polygon(c(x.pos,rev(x.pos)),cbind(cci.above,rep(100,length(cci))),col="red",border=theme$fg)
-    polygon(c(x.pos,rev(x.pos)),cbind(cci.below,rep(-100,length(cci))),col="red",border=theme$fg)
+    polygon(c(x.pos,rev(x.pos)),cbind(cci.above,rep(100,length(cci))),col=theme$CCI$col,border=theme$fg)
+    polygon(c(x.pos,rev(x.pos)),cbind(cci.below,rep(-100,length(cci))),col=theme$CCI$col,border=theme$fg)
     
     # draw CCI
-    lines(x.pos,cci,col='red',lwd=1,type='l')
+    lines(x.pos,cci,col=theme$CCI$col,lwd=1,type='l')
     
   }
   mapply(function(name, value) {
@@ -175,7 +175,7 @@ function(x) {
          paste("Commodity Channel Index (", n, ",",
                c,"):",sep=''),col=theme$fg,pos=4),
     text(0, max(abs(cci),na.rm=TRUE)*.9,
-         paste("\n\n\n",sprintf("%.2f",last(cci[xsubset])),sep=''), col = 'red', 
+         paste("\n\n\n",sprintf("%.2f",last(cci[xsubset])),sep=''), col = theme$CCI$col, 
          pos = 4)))
   exp <- c(expression(
     cci <- TA$cci,
@@ -196,6 +196,9 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$CCI)) {
+    lchob$Env$theme$CCI$col <- 'red'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -283,11 +286,11 @@ function(x) {
     theme <- x$Env$theme
     
     # draw DIp
-    lines(x.pos,adx[,1],col='green',lwd=1,type='l')
+    lines(x.pos,adx[,1],col=theme$ADX$col$DIp,lwd=1,type='l')
     # draw DIn
-    lines(x.pos,adx[,2],col='red',lwd=1,type='l')
+    lines(x.pos,adx[,2],col=theme$ADX$col$DIn,lwd=1,type='l')
     # draw ADX
-    lines(x.pos,adx[,4],col='blue',lwd=2,type='l')
+    lines(x.pos,adx[,4],col=theme$ADX$col$adx,lwd=2,type='l')
   }
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
@@ -315,6 +318,11 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$ADX)) {
+    lchob$Env$theme$ADX$col$DIp <- 'green'
+    lchob$Env$theme$ADX$col$DIn <- 'red'
+    lchob$Env$theme$ADX$col$adx <- 'blue'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -379,7 +387,7 @@ function(x) {
               max(atr[,2]*1.05, na.rm = TRUE))
     theme <- x$Env$theme
     
-    lines(x.pos,atr[,2],col='blue',lwd=2,type='l')
+    lines(x.pos,atr[,2],col=theme$ATR$col,lwd=2,type='l')
   }
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
@@ -404,6 +412,9 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$ATR)) {
+    lchob$Env$theme$ATR$col <- 'blue'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -468,9 +479,9 @@ function(x) {
     theme <- x$Env$theme
     
     # draw TRIX
-    lines(x.pos,trix[,1],col='green',lwd=1,type='l')
+    lines(x.pos,trix[,1],col=theme$TRIX$col$trix,lwd=1,type='l')
     # draw Signal
-    lines(x.pos,trix[,2],col='#999999',lwd=1,type='l')
+    lines(x.pos,trix[,2],col=theme$TRIX$col$signal,lwd=1,type='l')
   }
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
@@ -495,6 +506,10 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$TRIX)) {
+    lchob$Env$theme$TRIX$col$trix <- 'green'
+    lchob$Env$theme$TRIX$col$signal <- '#999999'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -705,8 +720,8 @@ function(x) {
     ylim <- c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)
     theme <- x$Env$theme
     
-    lines(x.pos,rsi,col='#0033CC',lwd=2,type='l')
-    lines(x.pos,rsi,col='#BFCFFF',lwd=1,lty='dotted',type='l')
+    lines(x.pos,rsi,col=theme$RSI$col$rsi,lwd=2,type='l')
+    lines(x.pos,rsi,col=theme$RSI$col$dot,lwd=1,lty='dotted',type='l')
     
   }
   mapply(function(name, value) {
@@ -721,7 +736,7 @@ function(x) {
          pos = 4),
     
     text(0, max(rsi,na.rm=TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(rsi[xsubset])), sep = ""), col = '#0033CC', 
+         paste("\n\n\n",sprintf("%.3f",last(rsi[xsubset])), sep = ""), col = theme$RSI$col$rsi, 
          pos = 4)))
   exp <- c(expression(
     rsi <- TA$rsi,
@@ -740,6 +755,10 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$RSI)) {
+    lchob$Env$theme$RSI$col$rsi <- '#0033CC'
+    lchob$Env$theme$RSI$col$dot <- '#BFCFFF'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -839,7 +858,6 @@ function(x) {
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
-  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -1015,6 +1033,15 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$bbands)) {
+    lchob$Env$theme$bbands$col$fill <- '#282828'
+    lchob$Env$theme$bbands$col$upper <- 'red'
+    lchob$Env$theme$bbands$col$lower <- 'red'
+    lchob$Env$theme$bbands$col$ma <- '#D5D5D5'
+    lchob$Env$theme$bbands$lty$upper <- 'dashed'
+    lchob$Env$theme$bbands$lty$lower <- 'dashed'
+    lchob$Env$theme$bbands$lty$ma <- 'dotted'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
@@ -1176,14 +1203,15 @@ function(x) {
     xlim <- x$Env$xlim
     theme <- x$Env$theme
     if(on[1] > 0) {
-      lines(x.pos,mae[,1],col='blue',lwd=1,lty='dotted')
-      lines(x.pos,mae[,3],col='blue',lwd=1,lty='dotted')
+      lines(x.pos,mae[,1],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
+      lines(x.pos,mae[,3],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
       #lines(x.pos,mae[,2],col='grey',lwd=1,lty='dotted')
     } else {
       xx <- x.pos
-      polygon(c(xx,rev(xx)), c(as.numeric(mae[,1]),rev(as.numeric(mae[,3]))),col='#282828',border=NA)
-      lines(x.pos,mae[,1],col='blue',lwd=1,lty='dotted')
-      lines(x.pos,mae[,3],col='blue',lwd=1,lty='dotted')
+      polygon(c(xx,rev(xx)), c(as.numeric(mae[,1]),rev(as.numeric(mae[,3]))),
+              col=theme$Envelope$col$fill,border=NA)
+      lines(x.pos,mae[,1],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
+      lines(x.pos,mae[,3],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
       #lines(x.pos,mae[,2],col='grey',lwd=1,lty='dotted')
     }
     
@@ -1209,6 +1237,11 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$Envelope)) {
+    lchob$Env$theme$Envelope$col$ma <- 'blue'
+    lchob$Env$theme$Envelope$col$fill <- '#282828'
+    lchob$Env$theme$Envelope$lty$ma <- 'dotted'
+  }
 
   x <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset

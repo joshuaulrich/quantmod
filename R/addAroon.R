@@ -20,9 +20,9 @@ function (n = 20, ..., on = NA, legend = "auto")
       ylim <- c(0,100)
       theme <- x$Env$theme
       
-      lines(x.pos, Aroon[,1], col = theme$aroon$col$aroonUp, 
+      lines(x.pos, Aroon[,1], col = theme$Aroon$col$aroonUp, 
             lwd = 1, lend = 2, ...)
-      lines(x.pos, Aroon[,2], col = theme$aroon$col$aroonDn, 
+      lines(x.pos, Aroon[,2], col = theme$Aroon$col$aroonDn, 
             lwd = 1, lend = 2, ...)
     }
     if(!is.character(legend) || legend == "auto")
@@ -39,7 +39,7 @@ function (n = 20, ..., on = NA, legend = "auto")
              legend = c(paste(legend, ":"),
                         paste("aroonUp :",format(last(Aroon[xsubset,1]),nsmall = 3L)), 
                         paste("aroonDn :",format(last(Aroon[xsubset,2]),nsmall = 3L))),
-             text.col = c(theme$fg, theme$aroon$col$aroonUp, theme$aroon$col$aroonDn), 
+             text.col = c(theme$fg, theme$Aroon$col$aroonUp, theme$Aroon$col$aroonDn), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -61,9 +61,10 @@ function (n = 20, ..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
-    if (is.null(lchob$Env$theme$aroon$col$arronUp)) {
-      lchob$Env$theme$aroon$col$aroonUp <- 3
-      lchob$Env$theme$aroon$col$aroonDn <- 4
+    if (is.null(lchob$Env$theme$Aroon)) {
+      lchob$Env$theme$Aroon$col$aroonUp <- 3
+      lchob$Env$theme$Aroon$col$aroonDn <- 4
+      lchob$Env$theme$Aroon$col$aroonOsc <- 3
     }
     xdata <- lchob$Env$xdata
     xdata <- cbind(Hi(xdata),Lo(xdata))
@@ -97,7 +98,7 @@ function (n = 20, ..., on = NA, legend = "auto")
       ylim <- range(AroonOsc,na.rm=TRUE)
       theme <- x$Env$theme
       
-      lines(x.pos, AroonOsc, col = theme$aroon$col$aroonOsc, 
+      lines(x.pos, AroonOsc, col = theme$Aroon$col$aroonOsc, 
             lwd = 1, lend = 2, ...)
     }
     if(!is.character(legend) || legend == "auto")
@@ -113,7 +114,7 @@ function (n = 20, ..., on = NA, legend = "auto")
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste(format(last(AroonOsc[xsubset]),nsmall = 3L))),
-             text.col = c(theme$fg, 4), 
+             text.col = c(theme$fg, theme$Aroon$col$aroonOsc), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -135,8 +136,10 @@ function (n = 20, ..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
-    if (is.null(lchob$Env$theme$aroon$col$aroonOsc)) {
-      lchob$Env$theme$aroon$col$aroonOsc <- 3
+    if (is.null(lchob$Env$theme$Aroon)) {
+      lchob$Env$theme$Aroon$col$aroonUp <- 3
+      lchob$Env$theme$Aroon$col$aroonDn <- 4
+      lchob$Env$theme$Aroon$col$aroonOsc <- 3
     }
     xdata <- lchob$Env$xdata
     xdata <- cbind(Hi(xdata),Lo(xdata))

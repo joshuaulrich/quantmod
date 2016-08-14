@@ -20,7 +20,7 @@ function (n = 14, ..., on = NA, legend = "auto")
       ylim <- c(0,100)
       theme <- x$Env$theme
 
-      lines(x.pos, mfi, col = 8, lwd = 1, lend = 2, ...)
+      lines(x.pos, mfi, col = theme$MFI$col, lwd = 1, lend = 2, ...)
     }
     if(!is.character(legend) || legend == "auto")
       legend <- gsub("^addMFI", "Money Flow Index ", deparse(match.call()))
@@ -35,7 +35,7 @@ function (n = 14, ..., on = NA, legend = "auto")
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste(format(last(mfi[xsubset]),nsmall = 3L))),
-             text.col = c(theme$fg, 8), 
+             text.col = c(theme$fg, theme$MFI$col), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -57,6 +57,9 @@ function (n = 14, ..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
+    if (is.null(lchob$Env$theme$MFI)) {
+      lchob$Env$theme$MFI$col <- 8
+    }
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     volume <- lchob$Env$vo

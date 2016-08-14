@@ -22,8 +22,8 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
       ylim <- range(kst, na.rm=TRUE) * 1.05
       theme <- x$Env$theme
 
-      lines(x.pos, kst[,1], col = 6, lwd = 1, lend = 2, ...)
-      lines(x.pos, kst[,2], col = 7, lwd = 1, lend = 2, ...)
+      lines(x.pos, kst[,1], col = theme$KST$col$kst, lwd = 1, lend = 2, ...)
+      lines(x.pos, kst[,2], col = theme$KST$col$signal, lwd = 1, lend = 2, ...)
     }
     if(missing(maType)) maType <- "SMA"
     if(!is.character(legend) || legend == "auto")
@@ -43,7 +43,7 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
              legend = c(legend,
                         paste("kst :",format(last(kst[xsubset,1]),nsmall = 3L)), 
                         paste("signal :",format(last(kst[xsubset,2]),nsmall = 3L))),
-             text.col = c(theme$fg, 6, 7), 
+             text.col = c(theme$fg, theme$KST$col$kst, theme$KST$col$signal), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -65,6 +65,10 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
+    if (is.null(lchob$Env$theme$KST)) {
+      lchob$Env$theme$KST$col$kst <- 6
+      lchob$Env$theme$KST$col$signal <- 7
+    }
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- Cl(x)

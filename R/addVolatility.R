@@ -19,7 +19,7 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
       ylim <- c(min(vol, na.rm=TRUE) * 0.95, max(vol, na.rm=TRUE) * 1.05)
       theme <- x$Env$theme
 
-      lines(x.pos, vol, col = 8, lwd = 1, lend = 2, ...)
+      lines(x.pos, vol, col = theme$Volatility$col, lwd = 1, lend = 2, ...)
       
     }
     if(!is.character(legend) || legend == "auto")
@@ -35,7 +35,7 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         sprintf("%.3f",last(vol[xsubset]))),
-             text.col = c(theme$fg, 8), 
+             text.col = c(theme$fg, theme$Volatility$col), 
              xjust = lc$xjust, 
              yjust = lc$yjust, 
              bty = "n", 
@@ -57,6 +57,9 @@ function (n = 10, calc = "close", N = 260, ..., on = NA, legend = "auto")
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
     lchob$Env$call_list[[ncalls + 1]] <- match.call()
+    if (is.null(lchob$Env$theme$Vol)) {
+      lchob$Env$theme$Volatility$col <- 8
+    }
     x <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     x <- OHLC(x)
