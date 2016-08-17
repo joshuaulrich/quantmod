@@ -11,17 +11,29 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
 {
     lenv <- new.env()
     lenv$chartKST <- function(x, n, nROC, nSig, maType, wts, ..., on, legend) {
-      xdata <- x$Env$xdata
       xsubset <- x$Env$xsubset
-      xdata <- Cl(xdata)
-      kst <- KST(price = xdata, n = n, nROC = nROC, nSig = nSig, maType = maType, 
-                 wts = wts)[xsubset]
+      kst <- kst[xsubset]
       spacing <- x$Env$theme$spacing
       x.pos <- 1 + spacing * (1:NROW(kst) - 1)
       xlim <- x$Env$xlim
-      ylim <- range(kst, na.rm=TRUE) * 1.05
+      frame <- x$get_frame()
+      ylim <- x$get_ylim()[[frame]]
       theme <- x$Env$theme
-
+      y_grid_lines <- x$Env$y_grid_lines
+      
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      
+      
       lines(x.pos, kst[,1], col = theme$KST$col$kst, lwd = 1, lend = 2, ...)
       lines(x.pos, kst[,2], col = theme$KST$col$signal, lwd = 1, lend = 2, ...)
     }
@@ -38,7 +50,8 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
                                                                                n = n, nROC = nROC, nSig = nSig, 
                                                                                maType = maType, wts = wts, ..., on = on, legend = legend)))), srcfile = NULL)
     exp <- c(exp, expression(
-      lc <- xts:::legend.coords("topleft", xlim, range(kst, na.rm=TRUE) * 1.05),
+      frame <- get_frame(),
+      lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
       legend(x = lc$x, y = lc$y, 
              legend = c(legend,
                         paste("kst :",format(last(kst[xsubset,1]),nsmall = 3L)), 
@@ -48,19 +61,6 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
              yjust = lc$yjust, 
              bty = "n", 
              y.intersp=0.95)))
-    exp <- c(expression(
-      kst <- TA$kst,
-      # add inbox color
-      rect(xlim[1], range(kst, na.rm=TRUE)[1] * 1.05, xlim[2], range(kst, na.rm=TRUE)[2] * 1.05, col=theme$fill),
-      # add grid lines and left-side axis labels
-      segments(xlim[1], y_grid_lines(range(kst, na.rm=TRUE) * 1.05), 
-               xlim[2], y_grid_lines(range(kst, na.rm=TRUE) * 1.05), 
-               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-      text(xlim[1], y_grid_lines(range(kst, na.rm=TRUE) * 1.05), y_grid_lines(range(kst, na.rm=TRUE) * 1.05), 
-           col = theme$labels, srt = theme$srt, 
-           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-      # add border of plotting area
-      rect(xlim[1], range(kst, na.rm=TRUE)[1] * 1.05, xlim[2], range(kst, na.rm=TRUE)[2] * 1.05, border=theme$labels)), exp)
     
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
@@ -74,9 +74,11 @@ function (n = c(10, 10, 10, 15), nROC = c(10, 15, 20, 30), nSig = 9,
     x <- Cl(x)
     kst <- KST(price = x, n = n, nROC = nROC, nSig = nSig, maType = maType, 
         wts = wts)
-    lchob$Env$TA$kst <- kst
+    lenv$xdata <- structure(kst, .Dimnames=list(NULL, c("kst", "signal")))
+    lenv$kst <- lchob$Env$TA$kst <- kst
+    lenv$get_frame <- lchob$get_frame
     if(is.na(on)) {
-      lchob$add_frame(ylim=range(kst, na.rm=TRUE) * 1.05,asp=1,fixed=TRUE)
+      lchob$add_frame(ylim=range(lenv$kst[xsubset], na.rm=TRUE) * 1.05,asp=1,fixed=FALSE)
       lchob$next_frame()
     }
     else {

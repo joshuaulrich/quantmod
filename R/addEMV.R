@@ -10,16 +10,27 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
 {
     lenv <- new.env()
     lenv$chartEMV <- function(x, volume, n, maType, vol.divisor, ..., on, legend) {
-      xdata <- x$Env$xdata
       xsubset <- x$Env$xsubset
-      volume <- x$Env$TA$volume
-      emv <- EMV(HL=HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
-                 legend = legend)[xsubset]
+      emv <- emv[xsubset]
       spacing <- x$Env$theme$spacing
       x.pos <- 1 + spacing * (1:NROW(emv) - 1)
       xlim <- x$Env$xlim
-      ylim <- range(emv,na.rm=TRUE)*1.05
+      frame <- x$get_frame()
+      ylim <- x$get_ylim()[[frame]]
       theme <- x$Env$theme
+      y_grid_lines <- x$Env$y_grid_lines
+      
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
 
       lines(x.pos, emv$emv, col = theme$EMV$col$emv, lwd = 1, lend = 2, ...)
       lines(x.pos, emv$maEMV, col = theme$EMV$col$maEMV, lwd = 1, lend = 2, ...)
@@ -45,7 +56,8 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
                              as.expression(substitute(list(x = current.chob(), volume = volume, n = n, maType = maType, vol.divisor = vol.divisor, ..., 
                                                            on = on, legend = legend)))), srcfile = NULL)
     exp <- c(exp, expression(
-      lc <- xts:::legend.coords("topleft", xlim, range(emv,na.rm=TRUE)*1.05),
+      frame <- get_frame(),
+      lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste("emv :", sprintf("%.3f",last(emv$emv[xsubset]))),
@@ -55,28 +67,17 @@ function (volume, n = 9, maType, vol.divisor = 10000, ..., on = NA,
              yjust = lc$yjust, 
              bty = "n", 
              y.intersp=0.95)))
-    exp <- c(expression(
-      emv <- TA$emv,
-      # add inbox color
-      rect(xlim[1], range(emv,na.rm=TRUE)[1]*1.05, xlim[2], range(emv,na.rm=TRUE)[2]*1.05, col=theme$fill),
-      # add grid lines and left-side axis labels
-      segments(xlim[1], y_grid_lines(range(emv,na.rm=TRUE)*1.05), 
-               xlim[2], y_grid_lines(range(emv,na.rm=TRUE)*1.05), 
-               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-      text(xlim[1], y_grid_lines(range(emv,na.rm=TRUE)*1.05), y_grid_lines(range(emv,na.rm=TRUE)*1.05), 
-           col = theme$labels, srt = theme$srt, 
-           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-      # add border of plotting area
-      rect(xlim[1], range(emv,na.rm=TRUE)[1]*1.05, xlim[2], range(emv,na.rm=TRUE)[2]*1.05, border=theme$labels)), exp)
     
     xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
     emv <- EMV(HL = HLC(xdata)[,-3], volume = volume, n = n, maType = maType, 
                vol.divisor = vol.divisor)
-    lchob$Env$TA$emv <- emv
+    lenv$xdata <- structure(emv, .Dimnames=list(NULL, c("emv", "maEMV")))
+    lenv$emv <- lchob$Env$TA$emv <- emv
     lchob$Env$TA$volume <- volume
+    lenv$get_frame <- lchob$get_frame
     if(is.na(on)) {
-      lchob$add_frame(ylim=range(emv,na.rm=TRUE)*1.05,asp=1,fixed=TRUE)
+      lchob$add_frame(ylim=range(lenv$emv[xsubset],na.rm=TRUE)*1.05,asp=1,fixed=FALSE)
       lchob$next_frame()
     }
     else {

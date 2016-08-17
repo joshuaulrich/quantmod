@@ -9,17 +9,28 @@ function (n = 14, ..., on = NA, legend = "auto")
 {
     lenv <- new.env()
     lenv$chartMFI <- function(x, n, ..., on, legend) {
-      xdata <- lchob$Env$xdata
       xsubset <- lchob$Env$xsubset
-      volume <- lchob$Env$vo
-      xdata <- HLC(xdata)
-      mfi <- MFI(HLC = xdata, volume = volume, n = n)[xsubset]
+      mfi <- mfi[xsubset]
       spacing <- x$Env$theme$spacing
       x.pos <- 1 + spacing * (1:NROW(mfi) - 1)
       xlim <- x$Env$xlim
-      ylim <- c(0,100)
+      frame <- x$get_frame()
+      ylim <- x$get_ylim()[[frame]]
       theme <- x$Env$theme
-
+      y_grid_lines <- x$Env$y_grid_lines
+      
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      
       lines(x.pos, mfi, col = theme$MFI$col, lwd = 1, lend = 2, ...)
     }
     if(!is.character(legend) || legend == "auto")
@@ -31,7 +42,8 @@ function (n = 14, ..., on = NA, legend = "auto")
     exp <- parse(text = gsub("list", "chartMFI", as.expression(substitute(list(x = current.chob(), 
                                                                                  n = n, ..., on = on, legend = legend)))), srcfile = NULL)
     exp <- c(exp, expression(
-      lc <- xts:::legend.coords("topleft", xlim, c(0,100)),
+      frame <- get_frame(),
+      lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
       legend(x = lc$x, y = lc$y, 
              legend = c(paste(legend, ":"),
                         paste(format(last(mfi[xsubset]),nsmall = 3L))),
@@ -40,19 +52,6 @@ function (n = 14, ..., on = NA, legend = "auto")
              yjust = lc$yjust, 
              bty = "n", 
              y.intersp=0.95)))
-    exp <- c(expression(
-      mfi <- TA$mfi,
-      # add inbox color
-      rect(xlim[1], 0, xlim[2], 100, col=theme$fill),
-      # add grid lines and left-side axis labels
-      segments(xlim[1], y_grid_lines(c(0,100)), 
-               xlim[2], y_grid_lines(c(0,100)), 
-               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-      text(xlim[1], y_grid_lines(c(0,100)), y_grid_lines(c(0,100)), 
-           col = theme$labels, srt = theme$srt, 
-           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-      # add border of plotting area
-      rect(xlim[1], 0, xlim[2], 100, border=theme$labels)), exp)
     
     lchob <- current.chob()
     ncalls <- length(lchob$Env$call_list)
@@ -65,9 +64,11 @@ function (n = 14, ..., on = NA, legend = "auto")
     volume <- lchob$Env$vo
     x <- HLC(x)
     mfi <- MFI(HLC = x, volume = volume, n = n)
-    lchob$Env$TA$mfi <- mfi
+    lenv$xdata <- structure(mfi, .Dimnames=list(NULL, "mfi"))
+    lenv$mfi <- lchob$Env$TA$mfi <- mfi
+    lenv$get_frame <- lchob$get_frame
     if(any(is.na(on))) {
-      lchob$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)
+      lchob$add_frame(ylim=range(lenv$mfi[xsubset], na.rm=TRUE),asp=1,fixed=FALSE)
       lchob$next_frame()
     }
     else {

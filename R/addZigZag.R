@@ -10,16 +10,14 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
 {
     lenv <- new.env()
     lenv$chartZigZag <- function(x, change, percent, retrace, lastExtreme, ..., on, legend) {
-      xdata <- x$Env$xdata
       xsubset <- x$Env$xsubset
-      xdata <- cbind(Hi(xdata),Lo(xdata))
-      zigzag <- ZigZag(HL = xdata, change = change, percent = percent, retrace = retrace, 
-                       lastExtreme = lastExtreme)[xsubset]
+      zigzag <- zigzag[xsubset]
       spacing <- x$Env$theme$spacing
       x.pos <- 1 + spacing * (1:NROW(zigzag) - 1)
       xlim <- x$Env$xlim
       ylim <- c(min(zigzag, na.rm=TRUE)*0.975, max(zigzag, na.rm=TRUE)*1.05)
       theme <- x$Env$theme
+      y_grid_lines <- x$Env$y_grid_lines
       
       if(any(is.na(on))) {
         legend.name <- c(paste(legend, ":"),
@@ -40,7 +38,6 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
       } else {
         ylim <- x$get_ylim()[[2]]
         legend.name <- paste(legend, ":", format(last(na.omit(zigzag)),nsmall = 3L))
-        yjust <- 1.5
       }
       lines(x.pos, zigzag, col = theme$ZigZag$col, lwd = 4, lend = 2, ...)
       lc <- xts:::legend.coords("topleft", xlim, ylim)
@@ -48,7 +45,7 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
              legend = legend.name,
              text.col = theme$ZigZag$col, 
              xjust = lc$xjust, 
-             yjust = yjust, 
+             yjust = 2, 
              bty = "n", 
              y.intersp=0.95)
     }
@@ -71,7 +68,8 @@ function (change = 10, percent = TRUE, retrace = FALSE, lastExtreme = TRUE,
     x <- cbind(Hi(x),Lo(x))
     zigzag <- ZigZag(HL = x, change = change, percent = percent, retrace = retrace, 
         lastExtreme = lastExtreme)
-    lchob$Env$TA$zigzag <- zigzag
+    lenv$xdata <- structure(zigzag, .Dimnames=list(NULL, "zigzag"))
+    lenv$zigzag <- lchob$Env$TA$zigzag <- zigzag
     
     if (any(is.na(on))) {
         lchob$add_frame(ylim=c(min(zigzag, na.rm=TRUE)*0.975, 

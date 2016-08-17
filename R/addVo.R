@@ -1,9 +1,9 @@
 
 # addVo {{{
-`addVo` <- function(log.scale=FALSE, ...) {
+`addVo` <- function(log.scale=FALSE) {
   lenv <- new.env()
   
-  lenv$chartVo <- function(x, ...) {
+  lenv$chartVo <- function(x) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     vo <- x$Env$TA$vo[xsubset]
@@ -13,8 +13,22 @@
     
     x.pos <- 1 + spacing * (1:NROW(vo) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(min(vo, na.rm=TRUE), max(vo, na.rm=TRUE) * 1.05)
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
     
     thin <- theme$thin
     
@@ -27,43 +41,28 @@
     } else theme$border.col[xsubset]
     
     border.col <- theme$border.col[xsubset]
-    min.vol <- min(vo)
     
     if(x$Env$theme$thin) {
       # plot thin volume bars if appropriate
-      segments(x.pos,min.vol,x.pos,vo,col=bar.col)
+      segments(x.pos,ylim[1],x.pos,vo,col=bar.col)
     } else {
-      rect(x.pos-spacing/3,min.vol,x.pos+spacing/3,vo,
+      rect(x.pos-spacing/3,ylim[1],x.pos+spacing/3,vo,
            col=bar.col,border=border.col)
     }
   }
   
-  # map all passed args (if any) to 'lenv' environment
-  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(...)), list(...))
   exp <- parse(text=gsub("list","chartVo",as.expression(substitute(list(x=current.chob(),...)))),
                srcfile=NULL)
   exp <- c(exp, expression(
-    lc <- xts:::legend.coords("topleft", xlim, range(vo,na.rm=TRUE)),
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
     legend(x = lc$x, y = lc$y, 
-           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(vo[xsubset])*vol.scale[[1]],big.mark=',')), 
+           legend = c(paste("Volume (",vol.scale[[2]],"):",sep=''),format(last(vo[xsubset]),big.mark=',')), 
            text.col = c(theme$fg, last(theme$bar.col)), 
            xjust = lc$xjust, 
            yjust = lc$yjust, 
            bty = "n", 
            y.intersp=0.95)))
-  exp <- c(expression(    
-    vo <- TA$vo, 
-    # add inbox color
-    rect(xlim[1], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[1], xlim[2], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[2], col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), 
-             xlim[2], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)), y_grid_lines(range(vo, na.rm=TRUE)), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[1], xlim[2], c(min(vo,na.rm=TRUE), max(vo,na.rm=TRUE)*1.05)[2], border=theme$labels)), exp)
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -118,6 +117,7 @@
     vol.scale <- list(1e+06, "millions")
   lchob$Env$vol.scale <- vol.scale
   lchob$Env$TA$vo <- vo/vol.scale[[1]]
+  lenv$get_frame <- lchob$get_frame
   
   lchob$add_frame(ylim=c(min(lchob$Env$TA$vo, na.rm=TRUE), 
                          max(lchob$Env$TA$vo, na.rm=TRUE) * 1.05), asp=1, fixed=TRUE)  # need to have a value set for ylim

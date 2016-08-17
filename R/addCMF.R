@@ -4,17 +4,29 @@
 
   lenv <- new.env()
   lenv$chartCMF <- function(x, n) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    xdata <- cbind(Hi(xdata),Lo(xdata),Cl(xdata))
-    vo <- x$Env$vo
-    cmf <- CMF(xdata,vo,n=n)[xsubset]
+    cmf <- cmf[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(cmf) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-max(abs(cmf), na.rm = TRUE), 
-              max(abs(cmf), na.rm = TRUE))*1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    ylim[1] <- ifelse(ylim[1] > 0, 0, ylim[1])
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    segments(xlim[1], 0, xlim[2], 0, col = "#999999")
 
     cmf.positive <- ifelse(cmf >= 0,cmf,0)
     cmf.negative <- ifelse(cmf <  0,cmf,0)
@@ -28,7 +40,8 @@
   exp <- parse(text = gsub("list", "chartCMF", as.expression(substitute(list(x = current.chob(), 
                                                                                   n = n)))), srcfile = NULL)
   exp <- c(exp, expression(
-    lc <- xts:::legend.coords("topleft", xlim, c(-max(abs(cmf), na.rm = TRUE),max(abs(cmf), na.rm = TRUE))*1.05),
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
     legend(x = lc$x, y = lc$y, 
            legend = c(paste(legend, ":"),
                       paste(sprintf("%.3f",last(cmf[xsubset])), sep = "")),
@@ -37,20 +50,6 @@
            yjust = lc$yjust, 
            bty = "n", 
            y.intersp=0.95)))
-  exp <- c(expression(    
-    cmf <- TA$cmf,
-    # add inbox color
-    rect(xlim[1], -max(abs(cmf), na.rm = TRUE)*1.05, xlim[2], max(abs(cmf), na.rm = TRUE)*1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-max(abs(cmf), na.rm = TRUE),max(abs(cmf), na.rm = TRUE))*1.05), 
-             xlim[2], y_grid_lines(c(-max(abs(cmf), na.rm = TRUE),max(abs(cmf), na.rm = TRUE))*1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-max(abs(cmf), na.rm = TRUE),max(abs(cmf), na.rm = TRUE))*1.05), y_grid_lines(c(-max(abs(cmf), na.rm = TRUE),max(abs(cmf), na.rm = TRUE))*1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -max(abs(cmf), na.rm = TRUE)*1.05, xlim[2], max(abs(cmf), na.rm = TRUE)*1.05, border=theme$labels),
-    segments(xlim[1], 0, xlim[2], 0, col = "#999999")), exp)
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -63,11 +62,13 @@
   vo <- lchob$Env$vo
 
   cmf <- CMF(xdata,vo,n=n)
-  lchob$Env$TA$cmf <- cmf
+  lenv$xdata <- structure(cmf, .Dimnames=list(NULL, "cmf"))
+  lenv$cmf <- lchob$Env$TA$cmf <- cmf
+  lenv$get_frame <- lchob$get_frame
   if(!is.character(legend) || legend == "auto")
     lchob$Env$legend <- paste("Chaikin Money Flow (", n, ")", sep="")
-  lchob$add_frame(ylim=c(-max(abs(cmf), na.rm = TRUE), 
-                         max(abs(cmf), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
+  lchob$add_frame(ylim=c(-max(abs(lenv$cmf[xsubset]), na.rm = TRUE), 
+                         max(abs(lenv$cmf[xsubset]), na.rm = TRUE))*1.05,asp=1,fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
   lchob

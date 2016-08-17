@@ -20,21 +20,29 @@
 
   lenv <- new.env()
   lenv$chartMomentum <- function(x, n, with.col) {
-    xdata <- lchob$Env$xdata
     xsubset <- lchob$Env$xsubset
-    if(is.OHLC(xdata) && missing(with.col)) with.col <- 1
     
-    if(is.function(with.col)) {
-      xx <- do.call(with.col,list(xdata))
-    } else xx <- xdata[,with.col]
-    
-    mom <- momentum(xx,n=n)[xsubset]
+    mom <- mom[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(mom) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-max(abs(mom),na.rm=TRUE),
-              max(abs(mom),na.rm=TRUE)) * 1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      segments(xlim[1],0,xlim[2],0,col="#666666",lwd=1,lty='dotted')
     
     lines(x.pos,mom,col=theme$Momentum$col,lwd=2,type='l')
     
@@ -45,26 +53,16 @@
   exp <- parse(text = gsub("list", "chartMomentum", as.expression(substitute(list(x = current.chob(), 
                                                                                   n = n, with.col = with.col)))), srcfile = NULL)
   exp <- c(exp, expression(
-    text(0, max(abs(mom),na.rm=TRUE) *.9, 
-         paste("Momentum (", n, "):"),col=theme$fg, pos=4),
-    
-    text(0, max(abs(mom),na.rm=TRUE) *.9,
-         paste("\n\n\n",sprintf("%.2f",last(mom[xsubset])),sep=''),
-         col = theme$Momentum$col, pos = 4)))
-  exp <- c(expression(
-    mom <- TA$mom,
-    # add inbox color
-    rect(xlim[1], -max(abs(mom),na.rm=TRUE) * 1.05, xlim[2], max(abs(mom),na.rm=TRUE) * 1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-max(abs(mom),na.rm=TRUE),max(abs(mom),na.rm=TRUE)) * 1.05), 
-             xlim[2], y_grid_lines(c(-max(abs(mom),na.rm=TRUE),max(abs(mom),na.rm=TRUE)) * 1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-max(abs(mom),na.rm=TRUE),max(abs(mom),na.rm=TRUE)) * 1.05), y_grid_lines(c(-max(abs(mom),na.rm=TRUE),max(abs(mom),na.rm=TRUE)) * 1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -max(abs(mom),na.rm=TRUE) * 1.05, xlim[2], max(abs(mom),na.rm=TRUE) * 1.05, border=theme$labels), 
-    segments(xlim[1],0,xlim[2],0,col="#666666",lwd=1,lty='dotted')), exp)
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Momentum (", n, "):"),
+                      paste(sprintf("%.2f",last(mom[xsubset])),sep='')), 
+           text.col = c(theme$fg, theme$Momentum$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -83,10 +81,12 @@
   } else xx <- x[,with.col]
 
   mom <- momentum(xx,n=n)
-  lchob$Env$TA$mom <- mom
+  lenv$xdata <- structure(mom, .Dimnames=list(NULL, "mom"))
+  lenv$mom <- lchob$Env$TA$mom <- mom
+  lenv$get_frame <- lchob$get_frame
   
-  lchob$add_frame(ylim=c(-max(abs(mom),na.rm=TRUE),
-                         max(abs(mom),na.rm=TRUE)) * 1.05, asp=1, fixed=TRUE)
+  lchob$add_frame(ylim=c(-max(abs(lenv$mom[xsubset]),na.rm=TRUE),
+                         max(abs(lenv$mom[xsubset]),na.rm=TRUE)) * 1.05, asp=1, fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -137,18 +137,29 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartCCI <- function(x, n, maType, c) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    xx <- if(is.OHLC(xdata)) {
-      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
-    } else xdata 
-    cci <- CCI(xx,n=n,maType=maType,c=c)[xsubset]
+    cci <- cci[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(cci) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-max(abs(cci),na.rm=TRUE),
-              max(abs(cci),na.rm=TRUE))*1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    # draw shading in -100:100 y-range 
+    rect(xlim[1],-100,xlim[2],100,col=theme$BBands$col$fill,border=theme$fg)
     
     # fill upper and lower areas
     cci.above <- ifelse(cci >=  100,cci, 100)
@@ -171,27 +182,16 @@ function(x) {
     segments(xlim[1],0,xlim[2],0,col='#666666',lwd=1,lty='dotted'),
     
     # add indicator name and last value
-    text(0, max(abs(cci),na.rm=TRUE)*.9,
-         paste("Commodity Channel Index (", n, ",",
-               c,"):",sep=''),col=theme$fg,pos=4),
-    text(0, max(abs(cci),na.rm=TRUE)*.9,
-         paste("\n\n\n",sprintf("%.2f",last(cci[xsubset])),sep=''), col = theme$CCI$col, 
-         pos = 4)))
-  exp <- c(expression(
-    cci <- TA$cci,
-    # add inbox color
-    rect(xlim[1], -max(abs(cci),na.rm=TRUE)*1.05, xlim[2], max(abs(cci),na.rm=TRUE)*1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-max(abs(cci),na.rm=TRUE),max(abs(cci),na.rm=TRUE))*1.05), 
-             xlim[2], y_grid_lines(c(-max(abs(cci),na.rm=TRUE),max(abs(cci),na.rm=TRUE))*1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-max(abs(cci),na.rm=TRUE),max(abs(cci),na.rm=TRUE))*1.05), y_grid_lines(c(-max(abs(cci),na.rm=TRUE),max(abs(cci),na.rm=TRUE))*1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -max(abs(cci),na.rm=TRUE)*1.05, xlim[2], max(abs(cci),na.rm=TRUE)*1.05, border=theme$labels), 
-    # draw shading in -100:100 y-range 
-    rect(xlim[1],-100,xlim[2],100,col=theme$bbands$col$fill,border=theme$fg)), exp)
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Commodity Channel Index (", n, ",", c,"):",sep=''),
+                      paste(sprintf("%.2f",last(cci[xsubset])),sep='')), 
+           text.col = c(theme$fg, theme$CCI$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -208,9 +208,11 @@ function(x) {
   } else x 
 
   cci <- CCI(xx,n=n,maType=maType,c=c)
-  lchob$Env$TA$cci <- cci
-  lchob$add_frame(ylim=c(-max(abs(cci), na.rm = TRUE), 
-                         max(abs(cci), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
+  lenv$xdata <- structure(cci, .Dimnames=list(NULL, "cci"))
+  lenv$cci <- lchob$Env$TA$cci <- cci
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(-max(abs(lenv$cci[xsubset]), na.rm = TRUE), 
+                         max(abs(lenv$cci[xsubset]), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
   lchob
@@ -275,15 +277,29 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartADX <- function(x, n, maType, wilder) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    adx <- ADX(cbind(Hi(xdata), Lo(xdata), Cl(xdata)), n=n, maType=maType, wilder=wilder)[xsubset]
+    adx <- adx[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(adx) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(min(adx*0.975, na.rm = TRUE), 
-              max(adx*1.05, na.rm = TRUE))
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    segments(xlim[1], 20, xlim[2], 20, col = "#666666", lty = "dotted")
+    segments(xlim[1], 40, xlim[2], 40, col = "#666666", lty = "dotted")
     
     # draw DIp
     lines(x.pos,adx[,1],col=theme$ADX$col$DIp,lwd=1,type='l')
@@ -298,22 +314,22 @@ function(x) {
   list(n = n, maType = maType, wilder = wilder))
   exp <- parse(text = gsub("list", "chartADX", as.expression(substitute(list(x = current.chob(), 
                                                                                n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
-  
-  exp <- c(expression(
-    adx <- TA$adx,
-    # add inbox color
-    rect(xlim[1], min(adx*0.975, na.rm = TRUE), xlim[2], max(adx*1.05, na.rm = TRUE), col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(min(adx*0.975, na.rm = TRUE),max(adx*1.05, na.rm = TRUE))), 
-             xlim[2], y_grid_lines(c(min(adx*0.975, na.rm = TRUE),max(adx*1.05, na.rm = TRUE))), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(min(adx*0.975, na.rm = TRUE),max(adx*1.05, na.rm = TRUE))), y_grid_lines(c(min(adx*0.975, na.rm = TRUE),max(adx*1.05, na.rm = TRUE))), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], min(adx*0.975, na.rm = TRUE), xlim[2], max(adx*1.05, na.rm = TRUE), border=theme$labels),
-    segments(xlim[1], 20, xlim[2], 20, col = "#666666", lty = "dotted"),
-    segments(xlim[1], 40, xlim[2], 40, col = "#666666", lty = "dotted")), exp)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste("DIp : ", sprintf("%.3f",last(adx[xsubset,1]))),
+                      paste("DIn : ", sprintf("%.3f",last(adx[xsubset,2]))),
+                      paste("ADX : ", sprintf("%.3f",last(adx[xsubset,4])))),
+           text.col = c(theme$fg, 
+                        theme$ADX$col$DIp,
+                        theme$ADX$col$DIn,
+                        theme$ADX$col$adx), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -330,9 +346,12 @@ function(x) {
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
   adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
-  lchob$Env$TA$adx <- adx
-  lchob$add_frame(ylim=c(min(adx*0.975, na.rm = TRUE), 
-                         max(adx*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
+  lenv$xdata <- structure(adx, .Dimnames=list(NULL, c("DIp", "DIn", "DX", "ADX")))
+  lenv$adx <- lchob$Env$TA$adx <- adx
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^addADX", "Directional Movement Index ", deparse(match.call()))
+  lchob$add_frame(ylim=c(min(lenv$adx[xsubset]*0.975, na.rm = TRUE), 
+                         max(lenv$adx[xsubset]*1.05, na.rm = TRUE)),asp=1,fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
   lchob
@@ -377,15 +396,27 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartATR <- function(x, n, maType) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    atr <- ATR(cbind(Hi(xdata), Lo(xdata), Cl(xdata)), n=n, maType=maType)[xsubset]
+    atr <- atr[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(atr) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(min(atr[,2]*0.975, na.rm = TRUE), 
-              max(atr[,2]*1.05, na.rm = TRUE))
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
     
     lines(x.pos,atr[,2],col=theme$ATR$col,lwd=2,type='l')
   }
@@ -394,20 +425,17 @@ function(x) {
   }, names(list(n = n, maType = maType)), list(n = n, maType = maType))
   exp <- parse(text = gsub("list", "chartATR", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, maType = maType)))), srcfile = NULL)
-  
-  exp <- c(expression(
-    atr <- TA$atr,
-    # add inbox color
-    rect(xlim[1], min(atr[,2]*0.975, na.rm = TRUE), xlim[2], max(atr[,2]*1.05, na.rm = TRUE), col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(min(atr[,2]*0.975, na.rm = TRUE),max(atr[,2]*1.05, na.rm = TRUE))), 
-             xlim[2], y_grid_lines(c(min(atr[,2]*0.975, na.rm = TRUE),max(atr[,2]*1.05, na.rm = TRUE))), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(min(atr[,2]*0.975, na.rm = TRUE),max(atr[,2]*1.05, na.rm = TRUE))), y_grid_lines(c(min(atr[,2]*0.975, na.rm = TRUE),max(atr[,2]*1.05, na.rm = TRUE))), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], min(atr[,2]*0.975, na.rm = TRUE), xlim[2], max(atr[,2]*1.05, na.rm = TRUE), border=theme$labels)), exp)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste(sprintf("%.3f", last(atr[xsubset,2])))),
+           text.col = c(theme$fg, theme$ATR$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -422,9 +450,12 @@ function(x) {
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
   atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,...)
-  lchob$Env$TA$atr <- atr
-  lchob$add_frame(ylim=c(min(atr[,2]*0.975, na.rm = TRUE), 
-                         max(atr[,2]*1.05, na.rm = TRUE)),asp=1,fixed=TRUE)
+  lenv$xdata <- structure(atr[,2], .Dimnames=list(NULL, "atr"))
+  lenv$atr <- lchob$Env$TA$atr <- atr
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^addATR", "Average True Range ", deparse(match.call()))
+  lchob$add_frame(ylim=c(min(lenv$atr[xsubset,2]*0.975, na.rm = TRUE), 
+                         max(lenv$atr[xsubset,2]*1.05, na.rm = TRUE)),asp=1,fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
   lchob
@@ -463,20 +494,28 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartTRIX <- function(x, n, signal, maType, percent) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    
-    xx <- if(is.OHLC(xdata)) {
-      Cl(xdata)
-    } else xdata
     
     trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(trix) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(min(trix[,1]*.975,na.rm=TRUE),
-              max(trix[,1]*1.05,na.rm=TRUE))
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
     
     # draw TRIX
     lines(x.pos,trix[,1],col=theme$TRIX$col$trix,lwd=1,type='l')
@@ -489,19 +528,18 @@ function(x) {
   list(n = n, signal = signal, maType = maType, percent = TRUE))
   exp <- parse(text = gsub("list", "chartTRIX", as.expression(substitute(list(x = current.chob(), 
                                                                               n = n, signal = signal, maType = maType, percent = TRUE)))), srcfile = NULL)
-  exp <- c(expression(
-    trix <- TA$trix,
-    # add inbox color
-    rect(xlim[1], min(trix[,1]*.975,na.rm=TRUE), xlim[2], max(trix[,1]*1.05,na.rm=TRUE), col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(min(trix[,1]*.975,na.rm=TRUE),max(trix[,1]*1.05,na.rm=TRUE))), 
-             xlim[2], y_grid_lines(c(min(trix[,1]*.975,na.rm=TRUE),max(trix[,1]*1.05,na.rm=TRUE))), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(min(trix[,1]*.975,na.rm=TRUE),max(trix[,1]*1.05,na.rm=TRUE))), y_grid_lines(c(min(trix[,1]*.975,na.rm=TRUE),max(trix[,1]*1.05,na.rm=TRUE))), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], min(trix[,1]*.975,na.rm=TRUE), xlim[2], max(trix[,1]*1.05,na.rm=TRUE), border=theme$labels)), exp)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste("TRIX :",sprintf("%.3f",last(trix[xsubset,1]))), 
+                      paste("signal :",sprintf("%.3f",last(trix[xsubset,2]),nsmall = 3L))),
+           text.col = c(theme$fg, theme$TRIX$col$trix, theme$TRIX$col$signal), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -519,9 +557,12 @@ function(x) {
   } else x 
 
   trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
-  lchob$Env$TA$trix <- trix
-  lchob$add_frame(ylim=c(min(trix[,1]*.975,na.rm=TRUE),
-                         max(trix[,1]*1.05,na.rm=TRUE)), asp=1, fixed=TRUE)
+  lenv$xdata <- structure(trix, .Dimnames=list(NULL, c("TRIX", "signal")))
+  lenv$trix <- lchob$Env$TA$trix <- trix
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^addTRIX", "Triple Exponential Moving Average ", deparse(match.call()))
+  lchob$add_frame(ylim=c(min(lenv$trix[xsubset,1]*.975,na.rm=TRUE),
+                         max(lenv$trix[xsubset,1]*1.05,na.rm=TRUE)), asp=1, fixed=TRUE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -565,18 +606,28 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartDPO <- function(x, n, maType, shift, percent) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    xx <- if(is.OHLC(xdata)) {
-      Cl(xdata)
-    } else xdata
-    dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)[xsubset]
+    dpo <- dpo[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(dpo) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-max(abs(dpo), na.rm = TRUE), 
-              max(abs(dpo), na.rm = TRUE))*1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      segments(xlim[1], 0, xlim[2], 0, col = "#999999")
     
     dpo.tmp <- dpo
     dpo.tmp[is.na(dpo)] <- 0
@@ -594,29 +645,17 @@ function(x) {
   exp <- parse(text = gsub("list", "chartDPO", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, maType = maType, shift = shift, percent = percent)))), srcfile = NULL)
   exp <- c(exp, expression(
-    text(0, max(abs(dpo), na.rm = TRUE)*.9,
-         paste("De-trended Price Oscillator (", n,"):", sep = ""), 
-         col = theme$fg, pos = 4),
-    
-    text(0, max(abs(dpo), na.rm = TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(na.omit(dpo[xsubset]))), sep = ""), 
-         col = ifelse(last(na.omit(dpo[xsubset])) > 0,theme$up.col,theme$dn.col), 
-         pos = 4)))
-  
-  exp <- c(expression(
-    dpo <- TA$dpo,
-    # add inbox color
-    rect(xlim[1], -max(abs(dpo), na.rm = TRUE) * 1.05, xlim[2], max(abs(dpo), na.rm = TRUE) * 1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-max(abs(dpo), na.rm = TRUE),max(abs(dpo), na.rm = TRUE))*1.05), 
-             xlim[2], y_grid_lines(c(-max(abs(dpo), na.rm = TRUE),max(abs(dpo), na.rm = TRUE))*1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-max(abs(dpo), na.rm = TRUE),max(abs(dpo), na.rm = TRUE))*1.05), y_grid_lines(c(-max(abs(dpo), na.rm = TRUE),max(abs(dpo), na.rm = TRUE))*1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -max(abs(dpo), na.rm = TRUE) * 1.05, xlim[2], max(abs(dpo), na.rm = TRUE) * 1.05, border=theme$labels),
-    segments(xlim[1], 0, xlim[2], 0, col = "#999999")), exp)
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("De-trended Price Oscillator (", n,"):", sep = ""),
+                      paste(sprintf("%.3f", last(na.omit(dpo[xsubset]))))),
+           text.col = c(theme$fg, ifelse(last(na.omit(dpo[xsubset])>0), 
+                                         theme$up.col, theme$dn.col)), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -632,9 +671,11 @@ function(x) {
   } else x 
 
   dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)
-  lchob$Env$TA$dpo <- dpo
+  lenv$xdata <- structure(dpo, .Dimnames=list(NULL, "dpo"))
+  lenv$dpo <- lchob$Env$TA$dpo <- dpo
+  lenv$get_frame <- lchob$get_frame
   lchob$add_frame(ylim=c(-max(abs(dpo), na.rm = TRUE), 
-                         max(abs(dpo), na.rm = TRUE)) * 1.05,asp=1,fixed=TRUE)
+                         max(abs(dpo), na.rm = TRUE)) * 1.05,asp=1,fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
   lchob
@@ -708,17 +749,27 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartRSI <- function(x, n, maType, wilder) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    xx <- if(is.OHLC(xdata)) {
-      Cl(xdata)
-    } else xdata
-    rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)[xsubset]
+    rsi <- rsi[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(rsi) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
     
     lines(x.pos,rsi,col=theme$RSI$col$rsi,lwd=2,type='l')
     lines(x.pos,rsi,col=theme$RSI$col$dot,lwd=1,lty='dotted',type='l')
@@ -731,26 +782,16 @@ function(x) {
   exp <- parse(text = gsub("list", "chartRSI", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
   exp <- c(exp, expression(
-    text(0, max(rsi,na.rm=TRUE)*.9,
-         paste("Relative Strength Index (", n,"):", sep = ""), col = theme$fg,  
-         pos = 4),
-    
-    text(0, max(rsi,na.rm=TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(rsi[xsubset])), sep = ""), col = theme$RSI$col$rsi, 
-         pos = 4)))
-  exp <- c(expression(
-    rsi <- TA$rsi,
-    # add inbox color
-    rect(xlim[1], min(rsi,na.rm=TRUE)*.975, xlim[2], max(rsi,na.rm=TRUE)*1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)), 
-             xlim[2], y_grid_lines(c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)), y_grid_lines(c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05)), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], min(rsi,na.rm=TRUE)*.975, xlim[2], max(rsi,na.rm=TRUE)*1.05, border=theme$labels)), exp)
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Relative Strength Index (", n,"):", sep = ""),
+                      paste(sprintf("%.3f",last(rsi[xsubset])), sep = "")),
+           text.col = c(theme$fg, theme$RSI$col$rsi), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -768,8 +809,10 @@ function(x) {
   } else x 
 
   rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)
-  lchob$Env$TA$rsi <- rsi
-  lchob$add_frame(ylim=c(min(rsi,na.rm=TRUE)*.975,max(rsi,na.rm=TRUE)*1.05),asp=1,fixed=TRUE)
+  lenv$xdata <- structure(rsi, .Dimnames=list(NULL, "rsi"))
+  lenv$rsi <- lchob$Env$TA$rsi <- rsi
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
   lchob
@@ -820,20 +863,28 @@ function(x) {
 
   lenv <- new.env()
   lenv$chartROC <- function(x, n, type, col) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     
-    xx <- if(is.OHLC(xdata)) {
-      Cl(xdata)
-    } else xdata 
-    
-    roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)[xsubset]
+    roc <- roc[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(roc) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-max(abs(roc), na.rm = TRUE), 
-              max(abs(roc), na.rm = TRUE))*1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
 
     lines(x.pos,roc,col=col,lwd=2,type='l')
   }
@@ -842,19 +893,17 @@ function(x) {
   }, names(list(n = n, type = type, col = col)), list(n = n, type = type, col = col))
   exp <- parse(text = gsub("list", "chartROC", as.expression(substitute(list(x = current.chob(), 
                                                                              n = n, type = type, col = col)))), srcfile = NULL)
-  exp <- c(expression(
-    roc <- TA$roc,
-    # add inbox color
-    rect(xlim[1], -max(abs(roc), na.rm = TRUE)*1.05, xlim[2], max(abs(roc), na.rm = TRUE)*1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-max(abs(roc), na.rm = TRUE),max(abs(roc), na.rm = TRUE))*1.05), 
-             xlim[2], y_grid_lines(c(-max(abs(roc), na.rm = TRUE),max(abs(roc), na.rm = TRUE))*1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-max(abs(roc), na.rm = TRUE),max(abs(roc), na.rm = TRUE))*1.05), y_grid_lines(c(-max(abs(roc), na.rm = TRUE),max(abs(roc), na.rm = TRUE))*1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -max(abs(roc), na.rm = TRUE)*1.05, xlim[2], max(abs(roc), na.rm = TRUE)*1.05, border=theme$labels)), exp)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste(sprintf("%.3f", last(roc[xsubset])))),
+           text.col = c(theme$fg, col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -867,9 +916,12 @@ function(x) {
   } else x 
 
   roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)
-  lchob$Env$TA$roc <- roc
-  lchob$add_frame(ylim=c(-max(abs(roc), na.rm = TRUE), 
-                         max(abs(roc), na.rm = TRUE))*1.05, asp=1, fixed=TRUE)
+  lenv$xdata <- structure(roc, .Dimnames=list(NULL, "roc"))
+  lenv$roc <- lchob$Env$TA$roc <- roc
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^add", "", deparse(match.call()))
+  lchob$add_frame(ylim=c(-max(abs(lenv$roc[xsubset]), na.rm = TRUE), 
+                         max(abs(lenv$roc[xsubset]), na.rm = TRUE))*1.05, asp=1, fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -907,22 +959,18 @@ function(x) {
   draw <- draw.options[pmatch(draw, draw.options)]
   lenv <- new.env()
   lenv$chartBBands <- function(x, n, sd, maType, draw, on) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     
-    xx <- if(is.OHLC(xdata)) {
-      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
-    } else xdata 
-    
-    bb <- BBands(xx,n=n,maType=maType,sd=sd)[xsubset]
+    bb <- bb[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(bb) - 1)
     xlim <- x$Env$xlim
     theme <- x$Env$theme
-    bband.col <- ifelse(!is.null(theme$bbands$col),
-                        theme$bbands$col$upper,'red') 
-    bband.fill <- ifelse(!is.null(theme$bbands$col$fill),
-                         theme$bbands$col$fill,theme$bg)
+    y_grid_lines <- x$Env$y_grid_lines
+    bband.col <- ifelse(!is.null(theme$BBands$col),
+                        theme$BBands$col$upper,'red') 
+    bband.fill <- ifelse(!is.null(theme$BBands$col$fill),
+                         theme$BBands$col$fill,theme$bg)
     
     # bband col vector
     # lower.band, middle.band, upper.band, %b, bb.width
@@ -949,7 +997,6 @@ function(x) {
         lines(x.pos,
               bb[,2],col=bband.col[2],lwd=1,lty='dotted')
       }
-      
       lc <- xts:::legend.coords("topleft", xlim, lchob$get_ylim()[[2]])
       legend(lc$x,lc$y,
              legend=paste("Bollinger Bands (",
@@ -964,7 +1011,8 @@ function(x) {
       
     } else 
       if(draw == 'percent') {
-        
+        frame <- x$get_frame()
+        ylim <- x$get_ylim()[[frame]]
         rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
         # add grid lines and left-side axis labels
         segments(xlim[1], y_grid_lines(ylim), 
@@ -977,21 +1025,24 @@ function(x) {
         rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
         
         # draw %B in new frame
-        y.range <- seq(min(bb[,4], na.rm = TRUE) * .9,
-                       max(abs(bb[,4]), na.rm = TRUE) * 1.05,
-                       length.out = length(x.pos))
         
         lines(x.pos, bb[,4], col=bband.col[4],lwd=1)
         
-        text(0,last(y.range) * .9, paste("Bollinger %b (",
-                                         paste(n,sd,sep=","), "): ",
-                                         sep=""), pos=4, col=theme$fg)
-        text(0,last(y.range) * .9, paste("\n\n\n",
-                                         sprintf("%.3f",last(bb[,4])), sep = ""),
-             pos=4, col=bband.col[4])
+        lc <- xts:::legend.coords("topleft", xlim, ylim)
+        legend(lc$x,lc$y,
+               legend=c(paste("Bollinger %b (",
+                              paste(n,sd,sep=","), "): ",
+                              sep=""),
+                        paste(sprintf("%.3f",last(bb[,4])), sep = "")), 
+               text.col = c(theme$fg, bband.col[4]),
+               xjust = lc$xjust, 
+               yjust = lc$yjust, 
+               bty = "n", 
+               y.intersp=0.95)
         
       } else {
-        
+        frame <- x$get_frame()
+        ylim <- x$get_ylim()[[frame]]
         rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
         # add grid lines and left-side axis labels
         segments(xlim[1], y_grid_lines(ylim), 
@@ -1005,20 +1056,19 @@ function(x) {
         
         # draw width in new frame
         # (high band - low band) / middle band
-        bbw <- (bb[,3] - bb[,1]) / bb[,2]
-        
-        y.range <- seq(min(bbw, na.rm = TRUE) * .9,
-                       max(abs(bbw), na.rm = TRUE) * 1.05,
-                       length.out = length(x.pos))
-        
         lines(x.pos, bbw, col=bband.col[5],lwd=1)
         
-        text(0,last(y.range) * .9, paste("Bollinger Band Width (",
-                                         paste(n,sd,sep=","), "): ",
-                                         sep=""), pos=4, col=theme$fg)
-        text(0,last(y.range) * .9, paste("\n\n\n",
-                                         sprintf("%.3f",last(bbw)), sep = ""),
-             pos=4, col=bband.col[5])
+        lc <- xts:::legend.coords("topleft", xlim, ylim)
+        legend(lc$x,lc$y,
+               legend=c(paste("Bollinger Band Width (",
+                              paste(n,sd,sep=","), "): ",
+                              sep=""),
+                        paste(sprintf("%.3f",last(bbw)), sep = "")), 
+               text.col = c(theme$fg, bband.col[5]),
+               xjust = lc$xjust, 
+               yjust = lc$yjust, 
+               bty = "n", 
+               y.intersp=0.95)
       }
   }
   mapply(function(name, value) {
@@ -1033,14 +1083,16 @@ function(x) {
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
-  if (is.null(lchob$Env$theme$bbands)) {
-    lchob$Env$theme$bbands$col$fill <- '#282828'
-    lchob$Env$theme$bbands$col$upper <- 'red'
-    lchob$Env$theme$bbands$col$lower <- 'red'
-    lchob$Env$theme$bbands$col$ma <- '#D5D5D5'
-    lchob$Env$theme$bbands$lty$upper <- 'dashed'
-    lchob$Env$theme$bbands$lty$lower <- 'dashed'
-    lchob$Env$theme$bbands$lty$ma <- 'dotted'
+  if (is.null(lchob$Env$theme$BBands$col)) {
+    lchob$Env$theme$BBands$col$fill <- '#282828'
+    lchob$Env$theme$BBands$col$upper <- 'red'
+    lchob$Env$theme$BBands$col$lower <- 'red'
+    lchob$Env$theme$BBands$col$ma <- '#D5D5D5'
+  }
+  if (is.null(lchob$Env$theme$BBands$lty)) {
+    lchob$Env$theme$BBands$lty$upper <- 'dashed'
+    lchob$Env$theme$BBands$lty$lower <- 'dashed'
+    lchob$Env$theme$BBands$lty$ma <- 'dotted'
   }
 
   x <- lchob$Env$xdata
@@ -1050,8 +1102,10 @@ function(x) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
-  bb <- BBands(xx,n=n,maType=maType,sd=sd)[xsubset]
-  lchob$Env$TA$bb <- bb
+  bb <- BBands(xx,n=n,maType=maType,sd=sd)
+  lenv$xdata <- structure(cbind(bb, (bb[,3] - bb[,1]) / bb[,2]), 
+                          .Dimnames=list(NULL, c("dn", "mavg", "up", "pctB", "bbw")))
+  lenv$bb <- lchob$Env$TA$bb <- bb
   if(draw == 'bands') {
     # draw Bollinger Bands on price chart
     lchob$set_frame(-2)
@@ -1059,21 +1113,18 @@ function(x) {
   } else 
     if(draw == 'percent') {
       # draw %B in new frame
-      ylim <- c(min(bb[,4], na.rm = TRUE) * .9,
-                max(abs(bb[,4]), na.rm = TRUE) * 1.05)
-      
-      lchob$add_frame(ylim=c(ylim[1], ylim[2]),asp=1,fixed=TRUE)
+      lchob$add_frame(ylim=c(min(lenv$bb[xsubset,4], na.rm = TRUE) * .9,
+                             max(abs(lenv$bb[xsubset,4]), na.rm = TRUE) * 1.05),asp=1,fixed=TRUE)
       lchob$next_frame()
       
     } else {
       # draw width in new frame
       # (high band - low band) / middle band
       bbw <- (bb[,3] - bb[,1]) / bb[,2]
+      lenv$bbw <- lchob$Env$TA$bbbw <- bbw
       
-      ylim <- c(min(bbw, na.rm = TRUE) * .9,
-                     max(abs(bbw), na.rm = TRUE) * 1.05)
-      
-      lchob$add_frame(ylim=c(ylim[1], ylim[2]),asp=1,fixed=TRUE)
+      lchob$add_frame(ylim=c(min(lenv$bbw[xsubset], na.rm = TRUE) * .9,
+                             max(abs(lenv$bbw[xsubset]), na.rm = TRUE) * 1.05),asp=1,fixed=TRUE)
       lchob$next_frame()
     }
   lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
@@ -1223,7 +1274,7 @@ function(x) {
                         sprintf("%.3f",last(mae[,1])), sep = ""), 
            text.col = "blue",
            xjust = lc$xjust, 
-           yjust = 1.5, 
+           yjust = 2, 
            bty = "n", 
            y.intersp=0.95) 
   }
@@ -1253,7 +1304,7 @@ function(x) {
   ma <- do.call(maType,list(xx,n=n,...))
   mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))[xsubset]
   lchob$Env$TA$mae <- mae
-  lchob$set_frame(on+1)
+  lchob$set_frame(sign(on)*(abs(on)+1L))
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
 } #}}}
@@ -1349,33 +1400,41 @@ function(x) {
   
   lenv <- new.env()
   lenv$chartMACD <- function(x, fast, slow, signal, type, histogram, col) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     
-    xx <- if(is.OHLC(xdata)) {
-      Cl(xdata)
-    } else xdata 
-    
-    macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)[xsubset]
+    macd <- macd[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(macd) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-max(abs(macd),na.rm=TRUE),
-              max(abs(macd),na.rm=TRUE))*1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
 
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
     if(histogram) {
       cols <- ifelse((macd[,1]-macd[,2]) > 0, col[1],col[2])
       rect(x.pos - spacing/5,0,x.pos + spacing/5, macd[,1]-macd[,2],
            col=cols,border=cols)
     } 
-    
+
     lines(x.pos,macd[,1],col=col[3],lwd=1)
     lines(x.pos,macd[,2],col=col[4],lwd=1,lty='dotted')
     
   }
-  col <- if(missing(col)) col <- c('#999999','#777777',
-                                   '#BBBBBB','#FF0000')
+  if(missing(col)) col <- c('#999999','#777777',
+                            '#BBBBBB','#FF0000')
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
   }, names(list(fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col)), 
@@ -1383,8 +1442,8 @@ function(x) {
   exp <- parse(text = gsub("list", "chartMACD", as.expression(substitute(list(x = current.chob(), 
                                                                              fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col)))), srcfile = NULL)
   exp <- c(exp, expression(
-    lc <- xts:::legend.coords("topleft", xlim, c(-max(abs(macd),na.rm=TRUE),
-                                                 max(abs(macd),na.rm=TRUE))*1.05),
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
     legend(lc$x, lc$y, 
            legend=c(paste("Moving Average Convergence Divergence (",
                           paste(fast,slow,signal,sep=','),"):", sep = ""),
@@ -1395,19 +1454,6 @@ function(x) {
            yjust=lc$yjust,
            bty='n',
            y.intersp=0.95)))
-  exp <- c(expression(
-    macd <- TA$macd,
-    # add inbox color
-    rect(xlim[1], -max(abs(macd),na.rm=TRUE)*1.05, xlim[2], max(abs(macd),na.rm=TRUE)*1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-max(abs(macd),na.rm=TRUE),max(abs(macd),na.rm=TRUE))*1.05), 
-             xlim[2], y_grid_lines(c(-max(abs(macd),na.rm=TRUE),max(abs(macd),na.rm=TRUE))*1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-max(abs(macd),na.rm=TRUE),max(abs(macd),na.rm=TRUE))*1.05), y_grid_lines(c(-max(abs(macd),na.rm=TRUE),max(abs(macd),na.rm=TRUE))*1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -max(abs(macd),na.rm=TRUE)*1.05, xlim[2], max(abs(macd),na.rm=TRUE)*1.05, border=theme$labels)), exp)
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -1421,9 +1467,11 @@ function(x) {
   } else x 
 
   macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
-  lchob$Env$TA$macd <- macd
-  lchob$add_frame(ylim=c(-max(abs(macd),na.rm=TRUE),
-                         max(abs(macd),na.rm=TRUE))*1.05, asp=1, fixed=TRUE)
+  lenv$xdata <- structure(cbind(macd, macd[,1]-macd[,2]), .Dimnames=list(NULL, c("macd", "signal", "histogram")))
+  lenv$macd <- lchob$Env$TA$macd <- macd
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(-max(abs(lenv$macd[xsubset]),na.rm=TRUE),
+                         max(abs(lenv$macd[xsubset]),na.rm=TRUE))*1.05, asp=1, fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
@@ -1693,11 +1741,15 @@ function(x) {
   lenv$chartPoints <- function(x, type, pch, offset, col, bg, cex, on, overlay) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    x.points <- x$Env$x.points
-    xsubset <- x.points %in% xsubset
-    y.points <- x$Env$y.points
+    if(is.xts(x$Env$x.points)) {
+      y.points <- x$Env$x.points[.index(x$Env$x.points) %in% .index(xdata[xsubset])]
+      x.points <- which(.index(xdata[xsubset]) %in% .index(x$Env$x.points))
+    }
+    else {
+      x.points <- which(.index(xdata[xsubset]) %in% .index(xdata[x$Env$x.points]))
+      y.points <- x$Env$y.points
+    }
     spacing <- x$Env$theme$spacing
-    
     # if OHLC and above - get Hi, else Lo
     # if univariate - get value
     y.data <- if(is.OHLC(xdata)) {
@@ -1727,7 +1779,7 @@ function(x) {
       segments(xlim[1], 0, xlim[2], 0, col = "#666666", lty = "dotted")
     }
     
-    points(x=x.points[xsubset], y=y.points[xsubset], type=type,pch=pch,col=col,bg=bg,cex=cex)
+    points(x=x.points, y=y.points, type=type,pch=pch,col=col,bg=bg,cex=cex)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
          names(list(type = type, pch = pch, offset = offset, col = col, 
@@ -1743,18 +1795,12 @@ function(x) {
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
   xdata <- lchob$Env$xdata
   xsubset <- lchob$Env$xsubset
-
   
-  if(missing(bg)) bg <- col
-  
-  if(is.xts(x)) {
-    lchob$Env$x.points <- match(.index(x), .index(xdata))
-    lchob$Env$y.points <- x
-  } else {
+  if(!is.null(y))
     if(NROW(x) != NROW(y)) stop('x and y must be of equal lengths')
-    lchob$Env$x.points <- x
-    lchob$Env$y.points <- y
-  }
+  
+  lchob$Env$x.points <- x
+  lchob$Env$y.points <- y
 
 
     if(overlay)

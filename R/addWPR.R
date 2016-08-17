@@ -5,24 +5,28 @@
 
   lenv <- new.env()
   lenv$chartWPR <- function(x, n) {
-    xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     
-    xx <- if(is.OHLC(xdata)) {
-      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
-    } else if(is.null(dim(xdata))) {
-      xdata
-    } else {
-      xdata[,1] 
-    }
-    
-    
-    wpr <- WPR(xx,n=n)[xsubset]
+    wpr <- wpr[xsubset]
     spacing <- x$Env$theme$spacing
     x.pos <- 1 + spacing * (1:NROW(wpr) - 1)
     xlim <- x$Env$xlim
-    ylim <- c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
     theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
     
     lines(x.pos,wpr,col=theme$WPR$col,lwd=1,type='l')
     
@@ -34,26 +38,16 @@
   exp <- parse(text = gsub("list", "chartWPR", as.expression(substitute(list(x = current.chob(), 
                                                                                n = n)))), srcfile = NULL)
   exp <- c(exp, expression(
-    text(0, max(abs(wpr), na.rm = TRUE)*.9,
-         paste("Williams %R (", n,"):", sep = ""), col = theme$fg, 
-         pos = 4),
-    
-    text(0, max(abs(wpr), na.rm = TRUE)*.9,
-         paste("\n\n\n",sprintf("%.3f",last(wpr[xsubset])), sep = ""), col = theme$WPR$col, 
-         pos = 4)))
-  exp <- c(expression(
-    wpr <- TA$wpr,
-    # add inbox color
-    rect(xlim[1], max(abs(wpr), na.rm = TRUE) * 1.05, xlim[2], max(abs(wpr), na.rm = TRUE) * 1.05, col=theme$fill),
-    # add grid lines and left-side axis labels
-    segments(xlim[1], y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), 
-             xlim[2], y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), 
-             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
-    text(xlim[1], y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), y_grid_lines(c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05), 
-         col = theme$labels, srt = theme$srt, 
-         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
-    # add border of plotting area
-    rect(xlim[1], -0.1 * 1.05, xlim[2], max(abs(wpr), na.rm = TRUE) * 1.05, border=theme$labels)), exp)
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Williams %R (", n,"):", sep = ""),
+                      paste(sprintf("%.3f",last(wpr[xsubset])), sep = "")), 
+           text.col = c(theme$fg, theme$WPR$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
   
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
@@ -75,8 +69,10 @@
 
 
   wpr <- WPR(xx,n=n)
-  lchob$Env$TA$wpr <- wpr
-  lchob$add_frame(ylim=c(-0.1, max(abs(wpr), na.rm = TRUE)) * 1.05, asp=1, fixed=TRUE)
+  lenv$xdata <- structure(wpr, .Dimnames=list(NULL, "wpr"))
+  lenv$wpr <- lchob$Env$TA$wpr <- wpr
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(-0.1, max(abs(lenv$wpr[xsubset]), na.rm = TRUE)) * 1.05, asp=1, fixed=FALSE)
   lchob$next_frame()
   lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
   lchob
