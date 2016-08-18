@@ -51,32 +51,6 @@ function (type = c("auto", "candlesticks", "matchsticks",
   if(!missing(name)) chob$Env$main <- name
   ########### end name ###########
 
-  ########### type ###########
-#  if(!missing(type)) {
-    chart.options <- c("auto","candlesticks","matchsticks","line","bars")
-    chart <- chart.options[pmatch(type,chart.options)]
-    if(chart[1]=="auto") {
-      chart <- ifelse(NROW(x[subset]) > 300,"matchsticks","candlesticks")
-    }
-    if(chart[1]=="candlesticks") {
-      spacing <- 3
-      width <- 3
-    } else
-    if(chart[1]=="matchsticks" || chart[1]=='line') {
-      spacing <- 1
-      width <- 1
-    } else
-    if(chart[1]=="bars") {
-      spacing <- 4
-      width <- 3
-      if(NROW(x[subset]) > 60) width <- 1
-    }
-#    chob@spacing <- spacing
-    chob$Env$theme$width <- width
-    chob$Env$range.bars.type <- chart[1]
-#  }
-  ########### end type ###########
-
   ########### subset ##########
   if(!missing(subset)) {
     if (!is.null(subset) & is.character(subset)) {
@@ -120,6 +94,32 @@ function (type = c("auto", "candlesticks", "matchsticks",
   }
   xsubset <- chob$Env$xsubset
   ########### end subset ##########
+  
+  ########### type ###########
+  #  if(!missing(type)) {
+  chart.options <- c("auto","candlesticks","matchsticks","line","bars")
+  chart <- chart.options[pmatch(type,chart.options)]
+  if(chart[1]=="auto") {
+    chart <- ifelse(NROW(x) > 300,"matchsticks","candlesticks")
+  }
+  if(chart[1]=="candlesticks") {
+    spacing <- 3
+    width <- 3
+  } else
+    if(chart[1]=="matchsticks" || chart[1]=='line') {
+      spacing <- 1
+      width <- 1
+    } else
+      if(chart[1]=="bars") {
+        spacing <- 4
+        width <- 3
+        if(NROW(x) > 60) width <- 1
+      }
+  #    chob@spacing <- spacing
+  chob$Env$theme$width <- width
+  chob$Env$range.bars.type <- chart[1]
+  #  }
+  ########### end type ###########
 
   if(!missing(major.ticks)) {
     chob$Env$bp <- axTicksByTime(chob$Env$xdata[chob$Env$xsubset],major.ticks)
@@ -163,9 +163,10 @@ function (type = c("auto", "candlesticks", "matchsticks",
       chob$Env$theme$grid2 <- theme$grid.col
     }
     
-    chob$Env$theme$bbands$col$fill <- theme$BBands.fill
-    chob$Env$theme$bbands$col$upper <- theme$BBands.col
-    chob$Env$theme$bbands$col$lower <- theme$BBands.col
+    chob$Env$theme$BBands$col$fill <- theme$BBands$col$fill
+    chob$Env$theme$BBands$col$upper <- theme$BBands$col$upper
+    chob$Env$theme$BBands$col$lower <- theme$BBands$col$lower
+    chob$Env$theme$BBands$col$ma <- theme$BBands$col$ma
   }
   ########### end chartTheme ##########
 
