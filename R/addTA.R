@@ -1646,55 +1646,53 @@ function(x) {
   if(missing(v)) v <- NULL
 
   lenv <- new.env()
-  lenv$chartLines <- function(x, h, v, on, overlay, col) {
-    xdata <- x$Env$xdata
+  lenv$chartLines <- function(x, series, h, v, on, overlay, col) {
     xsubset <- x$Env$xsubset
-    xdata <- cbind(Hi(xdata),Lo(xdata))
-    lines <- x$Env$TA$lines[xsubset]
+    series <- series[which(.index(series) %in% .index(x$Env$xdata[xsubset]))]
+    x.points <- which(.index(x$Env$xdata[xsubset]) %in% .index(series))
     spacing <- x$Env$theme$spacing
     xlim <- x$Env$xlim
     ylim <- x$get_ylim()[[abs(on)+1L]]
     theme <- x$Env$theme
-    y_grid_lines <- x$Env$y_grid_lines
+    y_grid_series <- x$Env$y_grid_series
     
     if(!overlay) {
-      ylim <- range(lines[,1], na.rm=TRUE) * 1.05
+      ylim <- range(series[,1], na.rm=TRUE) * 1.05
       # add inbox color
       rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
-      # add grid lines and left-side axis labels
-      segments(xlim[1], y_grid_lines(ylim), 
-               xlim[2], y_grid_lines(ylim), 
+      # add grid series and left-side axis labels
+      segments(xlim[1], y_grid_series(ylim), 
+               xlim[2], y_grid_series(ylim), 
                col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
-      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+      text(xlim[1], y_grid_series(ylim), y_grid_series(ylim), 
            col = theme$labels, srt = theme$srt, 
            offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
       # add border of plotting area
       rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
     }
-    if(!is.null(lines)) {
-      # draw lines given positions specified in x
-      x.pos <- 1 + spacing * (1:nrow(lines) - 1)
-      lines(x.pos, lines[,1],col=col)  
+    if(!is.null(series)) {
+      # draw series given positions specified in x
+      lines(x.points,series[,1],col=col)  
     }
     if(!is.null(h)) {
-      # draw horizontal lines given positions specified in h
+      # draw horizontal series given positions specified in h
       segments(xlim[1],h,xlim[2],h,col=col)
     }
     if(!is.null(v)) {
-      # draw vertical lines given positions specified in v
+      # draw vertical series given positions specified in v
       segments((v-1)*spacing+1,ylim[1],(v-1)*spacing+1,ylim[2],col=col)
     }
   }
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
-  }, names(list(h = h, v = v, on = on, overlay = overlay, col = col)), 
-  list(h = h, v = v, on = on, overlay = overlay, col = col))
+  }, names(list(x = x, h = h, v = v, on = on, overlay = overlay, col = col)), 
+  list(x = x, h = h, v = v, on = on, overlay = overlay, col = col))
   exp <- parse(text = gsub("list", "chartLines", as.expression(substitute(list(x = current.chob(), 
+                                                                               series = get("x"),
                                                                                h = h, v = v, on = on, overlay = overlay, col = col)))), srcfile = NULL)
   lchob <- current.chob()
   ncalls <- length(lchob$Env$call_list)
   lchob$Env$call_list[[ncalls + 1]] <- match.call()
-  lchob$Env$TA$lines <- x
 
   if(overlay) {
     lchob$set_frame(sign(on)*(abs(on)+1L))
@@ -1738,16 +1736,15 @@ function(x) {
                         on=1,overlay=TRUE) {
  
   lenv <- new.env()
-  lenv$chartPoints <- function(x, type, pch, offset, col, bg, cex, on, overlay) {
+  lenv$chartPoints <- function(x, x.points, y.points, type, pch, offset, col, bg, cex, on, overlay) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
-    if(is.xts(x$Env$x.points)) {
-      y.points <- x$Env$x.points[.index(x$Env$x.points) %in% .index(xdata[xsubset])]
-      x.points <- which(.index(xdata[xsubset]) %in% .index(x$Env$x.points))
+    if(is.xts(x.points)) {
+      y.points <- x.points[.index(x.points) %in% .index(xdata[xsubset])]
+      x.points <- which(.index(xdata[xsubset]) %in% .index(x.points))
     }
     else {
-      x.points <- which(.index(xdata[xsubset]) %in% .index(xdata[x$Env$x.points]))
-      y.points <- x$Env$y.points
+      x.points <- which(.index(xdata[xsubset]) %in% .index(xdata[x.points]))
     }
     spacing <- x$Env$theme$spacing
     # if OHLC and above - get Hi, else Lo
@@ -1758,7 +1755,10 @@ function(x) {
       } else Lo(xdata)
     } else xdata
     
-    if(is.null(y.points)) y.points <- y.data[x.points] * offset
+    if(is.null(y.points)) 
+      y.points <- y.data[x.points] * offset
+    else
+      y.points <- y.points[.index(y.points) %in% .index(xdata[xsubset])] * offset
     
     if(!overlay) {
       xlim <- x$Env$xlim
@@ -1782,11 +1782,12 @@ function(x) {
     points(x=x.points, y=y.points, type=type,pch=pch,col=col,bg=bg,cex=cex)
   }
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-         names(list(type = type, pch = pch, offset = offset, col = col, 
-                    bg = bg, cex = cex, on = on, overlay = overlay)), 
-         list(type = type, pch = pch, offset = offset, col = col, 
-              bg = bg, cex = cex, on = on, overlay = overlay))
+         names(list(x = x, y = y, type = type, pch = pch, offset = offset, 
+                    col = col, bg = bg, cex = cex, on = on, overlay = overlay)), 
+         list(x = x, y = y, type = type, pch = pch, offset = offset, 
+              col = col, bg = bg, cex = cex, on = on, overlay = overlay))
   exp <- parse(text=gsub("list","chartPoints",as.expression(substitute(list(x=current.chob(),
+                                                                            x.points=get("x"), y.points=get("y"),
                                                                             type = type, pch = pch, offset = offset, col = col, 
                                                                             bg = bg, cex = cex, on = on, overlay = overlay)))),
                srcfile=NULL)
@@ -1798,10 +1799,6 @@ function(x) {
   
   if(!is.null(y))
     if(NROW(x) != NROW(y)) stop('x and y must be of equal lengths')
-  
-  lchob$Env$x.points <- x
-  lchob$Env$y.points <- y
-
 
     if(overlay)
       lchob$set_frame(on+1)
