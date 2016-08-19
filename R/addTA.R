@@ -1593,12 +1593,12 @@ function(x) {
            col = theme$labels, srt = theme$srt, 
            offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
       # add border of plotting area
-      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=col, border=theme$labels)
     }
     
     rect(((xstart-1)*spacing+1)-width/2, rep(ylim[1],length(xstart)),
          ((xend-1)*spacing+1)+width/2, rep(ylim[2],length(xend)),
-         col=c(theme$bbands$col$fill),border=NA)
+         col=col,border=NA)
   }
   mapply(function(name, value) {
     assign(name, value, envir = lenv)
