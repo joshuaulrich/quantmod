@@ -18,7 +18,6 @@ loadSymbolLookup(file,dir="")
 \arguments{
   \item{\dots}{ name=value pairs for symbol defaults }
   \item{Symbols}{ name of symbol(s) }
-  \item{confirm}{ warn before deleting lookup table }
   \item{file}{ filename }
   \item{dir}{ directory of filename }
 }
