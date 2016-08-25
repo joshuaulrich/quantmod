@@ -10,62 +10,40 @@ function(Symbols, Exp=NULL, src="yahoo", ...) {
 
 getOptionChain.yahoo <- function(Symbols, Exp, ...)
 {
-  if(!requireNamespace("XML", quietly=TRUE))
-    stop("package:",dQuote("XML"),"cannot be loaded.")
+  if(!requireNamespace("jsonlite", quietly=TRUE))
+    stop("package:",dQuote("jsonlite"),"cannot be loaded.")
 
-  thParse <- function(x) {
-    if (length(XML::xmlChildren(x)) > 1) {
-      XML::xmlValue(x[["div"]][["div"]])
-    } else {
-      XML::xmlValue(x)
-    }
-  }
-  NewToOld <- function(x, nm) {
+  NewToOld <- function(x) {
     if(is.null(x))
       return(x)
-    # clean up colnames, in case there's weirdness in the HTML
-    x <- setNames(x, make.names(nm))
+    # clean up colnames, in case there's weirdness in the JSON
+    names(x) <- tolower(gsub("[[:space:]]", "", names(x)))
     # set cleaned up colnames to current output colnames
-    d <- with(x, data.frame(Strike=strike, Last=last, Chg=change,
+    d <- with(x, data.frame(Strike=strike, Last=lastprice, Chg=change,
       Bid=bid, Ask=ask, Vol=volume, OI=openinterest,
-      row.names=`contractname`, stringsAsFactors=FALSE))
+      row.names=contractsymbol, stringsAsFactors=FALSE))
     # remove commas from the numeric data
     d[] <- lapply(d, gsub, pattern=",", replacement="", fixed=TRUE)
     d[] <- lapply(d, type.convert, as.is=TRUE)
     d
   }
-  cleanNames <- function(x) {
-    tolower(gsub("[[:space:]]", "", x))
-  }
 
   # Don't check the expiry date if we're looping over dates we just scraped
   checkExp <- !hasArg(".expiry.known") || !match.call(expand.dots=TRUE)$.expiry.known
   # Construct URL
-  urlExp <- paste0("http://finance.yahoo.com/q/op?s=", Symbols[1])
+  urlExp <- paste0("https://query2.finance.yahoo.com/v7/finance/options/", Symbols[1])
   # Add expiry date to URL
   if(!checkExp)
-    urlExp <- paste0(urlExp, "&date=", Exp)
+    urlExp <- paste0(urlExp, "?&date=", Exp)
 
-  # Fetch data; ensure object is free'd on function exit
-  tbl <- XML::htmlParse(urlExp, isURL=TRUE)
-  on.exit(XML::free(tbl))
-
-  # xpaths to the data we're interested in
-  xpaths <- list()
-  xpaths$tables <- "//table[contains(@class, 'quote-table')]"
-  xpaths$table.names <- paste0(xpaths$tables, "/caption/text()")
-  xpaths$headers <- paste0(xpaths$tables, "/thead/tr[not(contains(@class, 'filterRangeRow'))]")
-  xpaths$expiries <- "//div[contains(@class, 'options_menu')]/form/select//option"
-
-  # Extract table names and headers
-  table.names <- XML::xpathSApply(tbl, xpaths$table.names, XML::xmlValue)
-  table.names <- cleanNames(table.names)
-  table.headers <- XML::xpathApply(tbl, xpaths$headers, fun=function(x) sapply(x['th'], thParse))
-  table.headers <- lapply(table.headers, cleanNames)
+  # Fetch data, ensure connection is closed on function exit
+  URL <- url(urlExp)
+  on.exit(close(URL))
+  tbl <- jsonlite::fromJSON(URL)
 
   # Only return nearest expiry (default served by Yahoo Finance), unless the user specified Exp
   if(!missing(Exp) && checkExp) {
-    all.expiries <- XML::xpathSApply(tbl, xpaths$expiries, XML::xmlGetAttr, name="value")
+    all.expiries <- tbl$optionChain$result$expirationDates[[1]]
     all.expiries.posix <- .POSIXct(as.numeric(all.expiries), tz="UTC")
 
     if(is.null(Exp)) {
@@ -101,10 +79,8 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     }
   }
 
-  dftables <- XML::xmlApply(XML::getNodeSet(tbl, xpaths$tables), XML::readHTMLTable, stringsAsFactors=FALSE)
-  names(dftables) <- table.names
-
-  dftables <- mapply(NewToOld, x=dftables, nm=table.headers, SIMPLIFY=FALSE)
+  dftables <- lapply(tbl$optionChain$result$options[[1]][,c("calls","puts")], `[[`, 1L)
+  dftables <- mapply(NewToOld, x=dftables, SIMPLIFY=FALSE)
   dftables
 }
 
