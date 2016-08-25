@@ -64,7 +64,3 @@ function(Symbols=NULL)
   all.symbols[Symbols]
 }
 
-"unsetSymbolLookup" <-
-function(Symbols,confirm=TRUE)
-{
-}

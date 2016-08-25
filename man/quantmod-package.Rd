@@ -14,9 +14,9 @@ Quantitative Financial Modelling and Trading Framework for R
 Package: \tab quantmod\cr
 Type: \tab Package\cr
 Version: \tab 0.4-6\cr
-Date: \tab 2016-04-07\cr
+Date: \tab 2016-08-25\cr
 Depends: \tab xts(>= 0.9-0),zoo,TTR(>= 0.2),methods\cr
-Suggests: \tab DBI,RMySQL,RSQLite,timeSeries,its,XML,downloader\cr
+Suggests: \tab DBI,RMySQL,RSQLite,timeSeries,its,XML,downloader,jsonlite\cr
 LazyLoad: \tab yes\cr
 License: \tab GPL-3\cr
 URL: \tab http://www.quantmod.com\cr

@@ -1,7 +1,6 @@
 \name{setSymbolLookup}
 \alias{setSymbolLookup}
 \alias{getSymbolLookup}
-\alias{unsetSymbolLookup}
 \alias{loadSymbolLookup}
 \alias{saveSymbolLookup}
 \title{ Manage Symbol Lookup Table }
@@ -12,7 +11,6 @@ Create and manage Symbol defaults lookup table within
 \usage{
 setSymbolLookup(...)
 getSymbolLookup(Symbols=NULL)
-unsetSymbolLookup(Symbols,confirm=TRUE)
 
 saveSymbolLookup(file,dir="")
 loadSymbolLookup(file,dir="")
