@@ -36,10 +36,8 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
   if(!checkExp)
     urlExp <- paste0(urlExp, "?&date=", Exp)
 
-  # Fetch data, ensure connection is closed on function exit
-  URL <- url(urlExp)
-  on.exit(close(URL))
-  tbl <- jsonlite::fromJSON(URL)
+  # Fetch data (jsonlite::fromJSON will handle connection)
+  tbl <- jsonlite::fromJSON(urlExp)
 
   # Only return nearest expiry (default served by Yahoo Finance), unless the user specified Exp
   if(!missing(Exp) && checkExp) {
