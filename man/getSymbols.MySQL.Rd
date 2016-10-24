@@ -65,7 +65,7 @@ with class defined by \code{return.class}.
 
    \cite{David A. James and Saikat DebRoy (2006).
          R Interface to the MySQL databse.
-         \url{www.omegahat.org}}
+         \url{www.omegahat.net}}
 
    \cite{R-SIG-DB. DBI: R Database Interface}
  }
