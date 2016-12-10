@@ -13,7 +13,8 @@ getDividends(Symbol,
              src = "yahoo", 
              auto.assign = FALSE, 
              auto.update = FALSE, 
-             verbose = FALSE, ...)
+             verbose = FALSE,
+             split.adjust = TRUE, ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,6 +26,8 @@ getDividends(Symbol,
   \item{auto.assign}{ should results be loaded to env}
   \item{auto.update}{ automatically add dividend to data object }
   \item{verbose}{ display status of retrieval }
+  \item{split.adjust}{ adjust dividends for splits (\code{TRUE} by default
+    because that's what Yahoo returns)}
   \item{\dots}{ currently unused }
 }
 \details{
