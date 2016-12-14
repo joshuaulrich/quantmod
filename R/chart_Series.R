@@ -371,14 +371,11 @@ chart_Series <- function(x,
 
   # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
   if(!is.null(TA) && nchar(TA) > 0) {
-  TA <- parse(text=TA, srcfile=NULL)
-  for( ta in 1:length(TA)) {
-    if(length(TA[ta][[1]][-1]) > 0) {
-    cs <- eval(TA[ta])
-    } else {
-    cs <- eval(TA[ta])
+    TA <- parse(text=TA, srcfile=NULL)
+    for(ta in seq_along(TA)) {
+      # evaluate TA in environment from which chart_Series was called
+      cs <- eval(TA[ta], envir = parent.frame())
     }
-  }
   }
   assign(".chob", cs, .plotEnv)
   cs
