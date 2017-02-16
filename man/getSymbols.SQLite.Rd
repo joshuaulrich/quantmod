@@ -10,6 +10,7 @@ this function should \emph{NOT} be called directly.
 getSymbols.SQLite(Symbols,
                   env,
                   return.class = 'xts',
+                  Date_col="row_names",
                   db.fields = c("row_names",
                                 "Open",
                                 "High",
@@ -17,7 +18,7 @@ getSymbols.SQLite(Symbols,
                                 "Close",
                                 "Volume",
                                 "Adjusted"),
-                  field.names = NULL,
+                  col.names = NULL,
                   dbname = NULL,
                   POSIX = TRUE,
                   ...)
@@ -27,8 +28,9 @@ getSymbols.SQLite(Symbols,
                   symbol to be loaded }
   \item{env}{ where to create the objects }
   \item{return.class}{ desired class of returned object }
+  \item{Date_col}{ column name of date in database }
   \item{db.fields}{ character vector naming fields to retrieve }
-  \item{field.names}{ names to assign to returned columns }
+  \item{col.names}{ names to assign to returned columns }
   \item{dbname}{ database name }
   \item{POSIX}{ are rownames numeric }
   \item{\dots}{ additional arguments }
