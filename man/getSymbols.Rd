@@ -157,7 +157,7 @@ valid environment and auto.assign=TRUE,
 \code{env} one object for each
 \code{Symbol} specified, with class defined
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
+\code{zoo}, \code{xts}, or \code{timeSeries}.
 
 If env=NULL or auto.assign=FALSE an object of type
 \code{return.class} will be returned.

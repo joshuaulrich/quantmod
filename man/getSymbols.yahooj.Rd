@@ -52,7 +52,7 @@ A call to getSymbols.yahooj will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
+\code{zoo}, \code{xts}, or \code{timeSeries}.
 
 In the case of xts objects, the indexing will be by Date. This
 can be altered with the \code{index.class} argument.  See

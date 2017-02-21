@@ -29,7 +29,7 @@ See \code{getModelData} for details of
 how this process works.
 
 Currently, objects of class \code{quantmod.OHLC},
-\code{zoo}, \code{ts} and \code{its} are supported within the
+\code{zoo} and \code{ts} are supported within the
 model formula.
 
 All symbols are first retrieved from the global environment, without inheritence.

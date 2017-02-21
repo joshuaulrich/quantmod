@@ -1128,16 +1128,6 @@ function(Symbols,env,return.class='xts',
          fr <- as.data.frame(fr)
          return(fr)
        } else
-       if('its' %in% return.class) {
-         if(requireNamespace("its", quietly=TRUE)) {
-           fr.dates <- as.POSIXct(as.character(index(fr)))
-           fr <- its::its(coredata(fr),fr.dates)
-           return(fr)
-         } else {
-           warning(paste("'its' from package 'its' could not be loaded:",
-                         " 'xts' class returned"))
-         }
-       } else 
        if('timeSeries' %in% return.class) {
          if(requireNamespace("timeSeries", quietly=TRUE)) {
            fr <- timeSeries::timeSeries(coredata(fr), charvec=as.character(index(fr)))

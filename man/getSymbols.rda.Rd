@@ -45,7 +45,7 @@ A call to getSymbols.csv will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{xts}, \code{data.frame}, 
+\code{zoo}, \code{xts}, \code{data.frame}, 
 or \code{timeSeries}.
 }
 \author{ Jeffrey A. Ryan }

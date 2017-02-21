@@ -47,7 +47,7 @@ A call to getSymbols.FRED will load into the specified
 environment one object for each
 \code{Symbol} specified, with class defined 
 by \code{return.class}. Presently this may be \code{ts},
-\code{its}, \code{zoo}, \code{xts}, or \code{timeSeries}.
+\code{zoo}, \code{xts}, or \code{timeSeries}.
 }
 \note{
 FRED changed its URL scheme for the downloads from http:// to

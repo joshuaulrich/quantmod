@@ -15,7 +15,7 @@ of the desired output data object, with the \code{dependent} side
 corresponding to first column, and the \code{independent} parameters of
 the formula assigned to the remaining columns. }
   \item{na.rm}{ drop rows with missing values? }
-  \item{return.class}{ one of "zoo","data.frame","ts","its","timeSeries" }
+  \item{return.class}{ one of "zoo","data.frame","ts","timeSeries" }
 }
 \details{
 Makes available for use \emph{outside} the \pkg{quantmod} workflow a dataset

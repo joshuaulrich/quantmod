@@ -22,7 +22,7 @@ quantmod wishlist: as of Mar 21, 2008
 
   - convert to xts from zoo throughout.  Simplify data methods [done]
   
-  - try to remove dependence on fSeries and its (etc).  Through 'xts'???
+  - try to remove dependence on fSeries (etc).  Through 'xts'???
 
 FUNCTIONALITY:
 

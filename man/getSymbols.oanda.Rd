@@ -46,7 +46,7 @@ fail with a warning that the limit has been exceeded.
 \value{
  A call to getSymbols(Symbols,src="oanda") will load into the specified
 environment one object for each 'Symbol' specified, with class
-defined  by 'return.class'. Presently this may be 'ts', 'its',
+defined  by 'return.class'. Presently this may be 'ts',
 'zoo', 'xts', or 'timeSeries'.
 }
 \note{

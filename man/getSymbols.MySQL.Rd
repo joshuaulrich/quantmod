@@ -30,7 +30,7 @@ getSymbols.MySQL(Symbols,
        \item{env}{ where to create objects. (.GlobalEnv)}
        \item{return.class}{ desired class of returned object.
                             Can be xts, 
-                            zoo, data.frame, ts, or its. (zoo)}
+                            zoo, data.frame, or ts. (zoo)}
        \item{db.fields}{ character vector indicating
                            names of fields to retrieve}
        \item{field.names}{ names to assign to returned columns }
