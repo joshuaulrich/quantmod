@@ -665,7 +665,7 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
-     FRED.URL <- "https://fred.stlouisfed.org/series/"
+     FRED.URL <- "https://fred.stlouisfed.org/series"
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
