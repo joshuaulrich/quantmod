@@ -471,19 +471,33 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
+
+     default.return.class <- return.class
+     default.from <- from
+     default.to <- to
+
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
      google.URL <- "http://finance.google.com/finance/historical?"
-     from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
-     from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
-     from.d <- as.numeric(strsplit(as.character(from),'-',)[[1]][3])
-     to.y <- as.numeric(strsplit(as.character(to),'-',)[[1]][1])
-     to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])
-     to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
      for(i in 1:length(Symbols)) {
+       return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+       return.class <- ifelse(is.null(return.class),default.return.class,
+                              return.class)
+       from <- getSymbolLookup()[[Symbols[[i]]]]$from
+       from <- if(is.null(from)) default.from else from
+       to <- getSymbolLookup()[[Symbols[[i]]]]$to
+       to <- if(is.null(to)) default.to else to
+
+       from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
+       from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
+       from.d <- as.numeric(strsplit(as.character(from),'-',)[[1]][3])
+       to.y <- as.numeric(strsplit(as.character(to),'-',)[[1]][1])
+       to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])
+       to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
+
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
