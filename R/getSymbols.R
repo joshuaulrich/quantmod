@@ -1036,6 +1036,9 @@ function(Symbols,env,return.class='xts',
          from=Sys.Date()-499,
          to=Sys.Date(),
          ...) {
+     if(!requireNamespace("jsonlite", quietly=TRUE))
+       stop("package:",dQuote("jsonlite"),"cannot be loaded.")
+
      importDefaults("getSymbols.oanda")
      this.env <- environment()
      for(var in names(list(...))) {
@@ -1087,25 +1090,32 @@ function(Symbols,env,return.class='xts',
            dateLoc <- length(dateStr)
        }
        data_range <- dateStr[dateLoc[1]]
-       oanda.URL <- paste("https://www.oanda.com/currency/historical-rates/download?",
-         "quote_currency=", currency.pair[1],
-         "&end_date=", to,
-         "&start_date=", from,
-         "&period=daily&display=absolute&rate=0",
-         "&data_range=", data_range,
-         "&price=mid&view=table",
-         "&base_currency_0=", currency.pair[2],
-         "&base_currency_1=&base_currency_2=&base_currency_3=&base_currency_4=&download=csv",
-         sep="")
-       download.file(oanda.URL, destfile=tmp, quiet=!verbose)
-       fr <- read.csv(tmp, skip=4, as.is=TRUE, header=TRUE)
-       fr[,1L] <- as.Date(fr[,1L], origin="1970-01-01")
-       fr <- na.omit(fr[,1:2])    # remove period mean/min/max from end of file
-       if(is.character(fr[,2L]))  # remove thousands seperator and convert
-         fr[,2L] <- as.numeric(gsub(",", "", fr[,2L], fixed=TRUE))
+       oanda.URL <- paste0("https://www.oanda.com/fx-for-business/",
+                           "historical-rates/api/update/?&widget=1",
+                           "&source=OANDA&display=absolute&adjustment=0",
+                           "&data_range=c",
+                           "&quote_currency=", currency.pair[1],
+                           "&start_date=", from,
+                           "&end_date=", to,
+                           "&period=daily",
+                           "&price=mid",
+                           "&view=table",
+                           "&base_currency_0=", currency.pair[2])
+       # Fetch data (jsonlite::fromJSON will handle connection)
+       tbl <- jsonlite::fromJSON(oanda.URL, simplifyVector = FALSE)
+       Data <- tbl[[1]][[1]]$data
+
+       # timestamps are ms since midnight 1970-01-01
+       secs <- as.numeric(sapply(Data, `[[`, 1L)) / 1000
+       dates <- as.Date(.POSIXct(secs, tz = "UTC"))
+
+       # remove thousands separator and convert to numeric
+       rates <- sapply(Data, `[[`, 2L)
+       if(is.character(rates))
+         rates <- as.numeric(gsub(",", "", rates))
 
        if(verbose) cat("done.\n")
-       fr <- xts(fr[,-1L], fr[,1L], src='oanda', updated=Sys.time())
+       fr <- xts(rates, dates, src="oanda", updated=Sys.time())
        fr <- fr[paste(from, to, sep="/")]  # subset to requested timespan
        colnames(fr) <- gsub("/",".",Symbols[[i]])
        fr <- convert.time.series(fr=fr,return.class=return.class)
