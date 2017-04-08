@@ -708,7 +708,7 @@ function(Symbols,env,return.class='xts',
 
 # getFX {{{
 `getFX` <-
-function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
+function(Currencies,from=Sys.Date()-179,to=Sys.Date(),
          env=parent.frame(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
@@ -738,7 +738,7 @@ function(Currencies,from=Sys.Date()-499,to=Sys.Date(),
 
 # getMetals {{{
 `getMetals` <-
-function(Metals,from=Sys.Date()-500,to=Sys.Date(),
+function(Metals,from=Sys.Date()-179,to=Sys.Date(),
          base.currency="USD",env=parent.frame(),
          verbose=FALSE,warning=TRUE,
          auto.assign=TRUE,...) {
@@ -1033,7 +1033,7 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
 # getSymbols.oanda {{{
 `getSymbols.oanda` <-
 function(Symbols,env,return.class='xts',
-         from=Sys.Date()-499,
+         from=Sys.Date()-179,
          to=Sys.Date(),
          ...) {
      if(!requireNamespace("jsonlite", quietly=TRUE))
@@ -1056,8 +1056,8 @@ function(Symbols,env,return.class='xts',
      if(!hasArg(auto.assign)) auto.assign <- TRUE
 
      # Request minimum data from server to fulfill user's request
-     daySpans <- c(7, 30, 60, 90, 180, 364, 728, 1820)
-     dateStr <- c("d7", "d30", "d60", "d90", "d180", "y1", "y2", "y5")
+     daySpans <- c(7, 30, 60, 90, 180)
+     dateStr <- c("d7", "d30", "d60", "d90", "d180")
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
@@ -1086,7 +1086,7 @@ function(Symbols,env,return.class='xts',
        dateLoc <- which(daySpans >= dateDiff)
        # throw warning, but return as much data as possible
        if(!length(dateLoc)) {
-           warning("Oanda limits data to 5years. Symbol: ", Symbols[[i]])
+           warning("Oanda limits data to 180 days. Symbol: ", Symbols[[i]])
            dateLoc <- length(dateStr)
        }
        data_range <- dateStr[dateLoc[1]]

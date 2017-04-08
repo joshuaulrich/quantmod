@@ -7,7 +7,7 @@ Download exchange rates or metals prices from oanda.
 }
 \usage{
 getFX(Currencies,
-      from = Sys.Date() - 499,
+      from = Sys.Date() - 179,
       to = Sys.Date(),
       env = parent.frame(),
       verbose = FALSE,
