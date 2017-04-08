@@ -234,7 +234,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
-     yahoo.URL <- "http://ichart.finance.yahoo.com/table.csv?"
+     yahoo.URL <- "http://real-chart.finance.yahoo.com/table.csv?"
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
