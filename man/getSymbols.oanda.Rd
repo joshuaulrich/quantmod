@@ -40,8 +40,9 @@ available by calling \code{oanda.currencies} }
  Meant to be called internally by getSymbols only.
 
  Oanda data is 7 day daily average price data, that is Monday through Sunday.
-There is a limit of 180 days per request, and getSymbols will return as much
-data as possible and warn that the limit has been exceeded.
+Oanda only provides historical data for the past 180 days. getSymbols will
+return as much data as possible, and warn when the \code{from} date is more
+than 180 days ago.
 }
 \value{
  A call to getSymbols(Symbols,src="oanda") will load into the specified

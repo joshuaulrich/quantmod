@@ -1055,10 +1055,6 @@ function(Symbols,env,return.class='xts',
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-     # Request minimum data from server to fulfill user's request
-     daySpans <- c(7, 30, 60, 90, 180)
-     dateStr <- c("d7", "d30", "d60", "d90", "d180")
-
      tmp <- tempfile()
      on.exit(unlink(tmp))
      for(i in 1:length(Symbols)) {
@@ -1081,15 +1077,11 @@ function(Symbols,env,return.class='xts',
        }
 
        if(verbose) cat("downloading ",Symbols.name,".....")
-       # Request minimum data from server to fulfill user's request
-       dateDiff <- difftime(to, from, units="days")
-       dateLoc <- which(daySpans >= dateDiff)
        # throw warning, but return as much data as possible
-       if(!length(dateLoc)) {
-           warning("Oanda limits data to 180 days. Symbol: ", Symbols[[i]])
-           dateLoc <- length(dateStr)
+       if(from < Sys.Date() - 180) {
+           warning("Oanda only provides historical data for the past 180 days.",
+                   " Symbol: ", Symbols[[i]])
        }
-       data_range <- dateStr[dateLoc[1]]
        oanda.URL <- paste0("https://www.oanda.com/fx-for-business/",
                            "historical-rates/api/update/?&widget=1",
                            "&source=OANDA&display=absolute&adjustment=0",
