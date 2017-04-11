@@ -93,15 +93,54 @@ function(x, type="", spacing=1, line.col="darkorange",
     }
   } else {
     line.col <- rep(line.col, length.out=NCOL(x))
+    if(is.null(cs$Env$line.type))
+      line.type <- "l"
+    else
+      line.type <- cs$Env$line.type
     for(i in 1:NCOL(x))
-      lines(1:NROW(x),x[,i],lwd=2,col=line.col[i],lend=3,lty=1)
+      lines(1:NROW(x),x[,i],lwd=2,col=line.col[i],lend=3,lty=1,type=line.type)
     return(NULL)
   }
-  bar.col <- ifelse(Opens < Closes, up.col, dn.col)
-  bar.border <- ifelse(Opens < Closes, up.border, dn.border)
+  # masked from chartSeries.chob to handle multi.col
+  # create a vector of colors
+  cs <- current.chob()
+  dn.up.col <- cs$Env$theme$dn.up.col
+  up.up.col <- cs$Env$theme$up.up.col
+  up.dn.col <- cs$Env$theme$up.dn.col
+  dn.dn.col <- cs$Env$theme$dn.dn.col
+  
+  dn.up.border <- cs$Env$theme$dn.up.border
+  up.up.border <- cs$Env$theme$up.up.border
+  up.dn.border <- cs$Env$theme$up.dn.border
+  dn.dn.border <- cs$Env$theme$dn.dn.border
+  multi.col <- cs$Env$multi.col
+  range.bars.type <- cs$Env$range.bars.type
+  if(isTRUE(multi.col) && range.bars.type != "line") {
+    last.Closes <- as.numeric(quantmod::Lag(Closes))
+    last.Closes[1] <- Closes[1]
+    # create vector of appropriate bar colors
+    bar.col <- ifelse(Opens < Closes,
+                      ifelse(Opens < last.Closes,
+                             dn.up.col,
+                             up.up.col),
+                      ifelse(Opens < last.Closes,
+                             dn.dn.col,
+                             up.dn.col))
+    # create vector of appropriate border colors
+    bar.border <- ifelse(Opens < Closes,
+                         ifelse(Opens < last.Closes,
+                                dn.up.border,
+                                up.up.border),
+                         ifelse(Opens < last.Closes,
+                                dn.dn.border,
+                                up.dn.border))
+  } else {
+    bar.col <- ifelse(Opens < Closes, up.col, dn.col)
+    bar.border <- ifelse(Opens < Closes, up.border, dn.border)
+  }
   
   x.pos <- spacing*(1:NROW(x))
-  if( type %in% c("ohlc", "hlc")) {
+  if(type %in% c("ohlc", "hlc")) {
     bar.border <- bar.col
     bar.border[is.na(bar.border)] <- up.border
   }
@@ -182,54 +221,26 @@ chart_Series <- function(x,
                          pars=chart_pars(), theme=chart_theme(),
                          clev=0,
                          ...) {
-  cs <- new.replot()
-  #cex <- pars$cex
-  #mar <- pars$mar
   line.col <- theme$col$line.col
   up.col <- theme$col$up.col
   dn.col <- theme$col$dn.col
   up.border <- theme$col$up.border
   dn.border <- theme$col$dn.border
   format.labels <- theme$format.labels
-  if(is.null(theme$grid.ticks.on)) {
-    xs <- x[subset]
-    major.grid <- c(years=nyears(xs),
-                    months=nmonths(xs),
-                    days=ndays(xs))
-    grid.ticks.on <- names(major.grid)[rev(which(major.grid < 30))[1]]
-  } else grid.ticks.on <- theme$grid.ticks.on
   label.bg <- theme$col$label.bg
-  
-  cs$subset <- function(x) {
-    if(FALSE) {set_ylim <- get_ylim <- set_xlim <- Env<-function(){} }  # appease R parser?
-    if(missing(x)) {
-      x <- "" #1:NROW(Env$xdata)
-    }
-    Env$xsubset <<- x
-    set_xlim(c(1,NROW(Env$xdata[Env$xsubset])))
-    ylim <- get_ylim()
-    for(y in seq(2,length(ylim),by=2)) {
-      if(!attr(ylim[[y]],'fixed'))
-        ylim[[y]] <- structure(c(Inf,-Inf),fixed=FALSE)
-    }
-    lapply(Env$actions,
-           function(x) {
-             frame <- abs(attr(x, "frame"))
-             fixed <- attr(ylim[[frame]],'fixed')
-             #fixed <- attr(x, "fixed")
-             if(frame %% 2 == 0 && !fixed) {
-               lenv <- attr(x,"env")
-               if(is.list(lenv)) lenv <- lenv[[1]]
-               min.tmp <- min(ylim[[frame]][1],range(na.omit(lenv$xdata[Env$xsubset]))[1],na.rm=TRUE)
-               max.tmp <- max(ylim[[frame]][2],range(na.omit(lenv$xdata[Env$xsubset]))[2],na.rm=TRUE)
-               ylim[[frame]] <<- structure(c(min.tmp,max.tmp),fixed=fixed)
-             }
-           })
-    # reset all ylim values, by looking for range(env[[1]]$xdata)
-    # xdata should be either coming from Env or if lenv, lenv
-    set_ylim(ylim)
-  }
-  environment(cs$subset) <- environment(cs$get_asp)
+
+  if(is.OHLC(x)) {
+    yrange <- c(min(Lo(x[subset]),na.rm=TRUE),max(Hi(x[subset]),na.rm=TRUE))
+  } else yrange <- range(x[subset, 1], na.rm=TRUE)
+  cs <- plot.xts(x,
+                ...,
+                subset = subset,
+                main = name,
+                ylim = yrange,
+                type = "n",
+                observation.based = TRUE,
+                major.ticks = "auto",
+                grid.ticks.on = "auto")
   if(is.character(x))
     stop("'x' must be a time-series object")
   if(is.OHLC(x)) {
@@ -237,14 +248,6 @@ chart_Series <- function(x,
     if(has.Vo(x))
       cs$Env$vo <- Vo(x)
   } else cs$Env$xdata <- x
-  #subset <- match(.index(x[subset]), .index(x))
-  cs$Env$xsubset <- subset
-  cs$Env$cex <- pars$cex
-  cs$Env$mar <- pars$mar
-  cs$set_asp(3)
-  cs$set_xlim(c(1,NROW(cs$Env$xdata[subset])))
-  cs$set_ylim(list(structure(range(na.omit(cs$Env$xdata[subset])),fixed=FALSE)))
-  cs$set_frame(1,FALSE)
   cs$Env$clev = min(clev+0.01,1) # (0,1]
   cs$Env$theme$bbands <- theme$bbands
   cs$Env$theme$shading <- theme$shading
@@ -261,9 +264,11 @@ chart_Series <- function(x,
   cs$Env$theme$labels <- "#333333"
   cs$Env$theme$label.bg <- label.bg
   cs$Env$format.labels <- format.labels
-  cs$Env$ticks.on <- grid.ticks.on
+  cs$Env$ticks.on <- cs$Env$grid.ticks.on
   cs$Env$grid.ticks.lwd <- theme$grid.ticks.lwd
-  cs$Env$type <- type
+  cs$Env$range.bars.type <- type
+  cs$Env$cex <- pars$cex
+  cs$Env$mar <- pars$mar
 
   # axis_ticks function to label lower frequency ranges/grid lines
   cs$Env$axis_ticks <- function(xdata,xsubset) {
@@ -277,117 +282,84 @@ chart_Series <- function(x,
     ticks
   }
   # need to add if(upper.x.label) to allow for finer control
-  cs$add(expression(atbt <- axTicksByTime2(xdata[xsubset]),
-                    segments(atbt, #axTicksByTime2(xdata[xsubset]),
-                             get_ylim()[[2]][1],
-                             atbt, #axTicksByTime2(xdata[xsubset]),
-                             get_ylim()[[2]][2], col=theme$grid, lwd=grid.ticks.lwd),
-                    axt <- axis_ticks(xdata,xsubset),
+  cs$add(expression(axt <- axis_ticks(xdata,xsubset),
                     text(as.numeric(axt),
                          par('usr')[3]-0.2*min(strheight(axt)),
-                         names(axt),xpd=TRUE,cex=0.9,pos=3)),
+                         names(axt),xpd=TRUE,cex=0.9,pos=3,col=theme$labels)),
                     clip=FALSE,expr=TRUE)
-  cs$set_frame(-1)
-  # background of main window
-  #cs$add(expression(rect(par("usr")[1],
-  #                       par("usr")[3],
-  #                       par("usr")[2],
-  #                       par("usr")[4],border=NA,col=theme$bg)),expr=TRUE)
-  cs$add_frame(0,ylim=c(0,1),asp=0.2)
-  cs$set_frame(1)
 
-  # add observation level ticks on x-axis if < 400 obs.
-  cs$add(expression(if(NROW(xdata[xsubset])<400) 
-          {axis(1,at=1:NROW(xdata[xsubset]),labels=FALSE,col=theme$grid2,tcl=0.3)}),expr=TRUE)
-
-  # add "month" or "month.abb"
-  cs$add(expression(axt <- axTicksByTime(xdata[xsubset],format.labels=format.labels),
-                axis(1,at=axt, #axTicksByTime(xdata[xsubset]),
-                labels=names(axt), #axTicksByTime(xdata[xsubset],format.labels=format.labels)),
-                las=1,lwd.ticks=1,mgp=c(3,1.5,0),tcl=-0.4,cex.axis=.9)),
-         expr=TRUE)
-  cs$Env$name <- name
-  text.exp <- c(expression(text(1-1/3,0.5,name,font=2,col='#444444',offset=0,cex=1.1,pos=4)),
-                expression(text(NROW(xdata[xsubset]),0.5,
-                           paste(start(xdata[xsubset]),end(xdata[xsubset]),sep=" / "),
-                           col=1,adj=c(0,0),pos=2)))
-  cs$add(text.exp, env=cs$Env, expr=TRUE)
-  cs$set_frame(2)
-
-  cs$Env$axis_labels <- function(xdata,xsubset,scale=5) {
-    axTicksByValue(na.omit(xdata[xsubset]))
-  }
-  cs$Env$make_pretty_labels <- function(ylim) {
-    p <- pretty(ylim,10)
-    p[p > ylim[1] & p < ylim[2]]
-  }
-  #cs$add(assign("five",rnorm(10)))  # this gets re-evaled each update, though only to test
-  #cs$add(expression(assign("alabels", axTicksByValue(na.omit(xdata[xsubset])))),expr=TRUE)
-  #cs$add(expression(assign("alabels", pretty(range(xdata[xsubset],na.rm=TRUE)))),expr=TRUE)
-  #cs$add(expression(assign("alabels", pretty(get_ylim(get_frame())[[2]],10))),expr=TRUE)
-  cs$add(expression(assign("alabels", make_pretty_labels(get_ylim(get_frame())[[2]]))),expr=TRUE)
-
-  # add $1 grid lines if appropriate
-  cs$set_frame(-2)
-
-  # add minor y-grid lines
-  cs$add(expression(if(diff(range(xdata[xsubset],na.rm=TRUE)) < 50)
-                    segments(1,seq(min(xdata[xsubset]%/%1,na.rm=TRUE),
-                                   max(xdata[xsubset]%/%1,na.rm=TRUE),1),
-                             length(xsubset),
-                               seq(min(xdata[xsubset]%/%1,na.rm=TRUE),
-                                   max(xdata[xsubset]%/%1,na.rm=TRUE),1),
-                             col=theme$grid2, lty="dotted")), expr=TRUE)
-  cs$set_frame(2)
-  # add main y-grid lines
-  cs$add(expression(segments(1,alabels,NROW(xdata[xsubset]),alabels, col=theme$grid)),expr=TRUE)
-  # left axis labels
-  if(theme$lylab) {
-    cs$add(expression(text(1-1/3-max(strwidth(alabels)),
-                alabels, #axis_labels(xdata,xsubset), 
-                noquote(format(alabels,justify="right")), 
-                col=theme$labels,offset=0,cex=0.9,pos=4,xpd=TRUE)),expr=TRUE)
-  }
-  # right axis labels
-  if(theme$rylab) {
-    cs$add(expression(text(NROW(xdata[xsubset])+1/3,
-                alabels, 
-                noquote(format(alabels,justify="right")),
-                col=theme$labels,offset=0,cex=0.9,pos=4,xpd=TRUE)),expr=TRUE)
-  }
-  # add main series
-  cs$set_frame(2)
-  # need to rename range.bars to something more generic, and allow type= to handle:
-  #  ohlc, hlc, candles, ha-candles, line, area
-  #  chart_Perf will be the call to handle relative performace plots
-  cs$add(expression(range.bars(xdata[xsubset], 
-                    type, 1,
-                    fade(theme$line.col,clev),
-                    fade(theme$up.col,clev),
-                    fade(theme$dn.col,clev),
-                    fade(theme$up.border,clev),
-                    fade(theme$dn.border,clev))),expr=TRUE)
-  assign(".chob", cs, .plotEnv)
-
+  if(!hasArg(spacing))
+    spacing <- 1
+  cs$Env$theme$spacing <- spacing
+  cs$Env$range.bars <- range.bars
+  cs$Env$fade <- fade
+  exp <- expression(range.bars(xdata[xsubset],
+                               type=range.bars.type,
+                               spacing=theme$spacing,
+                               line.col=fade(theme$line.col, clev),
+                               up.col=fade(theme$up.col, clev),
+                               dn.col=fade(theme$dn.col, clev),
+                               up.border=fade(theme$up.border, clev),
+                               dn.border=fade(theme$up.border, clev)))
+  cs$add(exp, expr = TRUE, env = cs$Env)
   # handle TA="add_Vo()" as we would interactively FIXME: allow TA=NULL to work
   if(!is.null(TA) && nchar(TA) > 0) {
-  TA <- parse(text=TA, srcfile=NULL)
-  for( ta in 1:length(TA)) {
-    if(length(TA[ta][[1]][-1]) > 0) {
-    cs <- eval(TA[ta])
-    } else {
-    cs <- eval(TA[ta])
+    TA <- parse(text=TA, srcfile=NULL)
+    for(ta in seq_along(TA)) {
+      if(length(TA[ta][[1]][-1]) > 0) {
+        cs <- eval(TA[ta])
+      } else {
+        cs <- eval(TA[ta])
+      }
     }
   }
-  }
-  assign(".chob", cs, .plotEnv)
+  assign(".xts_chob", cs, xts:::.plotxtsEnv)
   cs
 } #}}}
 
 # zoom_Chart {{{
 zoom_Chart <- function(subset) {
+  # refactor xts:::chart.lines to make subset functionality work
+  chart.lines <- function (x, type = "l", lty = 1, lwd = 2, lend = 1, col = 1:10, 
+                           up.col = NULL, dn.col = NULL, legend.loc = NULL, ...) 
+  {
+    if (is.null(up.col)) 
+      up.col <- "green"
+    if (is.null(dn.col)) 
+      dn.col <- "red"
+    xx <- xts:::current.xts_chob()
+    switch(type, h = {
+      colors <- ifelse(x[, 1] < 0, dn.col, up.col)
+      lines(xx$Env$xycoords$x[match(index(x), index(xx$Env$xdata))], x[, 1], lwd = 2, col = colors, 
+            lend = lend, lty = 1, type = "h", ...)
+    }, p = , l = , b = , c = , o = , s = , S = , n = {
+      if (length(lty) < NCOL(x)) lty <- rep(lty, length.out = NCOL(x))
+      if (length(lwd) < NCOL(x)) lwd <- rep(lwd, length.out = NCOL(x))
+      if (length(col) < NCOL(x)) col <- rep(col, length.out = NCOL(x))
+      for (i in NCOL(x):1) {
+        lines(xx$Env$xycoords$x[match(index(x), index(xx$Env$xdata))], x[, i], type = type, lend = lend, 
+              col = col[i], lty = lty[i], lwd = lwd[i], ...)
+      }
+    }, {
+      warning(paste(type, "not recognized. Type must be one of\n
+                  'p', 'l', 'b, 'c', 'o', 'h', 's', 'S', 'n'.\n
+                  plot.xts supports the same types as plot.default,\n
+                  see ?plot for valid arguments for type"))
+    })
+    if (!is.null(legend.loc)) {
+      lc <- legend.coords(legend.loc, xx$Env$xlim, range(x, 
+                                                         na.rm = TRUE))
+      legend(x = lc$x, y = lc$y, legend = colnames(x), xjust = lc$xjust, 
+             yjust = lc$yjust, fill = col[1:NCOL(x)], bty = "n")
+    }
+  }
   chob <- current.chob()
+  x <- chob$Env$xdata
+  x.pos <- 1:NROW(x[subset])
+  chob$Env$chart.lines <- chart.lines
   chob$subset(subset)
+  chob$Env$xlim <- range(x.pos)
+  chob$Env$ylim[[2]] <- structure(range(x[subset], na.rm=TRUE), fixed=TRUE)
   chob
 }
 # }}}
@@ -400,7 +372,7 @@ fade <- function(col, level) {
   cols
 }
 
-current.chob <- function() invisible(get(".chob",.plotEnv))
+current.chob <- function() invisible(xts:::current.xts_chob())
 
 use.chob <- function(use=TRUE) {
   options('global.chob'=use) 
@@ -570,15 +542,15 @@ add_TA <- function(x, order=NULL, on=NA, legend="auto",
       lenv$grid_lines <- function(xdata,xsubset) { 
         pretty(xdata[xsubset])
       }
-      exp <- c(exp,
+      #exp <- c(exp,
            # LHS
            #expression(text(1-1/3-max(strwidth(grid_lines(xdata,xsubset))),grid_lines(xdata,xsubset),
            #           noquote(format(grid_lines(xdata,xsubset),justify="right")),
            #           col=theme$labels,offset=0,pos=4,cex=0.9)),
            # RHS
-           expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
-                      noquote(format(grid_lines(xdata,xsubset),justify="right")),
-                      col=theme$labels,offset=0,pos=4,cex=0.9)))
+           #expression(text(NROW(xdata[xsubset])+1/3,grid_lines(xdata,xsubset),
+           #           noquote(format(grid_lines(xdata,xsubset),justify="right")),
+           #           col=theme$labels,offset=0,pos=4,cex=0.9)))
       #}
       plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE,no.update=no.update)
     }
@@ -895,7 +867,7 @@ skeleton_TA <- function(on, arg, ...) {
   preFUN <- ""
   FUN <- ""
   postFUN <- ""
-  chob$add_frame(ylin=c(0,1),asp=0.15)
+  chob$add_frame(ylim=c(0,1),asp=0.15)
   chob$next_frame()
 }
 
@@ -923,7 +895,7 @@ add_MACD <- function(fast=12,slow=26,signal=9,maType="EMA",histogram=TRUE,...) {
       rect(x.pos-1/3, 0, x.pos+1/3, macd.hist, col=bar.col, border="grey", lwd=0.2, ...)  # base graphics call
     }
     # macd line
-    lines(x.pos, macd[,1], col=x$Env$theme$macd$macd, lwd=2,,lty=1,...) 
+    lines(x.pos, macd[,1], col=x$Env$theme$macd$macd, lwd=2,lty=1,...)
     # signal line
     lines(x.pos, macd[,2], col=x$Env$theme$macd$signal, lty=3,...) 
   }
