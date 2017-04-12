@@ -480,8 +480,15 @@ function(Symbols,env,return.class='xts',
      if(!hasArg(auto.assign)) auto.assign <- TRUE
      google.URL <- "http://finance.google.com/finance/historical?"
 
+     # Google CSV contains English month abbreviations
+     # Ensure strptime() uses an English locale in this call
+     lc_time <- Sys.getlocale("LC_TIME")
+     on.exit(Sys.setlocale(category = "LC_TIME", locale = lc_time))
+     Sys.setlocale(category = "LC_TIME", locale = "C")
+
      tmp <- tempfile()
-     on.exit(unlink(tmp))
+     on.exit(unlink(tmp), add = TRUE)
+
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
