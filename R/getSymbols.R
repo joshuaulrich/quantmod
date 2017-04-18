@@ -234,7 +234,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
-     yahoo.URL <- "http://ichart.finance.yahoo.com/table.csv?"
+     yahoo.URL <- "https://ichart.finance.yahoo.com/table.csv?"
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
@@ -326,7 +326,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
         if(!requireNamespace("XML", quietly=TRUE))
           stop("package:",dQuote("XML"),"cannot be loaded.")
 
-        yahoo.URL <- "http://info.finance.yahoo.co.jp/history/"
+        yahoo.URL <- "https://info.finance.yahoo.co.jp/history/"
         for(i in 1:length(Symbols)) {
             # The name of the symbol, which will actually be used as the
             # variable name. It needs to start with YJ, and it will be appended

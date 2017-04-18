@@ -45,7 +45,7 @@ function(Symbols,what=standardQuote(),...) {
   }
   QF <- paste('d1t1',QF,sep='')
   download.file(paste(
-                "http://finance.yahoo.com/d/quotes.csv?s=",
+                "https://finance.yahoo.com/d/quotes.csv?s=",
                 Symbols,
                 "&f=",QF,sep=""),
                 destfile=tmp,quiet=TRUE)

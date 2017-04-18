@@ -10,7 +10,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
                         deparse(substitute(Symbol)),
                         as.character(Symbol))
 
-  yahoo.URL <- 'http://ichart.finance.yahoo.com/table.csv?s='
+  yahoo.URL <- 'https://ichart.finance.yahoo.com/table.csv?s='
   from.y <- as.numeric(strsplit(as.character(from), "-", )[[1]][1])
   from.m <- as.numeric(strsplit(as.character(from), "-", )[[1]][2])-1
   from.d <- as.numeric(strsplit(as.character(from), "-", )[[1]][3])
