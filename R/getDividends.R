@@ -20,7 +20,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
 
   tmp <- tempfile()
   on.exit(unlink(tmp))
-  download.file(paste(yahoo.URL,Symbol.name, "&a=", 
+  try.download.file(paste(yahoo.URL,Symbol.name, "&a=", 
             from.m, "&b=", sprintf("%.2d", from.d), "&c=", from.y, 
             "&d=", to.m, "&e=", sprintf("%.2d", to.d), "&f=", 
             to.y, "&g=v&ignore=.csv", 

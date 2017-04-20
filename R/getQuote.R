@@ -44,11 +44,9 @@ function(Symbols,what=standardQuote(),...) {
     QF.names <- NULL
   }
   QF <- paste('d1t1',QF,sep='')
-  download.file(paste(
-                "https://finance.yahoo.com/d/quotes.csv?s=",
-                Symbols,
-                "&f=",QF,sep=""),
-                destfile=tmp,quiet=TRUE)
+  try.download.file(paste("https://finance.yahoo.com/d/quotes.csv?s=",
+                          Symbols, "&f=",QF,sep=""),
+                    destfile=tmp,quiet=TRUE)
   sq <- read.csv(file=tmp,sep=',',stringsAsFactors=FALSE,header=FALSE)
   Qposix <- strptime(paste(sq[,1],sq[,2]),format='%m/%d/%Y %H:%M')
   Symbols <- unlist(strsplit(Symbols,'\\+'))

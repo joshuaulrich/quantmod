@@ -257,17 +257,17 @@ function(Symbols,env,return.class='xts',index.class="Date",
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
-       download.file(paste(yahoo.URL,
-                           "s=",Symbols.name,
-                           "&a=",from.m,
-                           "&b=",sprintf('%.2d',from.d),
-                           "&c=",from.y,
-                           "&d=",to.m,
-                           "&e=",sprintf('%.2d',to.d),
-                           "&f=",to.y,
-                           "&g=d&q=q&y=0",
-                           "&z=",Symbols.name,"&x=.csv",
-                           sep=''),destfile=tmp,quiet=!verbose)
+       try.download.file(paste(yahoo.URL,
+                               "s=",Symbols.name,
+                               "&a=",from.m,
+                               "&b=",sprintf('%.2d',from.d),
+                               "&c=",from.y,
+                               "&d=",to.m,
+                               "&e=",sprintf('%.2d',to.d),
+                               "&f=",to.y,
+                               "&g=d&q=q&y=0",
+                               "&z=",Symbols.name,"&x=.csv",
+                               sep=''),destfile=tmp,quiet=!verbose)
        fr <- read.csv(tmp)
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
