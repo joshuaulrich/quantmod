@@ -212,6 +212,27 @@ formals(loadSymbols) <- loadSymbols.formals
 #"getSymbols.Bloomberg" <- getSymbols.Bloomberg
 # }}}
 
+.getHandle <- function()
+{
+  h <- get0("_handle_", .quantmodEnv)
+
+  if (is.null(h)) {
+     tmp <- tempfile()
+     on.exit(unlink(tmp))
+
+     # establish session
+     ch <- curl::new_handle()
+     curl::curl_download("https://finance.yahoo.com", tmp, handle=ch)
+
+     query.srv <- paste0("https://query1.finance.yahoo.com/")
+     cres <-  curl::curl_fetch_memory(paste0(query.srv, "v1/test/getcrumb"), handle=ch)
+
+     h <- list(ch = ch, cb = rawToChar(cres$content))
+     assign("_handle_", h, .quantmodEnv)
+  }
+  return(h)
+}
+
 # getSymbols.yahoo {{{
 "getSymbols.yahoo" <-
 function(Symbols,env,return.class='xts',index.class="Date",
@@ -235,17 +256,11 @@ function(Symbols,env,return.class='xts',index.class="Date",
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-     query.srv <- paste0("https://query1.finance.yahoo.com/")
-     yahoo.URL <- paste0(query.srv, "v7/finance/download/")
+     yahoo.URL <- "https://query1.finance.yahoo.com/v7/finance/download/"
+     handle <- .getHandle()
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-
-     # establish session
-     handle <- curl::new_handle()
-     curl::curl_download("https://finance.yahoo.com", tmp, handle=handle)
-     cres <-  curl::curl_fetch_memory(paste0(query.srv, "v1/test/getcrumb"), handle=handle)
-     cb <- rawToChar(cres$content)
 
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -268,8 +283,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
                                   "&period2=", to.posix,
                                   "&interval=1d",
                                   "&events=history",
-                                  "&crumb=", cb),
-                           destfile=tmp, quiet=!verbose, handle=handle)
+                                  "&crumb=", handle$cb),
+                           destfile=tmp, quiet=!verbose, handle=handle$ch)
 
        fr <- read.csv(tmp)
        if(verbose) cat("done.\n")
