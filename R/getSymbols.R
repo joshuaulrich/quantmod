@@ -286,7 +286,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
                                   "&crumb=", handle$cb),
                            destfile=tmp, quiet=!verbose, handle=handle$ch)
 
-       fr <- read.csv(tmp)
+       fr <- read.csv(tmp, na.strings="null")
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1]),
