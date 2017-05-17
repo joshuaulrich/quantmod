@@ -33,7 +33,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
 
   # dividends from Yahoo are split-adjusted; need to un-adjust
   if(src[1] == "yahoo" && !split.adjust) {
-    splits <- getSplits(Symbol.name, from="1900-01-01")
+    splits <- getSplits(Symbol.name, from="1949-01-01")
     if(is.xts(splits) && is.xts(fr) && nrow(splits) > 0 && nrow(fr) > 0) {
       fr <- fr / adjRatios(splits=merge(splits, index(fr)))[,1]
     }

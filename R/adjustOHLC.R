@@ -12,8 +12,8 @@ function(x,
       ratio <- Ad(x)/Cl(x)
     } else {
       # use actual split and/or dividend data
-      div <- getDividends(symbol.name, from="1900-01-01")
-      splits <- getSplits(symbol.name, from="1900-01-01")
+      div <- getDividends(symbol.name, from="1949-01-01")
+      splits <- getSplits(symbol.name, from="1949-01-01")
       # un-adjust dividends for splits (Yahoo already adjusts div for splits)
       # do not use split.adjust=FALSE in getDividends call, which would
       # download the split data twice.
