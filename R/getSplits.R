@@ -12,30 +12,36 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
                         deparse(substitute(Symbol)),
                         as.character(Symbol))
 
-  yahoo.URL <- 'https://ichart.finance.yahoo.com/x?s='
-  from.y <- as.numeric(strsplit(as.character(from), "-", )[[1]][1])
-  from.m <- as.numeric(strsplit(as.character(from), "-", )[[1]][2])-1
-  from.d <- as.numeric(strsplit(as.character(from), "-", )[[1]][3])
-  to.y <- as.numeric(strsplit(as.character(to), "-", )[[1]][1])
-  to.m <- as.numeric(strsplit(as.character(to), "-", )[[1]][2])-1
-  to.d <- as.numeric(strsplit(as.character(to), "-", )[[1]][3])
+  query.srv <- paste0("https://query1.finance.yahoo.com/")
+  yahoo.URL <- paste0(query.srv, "v7/finance/download/")
+
+  from.posix <- as.integer(as.POSIXct(as.Date(from, origin = "1970-01-01")))
+  to.posix <- as.integer(as.POSIXct(as.Date(to, origin = "1970-01-01")))
 
   tmp <- tempfile()
   on.exit(unlink(tmp))
-  download.file(paste(yahoo.URL,Symbol.name, "&a=", 
-            from.m, "&b=", sprintf("%.2d", from.d), "&c=", from.y, 
-            "&d=", to.m, "&e=", sprintf("%.2d", to.d), "&f=", 
-            to.y, "&g=v&y=0&z=30000", 
-            sep = ""), destfile = tmp, quiet = !verbose)
-  fr <- read.table(tmp, skip=1, fill=TRUE, as.is=TRUE, sep=",")
-  fr <- fr[fr$V1=="SPLIT",]
+
+  # establish session
+  handle <- curl::new_handle()
+  curl::curl_download("https://finance.yahoo.com", tmp, handle=handle)
+  cres <-  curl::curl_fetch_memory(paste0(query.srv, "v1/test/getcrumb"), handle=handle)
+  cb <- rawToChar(cres$content)
+
+  curl::curl_download(paste0(yahoo.URL, Symbol.name,
+                            "?period1=", from.posix,
+                            "&period2=", to.posix,
+                            "&interval=1d",
+                            "&events=split",
+                            "&crumb=", cb),
+                     destfile=tmp, quiet=!verbose, handle=handle)
+
+  fr <- read.csv(tmp, as.is=TRUE)
 
   if(NROW(fr)==0) {
     fr <- NA
   } else {
-    fr$V3 <- sub(":","/", fr$V3)
-    fr$V3 <- 1 / sapply( parse( text=fr$V3 ), eval )
-    fr <- xts(fr$V3, as.Date(as.character(fr$V2),"%Y%m%d"))
+    fr$V3 <- 1 / sapply(parse(text=fr[,2]), eval)
+    fr <- xts(fr$V3, as.Date(fr[,1], "%Y-%m-%d"))
     colnames(fr) <- paste(Symbol.name,'spl',sep='.')
   }
 

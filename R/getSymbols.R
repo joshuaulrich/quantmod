@@ -234,10 +234,19 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
-     yahoo.URL <- "https://ichart.finance.yahoo.com/table.csv?"
+
+     query.srv <- paste0("https://query1.finance.yahoo.com/")
+     yahoo.URL <- paste0(query.srv, "v7/finance/download/")
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
+
+     # establish session
+     handle <- curl::new_handle()
+     curl::curl_download("https://finance.yahoo.com", tmp, handle=handle)
+     cres <-  curl::curl_fetch_memory(paste0(query.srv, "v1/test/getcrumb"), handle=handle)
+     cb <- rawToChar(cres$content)
+
      for(i in 1:length(Symbols)) {
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
@@ -246,40 +255,41 @@ function(Symbols,env,return.class='xts',index.class="Date",
        from <- if(is.null(from)) default.from else from
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- if(is.null(to)) default.to else to
-   
-       from.y <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][1])
-       from.m <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][2])-1
-       from.d <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][3])
-       to.y <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][1])
-       to.m <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][2])-1
-       to.d <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][3])
-       
+
+       from.posix <- as.integer(as.POSIXct(as.Date(from, origin = "1970-01-01")))
+       to.posix <- as.integer(as.POSIXct(as.Date(to, origin = "1970-01-01")))
+
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
-       download.file(paste(yahoo.URL,
-                           "s=",Symbols.name,
-                           "&a=",from.m,
-                           "&b=",sprintf('%.2d',from.d),
-                           "&c=",from.y,
-                           "&d=",to.m,
-                           "&e=",sprintf('%.2d',to.d),
-                           "&f=",to.y,
-                           "&g=d&q=q&y=0",
-                           "&z=",Symbols.name,"&x=.csv",
-                           sep=''),destfile=tmp,quiet=!verbose)
+
+       curl::curl_download(paste0(yahoo.URL, Symbols.name,
+                                  "?period1=", from.posix,
+                                  "&period2=", to.posix,
+                                  "&interval=1d",
+                                  "&events=history",
+                                  "&crumb=", cb),
+                           destfile=tmp, quiet=!verbose, handle=handle)
+
        fr <- read.csv(tmp)
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1]),
                  #as.POSIXct(fr[,1], tz=Sys.getenv("TZ")),
                  src='yahoo',updated=Sys.time())
-       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
-                             c('Open','High','Low','Close','Volume','Adjusted'),
-                             sep='.')
+
+       # re-order column names and prefix with symbol
+       cnames <- c("Open", "High", "Low", "Close", "Volume", "Adjusted")
+       corder <- pmatch(substr(cnames, 1, 3), colnames(fr))
+       fr <- fr[,corder]
+       colnames(fr) <- paste(toupper(gsub("\\^","",Symbols.name)), cnames, sep=".")
+
        if(adjust) {
-         # Adjustment algorithm by Joshua Ulrich
-         fr <- adjustOHLC(fr, symbol.name=Symbols.name)
+         # Already adjusted, except for the Close column
+         fr[,4] <- Ad(fr)
+       } else {
+         # Un-adjust the Close, using Adjusted column
+         fr[,1:3] <- round(fr[,1:3] * drop(fr[,4] / fr[,6]), 3)
        }
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
