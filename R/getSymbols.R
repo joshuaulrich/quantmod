@@ -325,6 +325,15 @@ function(Symbols,env,return.class='xts',index.class="Date",
                  #as.POSIXct(fr[,1], tz=Sys.getenv("TZ")),
                  src='yahoo',updated=Sys.time())
 
+       # remove NA and warn
+       frNA <- na.omit(fr)
+       na <- na.action(frNA)
+       if (!is.null(na)) {
+         warning("Removed rows in ", Symbols.name, " due to missing values:\n",
+                 paste0(index(fr)[na], collapse = ", "), call. = FALSE)
+         fr <- frNA
+       }
+
        # re-order column names and prefix with symbol
        cnames <- c("Open", "High", "Low", "Close", "Volume", "Adjusted")
        corder <- pmatch(substr(cnames, 1, 3), colnames(fr))
