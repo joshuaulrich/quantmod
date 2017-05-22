@@ -229,7 +229,8 @@ formals(loadSymbols) <- loadSymbols.formals
     h$ch <- curl::new_handle()
     curl::curl_download("https://finance.yahoo.com", tmp, handle = h$ch)
 
-    query.srv <- paste0("https://query.finance.yahoo.com/",
+    n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
+    query.srv <- paste0("https://query", n, ".finance.yahoo.com/",
                         "v1/test/getcrumb")
     cres <- curl::curl_fetch_memory(query.srv, handle = h$ch)
 
@@ -243,7 +244,8 @@ formals(loadSymbols) <- loadSymbols.formals
 function(symbol, from, to, period, handle)
 {
   p <- match.arg(period, c("1d", "1wk", "1mo"))
-  u <- paste0("https://query.finance.yahoo.com/v7/finance/download/",
+  n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
+  u <- paste0("https://query", n, ".finance.yahoo.com/v7/finance/download/",
               symbol, "?period1=", from, "&period2=", to, "&interval=", p,
               "&events=history&crumb=", handle$cb)
   return(u)
