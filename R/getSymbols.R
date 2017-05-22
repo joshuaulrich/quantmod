@@ -212,25 +212,41 @@ formals(loadSymbols) <- loadSymbols.formals
 #"getSymbols.Bloomberg" <- getSymbols.Bloomberg
 # }}}
 
-.getHandle <- function()
+.getHandle <- function(force.new = FALSE)
 {
   h <- get0("_handle_", .quantmodEnv)
 
-  if (is.null(h)) {
-     tmp <- tempfile()
-     on.exit(unlink(tmp))
+  if (is.null(h) || force.new) {
+    tmp <- tempfile()
+    on.exit(unlink(tmp))
 
-     # establish session
-     ch <- curl::new_handle()
-     curl::curl_download("https://finance.yahoo.com", tmp, handle=ch)
+    # create 'h' if it doesn't exist yet
+    if (!force.new) {
+      h <- list()
+    }
 
-     query.srv <- paste0("https://query1.finance.yahoo.com/")
-     cres <-  curl::curl_fetch_memory(paste0(query.srv, "v1/test/getcrumb"), handle=ch)
+    # establish session
+    h$ch <- curl::new_handle()
+    curl::curl_download("https://finance.yahoo.com", tmp, handle = h$ch)
 
-     h <- list(ch = ch, cb = rawToChar(cres$content))
-     assign("_handle_", h, .quantmodEnv)
+    query.srv <- paste0("https://query.finance.yahoo.com/",
+                        "v1/test/getcrumb")
+    cres <- curl::curl_fetch_memory(query.srv, handle = h$ch)
+
+    h$cb <- rawToChar(cres$content)
+    assign("_handle_", h, .quantmodEnv)
   }
   return(h)
+}
+
+.yahooURL <-
+function(symbol, from, to, period, handle)
+{
+  p <- match.arg(period, c("1d", "1wk", "1mo"))
+  u <- paste0("https://query.finance.yahoo.com/v7/finance/download/",
+              symbol, "?period1=", from, "&period2=", to, "&interval=", p,
+              "&events=history&crumb=", handle$cb)
+  return(u)
 }
 
 # getSymbols.yahoo {{{
@@ -256,7 +272,6 @@ function(Symbols,env,return.class='xts',index.class="Date",
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
 
-     yahoo.URL <- "https://query1.finance.yahoo.com/v7/finance/download/"
      handle <- .getHandle()
 
      tmp <- tempfile()
@@ -278,13 +293,28 @@ function(Symbols,env,return.class='xts',index.class="Date",
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
 
-       curl::curl_download(paste0(yahoo.URL, Symbols.name,
-                                  "?period1=", from.posix,
-                                  "&period2=", to.posix,
-                                  "&interval=1d",
-                                  "&events=history",
-                                  "&crumb=", handle$cb),
-                           destfile=tmp, quiet=!verbose, handle=handle$ch)
+       yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix, "1d", handle)
+       dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
+                                     quiet = !verbose, handle = handle$ch),
+                  silent = TRUE)
+
+       if (inherits(dl, "try-error")) {
+         # warn user about the failure
+         warning(Symbols.name, " download failed; trying again.",
+                 call. = FALSE, immediate. = TRUE)
+         # re-create handle
+         handle <- .getHandle(force.new = TRUE)
+         # try again
+         yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix, "1d", handle)
+         dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
+                                       quiet = !verbose, handle = handle$ch),
+                    silent = TRUE)
+         # error if second attempt also failed
+         if (inherits(dl, "try-error")) {
+           stop(Symbols.name, " download failed after two attempts. Error",
+                " message:\n", attr(dl, "condition")$message, call. = FALSE)
+         }
+       }
 
        fr <- read.csv(tmp, na.strings="null")
        if(verbose) cat("done.\n")
