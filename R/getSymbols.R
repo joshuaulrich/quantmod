@@ -251,6 +251,11 @@ function(symbol, from, to, period, handle)
   return(u)
 }
 
+.dateToUNIX <- function(Date) {
+  posixct <- as.POSIXct(as.Date(Date, origin = "1970-01-01"))
+  trunc(as.numeric(posixct))
+}
+
 # getSymbols.yahoo {{{
 "getSymbols.yahoo" <-
 function(Symbols,env,return.class='xts',index.class="Date",
@@ -288,8 +293,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- if(is.null(to)) default.to else to
 
-       from.posix <- as.integer(as.POSIXct(as.Date(from, origin = "1970-01-01")))
-       to.posix <- as.integer(as.POSIXct(as.Date(to, origin = "1970-01-01")))
+       from.posix <- .dateToUNIX(from)
+       to.posix <- .dateToUNIX(to)
 
        Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
