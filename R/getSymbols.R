@@ -217,17 +217,29 @@ formals(loadSymbols) <- loadSymbols.formals
   h <- get0("_handle_", .quantmodEnv)
 
   if (is.null(h) || force.new) {
-    tmp <- tempfile()
-    on.exit(unlink(tmp))
-
     # create 'h' if it doesn't exist yet
     if (!force.new) {
       h <- list()
     }
 
     # establish session
-    h$ch <- curl::new_handle()
-    curl::curl_download("https://finance.yahoo.com", tmp, handle = h$ch)
+    new.session <- function(h) {
+      tmp <- tempfile()
+      on.exit(unlink(tmp))
+
+      for (i in 1:5) {
+        curl::curl_download("https://finance.yahoo.com", tmp, handle = h)
+        if (NROW(curl::handle_cookies(h)) > 0)
+          break;
+      }
+
+      if (NROW(curl::handle_cookies(h)) == 0)
+        stop("Could not establish session after 5 attempts.")
+
+      return(h)
+    }
+
+    h$ch <- new.session(curl::new_handle())
 
     n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
     query.srv <- paste0("https://query", n, ".finance.yahoo.com/",
