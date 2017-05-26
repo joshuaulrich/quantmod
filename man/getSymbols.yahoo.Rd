@@ -19,7 +19,8 @@ getSymbols.yahoo(Symbols,
                  index.class  = 'Date',
                  from = "2007-01-01",
                  to = Sys.Date(),
-                  ...)
+                 ...,
+                 periodicity = "daily")
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -32,6 +33,8 @@ getSymbols.yahoo(Symbols,
                     (2007-01-01)}
        \item{to}{ Retrieve data through this date (Sys.Date())}
        \item{\dots}{ additional parameters }
+       \item{periodicity}{ periodicity of data to query and return. Must be
+                           one of "daily", "weekly", "monthly". ("daily") }
 }
 \details{
 Meant to be called internally by \code{getSymbols} (see also).

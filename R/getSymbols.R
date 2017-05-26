@@ -272,7 +272,8 @@ function(symbol, from, to, period, type, handle)
 function(Symbols,env,return.class='xts',index.class="Date",
          from='2007-01-01',
          to=Sys.Date(),
-         ...)
+         ...,
+         periodicity="daily")
 {
      if(getOption("getSymbols.yahoo.warning",TRUE)) {
        # Warn about Yahoo Finance quality and stability
@@ -296,6 +297,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
      default.from <- from
      default.to <- to
 
+     intervals <- c(daily = "1d", weekly = "1wk", monthly = "1mo")
+     default.periodicity <- match.arg(periodicity, names(intervals))
+
      if(!hasArg(verbose)) verbose <- FALSE
      if(!hasArg(auto.assign)) auto.assign <- TRUE
 
@@ -308,6 +312,15 @@ function(Symbols,env,return.class='xts',index.class="Date",
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
+       periodicity <- getSymbolLookup()[[Symbols[[i]]]]$periodicity
+       periodicity <- if(is.null(periodicity)) default.periodicity else periodicity
+
+       # ensure valid periodicity
+       p <- pmatch(periodicity, names(intervals))
+       if(is.na(p))
+         stop("periodicity must be one of: ", paste(intervals, collapse=", "))
+       interval <- intervals[p]
+
        from <- getSymbolLookup()[[Symbols[[i]]]]$from
        from <- if(is.null(from)) default.from else from
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
@@ -321,7 +334,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
 
        yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
-                              "1d", "history", handle)
+                              interval, "history", handle)
        dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
                                      quiet = !verbose, handle = handle$ch),
                   silent = TRUE)
@@ -334,7 +347,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
          handle <- .getHandle(force.new = TRUE)
          # try again
          yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
-                                "1d", "history", handle)
+                                interval, "history", handle)
          dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
                                        quiet = !verbose, handle = handle$ch),
                     silent = TRUE)
