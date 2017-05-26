@@ -342,13 +342,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
                  #as.POSIXct(fr[,1], tz=Sys.getenv("TZ")),
                  src='yahoo',updated=Sys.time())
 
-       # remove NA and warn
-       frNA <- na.omit(fr)
-       na <- na.action(frNA)
-       if (!is.null(na)) {
-         warning("Removed rows in ", Symbols.name, " due to missing values:\n",
-                 paste0(index(fr)[na], collapse = ", "), call. = FALSE)
-         fr <- frNA
+       # warn about missing values
+       if (any(is.na(fr))) {
+         warning(Symbols.name, " contains missing values. Some functions will",
+                 " not work if objects contain missing values in the middle",
+                 " of the series. Consider using na.omit(), na.approx(),",
+                 " na.fill(), etc to remove or replace them.", call. = FALSE)
        }
 
        # re-order column names and prefix with symbol
