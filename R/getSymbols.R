@@ -253,13 +253,14 @@ formals(loadSymbols) <- loadSymbols.formals
 }
 
 .yahooURL <-
-function(symbol, from, to, period, handle)
+function(symbol, from, to, period, type, handle)
 {
   p <- match.arg(period, c("1d", "1wk", "1mo"))
+  e <- match.arg(type, c("history", "div", "split"))
   n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
   u <- paste0("https://query", n, ".finance.yahoo.com/v7/finance/download/",
               symbol, "?period1=", from, "&period2=", to, "&interval=", p,
-              "&events=history&crumb=", handle$cb)
+              "&events=", e, "&crumb=", handle$cb)
   return(u)
 }
 
@@ -312,7 +313,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
 
-       yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix, "1d", handle)
+       yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
+                              "1d", "history", handle)
        dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
                                      quiet = !verbose, handle = handle$ch),
                   silent = TRUE)
@@ -324,7 +326,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
          # re-create handle
          handle <- .getHandle(force.new = TRUE)
          # try again
-         yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix, "1d", handle)
+         yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
+                                "1d", "history", handle)
          dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
                                        quiet = !verbose, handle = handle$ch),
                     silent = TRUE)

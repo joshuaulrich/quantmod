@@ -12,22 +12,16 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
                         deparse(substitute(Symbol)),
                         as.character(Symbol))
 
-  yahoo.URL <- "https://query1.finance.yahoo.com/v7/finance/download/"
-
-  from.posix <- as.integer(as.POSIXct(as.Date(from, origin = "1970-01-01")))
-  to.posix <- as.integer(as.POSIXct(as.Date(to, origin = "1970-01-01")))
+  from.posix <- .dateToUNIX(from)
+  to.posix <- .dateToUNIX(to)
 
   tmp <- tempfile()
   on.exit(unlink(tmp))
 
   handle <- .getHandle()
-  curl::curl_download(paste0(yahoo.URL, Symbol.name,
-                            "?period1=", from.posix,
-                            "&period2=", to.posix,
-                            "&interval=1d",
-                            "&events=split",
-                            "&crumb=", handle$cb),
-                     destfile=tmp, quiet=!verbose, handle=handle$ch)
+  yahoo.URL <- .yahooURL(Symbol.name, from.posix, to.posix,
+                         "1d", "split", handle)
+  curl::curl_download(yahoo.URL, destfile=tmp, quiet=!verbose, handle=handle$ch)
 
   fr <- read.csv(tmp, as.is=TRUE)
 
