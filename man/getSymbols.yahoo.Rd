@@ -41,6 +41,17 @@ data for use with \pkg{quantmod}.  Essentially a
 simple wrapper to the underlying Yahoo! finance site's
 historical data download.
 }
+\section{Warning}{
+As of quantmod 0.4-9, \code{getSymbols.yahoo} has been patched to
+work with changes to Yahoo Finance, which also included the following
+changes to the raw data:
+  \itemize{
+    \item The adjusted close column appears to no longer include dividend adjustments
+    \item The close column appears to be adjusted for splits twice
+    \item The open, high, and low columns are adjusted for splits, and
+    \item The raw data may contain missing values.
+  }
+}
 \value{
 A call to getSymbols.yahoo will load into the specified
 environment one object for each

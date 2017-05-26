@@ -12,16 +12,14 @@ function(Symbols=NULL,
          ...)  {
       if(getOption("getSymbols.warning4.0",TRUE)) {
         # transition message for 0.4-0 to 0.5-0
-        message(paste(
-                '    As of 0.4-0,',sQuote('getSymbols'),'uses env=parent.frame() and\n',
-                'auto.assign=TRUE by default.\n\n',
-
-                'This  behavior  will be  phased out in 0.5-0  when the call  will\n',
-                'default to use auto.assign=FALSE. getOption("getSymbols.env") and \n',
-                'getOptions("getSymbols.auto.assign") are now checked for alternate defaults\n\n',
+        message(sQuote('getSymbols'), ' currently uses auto.assign=TRUE by default, but will\n',
+                'use auto.assign=FALSE in 0.5-0. You will still be able to use\n',
+                sQuote('loadSymbols'), ' to automatically load data. getOption("getSymbols.env")\n',
+                'and getOption("getSymbols.auto.assign") will still be checked for\n',
+                'alternate defaults.\n\n',
                 'This message is shown once per session and may be disabled by setting \n',
-                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for more details.'))
-        options("getSymbols.warning4.0"=FALSE) 
+                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for details.')
+        options("getSymbols.warning4.0"=FALSE)
       }
       importDefaults("getSymbols")
       #  to enable as-it-was behavior, set this:
@@ -276,6 +274,15 @@ function(Symbols,env,return.class='xts',index.class="Date",
          to=Sys.Date(),
          ...)
 {
+     if(getOption("getSymbols.yahoo.warning",TRUE)) {
+       # Warn about Yahoo Finance quality and stability
+       message("\nWARNING: There have been significant changes to Yahoo Finance data.",
+               "\nPlease see the Warning section of ", sQuote("?getSymbols.yahoo"), " for details.\n",
+               "\nThis message is shown once per session and may be disabled by setting\n",
+               "options(\"getSymbols.yahoo.warning\"=FALSE).")
+       options("getSymbols.yahoo.warning"=FALSE)
+     }
+
      importDefaults("getSymbols.yahoo")
      this.env <- environment()
      for(var in names(list(...))) {
