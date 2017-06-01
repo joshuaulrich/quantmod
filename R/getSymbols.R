@@ -513,27 +513,39 @@ function(Symbols,env,return.class='xts',index.class="Date",
             for(row in totalrows) {
                 cells <- XML::getNodeSet(row, "td")
                 
-                # 2 cells means it is a stocksplit row
-                # So extract stocksplit data and recalculate the matrix we have so far
-                if (length(cells) == 2 & length(cols) == 6 & nrow(mat) > 1) {
-                    ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(XML::xmlValue(cells[[2]]), "[^0-9]+")))))
-                    factor <- ss.data[2] / ss.data[1]
+                if (nchar(Symbols.name) == 8 && length(cells) == 3) {
+                    # For mutual fund from yahooj, only unit price is able to acquired
+                    # Length of ticker code must be 8.
+                    unit.price <- as.numeric(gsub(",", "", XML::xmlValue(cells[[2]])))
                     
-                    mat <- rbind(t(apply(mat[-nrow(mat),], 1, function(x) {
-                        x * c(1, rep(1/factor, 4), factor, 1)
-                    })), mat[nrow(mat),])
-                }
-                
-                if (length(cells) != length(cols) + 1) next
-                
-                # Parse the Japanese date format using UTF characters
-                # \u5e74 = "year"
-                # \u6708 = "month"
-                # \u65e5 = "day"
-                date <- as.Date(XML::xmlValue(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
-                entry <- c(date)
-                for(n in 2:length(cells)) {
-                    entry <- cbind(entry, as.numeric(gsub(",", "", XML::xmlValue(cells[[n]]))))
+                    date <- as.Date(XML::xmlValue(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
+                    # Fill other candle values by unit.price like the format of yahoo.us
+                    # Fill NA for "adjusted" due to lack of dividend information
+                    entry <- c(date, unit.price, unit.price, unit.price, unit.price, 0, NA)
+                    
+                } else {
+                    # 2 cells means it is a stocksplit row
+                    # So extract stocksplit data and recalculate the matrix we have so far
+                    if (length(cells) == 2 & length(cols) == 6 & nrow(mat) > 1) {
+                        ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(XML::xmlValue(cells[[2]]), "[^0-9]+")))))
+                        factor <- ss.data[2] / ss.data[1]
+                        
+                        mat <- rbind(t(apply(mat[-nrow(mat),], 1, function(x) {
+                            x * c(1, rep(1/factor, 4), factor, 1)
+                        })), mat[nrow(mat),])
+                    }
+                    
+                    if (length(cells) != length(cols) + 1) next
+                    
+                    # Parse the Japanese date format using UTF characters
+                    # \u5e74 = "year"
+                    # \u6708 = "month"
+                    # \u65e5 = "day"
+                    date <- as.Date(XML::xmlValue(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
+                    entry <- c(date)
+                    for(n in 2:length(cells)) {
+                        entry <- cbind(entry, as.numeric(gsub(",", "", XML::xmlValue(cells[[n]]))))
+                    }
                 }
                 
                 mat <- rbind(mat, entry)
