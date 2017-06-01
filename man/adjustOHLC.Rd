@@ -31,7 +31,7 @@ to split and dividend information.
 There are three methods available to
 calculate the new OHLC object prices.
 
-By default, getSplits and getDividends are
+By default, \code{getSplits} and \code{getDividends} are
 called to retrieve the respective information. These
 may dispatch to custom methods following the \dQuote{.}
 methodology used by quantmod dispatch.  See \code{getSymbols}
@@ -97,11 +97,11 @@ head(AAPL)
 head(AAPL.a <- adjustOHLC(AAPL))
 head(AAPL.uA <- adjustOHLC(AAPL, use.Adjusted=TRUE))
 
-# intrada adjustments are precise across all methods
+# intraday adjustments are precise across all methods
 # an example with Open to Close (OpCl)
 head(cbind(OpCl(AAPL),OpCl(AAPL.a),OpCl(AAPL.uA)))
 
-# Close to Close changes ma lose precision
+# Close to Close changes may lose precision
 head(cbind(ClCl(AAPL),ClCl(AAPL.a),ClCl(AAPL.uA)))
 }
 }
