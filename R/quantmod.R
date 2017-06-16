@@ -12,8 +12,12 @@ function(x)
 `as.zoo.data.frame`<-
 function(x,row.date=TRUE,...)
 {
+    # ignore row.date if order.by is specified
+    if(hasArg("order.by")) {
+        zoo(x,...)
+    }
     #really need to test order - ???how?
-    if(row.date) {
+    else if(row.date) {
         zoo(x,as.Date(rownames(x),origin='1970-01-01'),...)
     }
     else {
