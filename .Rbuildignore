@@ -8,3 +8,4 @@ WISHLIST
 ^\.gitignore
 ^.*\.orig$
 ^.*\.md$
+.travis.yml

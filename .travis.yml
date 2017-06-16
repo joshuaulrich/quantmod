@@ -1,0 +1,30 @@
+# Run Travis CI for R using https://eddelbuettel.github.io/r-travis/
+
+language: c
+
+sudo: required
+
+dist: trusty
+
+env:
+  global:
+    - _R_CHECK_FORCE_SUGGESTS_=false
+
+before_install:
+  - curl -OLs https://eddelbuettel.github.io/r-travis/run.sh && chmod 0755 run.sh
+  - ./run.sh bootstrap
+
+install:
+  - ./run.sh install_aptget r-cran-zoo r-cran-xts r-cran-ttr r-cran-curl
+
+script:
+  - ./run.sh run_tests
+
+after_failure:
+  - ./run.sh dump_logs
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
