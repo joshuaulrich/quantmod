@@ -227,7 +227,10 @@ formals(loadSymbols) <- loadSymbols.formals
 
       for (i in 1:5) {
         h <- curl::new_handle()
-        curl::curl_download("https://finance.yahoo.com", tmp, handle = h)
+        # random query to avoid cache
+        ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
+        cu <- paste0("https://finance.yahoo.com?", ru)
+        curl::curl_download(cu, tmp, handle = h)
         if (NROW(curl::handle_cookies(h)) > 0)
           break;
         Sys.sleep(0.1)
