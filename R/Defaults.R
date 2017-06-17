@@ -5,7 +5,7 @@ function(calling.fun=NULL) {
   if(is.function(calling.fun)) calling.fun <- deparse(substitute(calling.fun))
   if(is.null(sc)) 
     stop("importDefaults is only valid inside a function call") 
-  if(as.character(sc[[1]]) != calling.fun) return()
+  if((rev(as.character(sc[[1]]))[[1]]) != calling.fun) return()
   #calling.fun <- as.character(match.call(call=as.call(sys.call(-1)))[1])
   all.defaults <- getDefaults(calling.fun)
   if(is.null(all.defaults)) return()
