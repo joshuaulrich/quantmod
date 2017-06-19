@@ -23,3 +23,10 @@ stopifnot(identical(zz.f.char, as.zoo(f, order.by = dc)))
 stopifnot(identical(zz.f.date, as.zoo(f, order.by = dd)))
 stopifnot(identical(zz.r.char, as.zoo(r, order.by = dc)))
 stopifnot(identical(zz.r.date, as.zoo(r, order.by = dd)))
+
+# should not throw a warning
+op.warn <- getOption("warn")
+options(warn = 2)
+quantmod::getSymbols("SPY", src = "google", from = Sys.Date() - 10)
+options(warn = op.warn)
+
