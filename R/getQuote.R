@@ -3,6 +3,7 @@
 # getQuote.IBrokers
 # getQuote.RBloomberg
 # getQuote.OpenTick
+# getQuote.IEX
 
 `getQuote` <-
 function(Symbols,src='yahoo',what, ...) {
@@ -173,3 +174,58 @@ yahooQuote.EOD <- structure(list("ohgl1v", c("Open", "High",
   nms <- optshort[w]
   return(structure(list(str,nms),class='quoteFormat'))
 }
+
+                          
+                          
+                          
+                          
+                          
+getQuote.IEX <- function(symbols='vxx') {
+  convert.TOPS.time(
+    fromJSON(
+      curl(
+        form.IEX.url(symbols)
+        )
+      )
+    )
+  }
+
+       
+       
+form.IEX.url <- function(symbols) {
+  paste0( 'https://api.iextrading.com/1.0/tops/last?symbols=',  #TOPS only
+        paste0(
+          curl_escape(symbols),  #eg AGI+ needs to be AGI%2b
+          collapse=','
+          )
+       )
+  }
+                          
+
+convert.TOPS.time <- function(quote.from.TOPS) {
+  #time (milliseconds since epoch) comes in as the fourth parameter
+  time.from.TOPS <- quote.from.TOPS[,4]
+  time.from.TOPS -> milliseconds.from.TOPS
+
+  #very light error checking
+  if( any(!is.numeric(milliseconds.from.TOPS)) ) {
+          stop(   "I thought TOPS was going to give me a numeric time (milliseconds since the epoch) ..."   )
+          }
+  if( any(milliseconds.from.TOPS < 1e12) ) {
+          stop(   "That number of milliseconds is probably wrong (it dates back to 2001, before IEX was founded...)"    )
+          }
+  if( any(milliseconds.from.TOPS > 2e12) ) {
+          stop(   "That number of milliseconds is probably wrong (it's the year 2033, by which time this software package will either be obsolete or updated)."   )
+          }
+
+  #conversion
+  epoch <- '1970-01-01'
+  milliseconds.from.TOPS / 1000L -> seconds.from.TOPS
+
+  #edit only the fourth column
+  as.POSIXct(seconds.from.TOPS, origin=epoch) -> time.from.TOPS
+  time.from.TOPS -> quote.from.TOPS[,4]
+
+  #but return the whole object
+  return(quote.from.TOPS)
+  }
