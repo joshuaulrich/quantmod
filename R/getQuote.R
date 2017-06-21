@@ -182,8 +182,8 @@ yahooQuote.EOD <- structure(list("ohgl1v", c("Open", "High",
                           
 getQuote.IEX <- function(symbols='vxx') {
   convert.TOPS.time(
-    fromJSON(
-      curl(
+    jsonlite::fromJSON(
+      curl::curl(
         form.IEX.url(symbols)
         )
       )
@@ -195,7 +195,7 @@ getQuote.IEX <- function(symbols='vxx') {
 form.IEX.url <- function(symbols) {
   paste0( 'https://api.iextrading.com/1.0/tops/last?symbols=',  #TOPS only
         paste0(
-          curl_escape(symbols),  #eg AGI+ needs to be AGI%2b
+          curl::curl_escape(symbols),  #eg AGI+ needs to be AGI%2b
           collapse=','
           )
        )
