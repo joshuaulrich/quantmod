@@ -33,7 +33,6 @@ options(warn = op.warn)
 
 
 #IEX tests
-source('../R/getQuote.R')
 structure(list(symbol = c("VXX", "SNAP"), price = c(12.785, 17.27),
                size = c(100L, 200L), time = c(1498075199.954, 1498075184.411),
                .Names = c("symbol", "price", "size", "time"),
