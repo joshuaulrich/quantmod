@@ -205,14 +205,14 @@ form.IEX.url <- function(symbols) {
 convert.TOPS.time <- function(quote.from.TOPS) {
   #time (milliseconds since epoch) comes in as the fourth parameter
   time.from.TOPS <- quote.from.TOPS[,4]
-  time.from.TOPS -> milliseconds.from.TOPS
+  milliseconds.from.TOPS <- time.from.TOPS
 
   #very light error checking
   if( any(!is.numeric(milliseconds.from.TOPS)) ) {
-          stop(   "I thought TOPS was going to give me a numeric time (milliseconds since the epoch) ..."   )
+          stop(   "I thought TOPS was going to give me a numeric time (milliseconds since the epoch) …"   )
           }
   if( any(milliseconds.from.TOPS < 1e12) ) {
-          stop(   "That number of milliseconds is probably wrong (it dates back to 2001, before IEX was founded...)"    )
+          stop(   "That number of milliseconds is probably wrong (it dates back to 2001, before IEX was founded…)"    )
           }
   if( any(milliseconds.from.TOPS > 2e12) ) {
           stop(   "That number of milliseconds is probably wrong (it's the year 2033, by which time this software package will either be obsolete or updated)."   )
@@ -220,11 +220,11 @@ convert.TOPS.time <- function(quote.from.TOPS) {
 
   #conversion
   epoch <- '1970-01-01'
-  milliseconds.from.TOPS / 1000L -> seconds.from.TOPS
+  seconds.from.TOPS <- milliseconds.from.TOPS / 1000L
 
   #edit only the fourth column
-  as.POSIXct(seconds.from.TOPS, origin=epoch) -> time.from.TOPS
-  time.from.TOPS -> quote.from.TOPS[,4]
+  time.from.TOPS <- as.POSIXct(seconds.from.TOPS, origin=epoch)
+  quote.from.TOPS[,4] <- time.from.TOPS
 
   #but return the whole object
   return(quote.from.TOPS)
