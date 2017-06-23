@@ -1,8 +1,8 @@
-language: c
+language: r
 
 sudo: required
 
-dist: xenial
+dist: trusty
 
 env:
   global:
