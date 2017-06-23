@@ -40,10 +40,7 @@ structure(list(symbol = c("VXX", "SNAP"), price = c(12.785, 17.27),
 
 
 
-#net test       
-try(  getQuote.IEX('vxx')  )
-try(  getQuote.IEX( c('vxx','snap') ) )
-try(  getQuote.IEX( list('vxx','snap') ) )
+
       
        
           
