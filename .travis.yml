@@ -1,5 +1,3 @@
-# Run Travis CI for R using https://eddelbuettel.github.io/r-travis/
-
 language: c
 
 sudo: required
@@ -11,20 +9,20 @@ env:
     - _R_CHECK_FORCE_SUGGESTS_=false
 
 before_install:
-  - curl -OLs https://eddelbuettel.github.io/r-travis/run.sh && chmod 0755 run.sh
-  - ./run.sh bootstrap
+  - curl -OLs https://raw.githubusercontent.com/isomorphisms/r-travis/xenial/scripts/travis-tool.sh && chmod 0755 travis-tool.sh
+  - ./travis-tool.sh bootstrap
 
 install:
-  - ./run.sh install_aptget r-cran-zoo r-cran-xts r-cran-ttr r-cran-curl
+  - ./travis-tool.sh install_aptget r-cran-zoo r-cran-xts r-cran-ttr r-cran-curl
 
 script:
-  - ./run.sh run_tests
+  - ./travis-tool.sh run_tests
 
 after_failure:
-  - ./run.sh dump_logs
+  - ./travis-tool.sh dump_logs
 
 notifications:
   email:
-    on_success: change
-    on_failure: change
+    on_success: win@isomorphism.es   #change
+    on_failure: lose@isomorphism.es  #change
 
