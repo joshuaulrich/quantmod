@@ -71,8 +71,8 @@ structure(list(symbol = c("VXX", "SNAP"), price = c(12.785, 17.27),
 
 #net test       
 
-try(  quantmod::getQuote.IEX('vxx')  )
-try(  quantmod::getQuote.IEX( c('vxx','snap') ) )
+try(  quantmod:::getQuote.IEX('vxx')  )
+try(  quantmod:::getQuote.IEX( c('vxx','snap') ) )
 try(  quantmod::getQuote.IEX( list('vxx','snap') ) )
 
       
@@ -83,7 +83,7 @@ try(  quantmod::getQuote.IEX( list('vxx','snap') ) )
 
 #right shape
 stopifnot( identical(
-          dim(quantmod::getQuote.IEX('cat')),
+          dim(quantmod:::getQuote.IEX('cat')),
           c(1L,4L)
           )
 )
@@ -96,7 +96,7 @@ stopifnot( identical(
 
 stopifnot( identical(
                     c("symbol", "price", "size", "time"),
-                    names(  getQuote.IEX('slb') )
+                    names(  quantmod:::getQuote.IEX('slb') )
           )
 
           
@@ -111,7 +111,7 @@ expected.types <- structure(list(symbol = "character", price = "numeric", size =
           
 
 stopifnot( identical(
-                    lapply(getQuote.IEX('chd'), FUN=class),
+                    lapply(quantmod:::getQuote.IEX('chd'), FUN=class),
                     expected.types
                     )
           )
