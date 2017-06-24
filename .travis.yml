@@ -1,10 +1,11 @@
+
 language: r
 cache: packages
 
 sudo: false
 
 # dist: trusty
-pandoc_version: false   #ignore: false  #default: 1.15.2  #latest: 1.19.2.1
+pandoc_version: 1.19.2.1   #ignore: false  #default: 1.15.2  #latest: 1.19.2.1
 
 
 notifications:
