@@ -13,3 +13,8 @@ notifications:
     on_success: win@isomorphism.es   #change
     on_failure: lose@isomorphism.es  #change
 
+r_packages:
+  - covr
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
