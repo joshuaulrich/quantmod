@@ -105,13 +105,13 @@ stopifnot( identical(
 
 #IEX quotes are of the expected type
 
-expected.types <- structure(list(symbol = "character", price = "numeric", size = "integer", 
+expected_types <- structure(list(symbol = "character", price = "numeric", size = "integer", 
     time = c("POSIXct", "POSIXt")), .Names = c("symbol", "price", "size", "time"))
 
           
 
 stopifnot( identical(
                     lapply(quantmod:::getQuote.IEX('chd'), FUN=class),
-                    expected.types
+                    expected_types
                     )
           )
