@@ -56,12 +56,12 @@ options(warn = op.warn)
 
 
 #IEX tests
-
+here.now.vxx.snap <-
 structure(list(symbol = c("VXX", "SNAP"), price = c(12.785, 17.27),
                size = c(100L, 200L), time = c(1498075199.954, 1498075184.411),
                .Names = c("symbol", "price", "size", "time"),
                row.names = 1:2, class = "data.frame")
-          ) -> here.now.vxx.snap
+          )
 
 
 
@@ -97,6 +97,7 @@ stopifnot( identical(
 stopifnot( identical(
                     c("symbol", "price", "size", "time"),
                     names(  quantmod:::getQuote.IEX('slb') )
+                    )
           )
 
           
