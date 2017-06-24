@@ -3,7 +3,7 @@ cache: packages
 
 sudo: false
 
-# dist: trusty
+dist: trusty
 # pandoc_version: 1.19.2.1   #ignore: false  #default: 1.15.2  #latest: 1.19.2.1
 pandoc: false
 
