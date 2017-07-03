@@ -262,6 +262,8 @@ export(
     getSymbols.rda,
     getSymbols.RData,
     getSymbols.google,
+    getSymbols.av,
+    getSymbols.alphavantage,
 
     getFX,
     getMetals,

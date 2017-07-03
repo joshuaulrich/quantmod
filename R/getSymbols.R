@@ -1234,6 +1234,187 @@ function(Symbols,env,return.class='xts',
      return(fr)
 }#}}}
 
+#
+#  Download OHLC Data From Alpha Vantage
+#  
+#  Meant to be called internally by getSymbols().
+#  
+getSymbols.av <- function(Symbols, env, api.key,
+                          return.class="xts",
+                          periodicity="daily",
+                          adjusted=FALSE,
+                          interval="1min",
+                          output.size="compact", ... ) {
+  
+  VALID_PERIODICITY <- c("daily", "weekly", "monthly", "intraday")
+  VALID_INTERVAL <- c("1min", "5min", "15min", "30min", "60min")
+  VALID_OUTPUTSIZE <- c("compact", "full")
+  
+  fail <- function(...) stop("getSymbols.av: ",
+                             paste(list(...), collapse=" "), call.=FALSE )
+  
+  importDefaults("getSymbols.av")
+  this.env <- environment()
+  for (var in names(list(...))) {
+    assign(var, list(...)[[var]], this.env)
+  }
+  
+  if (!hasArg(api.key))
+    fail("An API key is required (api.key). Free registration at https://www.alphavantage.co/.")
+  if (!hasArg(auto.assign)) auto.assign <- TRUE
+  if (!hasArg(verbose)) verbose <- FALSE
+  if (!hasArg(warnings)) warnings <- TRUE
+  
+  periodicity <- match.arg(periodicity, VALID_PERIODICITY)
+  interval <- match.arg(interval, VALID_INTERVAL)
+  output.size <- match.arg(output.size, VALID_OUTPUTSIZE)
+  
+  default.return.class <- return.class
+  default.periodicity <- periodicity
+  
+  if (!requireNamespace("jsonlite", quietly=TRUE))
+    fail("Package", dQuote("jsonlite"), "is required but cannot be loaded.")
+  
+  tmp <- tempfile()
+  on.exit(file.remove(tmp))
+  
+  #
+  # For daily, weekly, and monthly data, timestamps are "yyyy-mm-dd".
+  # For intraday data, timestamps are "yyyy-mm-dd HH:MM:SS".
+  #
+  convertTimestamps <- function(ts, periodicity, tz) {
+    if (periodicity == "intraday")
+      as.POSIXct(ts, tz=tz)
+    else
+      as.Date(ts)
+  }
+  
+  downloadOne <- function(sym) {
+    
+    return.class <- getSymbolLookup()[[sym]]$return.class
+    return.class <- if (is.null(return.class)) default.return.class else return.class
+    
+    periodicity <- getSymbolLookup()[[sym]]$periodicity
+    periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
+    
+    periodicy <- match.arg(periodicity, VALID_PERIODICITY)
+    
+    if (adjusted && periodicity != "daily")
+      fail("only daily data can be adjusted")
+    
+    sym.name <- getSymbolLookup()[[sym]]$name
+    sym.name <- if (is.null(sym.name)) sym else sym.name
+    
+    FUNCTION <-
+      switch(periodicity,
+             daily = if (adjusted) "TIME_SERIES_DAILY_ADJUSTED" else "TIME_SERIES_DAILY",
+             weekly = "TIME_SERIES_WEEKLY",
+             monthly = "TIME_SERIES_MONTHLY",
+             intraday = "TIME_SERIES_INTRADAY" )
+    
+    if (verbose) cat("loading", sym.name, ".....")
+    
+    url.params <- paste(paste0("function=", FUNCTION),
+                        paste0("symbol=", sym.name),
+                        paste0("interval=", interval),
+                        paste0("outputsize=", output.size),
+                        paste0("apikey=", api.key),
+                        sep="&" )
+    url <- paste0("http://www.alphavantage.co/query",
+                  "?", url.params )
+    
+    utils::download.file(url=url, destfile=tmp, quiet=!verbose)
+    lst <- jsonlite::fromJSON(tmp)
+    
+    #
+    # Errors return a list with one element: An error message
+    #
+    if (length(lst) == 1)
+      fail(lst[[1]])
+    
+    if (verbose) cat("done.\n")
+    
+    #
+    # The first element of 'lst' is the metadata.
+    # Typical metadata (in JSON format):
+    #
+    #   "Meta Data": {
+    #     "1. Information": "Intraday (1min) prices and volumes",
+    #     "2. Symbol": "MSFT",
+    #     "3. Last Refreshed": "2017-05-23 16:00:00",
+    #     "4. Interval": "1min",
+    #     "5. Output Size": "Compact",
+    #     "6. Time Zone": "US/Eastern"
+    #   }
+    #
+    meta <- lst[[1]]
+    tz <- meta[["6. Time Zone"]]
+    updated <- convertTimestamps(meta[["3. Last Refreshed"]], periodicity, tz=tz)
+    
+    #
+    # The second element of 'lst' is the data: a list.
+    # The names of the list elements are the timestamps.
+    # Typical list element, non-adjusted data (in JSON format):
+    #
+    #   "2017-05-23": {
+    #     "1. open": "68.6750",
+    #     "2. high": "68.7100",
+    #     "3. low": "68.6400",
+    #     "4. close": "68.6800",
+    #     "5. volume": "1591941"
+    #   }
+    #
+    # Typical list element, adjusted data (again, JSON format):
+    #
+    #  "2017-06-30": {
+    #    "1. open": "68.7800",
+    #    "2. high": "69.3800",
+    #    "3. low": "68.7400",
+    #    "4. close": "68.9300",
+    #    "5. adjusted close": "68.9300",
+    #    "6. volume": "23039328",
+    #    "7. dividend amount": "0.00",
+    #    "8. split coefficient": "1.0000"
+    #   },
+    #
+    elems <- lst[[2]]
+    tm.stamps <- convertTimestamps(names(elems), periodicity, tz=tz)
+    
+    if (adjusted) {
+      av_names <- c("1. open", "2. high", "3. low", "4. close", "6. volume", "5. adjusted close")
+      qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume", "Adjusted"), sep=".")
+    } else {
+      av_names <- c("1. open", "2. high", "3. low", "4. close", "5. volume")
+      qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume"), sep=".")
+    }
+    
+    mkRow <- function(tm.stamp, node) {
+      row <- rbind(as.numeric(node[av_names]))
+      colnames(row) <- qm_names
+      xts(row, order.by=tm.stamp,
+          src="alphavantage", updated=updated )
+    }
+    
+    rows <- mapply(FUN=mkRow, tm.stamps, elems, SIMPLIFY=FALSE)
+    mat <- do.call(xts::rbind.xts, rows)
+    mat <- convert.time.series(mat, return.class=return.class)
+    if (auto.assign)
+      assign(sym, mat, env)
+    return(mat)
+  }
+  
+  matrices <- lapply(Symbols, downloadOne)
+  
+  if (auto.assign) {
+    return(Symbols)
+  } else {
+    return(matrices[[1]])
+  }
+}
+
+# Mnemonic alias, letting callers use getSymbols("IBM", src="alphavantage")
+getSymbols.alphavantage <- getSymbols.av
+
 # convert.time.series {{{
 `convert.time.series` <- function(fr,return.class) {
        if('quantmod.OHLC' %in% return.class) {
