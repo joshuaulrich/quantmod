@@ -385,11 +385,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
        colnames(fr) <- paste(toupper(gsub("\\^","",Symbols.name)), cnames, sep=".")
 
        if(adjust) {
-         # Already adjusted, except for the Close column
-         fr[,4] <- Ad(fr)
-       } else {
-         # Un-adjust the Close, using Adjusted column
-         fr[,1:3] <- round(fr[,1:3] * drop(fr[,4] / fr[,6]), 3)
+         # Adjustment algorithm by Joshua Ulrich
+         fr <- adjustOHLC(fr, symbol.name=Symbols.name)
        }
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
