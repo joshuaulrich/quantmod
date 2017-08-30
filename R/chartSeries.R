@@ -484,7 +484,7 @@ function(x,
 
   chob@xrange <- c(1,NROW(x))
   if(is.OHLC(x)) {
-    chob@yrange <- c(min(Lo(x),na.rm=TRUE),max(Hi(x),na.rm=TRUE))
+    chob@yrange <- range(OHLC(x), na.rm=TRUE)
   } else chob@yrange <- range(x[,1],na.rm=TRUE)
   
   if(!is.null(yrange) && length(yrange)==2)
