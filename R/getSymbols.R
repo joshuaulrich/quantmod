@@ -1250,17 +1250,16 @@ getSymbols.av <- function(Symbols, env, api.key,
   VALID_INTERVAL <- c("1min", "5min", "15min", "30min", "60min")
   VALID_OUTPUTSIZE <- c("compact", "full")
   
-  fail <- function(...) stop("getSymbols.av: ",
-                             paste(list(...), collapse=" "), call.=FALSE )
-  
   importDefaults("getSymbols.av")
   this.env <- environment()
   for (var in names(list(...))) {
     assign(var, list(...)[[var]], this.env)
   }
   
-  if (!hasArg("api.key"))
-    fail("An API key is required (api.key). Free registration at https://www.alphavantage.co/.")
+  if (!hasArg("api.key")) {
+    stop("getSymbols.av: An API key is required (api.key). Free registration",
+         " at https://www.alphavantage.co/.", call.=FALSE)
+  }
   if (!hasArg("auto.assign")) auto.assign <- TRUE
   if (!hasArg("verbose")) verbose <- FALSE
   if (!hasArg("warnings")) warnings <- TRUE
@@ -1272,8 +1271,10 @@ getSymbols.av <- function(Symbols, env, api.key,
   default.return.class <- return.class
   default.periodicity <- periodicity
   
-  if (!requireNamespace("jsonlite", quietly=TRUE))
-    fail("Package", dQuote("jsonlite"), "is required but cannot be loaded.")
+  if (!requireNamespace("jsonlite", quietly=TRUE)) {
+    stop("getSymbols.av: Package", dQuote("jsonlite"), "is required but",
+         " cannot be loaded.", call.=FALSE)
+  }
   
   tmp <- tempfile()
   on.exit(file.remove(tmp))
@@ -1300,7 +1301,7 @@ getSymbols.av <- function(Symbols, env, api.key,
     periodicy <- match.arg(periodicity, VALID_PERIODICITY)
     
     if (adjusted && periodicity != "daily")
-      fail("only daily data can be adjusted")
+      stop("getSymbols.av: Only daily data can be adjusted.", call.=FALSE)
     
     sym.name <- getSymbolLookup()[[sym]]$name
     sym.name <- if (is.null(sym.name)) sym else sym.name
@@ -1330,7 +1331,7 @@ getSymbols.av <- function(Symbols, env, api.key,
     # Errors return a list with one element: An error message
     #
     if (length(lst) == 1)
-      fail(lst[[1]])
+      stop("getSymbols.av: ", lst[[1]], call.=FALSE)
     
     if (verbose) cat("done.\n")
     
