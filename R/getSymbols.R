@@ -295,7 +295,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(!hasArg(adjust))
+     if(!hasArg("adjust"))
        adjust <- FALSE
 
      default.return.class <- return.class
@@ -305,8 +305,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
      intervals <- c(daily = "1d", weekly = "1wk", monthly = "1mo")
      default.periodicity <- match.arg(periodicity, names(intervals))
 
-     if(!hasArg(verbose)) verbose <- FALSE
-     if(!hasArg(auto.assign)) auto.assign <- TRUE
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
 
      handle <- .getHandle()
 
@@ -420,15 +420,15 @@ function(Symbols,env,return.class='xts',index.class="Date",
             # import all named elements that are NON formals
             assign(var, list(...)[[var]], this.env)
         }
-        if(!hasArg(adjust))
+        if(!hasArg("adjust"))
             adjust <- FALSE
         
         default.return.class <- return.class
         default.from <- from
         default.to <- to
         
-        if(!hasArg(verbose)) verbose <- FALSE
-        if(!hasArg(auto.assign)) auto.assign <- TRUE
+        if(!hasArg("verbose")) verbose <- FALSE
+        if(!hasArg("auto.assign")) auto.assign <- TRUE
 
         if(!requireNamespace("XML", quietly=TRUE))
           stop("package:",dQuote("XML"),"cannot be loaded.")
@@ -583,8 +583,8 @@ function(Symbols,env,return.class='xts',
      default.from <- from
      default.to <- to
 
-     if(!hasArg(verbose)) verbose <- FALSE
-     if(!hasArg(auto.assign)) auto.assign <- TRUE
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
      google.URL <- "http://finance.google.com/finance/historical?"
 
      # Google CSV contains English month abbreviations
@@ -670,8 +670,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(!hasArg(verbose)) verbose <- FALSE
-     if(!hasArg(auto.assign)) auto.assign <- TRUE
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
 
      if(!requireNamespace("DBI", quietly=TRUE))
        stop("package:",dQuote("DBI"),"cannot be loaded.")
@@ -734,8 +734,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(!hasArg(verbose)) verbose <- FALSE
-     if(!hasArg(auto.assign)) auto.assign <- TRUE
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
 
      if(!requireNamespace("DBI", quietly=TRUE))
        stop("package:",dQuote("DBI"),"cannot be loaded.")
@@ -791,8 +791,8 @@ function(Symbols,env,return.class='xts',
         # import all named elements that are NON formals
         assign(var, list(...)[[var]], this.env)
      }
-     if(!hasArg(verbose)) verbose <- FALSE
-     if(!hasArg(auto.assign)) auto.assign <- TRUE
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
      FRED.URL <- "https://fred.stlouisfed.org/series"
 
      tmp <- tempfile()
@@ -897,8 +897,8 @@ function(Symbols,env,
   default.dir <- dir
   default.extension <- extension
 
-  if(!hasArg(verbose)) verbose <- FALSE
-  if(!hasArg(auto.assign)) auto.assign <- TRUE
+  if(!hasArg("verbose")) verbose <- FALSE
+  if(!hasArg("auto.assign")) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -966,8 +966,8 @@ function(Symbols,env,
   default.dir <- dir
   default.extension <- extension
 
-  if(!hasArg(verbose)) verbose <- FALSE
-  if(!hasArg(auto.assign)) auto.assign <- TRUE
+  if(!hasArg("verbose")) verbose <- FALSE
+  if(!hasArg("auto.assign")) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -1025,8 +1025,8 @@ function(Symbols,env,
   default.dir <- dir
   default.extension <- extension
 
-  if(!hasArg(verbose)) verbose <- FALSE
-  if(!hasArg(auto.assign)) auto.assign <- TRUE
+  if(!hasArg("verbose")) verbose <- FALSE
+  if(!hasArg("auto.assign")) auto.assign <- TRUE
 
   for(i in 1:length(Symbols)) {
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -1081,9 +1081,9 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
   for(var in names(list(...))) {
     assign(var, list(...)[[var]], this.env)
   }
-  if(!hasArg(verbose))
+  if(!hasArg("verbose"))
     verbose <- FALSE
-  if(!hasArg(auto.assign))
+  if(!hasArg("auto.assign"))
     auto.assign <- TRUE
   if(is.method.available("twsConnect","IBrokers")) {
     tws <- do.call('twsConnect',list(clientId=1001))
@@ -1166,8 +1166,8 @@ function(Symbols,env,return.class='xts',
      default.from <- from
      default.to <- to
 
-     if(!hasArg(verbose)) verbose <- FALSE
-     if(!hasArg(auto.assign)) auto.assign <- TRUE
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
@@ -1259,11 +1259,11 @@ getSymbols.av <- function(Symbols, env, api.key,
     assign(var, list(...)[[var]], this.env)
   }
   
-  if (!hasArg(api.key))
+  if (!hasArg("api.key"))
     fail("An API key is required (api.key). Free registration at https://www.alphavantage.co/.")
-  if (!hasArg(auto.assign)) auto.assign <- TRUE
-  if (!hasArg(verbose)) verbose <- FALSE
-  if (!hasArg(warnings)) warnings <- TRUE
+  if (!hasArg("auto.assign")) auto.assign <- TRUE
+  if (!hasArg("verbose")) verbose <- FALSE
+  if (!hasArg("warnings")) warnings <- TRUE
   
   periodicity <- match.arg(periodicity, VALID_PERIODICITY)
   interval <- match.arg(interval, VALID_INTERVAL)
