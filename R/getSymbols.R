@@ -1293,15 +1293,13 @@ getSymbols.av <- function(Symbols, env, api.key,
       as.Date(ts)
   }
   
-  downloadOne <- function(sym) {
+  downloadOne <- function(sym, default.return.class, default.periodicity) {
     
     return.class <- getSymbolLookup()[[sym]]$return.class
     return.class <- if (is.null(return.class)) default.return.class else return.class
     
     periodicity <- getSymbolLookup()[[sym]]$periodicity
     periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
-    
-    periodicy <- match.arg(periodicity, VALID_PERIODICITY)
     
     if (adjusted && periodicity != "daily")
       stop("getSymbols.av: Only daily data can be adjusted.", call.=FALSE)
@@ -1407,7 +1405,9 @@ getSymbols.av <- function(Symbols, env, api.key,
     return(mat)
   }
   
-  matrices <- lapply(Symbols, downloadOne)
+  matrices <- lapply(Symbols, FUN=downloadOne,
+                     default.return.class=default.return.class,
+                     default.periodicity=default.periodicity)
   
   if (auto.assign) {
     return(Symbols)
