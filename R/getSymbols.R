@@ -1248,11 +1248,7 @@ getSymbols.av <- function(Symbols, env, api.key,
                           adjusted=FALSE,
                           interval="1min",
                           output.size="compact", ... ) {
-  
-  VALID_PERIODICITY <- c("daily", "weekly", "monthly", "intraday")
-  VALID_INTERVAL <- c("1min", "5min", "15min", "30min", "60min")
-  VALID_OUTPUTSIZE <- c("compact", "full")
-  
+
   importDefaults("getSymbols.av")
   this.env <- environment()
   for (var in names(list(...))) {
@@ -1267,9 +1263,9 @@ getSymbols.av <- function(Symbols, env, api.key,
   if (!hasArg("verbose")) verbose <- FALSE
   if (!hasArg("warnings")) warnings <- TRUE
   
-  periodicity <- match.arg(periodicity, VALID_PERIODICITY)
-  interval <- match.arg(interval, VALID_INTERVAL)
-  output.size <- match.arg(output.size, VALID_OUTPUTSIZE)
+  periodicity <- match.arg(periodicity, c("daily", "weekly", "monthly", "intraday"))
+  interval <- match.arg(interval, c("1min", "5min", "15min", "30min", "60min"))
+  output.size <- match.arg(output.size, c("compact", "full"))
   
   default.return.class <- return.class
   default.periodicity <- periodicity
