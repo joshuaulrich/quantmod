@@ -1386,15 +1386,13 @@ getSymbols.av <- function(Symbols, env, api.key,
       qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume"), sep=".")
     }
     
-    mkRow <- function(tm.stamp, node) {
-      row <- rbind(as.numeric(node[av_names]))
-      colnames(row) <- qm_names
-      xts(row, order.by=tm.stamp,
-          src="alphavantage", updated=updated )
-    }
-    
-    rows <- mapply(FUN=mkRow, tm.stamps, elems, SIMPLIFY=FALSE)
-    mat <- do.call(xts::rbind.xts, rows)
+    # extract columns from each element (row) and unlist to a vector
+    rows <- lapply(elems, function(x) unlist(x[av_names], use.names=FALSE))
+    rows <- do.call(rbind, rows)
+    colnames(rows) <- qm_names
+    storage.mode(rows) <- "numeric"
+    # convert matrix to xts
+    mat <- xts(rows, tm.stamps, src="alphavantage", updated=updated)
     mat <- convert.time.series(mat, return.class=return.class)
     if (auto.assign)
       assign(sym, mat, env)
