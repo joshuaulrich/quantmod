@@ -1312,16 +1312,14 @@ getSymbols.av <- function(Symbols, env, api.key,
     
     if (verbose) cat("loading", sym.name, ".....")
     
-    url.params <- paste(paste0("function=", FUNCTION),
-                        paste0("symbol=", sym.name),
-                        paste0("interval=", interval),
-                        paste0("outputsize=", output.size),
-                        paste0("apikey=", api.key),
-                        sep="&" )
-    url <- paste0("http://www.alphavantage.co/query",
-                  "?", url.params )
+    URL <- paste0("http://www.alphavantage.co/query",
+                  "?function=", FUNCTION,
+                  "&symbol=", sym.name,
+                  "&interval=", interval,
+                  "&outputsize=", output.size,
+                  "&apikey=", api.key)
     
-    utils::download.file(url=url, destfile=tmp, quiet=!verbose)
+    download.file(url=URL, destfile=tmp, quiet=!verbose)
     lst <- jsonlite::fromJSON(tmp)
     
     #
