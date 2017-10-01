@@ -20,7 +20,8 @@ getSymbols.yahoo(Symbols,
                  from = "2007-01-01",
                  to = Sys.Date(),
                  ...,
-                 periodicity = "daily")
+                 periodicity = "daily",
+                 curl.options = list())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -35,6 +36,7 @@ getSymbols.yahoo(Symbols,
        \item{\dots}{ additional parameters }
        \item{periodicity}{ periodicity of data to query and return. Must be
                            one of "daily", "weekly", "monthly". ("daily") }
+       \item{curl.options}{ options passed to \code{curl::handle_setopt} }
 }
 \details{
 Meant to be called internally by \code{getSymbols} (see also).

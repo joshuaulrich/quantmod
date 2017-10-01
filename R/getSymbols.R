@@ -210,7 +210,7 @@ formals(loadSymbols) <- loadSymbols.formals
 #"getSymbols.Bloomberg" <- getSymbols.Bloomberg
 # }}}
 
-.getHandle <- function(force.new = FALSE)
+.getHandle <- function(curl.options = list(), force.new = FALSE)
 {
   h <- get0("_handle_", .quantmodEnv)
 
@@ -227,6 +227,8 @@ formals(loadSymbols) <- loadSymbols.formals
 
       for (i in 1:5) {
         h <- curl::new_handle()
+        curl::handle_setopt(h, .list = curl.options)
+
         # random query to avoid cache
         ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
         cu <- paste0("https://finance.yahoo.com?", ru)
@@ -278,7 +280,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
          from='2007-01-01',
          to=Sys.Date(),
          ...,
-         periodicity="daily")
+         periodicity="daily",
+         curl.options=list())
 {
      if(getOption("getSymbols.yahoo.warning",TRUE)) {
        # Warn about Yahoo Finance quality and stability
@@ -308,7 +311,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
 
-     handle <- .getHandle()
+     handle <- .getHandle(curl.options)
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
@@ -349,7 +352,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
          warning(Symbols.name, " download failed; trying again.",
                  call. = FALSE, immediate. = TRUE)
          # re-create handle
-         handle <- .getHandle(force.new = TRUE)
+         handle <- .getHandle(curl.options, force.new = TRUE)
          # try again
          yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
                                 interval, "history", handle)
