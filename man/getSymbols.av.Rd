@@ -17,6 +17,7 @@ getSymbols.av(Symbols, env, api.key,
               adjusted = FALSE,
               interval = "1min",
               output.size = "compact",
+              data.type = "json",
               ...)
 }
 \arguments{
@@ -31,6 +32,7 @@ getSymbols.av(Symbols, env, api.key,
   \item{interval}{one of \code{"1min"}, \code{"5min"}, \code{"15min"}, \code{"30min"}, or \code{"60min"}
     (intraday data only)}
   \item{output.size}{ either \code{"compact"} or \code{"full"} }
+  \item{data.type}{ either \code{"json"} or \code{"csv"} }
   \item{\dots}{ additional parameters as per \code{\link{getSymbols}} }
 }
 \details{
@@ -65,6 +67,11 @@ Set \code{output.size="full"} to obtain the entire available history.
 For daily, weekly, and monthly data, Alpha Vantage says the available data is up to 20 years;
 for intraday data, the available history is the most recent 10 or 15 days.
 Be forewarned that downloading \code{full} data requires more time than \code{compact} data, of course.
+
+Alpha Vantage provides access to data via two APIs. You can choose the API via
+the \code{data.type} argument. \code{data.type="json"}, the default, will
+import data using the JSON API. This API includes additional metadata (e.g.
+last updated time, timezone, etc) that is not provided via the CSV API.
 }
 \value{
 A call to \code{getSymbols(Symbols, src="av")} will create objects

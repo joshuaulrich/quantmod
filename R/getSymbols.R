@@ -1247,8 +1247,10 @@ getSymbols.av <- function(Symbols, env, api.key,
                           periodicity="daily",
                           adjusted=FALSE,
                           interval="1min",
-                          output.size="compact", ... ) {
-
+                          output.size="compact",
+                          data.type="json",
+                          ...)
+{
   importDefaults("getSymbols.av")
   this.env <- environment()
   for (var in names(list(...))) {
@@ -1319,81 +1321,94 @@ getSymbols.av <- function(Symbols, env, api.key,
                   "&symbol=", sym.name,
                   "&interval=", interval,
                   "&outputsize=", output.size,
+                  "&datatype=", data.type,
                   "&apikey=", api.key)
     
     download.file(url=URL, destfile=tmp, quiet=!verbose)
-    lst <- jsonlite::fromJSON(tmp)
-    
-    #
-    # Errors return a list with one element: An error message
-    #
-    if (length(lst) == 1)
-      stop("getSymbols.av: ", lst[[1]], call.=FALSE)
-    
-    if (verbose) cat("done.\n")
-    
-    #
-    # The first element of 'lst' is the metadata.
-    # Typical metadata (in JSON format):
-    #
-    #   "Meta Data": {
-    #     "1. Information": "Intraday (1min) prices and volumes",
-    #     "2. Symbol": "MSFT",
-    #     "3. Last Refreshed": "2017-05-23 16:00:00",
-    #     "4. Interval": "1min",
-    #     "5. Output Size": "Compact",
-    #     "6. Time Zone": "US/Eastern"
-    #   }
-    #
-    meta <- lst[[1]]
-    tz <- meta[["6. Time Zone"]]
-    updated <- convertTimestamps(meta[["3. Last Refreshed"]], periodicity, tz=tz)
-    
-    #
-    # The second element of 'lst' is the data: a list.
-    # The names of the list elements are the timestamps.
-    # Typical list element, non-adjusted data (in JSON format):
-    #
-    #   "2017-05-23": {
-    #     "1. open": "68.6750",
-    #     "2. high": "68.7100",
-    #     "3. low": "68.6400",
-    #     "4. close": "68.6800",
-    #     "5. volume": "1591941"
-    #   }
-    #
-    # Typical list element, adjusted data (again, JSON format):
-    #
-    #  "2017-06-30": {
-    #    "1. open": "68.7800",
-    #    "2. high": "69.3800",
-    #    "3. low": "68.7400",
-    #    "4. close": "68.9300",
-    #    "5. adjusted close": "68.9300",
-    #    "6. volume": "23039328",
-    #    "7. dividend amount": "0.00",
-    #    "8. split coefficient": "1.0000"
-    #   },
-    #
-    elems <- lst[[2]]
-    tm.stamps <- convertTimestamps(names(elems), periodicity, tz=tz)
-    
-    if (adjusted) {
-      av_names <- c("1. open", "2. high", "3. low", "4. close", "6. volume", "5. adjusted close")
-      qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume", "Adjusted"), sep=".")
+
+    if (data.type == "json") {
+      lst <- jsonlite::fromJSON(tmp)
+
+      #
+      # Errors return a list with one element: An error message
+      #
+      if (length(lst) == 1)
+        stop("getSymbols.av: ", lst[[1]], call.=FALSE)
+
+      if (verbose) cat("done.\n")
+
+      #
+      # The first element of 'lst' is the metadata.
+      # Typical metadata (in JSON format):
+      #
+      #   "Meta Data": {
+      #     "1. Information": "Intraday (1min) prices and volumes",
+      #     "2. Symbol": "MSFT",
+      #     "3. Last Refreshed": "2017-05-23 16:00:00",
+      #     "4. Interval": "1min",
+      #     "5. Output Size": "Compact",
+      #     "6. Time Zone": "US/Eastern"
+      #   }
+      #
+      meta <- lst[[1]]
+      tz <- meta[["6. Time Zone"]]
+      updated <- convertTimestamps(meta[["3. Last Refreshed"]], periodicity, tz=tz)
+
+      #
+      # The second element of 'lst' is the data: a list.
+      # The names of the list elements are the timestamps.
+      # Typical list element, non-adjusted data (in JSON format):
+      #
+      #   "2017-05-23": {
+      #     "1. open": "68.6750",
+      #     "2. high": "68.7100",
+      #     "3. low": "68.6400",
+      #     "4. close": "68.6800",
+      #     "5. volume": "1591941"
+      #   }
+      #
+      # Typical list element, adjusted data (again, JSON format):
+      #
+      #  "2017-06-30": {
+      #    "1. open": "68.7800",
+      #    "2. high": "69.3800",
+      #    "3. low": "68.7400",
+      #    "4. close": "68.9300",
+      #    "5. adjusted close": "68.9300",
+      #    "6. volume": "23039328",
+      #    "7. dividend amount": "0.00",
+      #    "8. split coefficient": "1.0000"
+      #   },
+      #
+      elems <- lst[[2]]
+      tm.stamps <- convertTimestamps(names(elems), periodicity, tz=tz)
+
+      if (adjusted) {
+        av_names <- c("1. open", "2. high", "3. low", "4. close", "6. volume", "5. adjusted close")
+        qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume", "Adjusted"), sep=".")
+      } else {
+        av_names <- c("1. open", "2. high", "3. low", "4. close", "5. volume")
+        qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume"), sep=".")
+      }
+
+      # extract columns from each element (row) and unlist to a vector
+      rows <- lapply(elems, function(x) unlist(x[av_names], use.names=FALSE))
+      rows <- do.call(rbind, rows)
+      colnames(rows) <- qm_names
+      storage.mode(rows) <- "numeric"
+      # convert matrix to xts
+      mat <- xts(rows, tm.stamps, src="alphavantage", updated=updated)
+      mat <- convert.time.series(mat, return.class=return.class)
     } else {
-      av_names <- c("1. open", "2. high", "3. low", "4. close", "5. volume")
-      qm_names <- paste(sym, c("Open", "High", "Low", "Close", "Volume"), sep=".")
+      mat <- as.xts(read.zoo(tmp, header=TRUE, sep=","),
+                    src="alphavantage", updated=Sys.time())
+      # convert column names to symbol.series
+      cn <- colnames(mat)
+      cn <- paste0(toupper(substring(cn, 1, 1)), substring(cn, 2))
+      colnames(mat) <- paste(sym, cn, sep=".")
+
+      mat <- convert.time.series(mat, return.class=return.class)
     }
-    
-    # extract columns from each element (row) and unlist to a vector
-    rows <- lapply(elems, function(x) unlist(x[av_names], use.names=FALSE))
-    rows <- do.call(rbind, rows)
-    colnames(rows) <- qm_names
-    storage.mode(rows) <- "numeric"
-    # convert matrix to xts
-    mat <- xts(rows, tm.stamps, src="alphavantage", updated=updated)
-    mat <- convert.time.series(mat, return.class=return.class)
     if (auto.assign)
       assign(sym, mat, env)
     return(mat)
