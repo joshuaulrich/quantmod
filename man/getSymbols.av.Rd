@@ -36,7 +36,7 @@ getSymbols.av(Symbols, env, api.key,
   \item{\dots}{ additional parameters as per \code{\link{getSymbols}} }
 }
 \details{
-Meant to be called internally by getSymbols only.
+Meant to be called internally by \code{getSymbols} only.
 This method is not meant to be called directly, instead
 a call to \code{getSymbols("x", src="av")} will
 in turn call this method. It is documented for the
@@ -47,7 +47,7 @@ but the one-time registration is fast and free.
 Register at their web site, \url{https://www.alphavantage.co/},
 and you will receive an \emph{API key}:
 a short string of alphanumeric characters (e.g., "FU4U").
-Provide the API key everytime you call \code{getSymbols};
+Provide the API key every time you call \code{getSymbols};
 or set it globally using \code{setDefaults(getSymbols.av, api.key="yourKey")}.
 
 The Alpha Vantage site provides daily, weekly, monthly, and intraday data.
