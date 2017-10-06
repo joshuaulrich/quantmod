@@ -1263,7 +1263,8 @@ getSymbols.av <- function(Symbols, env, api.key,
   if (!hasArg("verbose")) verbose <- FALSE
   if (!hasArg("warnings")) warnings <- TRUE
   
-  periodicity <- match.arg(periodicity, c("daily", "weekly", "monthly", "intraday"))
+  valid.periodicity <- c("daily", "weekly", "monthly", "intraday")
+  periodicity <- match.arg(periodicity, valid.periodicity)
   interval <- match.arg(interval, c("1min", "5min", "15min", "30min", "60min"))
   output.size <- match.arg(output.size, c("compact", "full"))
   
@@ -1296,6 +1297,7 @@ getSymbols.av <- function(Symbols, env, api.key,
     
     periodicity <- getSymbolLookup()[[sym]]$periodicity
     periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
+    periodicity <- match.arg(periodicity, valid.periodicity)
     
     if (adjusted && periodicity != "daily")
       stop("getSymbols.av: Only daily data can be adjusted.", call.=FALSE)
