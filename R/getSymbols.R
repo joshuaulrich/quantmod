@@ -1316,7 +1316,7 @@ getSymbols.av <- function(Symbols, env, api.key,
     
     if (verbose) cat("loading", sym.name, ".....")
     
-    URL <- paste0("http://www.alphavantage.co/query",
+    URL <- paste0("https://www.alphavantage.co/query",
                   "?function=", FUNCTION,
                   "&symbol=", sym.name,
                   "&interval=", interval,
