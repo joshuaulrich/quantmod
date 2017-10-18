@@ -25,6 +25,5 @@ after_failure:
 
 notifications:
   email:
-    on_success: change
-    on_failure: change
-
+    on_success: quantmod@mailinator.com
+    on_failure: quantmad@mailinator.com
