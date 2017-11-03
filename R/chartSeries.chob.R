@@ -84,7 +84,7 @@ function(x)
 
   # add gridlines _under_ main series
   #grid(NA,NULL,col=x@colors$grid.col)
-  abline(h=axTicks(2), col=x@colors$grid.col)
+  if(x@show.grid == TRUE) abline(h=axTicks(2), col=x@colors$grid.col)
 
   # a vector of x positions
   x.pos <- 1+x@spacing*(1:x@length-1)
