@@ -134,6 +134,7 @@ function(x,
   chob@colors <- theme
   chob@time.scale <- time.scale
   chob@minor.ticks <- minor.ticks
+  chob@show.grid <- show.grid
 
   chob@length <- NROW(x)
 
