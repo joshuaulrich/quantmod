@@ -61,9 +61,23 @@ function(Symbols,what=standardQuote(),...) {
     stop(response$quoteResponse$error)
   }
   # Always return symbol and time
-  #FIXME: use exchange TZ, if possible. POSIXct must have only one TZ, so
-  #  times from different timezones will need to converted to a common TZ
-  Qposix <- .POSIXct(sq[,"regularMarketTime"], tz=NULL)
+  # Use exchange TZ, if possible. POSIXct must have only one TZ, so times
+  # from different timezones will be converted to a common TZ
+  tz <- sq[, "exchangeTimezoneName"]
+  if (length(unique(tz)) == 1L) {
+    Qposix <- .POSIXct(sq[,"regularMarketTime"], tz=tz[1L])
+  } else {
+    warning("symbols have different timezones; converting to local time")
+    convertTZ <- function(x) {
+      tz <- x$exchangeTimezoneName[1]
+      times <- .POSIXct(x$regularMarketTime, tz)
+      attr(times, "tzone") <- NULL
+      times
+    }
+    Qposix <- sapply(split(sq, sq$exchangeTimezoneName), convertTZ)
+    Qposix <- .POSIXct(Qposix, tz=NULL)  # force local timezone
+  }
+
   Symbols <- unlist(strsplit(Symbols,','))
   df <- data.frame(Qposix, sq[,QF])
   rownames(df) <- Symbols
