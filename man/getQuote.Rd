@@ -45,7 +45,6 @@ an object of class quoteFormat, for use within the \code{getQuote} function.
 }
 \references{ 
 Yahoo! Finance \url{finance.yahoo.com} 
-gummy-stuff.org \url{www.gummy-stuff.org/Yahoo-data.htm}
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}}}
