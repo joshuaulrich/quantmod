@@ -1,3 +1,132 @@
+### Changes in 0.4-12 (2017-12-02)
+
+#### BUG FIXES
+1. `chartSeries()` now honors `show.grid` argument.  Thanks to Ethan Smith.
+  [#200](https://github.com/joshuaulrich/quantmod/issues/200)
+1. `getQuote.yahoo()` uses the new JSON API.
+  [#197](https://github.com/joshuaulrich/quantmod/issues/197)
+1. `getSymbols.yahoo()` is more careful about converting UNIX timestamps to
+  character when creating the query URL.
+  [#202](https://github.com/joshuaulrich/quantmod/issues/202)
+
+
+### Changes in 0.4-11 (2017-10-06)
+
+#### BUG FIXES
+1. `getSymbols.yahoo()`
+    * Don't try to un-adjust the OHLC for splits and/or dividends. Return data
+      as-is and leave any (un-)adjustments to the end user.
+      [#174](https://github.com/joshuaulrich/quantmod/issues/174)
+    * Add ability to pass `curl.options` to `curl.download()`.
+      [#177](https://github.com/joshuaulrich/quantmod/issues/177)
+
+#### NEW FEATURES
+1. `getSymbols.av()` can download data from [Alpha Vantage](https://www.alphavantage.co/).
+  Thanks to Paul Teetor for the contribution.
+  [#176](https://github.com/joshuaulrich/quantmod/issues/176)
+
+
+### Changes in 0.4-10 (2017-06-20)
+
+#### BUG FIXES
+1. `getSymbols.yahoo()`
+    * Avoid cached response from Yahoo Finance proxy.
+      [#166](https://github.com/joshuaulrich/quantmod/issues/166)
+    * Set `from` argument back to 1900-01-01.
+      [#157](https://github.com/joshuaulrich/quantmod/issues/157)
+1. `getSymbols()` no longer warns if called with namespace
+  (i.e. `quantmod::getSymbols()`).
+  [#134](https://github.com/joshuaulrich/quantmod/issues/134)
+1. `as.zoo.data.frame()` now ignores `row.date` argument if called with
+  `order.by`.
+  [#168](https://github.com/joshuaulrich/quantmod/issues/168)
+
+
+### Changes in 0.4-9 (2017-05-29)
+
+#### BUG FIXES
+1. `getSymbols.yahoo()` uses the new API.
+  [#157](https://github.com/joshuaulrich/quantmod/issues/157)
+1. `getOptionChain.yahoo()` returns `NULL` when there are no calls/puts instead
+  of `list()`.
+  [#155](https://github.com/joshuaulrich/quantmod/issues/155)
+
+#### NEW FEATURES
+1. `getSymbols.yahoo()` gains a `periodicity` argument, for use by
+  `tseries::get.hist.quote()`.
+  [#162](https://github.com/joshuaulrich/quantmod/issues/162)
+
+
+### Changes in 0.4-8 (2017-04-19)
+
+#### BUG FIXES
+1. `getSymbols.google()`:
+    * Honor all arguments set via `setSymbolLookup()`.
+    * Correctly parse dates in non-English locales.
+1. Fix `getSymbols.oanda()`.
+1. Fix `add_TA()` when called from a function.
+1. Remove 'its' package references (it was archived).
+1. Update Yahoo Finance URLs to HTTPS to avoid redirect.
+1. Update FRED URL to avoid redirect.
+
+#### NEW FEATURES
+1. Add `split.adjust` argument to `getDividends()`.
+1. Add readme, contributing, and issue template files for GitHub.
+
+
+### Changes in 0.4-7 (2016-10-24)
+
+1. Let `jsonlite::fromJSON()` manage connections in `getOptionChain.yahoo()`.
+1. Update omegahat URL at CRAN's request.
+
+
+### Changes in 0.4-6 (2016-08-28)
+
+1. Remove unused `unsetSymbolLookup()`.
+1. Add documentation for `getPrice()`.
+1. Fix subsetting in `addTRIX()`.
+1. Fix `getSymbols.oanda()` to use https.
+1. Fix `getOptionChain.yahoo()` to download JSON instead of scrape HTML.
+
+
+### Changes in 0.4-5 (2015-07-24)
+
+1. Ensure `add*MA()` functions use Close column by default.
+1. Correct `Delt()` docs (type argument default value was wrong).
+1. Ensure tempfiles are always removed.
+1. In `getSymbols.csv()`:
+    * Fix format argument handling.
+    * Ensure date column is character before calling `as.Date()`.
+    * Add `col.names` argument.
+1. Fix `dbConnect()` call (changed in `RMySQL_0.10`) in `getSymbols.MySQL()`.
+1. Automatically detect OHLC vs OHLCVA in `getSymbols.yahooj()`.
+1. Handle long vectors in `setDefaults()`.
+1. Fix `getSymbols.FRED() for https.
+1. Fix `getOptionChain.yahoo() for spaces in table headers.
+1. Add `importFrom` for all non-base packages.
+
+
+### Changes in 0.4-4 (2015-03-08)
+
+1. Added `getSymbols.yahooj()` to pull data from Yahoo Finance Japan (Thanks to
+  Wouter Thielen for the contribution.
+  [#14](https://github.com/joshuaulrich/quantmod/issues/14)).
+1. Fixed `getOptionChain.yahoo()` to handle the new options page layout.
+  [#27](https://github.com/joshuaulrich/quantmod/issues/27)
+1. Fixed `getSymbols.oanda()` to handle the new URL structure and CSV format.
+  [#36](https://github.com/joshuaulrich/quantmod/issues/36)
+
+
+### Changes in 0.4-3 (2014-12-15)
+
+1. Change maintainer from Jeffrey Ryan to Joshua Ulrich
+
+1. Copy required functionality from the (archived) Defaults package into
+   quantmod and remove dependency on Defaults.
+
+1. Incorporate several bug fixes and patches.
+
+
 ### Changes in 0.4-0
 
 * getSymbols now uses parent.frame() when auto.assign=TRUE. This
