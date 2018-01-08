@@ -796,13 +796,13 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
-     FRED.URL <- "https://fred.stlouisfed.org/series"
+     FRED.URL <- "https://fred.stlouisfed.org/graph/fredgraph.csv?id="
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
      for(i in 1:length(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
-       URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
+       URL <- paste(FRED.URL, Symbols[[i]], sep="")
        try.download.file(URL, destfile=tmp, quiet=!verbose, ...)
        fr <- read.csv(tmp,na.string=".")
        if(verbose) cat("done.\n")
