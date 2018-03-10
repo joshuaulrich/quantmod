@@ -1428,6 +1428,104 @@ getSymbols.av <- function(Symbols, env, api.key,
 # Mnemonic alias, letting callers use getSymbols("IBM", src="alphavantage")
 getSymbols.alphavantage <- getSymbols.av
 
+#
+#  Download OHLC Data From Tiingo
+#  
+#  Meant to be called internally by getSymbols().
+#  
+getSymbols.tiingo <- function(Symbols, env, api.key,
+                              return.class="xts",
+                              periodicity="daily",
+                              from='2007-01-01',
+                              to=Sys.Date(),
+                              data.type="json",
+                              ...) {
+  
+  importDefaults("getSymbols.tiingo")
+  this.env <- environment()
+  for (var in names(list(...))) {
+    assign(var, list(...)[[var]], this.env)
+  }
+  
+  if (!hasArg("api.key")) {
+    stop("getSymbols.tiingo: An API key is required (api.key). Register",
+         " at https://api.tiingo.com.", call.=FALSE)
+  }
+  if (!hasArg("auto.assign")) auto.assign <- TRUE
+  if (!hasArg("verbose")) verbose <- FALSE
+  if (!hasArg("warnings")) warnings <- TRUE
+  
+  valid.periodicity <- c("daily", "weekly", "monthly", "annually")
+  periodicity <- match.arg(periodicity, valid.periodicity)
+  default.return.class <- return.class
+  default.periodicity <- periodicity
+  
+  if (!requireNamespace("jsonlite", quietly=TRUE)) {
+    stop("getSymbols.tiingo: Package", dQuote("jsonlite"), "is required but",
+         " cannot be loaded.", call.=FALSE)
+  }
+  
+  tmp <- tempfile()
+  on.exit(file.remove(tmp))
+  
+  downloadOne <- function(sym, default.return.class, default.periodicity) {
+    
+    return.class <- getSymbolLookup()[[sym]]$return.class
+    return.class <- if (is.null(return.class)) default.return.class else return.class
+    periodicity <- getSymbolLookup()[[sym]]$periodicity
+    periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
+    periodicity <- match.arg(periodicity, valid.periodicity)
+    sym.name <- getSymbolLookup()[[sym]]$name
+    sym.name <- if (is.null(sym.name)) sym else sym.name
+    
+    if (verbose) cat("loading", sym.name, ".....")
+    from.strftime <- strftime(from, format = "%Y-%m-%d")
+    to.strftime <- strftime(to, format = "%Y-%m-%d")
+    
+    URL <- paste0("https://api.tiingo.com/tiingo/",
+                  periodicity, "/",
+                  sym.name, "/prices",
+                  "?startDate=", from.strftime,
+                  "&endDate=", to.strftime,
+                  "&format=", data.type,
+                  "&token=", api.key)
+    download.file(url=URL, destfile=tmp, quiet=!verbose)
+    tiingo.names <- c("open", "high", "low", "close", "volume",
+                      "adjClose", "adjHigh", "adjLow", "adjOpen",
+                      "adjVolume", "divCash", "splitFactor")
+    qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
+                             "AdjustedClose", "AdjustedHigh", "AdjustedLow",
+                             "AdjustedOpen", "AdjustedVolume", "DivCash",
+                             "SplitFactor"), sep=".")
+    
+    if (data.type == "json") {
+      stock.data <- jsonlite::fromJSON(tmp)
+      if (verbose) cat("done.\n")
+    } else {
+      stock.data <- read.csv(tmp, as.is=TRUE)
+    }
+    tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
+    stock.data[, "date"] <- NULL
+    colnames(stock.data) <- qm.names[match(colnames(stock.data), tiingo.names)]
+    # convert data to xts
+    xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
+    xts.data <- convert.time.series(xts.data, return.class=return.class)
+    if (auto.assign)
+      assign(sym, xts.data, env)
+    return(xts.data)
+  }
+  
+  matrices <- lapply(Symbols, FUN=downloadOne,
+                     default.return.class=default.return.class,
+                     default.periodicity=default.periodicity)
+  
+  if (auto.assign) {
+    return(Symbols)
+  } else {
+    return(matrices[[1]])
+  }
+}
+
 # convert.time.series {{{
 `convert.time.series` <- function(fr,return.class) {
        if('quantmod.OHLC' %in% return.class) {
