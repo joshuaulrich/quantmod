@@ -79,7 +79,20 @@ function(Symbols,what=standardQuote(),...) {
   }
 
   Symbols <- unlist(strsplit(Symbols,','))
-  df <- data.frame(Qposix, sq[,QF])
+
+  # Extract user-requested columns. Convert to list to avoid
+  # 'undefined column' error with data.frame.
+  qflist <- setNames(as.list(sq)[QF], QF)
+
+  # Fill any missing columns with NA
+  pad <- rep(NA, length(Symbols))
+  qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
+
+  # Add the trade time and setNames() on other elements
+  qflist <- c(list(regularMarketTime = Qposix), setNames(qflist, QF))
+
+  df <- data.frame(qflist, stringsAsFactors = FALSE, check.names = FALSE)
+
   rownames(df) <- Symbols
   if(!is.null(QF.names)) {
     colnames(df) <- c('Trade Time',QF.names)
