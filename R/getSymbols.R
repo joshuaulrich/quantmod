@@ -18,7 +18,7 @@ function(Symbols=NULL,
                 'and getOption("getSymbols.auto.assign") will still be checked for\n',
                 'alternate defaults.\n\n',
                 'This message is shown once per session and may be disabled by setting \n',
-                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for details.')
+                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for details.\n')
         options("getSymbols.warning4.0"=FALSE)
       }
       importDefaults("getSymbols")
@@ -574,88 +574,9 @@ function(Symbols,env,return.class='xts',
          to=Sys.Date(),
          ...)
 {
-     fix.google.bug <- TRUE
-     importDefaults("getSymbols.google")
-     this.env <- environment()
-     for(var in names(list(...))) {
-        # import all named elements that are NON formals
-        assign(var, list(...)[[var]], this.env)
-     }
-
-     default.return.class <- return.class
-     default.from <- from
-     default.to <- to
-
-     if(!hasArg("verbose")) verbose <- FALSE
-     if(!hasArg("auto.assign")) auto.assign <- TRUE
-     google.URL <- "http://finance.google.com/finance/historical?"
-
-     # Google CSV contains English month abbreviations
-     # Ensure strptime() uses an English locale in this call
-     lc_time <- Sys.getlocale("LC_TIME")
-     on.exit(Sys.setlocale(category = "LC_TIME", locale = lc_time))
-     Sys.setlocale(category = "LC_TIME", locale = "C")
-
-     tmp <- tempfile()
-     on.exit(unlink(tmp), add = TRUE)
-
-     for(i in 1:length(Symbols)) {
-       return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
-       return.class <- ifelse(is.null(return.class),default.return.class,
-                              return.class)
-       from <- getSymbolLookup()[[Symbols[[i]]]]$from
-       from <- if(is.null(from)) default.from else from
-       to <- getSymbolLookup()[[Symbols[[i]]]]$to
-       to <- if(is.null(to)) default.to else to
-
-       from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
-       from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
-       from.d <- as.numeric(strsplit(as.character(from),'-',)[[1]][3])
-       to.y <- as.numeric(strsplit(as.character(to),'-',)[[1]][1])
-       to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])
-       to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
-
-       Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
-       Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
-       if(verbose) cat("downloading ",Symbols.name,".....\n\n")
-       download.file(paste(google.URL,
-                           "q=",Symbols.name,
-                           "&startdate=",month.abb[from.m],
-                           "+",sprintf('%.2d',from.d),
-                           ",+",from.y,
-                           "&enddate=",month.abb[to.m],
-                           "+",sprintf('%.2d',to.d),
-                           ",+",to.y,
-                           "&output=csv",
-                           sep=''),destfile=tmp,quiet=!verbose)
-       fr <- read.csv(tmp)
-       if(verbose) cat("done.\n")
-       fr <- fr[nrow(fr):1,] #google data is backwards
-       if(fix.google.bug) {
-         bad.dates <- c('29-Dec-04','30-Dec-04','31-Dec-04')
-         if(as.Date(from,origin='1970-01-01') < as.Date("2003-12-28",origin='1970-01-01') &&
-            as.Date(to,origin='1970-01-01') > as.Date("2003-12-30",origin='1970-01-01')) {
-           dup.dates <- which(fr[,1] %in% bad.dates)[(1:3)]
-           fr <- fr[-dup.dates,]
-           warning("google duplicate bug - missing Dec 28,29,30 of 2003")
-         }
-       }
-       fr <- xts(as.matrix(fr[,-1]),
-                 as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'),
-                 src='google',updated=Sys.time())
-       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
-                             c('Open','High','Low','Close','Volume'),
-                             sep='.')
-       # convert '-' to NAs
-       suppressWarnings(storage.mode(fr) <- "numeric")
-       fr <- convert.time.series(fr=fr,return.class=return.class)
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-       if(auto.assign)
-         assign(Symbols[[i]],fr,env)
-     }
-     if(auto.assign)
-       return(Symbols)
-     return(fr)
+  msg <- paste0("Google Finance stopped providing data in March, 2018.",
+         "\nYou could try setting src = 'yahoo' instead.")
+  .Defunct("getSymbols", NULL, msg)
 }
 # }}}
 
