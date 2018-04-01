@@ -1301,18 +1301,18 @@ getSymbols.av <- function(Symbols, env, api.key,
     periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
     periodicity <- match.arg(periodicity, valid.periodicity)
     
-    if (adjusted && periodicity != "daily")
-      stop("getSymbols.av: Only daily data can be adjusted.", call.=FALSE)
+    if (adjusted && periodicity == "intraday")
+      stop("getSymbols.av: Intraday data cannot be adjusted.", call.=FALSE)
     
     sym.name <- getSymbolLookup()[[sym]]$name
     sym.name <- if (is.null(sym.name)) sym else sym.name
     
-    FUNCTION <-
+    FUNCTION <- paste0("TIME_SERIES_",
       switch(periodicity,
-             daily = if (adjusted) "TIME_SERIES_DAILY_ADJUSTED" else "TIME_SERIES_DAILY",
-             weekly = "TIME_SERIES_WEEKLY",
-             monthly = "TIME_SERIES_MONTHLY",
-             intraday = "TIME_SERIES_INTRADAY" )
+             daily = if (adjusted) "DAILY_ADJUSTED" else "DAILY",
+             weekly = if (adjusted) "WEEKLY_ADJUSTED" else "WEEKLY",
+             monthly = if (adjusted) "MONTHLY_ADJUSTED" else "MONTHLY",
+             intraday = "INTRADAY" ))
     
     if (verbose) cat("loading", sym.name, ".....")
     
