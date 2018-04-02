@@ -39,10 +39,8 @@ It is possible to import data from a variety of sources with one quantmod
 function: `getSymbols()`. For example:
 
 ```r
-> getSymbols("GOOG", src = "google")   # from google finance
-[1] "YHOO"
-> getSymbols("YHOO", src = "yahoo")    # from yahoo finance
-[1] "GOOG"
+> getSymbols("AAPL", src = "yahoo")    # from yahoo finance
+[1] "AAPL"
 > getSymbols("DEXJPUS", src = "FRED")  # FX rates from FRED
 [1] "DEXJPUS"
 ```
