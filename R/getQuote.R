@@ -280,3 +280,29 @@ matrix(c(
   #"Error Indication (returned for symbol changed / invalid)", "Error Indication (returned for symbol changed / invalid)", "e1",
   ),
 ncol = 3, byrow = TRUE, dimnames = list(NULL, c("name", "shortname", "field")))
+
+getQuote.av <- function(Symbols, api.key, ...) {
+    importDefaults("getQuote.av")
+    if (!hasArg("api.key")) {
+        stop("getQuote.av: An API key is required (api.key). Free registration, at https://www.alphavantage.co/.", call. = FALSE)
+    }
+    qRoot <- paste0("https://www.alphavantage.co/query?function=BATCH_STOCK_QUOTES&apikey=", api.key, "&symbols=")
+    r <- NULL
+    for (x in seq(1, length(Symbols), 100)) { #av support batches of 100
+        if (x > 1) {
+            Sys.sleep(0.25)
+            cat(paste("getQuote.av downloading batch", x, ":", x+99, "\n"))
+        }
+        z <- jsonlite::fromJSON(paste(qRoot, paste(Symbols[x:min(length(Symbols), x + 99)], collapse = ","), sep = ""))
+        if (is.null(r)) r <- z$`Stock Quotes` else r <- rbind(r, z$`Stock Quotes`)
+    }
+    colnames(r) <- c("Symbol", "Last", "Volume", "Trade Time")
+    r$Volume <- suppressWarnings(as.numeric(r$Volume))
+    r$Last <- as.numeric(r$Last)
+    r$`Trade Time` <- as.POSIXct(r$`Trade Time`, tz = z$`Meta Data`$`3. Time Zone`)
+    # merge join to produce emtpy rows for missing results from AV
+    # so that return value has the same rows and ortder as the input
+    r <- merge(data.frame(Symbol = Symbols), r, by = "Symbol", all.x = T) 
+    rownames(r) <- r$Symbol
+    return(r[, c("Trade Time", "Last", "Volume")])
+}
