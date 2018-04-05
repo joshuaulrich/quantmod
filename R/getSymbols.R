@@ -1200,16 +1200,15 @@ function(Symbols,env,return.class='xts',
                    " Symbol: ", Symbols[[i]])
        }
        oanda.URL <- paste0("https://www.oanda.com/fx-for-business/",
-                           "historical-rates/api/update/?&widget=1",
-                           "&source=OANDA&display=absolute&adjustment=0",
-                           "&data_range=c",
-                           "&quote_currency=", currency.pair[1],
+                           "historical-rates/api/data/update/",
+                           "?&source=OANDA&adjustment=0",
+                           "&base_currency=", currency.pair[1],
                            "&start_date=", from,
                            "&end_date=", to,
                            "&period=daily",
                            "&price=mid",
                            "&view=table",
-                           "&base_currency_0=", currency.pair[2])
+                           "&quote_currency_0=", currency.pair[2])
        # Fetch data (jsonlite::fromJSON will handle connection)
        tbl <- jsonlite::fromJSON(oanda.URL, simplifyVector = FALSE)
        Data <- tbl[[1]][[1]]$data
