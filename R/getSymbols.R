@@ -574,9 +574,11 @@ function(Symbols,env,return.class='xts',
          to=Sys.Date(),
          ...)
 {
-  msg <- paste0("Google Finance stopped providing data in March, 2018.",
-         "\nYou could try setting src = 'yahoo' instead.")
-  .Defunct("getSymbols", NULL, msg)
+  msg <- paste0(sQuote("getSymbols.google"), " is defunct.",
+         "\nGoogle Finance stopped providing data in March, 2018.",
+         "\nYou could try setting src = \"yahoo\" instead.",
+         "\nSee help(\"Defunct\") and help(\"quantmod-defunct\")")
+  .Defunct("getSymbols", "quantmod", msg = msg)
 }
 # }}}
 

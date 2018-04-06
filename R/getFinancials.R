@@ -1,10 +1,21 @@
+`getFinancials` <-
 getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
-  msg <- paste0("Google Finance stopped providing data in March, 2018.",
-         "\nYou could try some of the data sources via Quandl instead.")
-  .Defunct("Quandl", "Quandl", msg)
+  src <- match.arg(src, "google")
+  if (src != "google") {
+    stop("src = ", sQuote(src), " is not implemented")
+  }
+  getFinancials.google(Symbol, env, auto.assign = auto.assign, ...)
 }
 
-`getFinancials` <- getFin
+getFinancials.google <-
+function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
+  msg <- paste0(sQuote("getFinancials.google"), " is defunct.",
+         "\nGoogle Finance stopped providing data in March, 2018.",
+         "\nYou could try some of the data sources via Quandl instead.",
+         "\nSee help(\"Defunct\") and help(\"quantmod-defunct\")")
+  .Defunct("Quandl", "quantmod", msg = msg)
+}
+
 
 `print.financials` <- function(x, ...) {
   cat('Financial Statement for',attr(x,'symbol'),'\n')
@@ -12,6 +23,7 @@ getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, .
   cat('Use "viewFinancials" or "viewFin" to view\n')
 }
 
+`viewFin` <-
 `viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
                              subset = NULL) {
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
@@ -41,5 +53,3 @@ getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, .
     return(tmp.table)
   }
 }
-
-`viewFin` <- viewFinancials
