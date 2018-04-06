@@ -1436,6 +1436,7 @@ getSymbols.alphavantage <- getSymbols.av
 getSymbols.tiingo <- function(Symbols, env, api.key,
                               return.class="xts",
                               periodicity="daily",
+                              adjust=FALSE,
                               from='2007-01-01',
                               to=Sys.Date(),
                               data.type="json",
@@ -1482,21 +1483,26 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     from.strftime <- strftime(from, format = "%Y-%m-%d")
     to.strftime <- strftime(to, format = "%Y-%m-%d")
     
+    tiingo.names <- c("open", "high", "low", "close", "volume",
+                      "adjClose", "adjHigh", "adjLow", "adjOpen",
+                      "adjVolume", "divCash", "splitFactor")
+    qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
+                             "Open", "High", "Low", "Close", "Volume",
+                             "DivCash", "SplitFactor"), sep=".")
+    if (isTRUE(adjust)) {
+      return.columns <- tiingo.names[6:10]
+    } else {
+      return.columns <- tiingo.names[1:5]
+    }
     URL <- paste0("https://api.tiingo.com/tiingo/",
                   periodicity, "/",
                   sym.name, "/prices",
                   "?startDate=", from.strftime,
                   "&endDate=", to.strftime,
                   "&format=", data.type,
-                  "&token=", api.key)
+                  "&token=", api.key,
+                  "&columns=", paste0(return.columns, collapse=","))
     download.file(url=URL, destfile=tmp, quiet=!verbose)
-    tiingo.names <- c("open", "high", "low", "close", "volume",
-                      "adjClose", "adjHigh", "adjLow", "adjOpen",
-                      "adjVolume", "divCash", "splitFactor")
-    qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
-                             "AdjustedClose", "AdjustedHigh", "AdjustedLow",
-                             "AdjustedOpen", "AdjustedVolume", "DivCash",
-                             "SplitFactor"), sep=".")
     
     if (data.type == "json") {
       stock.data <- jsonlite::fromJSON(tmp)
@@ -1510,6 +1516,8 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     # convert data to xts
     xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
     xts.data <- convert.time.series(xts.data, return.class=return.class)
+    # order columns
+    xts.data <- OHLCV(xts.data)
     if (auto.assign)
       assign(sym, xts.data, env)
     return(xts.data)

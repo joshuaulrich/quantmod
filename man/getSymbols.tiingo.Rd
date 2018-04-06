@@ -10,6 +10,7 @@
   getSymbols.tiingo(Symbols, env, api.key,
                     return.class="xts",
                     periodicity="daily",
+                    adjust=FALSE,
                     from='2007-01-01',
                     to=Sys.Date(),
                     data.type="json",
@@ -22,6 +23,7 @@
   \item{api.key}{ the API key issued by Tiingo when you registered (character)}
   \item{return.class}{ class of returned object, see Value (character) }
   \item{periodicity}{ one of \code{"daily"}, \code{"weekly"}, \code{"monthly"}, or \code{"Annually"} }
+  \item{adjust}{ adjust for dividends and splits? (FALSE) }
   \item{from}{ Retrieve data no earlier than this date. (2007-01-01)}
   \item{to}{ Retrieve data through this date (Sys.Date())}
   \item{data.type}{ either \code{"json"} or \code{"csv"} }
@@ -43,6 +45,7 @@
   
   Tiingo provides daily, weekly, monthly, and annual data.
   Use \code{periodicity} to select one.
+  This API accessor will return adjusted or unadjusted OHLC as well as split and dividend information.
 
   For daily, weekly, and monthly data, Tiingo says the available data is up to 30 years;
 
