@@ -30,3 +30,13 @@ options(warn = 2)
 quantmod::getSymbols("SPY", src = "google", from = Sys.Date() - 10)
 options(warn = op.warn)
 
+# should throw an error
+errorKey <- "d116c846835e633aacedb1a31959dd2724cd67b8"
+x <- try(
+  quantmod::getSymbols("AAPL", src = "tiingo", data.type = "csv", api.key = errorKey)
+, silent = TRUE)
+stopifnot(inherits(x, "try-error"))
+x <- try(
+  quantmod::getSymbols("AAPL", src = "tiingo", data.type = "json", api.key = errorKey)
+, silent = TRUE)
+stopifnot(inherits(x, "try-error"))

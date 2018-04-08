@@ -1502,13 +1502,26 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
                   "&format=", data.type,
                   "&token=", api.key,
                   "&columns=", paste0(return.columns, collapse=","))
-    download.file(url=URL, destfile=tmp, quiet=!verbose)
-    
+    # If rate limit is hit, the csv API returns HTTP 200 (OK), while json API
+    # returns HTTP 429. The latter caused download.file() to error, but the
+    # contents of 'tmp' still contain the error message.
+    response <- curl::curl_fetch_disk(URL, tmp)
+
     if (data.type == "json") {
       stock.data <- jsonlite::fromJSON(tmp)
       if (verbose) cat("done.\n")
     } else {
       stock.data <- read.csv(tmp, as.is=TRUE)
+    }
+    # check for error
+    if (!all(return.columns %in% names(stock.data))) {
+      if (data.type == "json") {
+        msg <- jsonlite::fromJSON(tmp)$detail
+      } else {
+        msg <- readLines(tmp, warn=FALSE)
+      }
+      msg <- sub("Error: ", "", msg)
+      stop(msg, call. = FALSE)
     }
     tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
     stock.data[, "date"] <- NULL
