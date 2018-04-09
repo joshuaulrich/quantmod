@@ -1350,6 +1350,125 @@ getSymbols.av <- function(Symbols, env, api.key,
 # Mnemonic alias, letting callers use getSymbols("IBM", src="alphavantage")
 getSymbols.alphavantage <- getSymbols.av
 
+#
+#  Download OHLC Data From Tiingo
+#  
+#  Meant to be called internally by getSymbols().
+#  
+getSymbols.tiingo <- function(Symbols, env, api.key,
+                              return.class="xts",
+                              periodicity="daily",
+                              adjust=FALSE,
+                              from='2007-01-01',
+                              to=Sys.Date(),
+                              data.type="json",
+                              ...) {
+  
+  importDefaults("getSymbols.tiingo")
+  this.env <- environment()
+  for (var in names(list(...))) {
+    assign(var, list(...)[[var]], this.env)
+  }
+  
+  if (!hasArg("api.key")) {
+    stop("getSymbols.tiingo: An API key is required (api.key). Register",
+         " at https://api.tiingo.com.", call.=FALSE)
+  }
+  if (!hasArg("auto.assign")) auto.assign <- TRUE
+  if (!hasArg("verbose")) verbose <- FALSE
+  if (!hasArg("warnings")) warnings <- TRUE
+  
+  valid.periodicity <- c("daily", "weekly", "monthly", "annually")
+  periodicity <- match.arg(periodicity, valid.periodicity)
+  default.return.class <- return.class
+  default.periodicity <- periodicity
+  
+  if (!requireNamespace("jsonlite", quietly=TRUE)) {
+    stop("getSymbols.tiingo: Package", dQuote("jsonlite"), "is required but",
+         " cannot be loaded.", call.=FALSE)
+  }
+  
+  tmp <- tempfile()
+  on.exit(file.remove(tmp))
+  
+  downloadOne <- function(sym, default.return.class, default.periodicity) {
+    
+    return.class <- getSymbolLookup()[[sym]]$return.class
+    return.class <- if (is.null(return.class)) default.return.class else return.class
+    periodicity <- getSymbolLookup()[[sym]]$periodicity
+    periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
+    periodicity <- match.arg(periodicity, valid.periodicity)
+    sym.name <- getSymbolLookup()[[sym]]$name
+    sym.name <- if (is.null(sym.name)) sym else sym.name
+    
+    if (verbose) cat("loading", sym.name, ".....")
+    from.strftime <- strftime(from, format = "%Y-%m-%d")
+    to.strftime <- strftime(to, format = "%Y-%m-%d")
+    
+    tiingo.names <- c("open", "high", "low", "close", "volume",
+                      "adjClose", "adjHigh", "adjLow", "adjOpen",
+                      "adjVolume", "divCash", "splitFactor")
+    qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
+                             "Open", "High", "Low", "Close", "Volume",
+                             "DivCash", "SplitFactor"), sep=".")
+    if (isTRUE(adjust)) {
+      return.columns <- tiingo.names[6:10]
+    } else {
+      return.columns <- tiingo.names[1:5]
+    }
+    URL <- paste0("https://api.tiingo.com/tiingo/",
+                  periodicity, "/",
+                  sym.name, "/prices",
+                  "?startDate=", from.strftime,
+                  "&endDate=", to.strftime,
+                  "&format=", data.type,
+                  "&token=", api.key,
+                  "&columns=", paste0(return.columns, collapse=","))
+    # If rate limit is hit, the csv API returns HTTP 200 (OK), while json API
+    # returns HTTP 429. The latter caused download.file() to error, but the
+    # contents of 'tmp' still contain the error message.
+    response <- curl::curl_fetch_disk(URL, tmp)
+
+    if (data.type == "json") {
+      stock.data <- jsonlite::fromJSON(tmp)
+      if (verbose) cat("done.\n")
+    } else {
+      stock.data <- read.csv(tmp, as.is=TRUE)
+    }
+    # check for error
+    if (!all(return.columns %in% names(stock.data))) {
+      if (data.type == "json") {
+        msg <- jsonlite::fromJSON(tmp)$detail
+      } else {
+        msg <- readLines(tmp, warn=FALSE)
+      }
+      msg <- sub("Error: ", "", msg)
+      stop(msg, call. = FALSE)
+    }
+    tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
+    stock.data[, "date"] <- NULL
+    colnames(stock.data) <- qm.names[match(colnames(stock.data), tiingo.names)]
+    # convert data to xts
+    xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
+    xts.data <- convert.time.series(xts.data, return.class=return.class)
+    # order columns
+    xts.data <- OHLCV(xts.data)
+    if (auto.assign)
+      assign(sym, xts.data, env)
+    return(xts.data)
+  }
+  
+  matrices <- lapply(Symbols, FUN=downloadOne,
+                     default.return.class=default.return.class,
+                     default.periodicity=default.periodicity)
+  
+  if (auto.assign) {
+    return(Symbols)
+  } else {
+    return(matrices[[1]])
+  }
+}
+
 # convert.time.series {{{
 `convert.time.series` <- function(fr,return.class) {
        if('quantmod.OHLC' %in% return.class) {
