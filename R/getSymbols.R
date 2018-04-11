@@ -283,15 +283,6 @@ function(Symbols,env,return.class='xts',index.class="Date",
          periodicity="daily",
          curl.options=list())
 {
-     if(getOption("getSymbols.yahoo.warning",TRUE)) {
-       # Warn about Yahoo Finance quality and stability
-       message("\nWARNING: There have been significant changes to Yahoo Finance data.",
-               "\nPlease see the Warning section of ", sQuote("?getSymbols.yahoo"), " for details.\n",
-               "\nThis message is shown once per session and may be disabled by setting\n",
-               "options(\"getSymbols.yahoo.warning\"=FALSE).")
-       options("getSymbols.yahoo.warning"=FALSE)
-     }
-
      importDefaults("getSymbols.yahoo")
      this.env <- environment()
      for(var in names(list(...))) {
