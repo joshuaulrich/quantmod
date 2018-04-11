@@ -438,7 +438,11 @@ function(Symbols,env,return.class='xts',index.class="Date",
           stop("package:",dQuote("XML"),"cannot be loaded.")
 
         yahoo.URL <- "https://info.finance.yahoo.co.jp/history/"
-        for(i in 1:length(Symbols)) {
+
+        returnSym <- Symbols
+        noDataSym <- NULL
+        for(i in seq_along(Symbols)) {
+            test <- try({
             # The name of the symbol, which will actually be used as the
             # variable name. It needs to start with YJ, and it will be appended
             # if it does not.
@@ -565,9 +569,16 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 Sys.sleep(1)
             }
             
+            }, silent = TRUE)
+            if (inherits(test, "try-error")) {
+                msg <- attr(test, "condition")$message
+                warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
+                        msg, call. = FALSE, immediate. = TRUE)
+                noDataSym <- c(noDataSym, returnSym[[i]])
+            }
         }
         if(auto.assign)
-            return(Symbols)
+            return(setdiff(returnSym, noDataSym))
         return(fr)
     }
 # }}}
