@@ -307,7 +307,10 @@ function(Symbols,env,return.class='xts',index.class="Date",
      tmp <- tempfile()
      on.exit(unlink(tmp))
 
-     for(i in 1:length(Symbols)) {
+     returnSym <- Symbols
+     noDataSym <- NULL
+     for(i in seq_along(Symbols)) {
+       test <- try({
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
@@ -394,9 +397,16 @@ function(Symbols,env,return.class='xts',index.class="Date",
          message("pausing 1 second between requests for more than 5 symbols")
          Sys.sleep(1)
        }
+       }, silent = TRUE)
+       if (inherits(test, "try-error")) {
+         msg <- attr(test, "condition")$message
+         warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
+                 msg, call. = FALSE, immediate. = TRUE)
+         noDataSym <- c(noDataSym, returnSym[[i]])
+       }
      }
      if(auto.assign)
-       return(Symbols)
+       return(setdiff(returnSym, noDataSym))
      return(fr)
 }
 # }}}
