@@ -499,13 +499,17 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 
                 fdoc <- XML::htmlParse(tmp)
                 rows <- XML::xpathApply(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
-                if (length(rows) == 1) break
+                if (length(rows) <= 1) break
                 
                 totalrows <- c(totalrows, rows)
                 page <- page + 1
             }
             if(verbose) cat("done.\n")
             
+            if (is.null(rows)) {
+              stop("No historical data for ", dQuote(Symbols[[i]]), ".")
+            }
+
             # Available columns
             cols <- c('Open','High','Low','Close','Volume','Adjusted')
             
