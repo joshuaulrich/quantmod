@@ -1440,12 +1440,26 @@ getSymbols.av <- function(Symbols, env, api.key,
     return(mat)
   }
   
-  matrices <- lapply(Symbols, FUN=downloadOne,
-                     default.return.class=default.return.class,
-                     default.periodicity=default.periodicity)
-  
+  returnSym <- Symbols
+  noDataSym <- NULL
+  matrices <- list()
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
+      matrices[[i]] <- downloadOne(Symbols[[i]],
+        default.return.class = default.return.class,
+        default.periodicity = default.periodicity)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- attr(test, "condition")$message
+      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
+        msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
+  }
+
   if (auto.assign) {
-    return(Symbols)
+    return(setdiff(returnSym, noDataSym))
   } else {
     return(matrices[[1]])
   }
@@ -1562,12 +1576,26 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     return(xts.data)
   }
   
-  matrices <- lapply(Symbols, FUN=downloadOne,
-                     default.return.class=default.return.class,
-                     default.periodicity=default.periodicity)
+  returnSym <- Symbols
+  noDataSym <- NULL
+  matrices <- list()
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
+      matrices[[i]] <- downloadOne(Symbols[[i]],
+        default.return.class = default.return.class,
+        default.periodicity = default.periodicity)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- attr(test, "condition")$message
+      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
+        msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
+  }
   
   if (auto.assign) {
-    return(Symbols)
+    return(setdiff(returnSym, noDataSym))
   } else {
     return(matrices[[1]])
   }
