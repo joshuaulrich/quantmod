@@ -1,3 +1,29 @@
+### Changes in 0.4-13 (2018-04-13)
+
+#### BUG FIXES
+1. Fix `getQuote.yahoo()` when a field has no data for all requested tickers.
+  [#208](https://github.com/joshuaulrich/quantmod/issues/208)
+1. Expose weekly and monthly adjusted prices from Alpha Vantage's API.
+  [#212](https://github.com/joshuaulrich/quantmod/issues/212)
+1. Fix `saveChart()` (it actually saves a chart now!).
+  [#154](https://github.com/joshuaulrich/quantmod/issues/154)
+1. Update Oanda URL, which fixes `getSymbols.oanda()` and `getFX()`.
+  [#225](https://github.com/joshuaulrich/quantmod/issues/225)
+
+#### NEW FEATURES
+1. Add `getQuote.alphavantage()`, thanks to Ethan Smith for the PR.
+  [#213](https://github.com/joshuaulrich/quantmod/issues/213)
+  [#223](https://github.com/joshuaulrich/quantmod/issues/223)
+1. Add `getSymbols.tiingo()` to import data from [Tiingo](https://www.tiingo.com/).
+  Thanks to Steve Bronder for the PR.
+  [#220](https://github.com/joshuaulrich/quantmod/issues/220)
+
+#### BREAKING CHANGES
+1. Google Finance no longer provides data for historical prices or financial
+   statements, so all Google data sources are defunct.
+  [#221](https://github.com/joshuaulrich/quantmod/issues/221)
+
+
 ### Changes in 0.4-12 (2017-12-02)
 
 #### BUG FIXES
