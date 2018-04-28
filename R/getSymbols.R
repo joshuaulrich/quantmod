@@ -1406,7 +1406,7 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     to.strftime <- strftime(to, format = "%Y-%m-%d")
     
     tiingo.names <- c("open", "high", "low", "close", "volume",
-                      "adjClose", "adjHigh", "adjLow", "adjOpen",
+                      "adjOpen", "adjHigh", "adjLow", "adjClose",
                       "adjVolume", "divCash", "splitFactor")
     qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
                              "Open", "High", "Low", "Close", "Volume",
