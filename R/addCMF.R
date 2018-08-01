@@ -2,41 +2,76 @@
 # addCMF {{{
 `addCMF` <- function(n=20) {
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartCMF <- function(x, n) {
+    xsubset <- x$Env$xsubset
+    cmf <- cmf[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(cmf) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    ylim[1] <- ifelse(ylim[1] > 0, 0, ylim[1])
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    segments(xlim[1], 0, xlim[2], 0, col = "#999999")
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-
-  xx <- if(is.OHLC(x)) {
-    cbind(Hi(x),Lo(x),Cl(x))
+    cmf.positive <- ifelse(cmf >= 0,cmf,0)
+    cmf.negative <- ifelse(cmf <  0,cmf,0)
+    
+    polygon(c(x.pos,rev(x.pos)),cbind(cmf.positive,rep(0,length(cmf))),col=theme$up.col)
+    polygon(c(x.pos,rev(x.pos)),cbind(cmf.negative,rep(0,length(cmf))),col=theme$dn.col)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n)), list(n = n))
+  exp <- parse(text = gsub("list", "chartCMF", as.expression(substitute(list(x = current.chob(), 
+                                                                                  n = n)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste(sprintf("%.3f",last(cmf[xsubset])), sep = "")),
+           text.col = c(theme$fg, ifelse(last(cmf[xsubset]) > 0,theme$up.col,theme$dn.col)), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  xdata <- lchob$Env$xdata
+  xdata <- if(is.OHLC(xdata)) {
+    cbind(Hi(xdata),Lo(xdata),Cl(xdata))
   } else stop("CMF only applicaple to HLC series")
+  xsubset <- lchob$Env$xsubset
+  vo <- lchob$Env$vo
 
-  cmf <- CMF(xx,Vo(x),n=n)
-
-  chobTA@TA.values <- cmf[lchob@xsubset]
-  chobTA@name <- "chartCMF"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  cmf <- CMF(xdata,vo,n=n)
+  lenv$xdata <- structure(cmf, .Dimnames=list(NULL, "cmf"))
+  lenv$cmf <- lchob$Env$TA$cmf <- cmf
+  lenv$get_frame <- lchob$get_frame
+  if(!is.character(legend) || legend == "auto")
+    lchob$Env$legend <- paste("Chaikin Money Flow (", n, ")", sep="")
+  lchob$add_frame(ylim=c(-max(abs(lenv$cmf[xsubset]), na.rm = TRUE), 
+                         max(abs(lenv$cmf[xsubset]), na.rm = TRUE))*1.05,asp=1,fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartCMF {{{
 `chartCMF` <-

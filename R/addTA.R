@@ -15,46 +15,81 @@
 #    CLV,CMD,OBV,KST,TDI,WHF,Aroon,ChAD,ChVol,WilliamsAD,
 #    Points, Stoch, SD, ...??? 
 # addMomentum {{{
-`addMomentum` <- function(n=1) {
+`addMomentum` <- function(n=1, with.col=Cl) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartMomentum <- function(x, n, with.col) {
+    xsubset <- lchob$Env$xsubset
+    
+    mom <- mom[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(mom) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      segments(xlim[1],0,xlim[2],0,col="#666666",lwd=1,lty='dotted')
+    
+    lines(x.pos,mom,col=theme$Momentum$col,lwd=2,type='l')
+    
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, with.col = with.col)), list(n = n, with.col = with.col))
+  exp <- parse(text = gsub("list", "chartMomentum", as.expression(substitute(list(x = current.chob(), 
+                                                                                  n = n, with.col = with.col)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Momentum (", n, "):"),
+                      paste(sprintf("%.2f",last(mom[xsubset])),sep='')), 
+           text.col = c(theme$fg, theme$Momentum$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$Momentum)) {
+    lchob$Env$theme$Momentum$col <- "#0033CC"
+  }
 
-  x <- as.matrix(lchob@xdata)
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-
-  #  needs to accept any arguments for x, not just close
-
-  xx <- if(is.OHLC(x)) {
-    Cl(x)
-  } else x 
+  if(is.OHLC(x) && missing(with.col)) with.col <- 1
+  
+  if(is.function(with.col)) {
+    xx <- do.call(with.col,list(x))
+  } else xx <- x[,with.col]
 
   mom <- momentum(xx,n=n)
-
-  chobTA@TA.values <- mom[lchob@xsubset]
-  chobTA@name <- "chartMomentum"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(mom, .Dimnames=list(NULL, "mom"))
+  lenv$mom <- lchob$Env$TA$mom <- mom
+  lenv$get_frame <- lchob$get_frame
+  
+  lchob$add_frame(ylim=c(-max(abs(lenv$mom[xsubset]),na.rm=TRUE),
+                         max(abs(lenv$mom[xsubset]),na.rm=TRUE)) * 1.05, asp=1, fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartMomentum {{{
 `chartMomentum` <-
@@ -100,41 +135,87 @@ function(x) {
 `addCCI` <- function(n=20, maType="SMA", c=0.015) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartCCI <- function(x, n, maType, c) {
+    xsubset <- x$Env$xsubset
+    cci <- cci[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(cci) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    # draw shading in -100:100 y-range 
+    rect(xlim[1],-100,xlim[2],100,col=theme$BBands$col$fill,border=theme$fg)
+    
+    # fill upper and lower areas
+    cci.above <- ifelse(cci >=  100,cci, 100)
+    cci.below <- ifelse(cci <= -100,cci,-100)
+    
+    polygon(c(x.pos,rev(x.pos)),cbind(cci.above,rep(100,length(cci))),col=theme$CCI$col,border=theme$fg)
+    polygon(c(x.pos,rev(x.pos)),cbind(cci.below,rep(-100,length(cci))),col=theme$CCI$col,border=theme$fg)
+    
+    # draw CCI
+    lines(x.pos,cci,col=theme$CCI$col,lwd=1,type='l')
+    
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, c = c)), list(n = n, maType = maType, c = c))
+  exp <- parse(text = gsub("list", "chartCCI", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType, c = c)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    # draw dotted guide line at 0
+    segments(xlim[1],0,xlim[2],0,col='#666666',lwd=1,lty='dotted'),
+    
+    # add indicator name and last value
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Commodity Channel Index (", n, ",", c,"):",sep=''),
+                      paste(sprintf("%.2f",last(cci[xsubset])),sep='')), 
+           text.col = c(theme$fg, theme$CCI$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$CCI)) {
+    lchob$Env$theme$CCI$col <- 'red'
+  }
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
   cci <- CCI(xx,n=n,maType=maType,c=c)
-
-  chobTA@TA.values <- cci[lchob@xsubset]
-  chobTA@name <- "chartCCI"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType,c=c)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(cci, .Dimnames=list(NULL, "cci"))
+  lenv$cci <- lchob$Env$TA$cci <- cci
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(-max(abs(lenv$cci[xsubset]), na.rm = TRUE), 
+                         max(abs(lenv$cci[xsubset]), na.rm = TRUE))*1.05,asp=1,fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartCCI {{{
 `chartCCI` <-
@@ -194,40 +275,86 @@ function(x) {
 # addADX {{{
 `addADX` <- function(n=14, maType="EMA", wilder=TRUE) {
 
+  lenv <- new.env()
+  lenv$chartADX <- function(x, n, maType, wilder) {
+    xsubset <- x$Env$xsubset
+    adx <- adx[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(adx) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    segments(xlim[1], 20, xlim[2], 20, col = "#666666", lty = "dotted")
+    segments(xlim[1], 40, xlim[2], 40, col = "#666666", lty = "dotted")
+    
+    # draw DIp
+    lines(x.pos,adx[,1],col=theme$ADX$col$DIp,lwd=1,type='l')
+    # draw DIn
+    lines(x.pos,adx[,2],col=theme$ADX$col$DIn,lwd=1,type='l')
+    # draw ADX
+    lines(x.pos,adx[,4],col=theme$ADX$col$adx,lwd=2,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, wilder = wilder)), 
+  list(n = n, maType = maType, wilder = wilder))
+  exp <- parse(text = gsub("list", "chartADX", as.expression(substitute(list(x = current.chob(), 
+                                                                               n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste("DIp : ", sprintf("%.3f",last(adx[xsubset,1]))),
+                      paste("DIn : ", sprintf("%.3f",last(adx[xsubset,2]))),
+                      paste("ADX : ", sprintf("%.3f",last(adx[xsubset,4])))),
+           text.col = c(theme$fg, 
+                        theme$ADX$col$DIp,
+                        theme$ADX$col$DIn,
+                        theme$ADX$col$adx), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$ADX)) {
+    lchob$Env$theme$ADX$col$DIp <- 'green'
+    lchob$Env$theme$ADX$col$DIn <- 'red'
+    lchob$Env$theme$ADX$col$adx <- 'blue'
+  }
 
-  lchob <- get.current.chob()
-
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
   adx <- ADX(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,wilder=wilder)
-
-  chobTA@TA.values <- adx[lchob@xsubset,]
-  chobTA@name <- "chartADX"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType,wilder=wilder)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(adx, .Dimnames=list(NULL, c("DIp", "DIn", "DX", "ADX")))
+  lenv$adx <- lchob$Env$TA$adx <- adx
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^addADX", "Directional Movement Index ", deparse(match.call()))
+  lchob$add_frame(ylim=c(min(lenv$adx[xsubset]*0.975, na.rm = TRUE), 
+                         max(lenv$adx[xsubset]*1.05, na.rm = TRUE)),asp=1,fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartADX {{{
 `chartADX` <-
@@ -267,40 +394,71 @@ function(x) {
 # addATR {{{
 `addATR` <- function(n=14, maType="EMA", ...) {
 
+  lenv <- new.env()
+  lenv$chartATR <- function(x, n, maType) {
+    xsubset <- x$Env$xsubset
+    atr <- atr[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(atr) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    lines(x.pos,atr[,2],col=theme$ATR$col,lwd=2,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType)), list(n = n, maType = maType))
+  exp <- parse(text = gsub("list", "chartATR", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste(sprintf("%.3f", last(atr[xsubset,2])))),
+           text.col = c(theme$fg, theme$ATR$col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$ATR)) {
+    lchob$Env$theme$ATR$col <- 'blue'
+  }
 
-  lchob <- get.current.chob()
-
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   if(!is.OHLC(x)) stop("only applicable to HLC series")
 
   atr <- ATR(cbind(Hi(x),Lo(x),Cl(x)),n=n,maType=maType,...)
-
-  chobTA@TA.values <- atr[lchob@xsubset,]
-  chobTA@name <- "chartATR"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(atr[,2], .Dimnames=list(NULL, "atr"))
+  lenv$atr <- lchob$Env$TA$atr <- atr
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^addATR", "Average True Range ", deparse(match.call()))
+  lchob$add_frame(ylim=c(min(lenv$atr[xsubset,2]*0.975, na.rm = TRUE), 
+                         max(lenv$atr[xsubset,2]*1.05, na.rm = TRUE)),asp=1,fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartATR {{{
 `chartATR` <-
@@ -334,42 +492,80 @@ function(x) {
 `addTRIX` <- function(n=20, signal=9, maType="EMA", percent=TRUE) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartTRIX <- function(x, n, signal, maType, percent) {
+    xsubset <- x$Env$xsubset
+    
+    trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(trix) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    # draw TRIX
+    lines(x.pos,trix[,1],col=theme$TRIX$col$trix,lwd=1,type='l')
+    # draw Signal
+    lines(x.pos,trix[,2],col=theme$TRIX$col$signal,lwd=1,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, signal = signal, maType = maType, percent = TRUE)), 
+  list(n = n, signal = signal, maType = maType, percent = TRUE))
+  exp <- parse(text = gsub("list", "chartTRIX", as.expression(substitute(list(x = current.chob(), 
+                                                                              n = n, signal = signal, maType = maType, percent = TRUE)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste("TRIX :",sprintf("%.3f",last(trix[xsubset,1]))), 
+                      paste("signal :",sprintf("%.3f",last(trix[xsubset,2]),nsmall = 3L))),
+           text.col = c(theme$fg, theme$TRIX$col$trix, theme$TRIX$col$signal), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$TRIX)) {
+    lchob$Env$theme$TRIX$col$trix <- 'green'
+    lchob$Env$theme$TRIX$col$signal <- '#999999'
+  }
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
   trix <- TRIX(xx,n=n,nSig=signal,maType=maType,percent=percent)
-
-  chobTA@TA.values <- trix[lchob@xsubset,]
-
-  chobTA@name <- "chartTRIX"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,signal=signal,maType=maType,percent=percent)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(trix, .Dimnames=list(NULL, c("TRIX", "signal")))
+  lenv$trix <- lchob$Env$TA$trix <- trix
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^addTRIX", "Triple Exponential Moving Average ", deparse(match.call()))
+  lchob$add_frame(ylim=c(min(lenv$trix[xsubset,1]*.975,na.rm=TRUE),
+                         max(lenv$trix[xsubset,1]*1.05,na.rm=TRUE)), asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartTRIX {{{
 `chartTRIX` <-
@@ -408,13 +604,66 @@ function(x) {
 `addDPO` <- function(n=10, maType="EMA", shift=n/2+1, percent=FALSE) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartDPO <- function(x, n, maType, shift, percent) {
+    xsubset <- x$Env$xsubset
+    dpo <- dpo[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(dpo) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      segments(xlim[1], 0, xlim[2], 0, col = "#999999")
+    
+    dpo.tmp <- dpo
+    dpo.tmp[is.na(dpo)] <- 0
+    dpo.positive <- ifelse(dpo.tmp >= 0,dpo.tmp,0)
+    dpo.negative <- ifelse(dpo.tmp <  0,dpo.tmp,0)
+    
+    polygon(c(x.pos,rev(x.pos)),cbind(dpo.positive,rep(0,length(dpo))),col=theme$up.col, border="#999999")
+    polygon(c(x.pos,rev(x.pos)),cbind(dpo.negative,rep(0,length(dpo))),col=theme$dn.col, border="#999999")
+    
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, shift = shift, percent = percent)), 
+  list(n = n, maType = maType, shift = shift, percent = percent))
+  exp <- parse(text = gsub("list", "chartDPO", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType, shift = shift, percent = percent)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("De-trended Price Oscillator (", n,"):", sep = ""),
+                      paste(sprintf("%.3f", last(na.omit(dpo[xsubset]))))),
+           text.col = c(theme$fg, ifelse(last(na.omit(dpo[xsubset])>0), 
+                                         theme$up.col, theme$dn.col)), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
-  x <- as.matrix(lchob@xdata)
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
- 
   # should really allow for _any_ series to be used, like MA (FIXME)
 
   xx <- if(is.OHLC(x)) {
@@ -422,30 +671,14 @@ function(x) {
   } else x 
 
   dpo <- DPO(xx,n=n,maType=maType,shift=shift,percent=percent)
-
-  chobTA@TA.values <- dpo[lchob@xsubset]
-
-  chobTA@name <- "chartDPO"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,maType=maType,shift=shift,percent=percent)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(dpo, .Dimnames=list(NULL, "dpo"))
+  lenv$dpo <- lchob$Env$TA$dpo <- dpo
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(-max(abs(dpo), na.rm = TRUE), 
+                         max(abs(dpo), na.rm = TRUE)) * 1.05,asp=1,fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartDPO {{{
 `chartDPO` <-
@@ -514,41 +747,75 @@ function(x) {
 `addRSI` <- function(n=14,maType='EMA',wilder=TRUE) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartRSI <- function(x, n, maType, wilder) {
+    xsubset <- x$Env$xsubset
+    rsi <- rsi[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(rsi) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    lines(x.pos,rsi,col=theme$RSI$col$rsi,lwd=2,type='l')
+    lines(x.pos,rsi,col=theme$RSI$col$dot,lwd=1,lty='dotted',type='l')
+    
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, maType = maType, wilder = wilder)), 
+  list(n = n, maType = maType, wilder = wilder))
+  exp <- parse(text = gsub("list", "chartRSI", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, maType = maType, wilder = wilder)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste("Relative Strength Index (", n,"):", sep = ""),
+                      paste(sprintf("%.3f",last(rsi[xsubset])), sep = "")),
+           text.col = c(theme$fg, theme$RSI$col$rsi), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$RSI)) {
+    lchob$Env$theme$RSI$col$rsi <- '#0033CC'
+    lchob$Env$theme$RSI$col$dot <- '#BFCFFF'
+  }
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
-
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
   rsi <- RSI(xx,n=n,maType=maType,wilder=wilder)
-  chobTA@TA.values <- rsi[lchob@xsubset]
-  chobTA@name <- "chartRSI"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n, wilder=wilder,maType=maType)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv$xdata <- structure(rsi, .Dimnames=list(NULL, "rsi"))
+  lenv$rsi <- lchob$Env$TA$rsi <- rsi
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(0,100),asp=1,fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartRSI {{{
 `chartRSI` <-
@@ -594,42 +861,70 @@ function(x) {
 `addROC` <- function(n=1,type=c('discrete','continuous'),col='red') {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartROC <- function(x, n, type, col) {
+    xsubset <- x$Env$xsubset
+    
+    roc <- roc[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(roc) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
 
-  x <- as.matrix(lchob@xdata)
+    lines(x.pos,roc,col=col,lwd=2,type='l')
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, type = type, col = col)), list(n = n, type = type, col = col))
+  exp <- parse(text = gsub("list", "chartROC", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, type = type, col = col)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(x = lc$x, y = lc$y, 
+           legend = c(paste(legend, ":"),
+                      paste(sprintf("%.3f", last(roc[xsubset])))),
+           text.col = c(theme$fg, col), 
+           xjust = lc$xjust, 
+           yjust = lc$yjust, 
+           bty = "n", 
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
 
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
-  type <- match.arg(type)
-
-  roc <- ROC(xx,n=n,type=type,na.pad=TRUE)
-
-  chobTA@TA.values <- roc[lchob@xsubset]
-  chobTA@name <- "chartROC"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,type=type,col=col)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  roc <- ROC(xx,n=n,type=type[1],na.pad=TRUE)
+  lenv$xdata <- structure(roc, .Dimnames=list(NULL, "roc"))
+  lenv$roc <- lchob$Env$TA$roc <- roc
+  lenv$get_frame <- lchob$get_frame
+  lenv$legend <- gsub("^add", "", deparse(match.call()))
+  lchob$add_frame(ylim=c(-max(abs(lenv$roc[xsubset]), na.rm = TRUE), 
+                         max(abs(lenv$roc[xsubset]), na.rm = TRUE))*1.05, asp=1, fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartROC {{{
 `chartROC` <-
@@ -660,44 +955,180 @@ function(x) {
 `addBBands` <- function(n=20,sd=2,maType='SMA',draw='bands',on=-1) {
 
 
-  draw.options <- c('bands','percent','width')
-  draw <- draw.options[pmatch(draw,draw.options)]
+  draw.options <- c("bands", "percent", "width")
+  draw <- draw.options[pmatch(draw, draw.options)]
+  lenv <- new.env()
+  lenv$chartBBands <- function(x, n, sd, maType, draw, on) {
+    xsubset <- x$Env$xsubset
+    
+    bb <- bb[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(bb) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    bband.col <- ifelse(!is.null(theme$BBands$col),
+                        theme$BBands$col$upper,'red') 
+    bband.fill <- ifelse(!is.null(theme$BBands$col$fill),
+                         theme$BBands$col$fill,theme$bg)
+    
+    # bband col vector
+    # lower.band, middle.band, upper.band, %b, bb.width
+    if(length(bband.col) == 1) # no user specified
+      bband.col <- c(bband.col,'grey',rep(bband.col,3))
+    
+    if(draw == 'bands') {
+      # draw Bollinger Bands on price chart
+      if(on[1] > 0) {
+        lines(x.pos,
+              bb[,1],col=bband.col[1],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,3],col=bband.col[3],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,2],col=bband.col[2],lwd=1,lty='dotted')
+      } else {
+        
+        polygon(c(x.pos,rev(x.pos)),
+                c(as.numeric(bb[,1]),as.numeric(rev(bb[,3]))),col=bband.fill,border=NA)
+        lines(x.pos,
+              bb[,1],col=bband.col[1],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,3],col=bband.col[3],lwd=1,lty='dashed')
+        lines(x.pos,
+              bb[,2],col=bband.col[2],lwd=1,lty='dotted')
+      }
+      lc <- xts:::legend.coords("topleft", xlim, lchob$get_ylim()[[2]])
+      legend(lc$x,lc$y,
+             legend=paste("Bollinger Bands (",
+                          paste(n,sd,sep=","),") [Upper/Lower]: ",
+                          sprintf("%.3f",last(bb[,3])),"/",
+                          sprintf("%.3f",last(bb[,1])), sep = ""), 
+             text.col = bband.col[3],
+             xjust = lc$xjust, 
+             yjust = 1.5, 
+             bty = "n", 
+             y.intersp=0.95) 
+      
+    } else 
+      if(draw == 'percent') {
+        frame <- x$get_frame()
+        ylim <- x$get_ylim()[[frame]]
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+        
+        # draw %B in new frame
+        
+        lines(x.pos, bb[,4], col=bband.col[4],lwd=1)
+        
+        lc <- xts:::legend.coords("topleft", xlim, ylim)
+        legend(lc$x,lc$y,
+               legend=c(paste("Bollinger %b (",
+                              paste(n,sd,sep=","), "): ",
+                              sep=""),
+                        paste(sprintf("%.3f",last(bb[,4])), sep = "")), 
+               text.col = c(theme$fg, bband.col[4]),
+               xjust = lc$xjust, 
+               yjust = lc$yjust, 
+               bty = "n", 
+               y.intersp=0.95)
+        
+      } else {
+        frame <- x$get_frame()
+        ylim <- x$get_ylim()[[frame]]
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+        
+        # draw width in new frame
+        # (high band - low band) / middle band
+        lines(x.pos, bbw, col=bband.col[5],lwd=1)
+        
+        lc <- xts:::legend.coords("topleft", xlim, ylim)
+        legend(lc$x,lc$y,
+               legend=c(paste("Bollinger Band Width (",
+                              paste(n,sd,sep=","), "): ",
+                              sep=""),
+                        paste(sprintf("%.3f",last(bbw)), sep = "")), 
+               text.col = c(theme$fg, bband.col[5]),
+               xjust = lc$xjust, 
+               yjust = lc$yjust, 
+               bty = "n", 
+               y.intersp=0.95)
+      }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, sd = sd, maType = maType, draw = draw, on = on)), 
+  list(n = n, sd = sd, maType = maType, draw = draw, on = on))
+  exp <- parse(text = gsub("list", "chartBBands", as.expression(substitute(list(x = current.chob(), 
+                                                                                n = n, sd = sd, maType = maType, draw = draw, on = on)))), srcfile = NULL)
+#  draw.options <- c('bands','percent','width')
+#  draw <- draw.options[pmatch(draw,draw.options)]
 
-  lchob <- get.current.chob()
-
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  if(draw=='bands') {
-    chobTA@new <- FALSE
-    } else {
-      chobTA@new <- TRUE
-      on <- NULL
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$BBands$col)) {
+    lchob$Env$theme$BBands$col$fill <- '#282828'
+    lchob$Env$theme$BBands$col$upper <- 'red'
+    lchob$Env$theme$BBands$col$lower <- 'red'
+    lchob$Env$theme$BBands$col$ma <- '#D5D5D5'
+  }
+  if (is.null(lchob$Env$theme$BBands$lty)) {
+    lchob$Env$theme$BBands$lty$upper <- 'dashed'
+    lchob$Env$theme$BBands$lty$lower <- 'dashed'
+    lchob$Env$theme$BBands$lty$ma <- 'dotted'
   }
 
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
   } else x 
 
   bb <- BBands(xx,n=n,maType=maType,sd=sd)
-  
-  chobTA@TA.values <- bb[lchob@xsubset,]
-  chobTA@name <- "chartBBands"
-  chobTA@call <- match.call()
-  chobTA@on <- on
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,ma=maType,sd=sd,
-                        draw=draw)
-  return(chobTA)
+  lenv$xdata <- structure(cbind(bb, (bb[,3] - bb[,1]) / bb[,2]), 
+                          .Dimnames=list(NULL, c("dn", "mavg", "up", "pctB", "bbw")))
+  lenv$bb <- lchob$Env$TA$bb <- bb
+  if(draw == 'bands') {
+    # draw Bollinger Bands on price chart
+    lchob$set_frame(-2)
+    
+  } else 
+    if(draw == 'percent') {
+      # draw %B in new frame
+      lchob$add_frame(ylim=c(min(lenv$bb[xsubset,4], na.rm = TRUE) * .9,
+                             max(abs(lenv$bb[xsubset,4]), na.rm = TRUE) * 1.05),asp=1,fixed=TRUE)
+      lchob$next_frame()
+      
+    } else {
+      # draw width in new frame
+      # (high band - low band) / middle band
+      bbw <- (bb[,3] - bb[,1]) / bb[,2]
+      lenv$bbw <- lchob$Env$TA$bbbw <- bbw
+      
+      lchob$add_frame(ylim=c(min(lenv$bbw[xsubset], na.rm = TRUE) * .9,
+                             max(abs(lenv$bbw[xsubset]), na.rm = TRUE) * 1.05),asp=1,fixed=TRUE)
+      lchob$next_frame()
+    }
+  lchob$replot(exp, env=c(lenv,lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartBBands {{{
 `chartBBands` <-
@@ -806,44 +1237,76 @@ function(x) {
 `addEnvelope` <- function(n=20,p=2.5,maType='SMA',...,on=1) {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartEnvelope <- function(x, n, p, maType, ..., on) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      Cl(xdata)
+    } else xdata 
+    
+    ma <- do.call(maType,list(xx,n=n,...))
+    mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))[xsubset]
+    
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(mae) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    if(on[1] > 0) {
+      lines(x.pos,mae[,1],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
+      lines(x.pos,mae[,3],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
+      #lines(x.pos,mae[,2],col='grey',lwd=1,lty='dotted')
+    } else {
+      xx <- x.pos
+      polygon(c(xx,rev(xx)), c(as.numeric(mae[,1]),rev(as.numeric(mae[,3]))),
+              col=theme$Envelope$col$fill,border=NA)
+      lines(x.pos,mae[,1],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
+      lines(x.pos,mae[,3],col=theme$Envelope$col$ma,lwd=1,lty=theme$Envelope$lty$ma)
+      #lines(x.pos,mae[,2],col='grey',lwd=1,lty='dotted')
+    }
+    
+    lc <- xts:::legend.coords("topleft", xlim, lchob$get_ylim()[[2]])
+    legend(lc$x,lc$y,
+           legend=paste("Moving Ave. Envelope (",
+                        paste(n,p,sep=","),") [Upper/Lower]: ",
+                        sprintf("%.3f",last(mae[,3])),"/",
+                        sprintf("%.3f",last(mae[,1])), sep = ""), 
+           text.col = "blue",
+           xjust = lc$xjust, 
+           yjust = 2, 
+           bty = "n", 
+           y.intersp=0.95) 
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, p = p, maType = maType, ..., on = on)), 
+  list(n = n, p = p, maType = maType, ..., on = on))
+  exp <- parse(text = gsub("list", "chartEnvelope", as.expression(substitute(list(x = current.chob(), 
+                                                                                  n = n, p = p, maType = maType, ..., on = on)))), srcfile = NULL)
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$Envelope)) {
+    lchob$Env$theme$Envelope$col$ma <- 'blue'
+    lchob$Env$theme$Envelope$col$fill <- '#282828'
+    lchob$Env$theme$Envelope$lty$ma <- 'dotted'
+  }
 
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- FALSE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
   ma <- do.call(maType,list(xx,n=n,...))
-  mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))
-  
-  chobTA@TA.values <- mae[lchob@xsubset,]
-
-  chobTA@name <- "chartEnvelope"
-  chobTA@call <- match.call()
-  chobTA@on <- on
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,p=p,maType=maType)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  mae <- cbind(ma*(1-p/100),ma,ma*(1+p/100))[xsubset]
+  lchob$Env$TA$mae <- mae
+  lchob$set_frame(sign(on)*(abs(on)+1L))
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartEnvelope {{{
 `chartEnvelope` <-
@@ -884,41 +1347,35 @@ function(x) {
 `addSAR` <- function(accel=c(0.02,0.2),col='blue') {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartSAR <- function(x, accel, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    sar <- SAR(cbind(Hi(xdata),Lo(xdata)),accel=accel)[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(sar) - 1)
 
-  x <- as.matrix(lchob@xdata)
+    points(x.pos,sar,col=col,cex=1)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(accel = accel, col = col)), list(accel = accel, col = col))
+  exp <- parse(text = gsub("list", "chartSAR", as.expression(substitute(list(x = current.chob(), 
+                                                                             accel = accel, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
-  chobTA <- new("chobTA")
-  chobTA@new <- FALSE
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   if(!is.OHLC(x)) stop("SAR requires HL series") 
 
-  sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)
-
-  chobTA@TA.values <- sar[lchob@xsubset]
-
-  chobTA@name <- "chartSAR"
-  chobTA@call <- match.call()
-  chobTA@on <- 1
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        accel=accel,col=col)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  sar <- SAR(cbind(Hi(x),Lo(x)),accel=accel)[xsubset]
+  lchob$Env$TA$sar <- sar
+  lchob$set_frame(2)
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartSAR {{{
 `chartSAR` <-
@@ -940,37 +1397,84 @@ function(x) {
 `addMACD` <- function(fast=12,slow=26,signal=9,type='EMA',histogram=TRUE,col) {
 
 
-  lchob <- get.current.chob()
+  
+  lenv <- new.env()
+  lenv$chartMACD <- function(x, fast, slow, signal, type, histogram, col) {
+    xsubset <- x$Env$xsubset
+    
+    macd <- macd[xsubset]
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(macd) - 1)
+    xlim <- x$Env$xlim
+    frame <- x$get_frame()
+    ylim <- x$get_ylim()[[frame]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
 
-  x <- as.matrix(lchob@xdata)
+    # add inbox color
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(ylim), 
+             xlim[2], y_grid_lines(ylim), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+    text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+    # add border of plotting area
+    rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    
+    if(histogram) {
+      cols <- ifelse((macd[,1]-macd[,2]) > 0, col[1],col[2])
+      rect(x.pos - spacing/5,0,x.pos + spacing/5, macd[,1]-macd[,2],
+           col=cols,border=cols)
+    } 
 
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+    lines(x.pos,macd[,1],col=col[3],lwd=1)
+    lines(x.pos,macd[,2],col=col[4],lwd=1,lty='dotted')
+    
+  }
+  if(missing(col)) col <- c('#999999','#777777',
+                            '#BBBBBB','#FF0000')
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col)), 
+  list(fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col))
+  exp <- parse(text = gsub("list", "chartMACD", as.expression(substitute(list(x = current.chob(), 
+                                                                             fast = fast,slow = slow,signal = signal,type = type,histogram = histogram,col = col)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    frame <- get_frame(),
+    lc <- xts:::legend.coords("topleft", xlim, ylim[[frame]]),
+    legend(lc$x, lc$y, 
+           legend=c(paste("Moving Average Convergence Divergence (",
+                          paste(fast,slow,signal,sep=','),"):", sep = ""),
+                    paste("MACD:",sprintf("%.3f",last(macd[xsubset,1]))),
+                    paste("Signal:",sprintf("%.3f",last(macd[xsubset,2])))),
+           text.col=c(theme$fg, col[3], col[4]),
+           xjust=lc$xjust,
+           yjust=lc$yjust,
+           bty='n',
+           y.intersp=0.95)))
+  
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
-  col <- if(missing(col)) col <- c('#999999','#777777',
-                              '#BBBBBB','#FF0000')
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
   } else x 
 
   macd <- MACD(xx,nFast=fast,nSlow=slow,nSig=signal,maType=type)
-  
-  chobTA@TA.values <- macd[lchob@xsubset,]
-
-  chobTA@name <- "chartMACD"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        fast=fast,slow=slow,signal=signal,
-                        col=col,histo=histogram
-                        )
-  return(chobTA)
+  lenv$xdata <- structure(cbind(macd, macd[,1]-macd[,2]), .Dimnames=list(NULL, c("macd", "signal", "histogram")))
+  lenv$macd <- lchob$Env$TA$macd <- macd
+  lenv$get_frame <- lchob$get_frame
+  lchob$add_frame(ylim=c(-max(abs(lenv$macd[xsubset]),na.rm=TRUE),
+                         max(abs(lenv$macd[xsubset]),na.rm=TRUE))*1.05, asp=1, fixed=FALSE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartMACD {{{
 `chartMACD` <-
@@ -1031,69 +1535,90 @@ function(x) {
 # addShading {{{
 `addShading` <- function(when,on=-1,overlay=TRUE,col='blue') {
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-    x <- lchob@xdata
+  lenv <- new.env()
+  lenv$chartShading <- function(x, when, on, overlay, col) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xdata <- xdata[xsubset]
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    spacing <- theme$spacing
+    width <- theme$width
     i <- when
-    indexClass(x) <- "POSIXct"
-    POSIXindex <- index(x)
+    indexClass(xdata) <- "POSIXct"
+    POSIXindex <- index(xdata)
     if (missing(i)) 
-        i <- 1:NROW(x)
+      i <- 1:NROW(xdata)
     if (timeBased(i)) 
-        i <- as.character(as.POSIXct(i))
+      i <- as.character(as.POSIXct(i))
     if (is.character(i)) {
-        i <- strsplit(i, ';')[[1]]
-        i.tmp <- NULL
-        for (ii in i) {
-            if (!identical(grep("::", ii), integer(0))) {
-                dates <- strsplit(ii, "::")[[1]]
-                first.time <- ifelse(dates[1] == "", POSIXindex[1], 
-                  do.call("firstof", as.list(as.numeric(strsplit(dates[1], 
-                    ":|-|/| ")[[1]]))))
-                last.time <- ifelse(length(dates) == 1, POSIXindex[length(POSIXindex)], 
-                  do.call("lastof", as.list(as.numeric(strsplit(dates[2], 
-                    ":|-|/| ")[[1]]))))
-            }
-            else {
-                dates <- ii
-                first.time <- do.call("firstof", as.list(as.numeric(strsplit(dates, 
-                  ":|-|/| ")[[1]])))
-                last.time <- do.call("lastof", as.list(as.numeric(strsplit(dates, 
-                  ":|-|/| ")[[1]])))
-            }
-            i.tmp <- c(i.tmp, which(POSIXindex <= last.time & 
-                POSIXindex >= first.time))
+      i <- strsplit(i, ';')[[1]]
+      i.tmp <- NULL
+      for (ii in i) {
+        if (!identical(grep("::", ii), integer(0))) {
+          dates <- strsplit(ii, "::")[[1]]
+          first.time <- ifelse(dates[1] == "", POSIXindex[1], 
+                               do.call("firstof", as.list(as.numeric(strsplit(dates[1], 
+                                                                              ":|-|/| ")[[1]]))))
+          last.time <- ifelse(length(dates) == 1, POSIXindex[length(POSIXindex)], 
+                              do.call("lastof", as.list(as.numeric(strsplit(dates[2], 
+                                                                            ":|-|/| ")[[1]]))))
         }
-        i <- i.tmp
+        else {
+          dates <- ii
+          first.time <- do.call("firstof", as.list(as.numeric(strsplit(dates, 
+                                                                       ":|-|/| ")[[1]])))
+          last.time <- do.call("lastof", as.list(as.numeric(strsplit(dates, 
+                                                                     ":|-|/| ")[[1]])))
+        }
+        i.tmp <- c(i.tmp, which(POSIXindex <= last.time & 
+                                  POSIXindex >= first.time))
+      }
+      i <- i.tmp
     }
+    
+    xstart <- unique(c(i[1],i[which(diff(i) != 1)+1]))
+    xend   <- unique(c(i[which(diff(i) != 1)-1], rev(i)[1]))
+    
+    if(!overlay) {
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=col, border=theme$labels)
+    }
+    
+    rect(((xstart-1)*spacing+1)-width/2, rep(ylim[1],length(xstart)),
+         ((xend-1)*spacing+1)+width/2, rep(ylim[2],length(xend)),
+         col=col,border=NA)
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(when = when, on = on, overlay = overlay, col = col)), 
+  list(when = when, on = on, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartShading", as.expression(substitute(list(x = current.chob(), 
+                                                                                 when = when, on = on, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
-  xstart <- unique(c(i[1],i[which(diff(i) != 1)+1]))
-  xend   <- unique(c(i[which(diff(i) != 1)-1], rev(i)[1]))
-
-  chobTA@TA.values <- x
-  chobTA@name <- "chartShading"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        yrange=lchob@yrange,
-                        colors=lchob@colors,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        xsubset=lchob@xsubset,
-                        time.scale=lchob@time.scale,
-                        xstart=xstart,xend=xend
-                        )
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+    if(overlay) {
+      lchob$set_frame(sign(on)*(abs(on)+1L))
+    } else {
+      lchob$add_frame(ylim=c(lchob$get_ylim()[[abs(on)+1L]][1], 
+                             lchob$get_ylim()[[abs(on)+1L]][2]), asp=1, fixed=TRUE)
+      lchob$next_frame()
+    }
+    lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+    lchob
 } # }}}
 # chartShading {{{
 `chartShading` <-
@@ -1120,33 +1645,63 @@ function(x) {
   if(missing(h)) h <- NULL
   if(missing(v)) v <- NULL
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
+  lenv <- new.env()
+  lenv$chartLines <- function(x, series, h, v, on, overlay, col) {
+    xsubset <- x$Env$xsubset
+    series <- series[which(.index(series) %in% .index(x$Env$xdata[xsubset]))]
+    x.points <- which(.index(x$Env$xdata[xsubset]) %in% .index(series))
+    spacing <- x$Env$theme$spacing
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    y_grid_series <- x$Env$y_grid_series
+    
+    if(!overlay) {
+      ylim <- range(series[,1], na.rm=TRUE) * 1.05
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid series and left-side axis labels
+      segments(xlim[1], y_grid_series(ylim), 
+               xlim[2], y_grid_series(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_series(ylim), y_grid_series(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    }
+    if(!is.null(series)) {
+      # draw series given positions specified in x
+      lines(x.points,series[,1],col=col)  
+    }
+    if(!is.null(h)) {
+      # draw horizontal series given positions specified in h
+      segments(xlim[1],h,xlim[2],h,col=col)
+    }
+    if(!is.null(v)) {
+      # draw vertical series given positions specified in v
+      segments((v-1)*spacing+1,ylim[1],(v-1)*spacing+1,ylim[2],col=col)
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(x = x, h = h, v = v, on = on, overlay = overlay, col = col)), 
+  list(x = x, h = h, v = v, on = on, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartLines", as.expression(substitute(list(x = current.chob(), 
+                                                                               series = get("x"),
+                                                                               h = h, v = v, on = on, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
 
-  chobTA@TA.values <- NULL # single numeric vector
-  chobTA@name <- "chartLines"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,h=h,x=x,v=v)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
+  if(overlay) {
+    lchob$set_frame(sign(on)*(abs(on)+1L))
   } else {
-   return(chobTA)
-  } 
+    lchob$add_frame(ylim=range(x, na.rm=TRUE) * 1.05, aps=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartLines {{{
 `chartLines` <-
@@ -1176,51 +1731,83 @@ function(x) {
 } # }}}
 
 # addPoints {{{
-`addPoints` <- function(x,y=NULL,type='p',pch=20,
+`addPoints` <- function(x,y = NULL,type='p',pch=20,
                         offset=1,col=2,bg=2,cex=1,
                         on=1,overlay=TRUE) {
  
-  lchob <- get.current.chob()
-  xdata <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
+  lenv <- new.env()
+  lenv$chartPoints <- function(x, x.points, y.points, type, pch, offset, col, bg, cex, on, overlay) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    if(is.xts(x.points)) {
+      y.points <- x.points[.index(x.points) %in% .index(xdata[xsubset])]
+      x.points <- which(.index(xdata[xsubset]) %in% .index(x.points))
+    }
+    else {
+      x.points <- which(.index(xdata[xsubset]) %in% .index(xdata[x.points]))
+    }
+    spacing <- x$Env$theme$spacing
+    # if OHLC and above - get Hi, else Lo
+    # if univariate - get value
+    y.data <- if(is.OHLC(xdata)) {
+      if(offset > 1) {
+        Hi(xdata)
+      } else Lo(xdata)
+    } else xdata
+    
+    if(is.null(y.points)) 
+      y.points <- y.data[x.points] * offset
+    else
+      y.points <- y.points[.index(y.points) %in% .index(xdata[xsubset])] * offset
+    
+    if(!overlay) {
+      xlim <- x$Env$xlim
+      ylim <- x$get_ylim()[[2]]
+      theme <- x$Env$theme
+      y_grid_lines <- x$Env$y_grid_lines
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      segments(xlim[1], 0, xlim[2], 0, col = "#666666", lty = "dotted")
+    }
+    
+    points(x=x.points, y=y.points, type=type,pch=pch,col=col,bg=bg,cex=cex)
+  }
+  mapply(function(name,value) { assign(name,value,envir=lenv) }, 
+         names(list(x = x, y = y, type = type, pch = pch, offset = offset, 
+                    col = col, bg = bg, cex = cex, on = on, overlay = overlay)), 
+         list(x = x, y = y, type = type, pch = pch, offset = offset, 
+              col = col, bg = bg, cex = cex, on = on, overlay = overlay))
+  exp <- parse(text=gsub("list","chartPoints",as.expression(substitute(list(x=current.chob(),
+                                                                            x.points=get("x"), y.points=get("y"),
+                                                                            type = type, pch = pch, offset = offset, col = col, 
+                                                                            bg = bg, cex = cex, on = on, overlay = overlay)))),
+               srcfile=NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  xdata <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
   
-  chobTA@TA.values <- xdata[lchob@xsubset,]
-  chobTA@name <- "chartPoints"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-
-  if(missing(bg)) bg <- col
-
-    xsubset <- x %in% lchob@xsubset
+  if(!is.null(y))
     if(NROW(x) != NROW(y)) stop('x and y must be of equal lengths')
-    x <- x[xsubset]
-    if(!is.null(y))
-      y <- y[xsubset]
 
-
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        subset=lchob@xsubset,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        x=x,y=y,type=type,offset=offset,
-                        pch=pch,col=col,bg=bg,cex=cex)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+    if(overlay)
+      lchob$set_frame(on+1)
+    else {
+      lchob$add_frame(ylim=lchob$get_ylim()[[2]], asp=1, fixed=TRUE)
+      lchob$next_frame()
+    }
+    lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+    lchob
 } # }}}
 # chartPoints {{{
 `chartPoints` <-
@@ -1262,66 +1849,114 @@ function(x) {
 `addEMA` <- function(n=10,wilder=FALSE,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='blue') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-
-  # get the appropriate data - from the approp. src
+  lenv <- new.env()
+  lenv$chartEMA <- function(x, n, wilder, ratio, on, with.col, overlay, col) {
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- x$Env$xdata
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
+      
+      if(missing(with.col)) with.col <- 1
+      
+      #    if(is.function(with.col)) {
+      #      x.tmp <- do.call(with.col,list(x))
+      #    } else x.tmp <- x[,with.col]
+      x.tmp <- xdata
+    }
+    xsubset <- x$Env$xsubset
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp[xsubset]) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    if(length(n) != length(col)) {
+      colors <- 3:10
+    } else colors <- col
+    
+    for(li in 1:length(n)) {
+      ma <- EMA(x.tmp,n=n[li],wilder=wilder[1],ratio=ratio[1])[xsubset]
+      ma.tmp <- cbind(ma.tmp, ma)
+      if(!overlay) {
+        ylim <- c(min(ma*0.975, na.rm=TRUE), max(ma*1.05, na.rm=TRUE))
+        # add inbox color
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+        
+        lc <- xts:::legend.coords("topleft", xlim, ylim)
+        legend(x = lc$x, y = lc$y, 
+               legend = paste("EMA (",
+                        paste(n[li],sep=","),"): ",
+                        sprintf("%.3f",last(ma)),
+                        sep = ""), 
+               text.col = colors[li],  
+               xjust = lc$xjust, 
+               yjust = lc$yjust, 
+               bty = "n", 
+               y.intersp=0.95) 
+      }
+      lines(x.pos,ma,col=colors[li],lwd=1,type='l')
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, wilder = wilder, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, wilder = wilder, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartEMA", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, wilder = wilder, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
+    x <- lchob$Env$xdata
+    
     if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
+    
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
   } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-
-    x <- as.matrix(target.TA@TA.values)
-
-    if(missing(with.col)) with.col <- 1
-      
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
   }
-
+  xsubset <- lchob$Env$xsubset
+  
   ma.tmp <- NULL
-
   for(i in 1:length(n)) {
     ma <- EMA(x.tmp,n=n[i],wilder=wilder[1],
-              ratio=ratio[1])
-    ma.tmp <- cbind(ma.tmp,ma)
+              ratio=ratio[1])[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
   }
-
-  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],ncol=NCOL(ma.tmp))
-
-  chobTA@name <- "chartEMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n,wilder=wilder,ratio=ratio)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lchob$Env$TA$ema <- ma.tmp
+  if(overlay)
+    lchob$set_frame(on+1)
+  else {
+    lchob$add_frame(ylim=c(min(ma.tmp*0.975, na.rm=TRUE), 
+                           max(ma.tmp*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartEMA {{{
 `chartEMA` <-
@@ -1369,61 +2004,104 @@ function(x) {
 `addSMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='brown') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-  # get the appropriate data - from the approp. src
+  lenv <- new.env()
+  lenv$chartSMA <- function(x, n, on, with.col, overlay, col) {
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- x$Env$xdata
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
+      
+      if(missing(with.col)) with.col <- 1
+      
+#      if(is.function(with.col)) {
+#        x.tmp <- do.call(with.col,list(x))
+#      } else x.tmp <- x[,with.col]
+      x.tmp <- xdata
+    }
+    xsubset <- x$Env$xsubset
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp[xsubset]) - 1)
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    if(length(n) != length(col)) {
+      colors <- c(4:10,3)
+    } else colors <- col
+    
+    if(!overlay) {
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    }
+    
+    ma.tmp <- NULL
+    for(i in 1:length(n)) {
+      ma <- SMA(x.tmp,n=n[i])[xsubset]
+      ma.tmp <- cbind(ma.tmp,ma)
+      
+      lines(x.pos,ma,col=colors[i],lwd=1,type='l')
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartSMA", as.expression(substitute(list(x = current.chob(), 
+                                                                              n = n, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
   if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
+    x <- lchob$Env$xdata
+    
     if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
+    
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
   } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-
-    x <- as.matrix(target.TA@TA.values)
-
-    if(missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
   }
+  xsubset <- lchob$Env$xsubset
+  
   ma.tmp <- NULL
   for(i in 1:length(n)) {
-    ma <- SMA(x.tmp,n=n[i])
+    ma <- SMA(x.tmp,n=n[i])[xsubset]
     ma.tmp <- cbind(ma.tmp,ma)
   }
-
-  chobTA@TA.values <- matrix(ma.tmp[lchob@xsubset,],ncol=NCOL(ma.tmp)) # single numeric vector
-  chobTA@name <- "chartSMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
+  lchob$Env$TA$sma <- ma.tmp
+  
+  if(overlay) {
+    lchob$set_frame(sign(on)*(abs(on)+1L))
   } else {
-   return(chobTA)
-  } 
+    lchob$add_frame(ylim=lchob$get_ylim()[[abs(on)+1L]], asp=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartSMA {{{
 `chartSMA` <-
@@ -1467,55 +2145,101 @@ function(x) {
 `addWMA` <- function(n=10,wts=1:n,on=1,with.col=Cl,overlay=TRUE,col='green') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-  # get the appropriate data - from the approp. src
-  if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
-    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
-  } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-    x <- as.matrix(target.TA@TA.values)
-
-    if(missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
+  lenv <- new.env()
+  lenv$chartWMA <- function(x, n, wts, on, with.col, overlay, col) {
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- lchob$Env$xdata
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
+      
+      if(missing(with.col)) with.col <- 1
+      
+      #    if(is.function(with.col)) {
+      #      x.tmp <- do.call(with.col,list(x))
+      #    } else x.tmp <- x[,with.col]
+      #  }
+      x.tmp <- xdata
+    }
+    xsubset <- x$Env$xsubset
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp[xsubset]) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    if(length(n) < length(col)) {
+      colors <- 3:10
+    } else colors <- col
+    
+    for(li in 1:length(n)) {
+      ma <- WMA(x.tmp,n=n[li],wts=wts)[xsubset]
+      if(!overlay) {
+        ylim <- c(min(ma*0.975, na.rm=TRUE), max(ma*1.05, na.rm=TRUE))
+        # add inbox color
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+      }
+      lines(x.pos,ma,col=colors[li],lwd=1,type='l')
+    }
   }
-
-  chobTA@TA.values <- x.tmp[lchob@xsubset]
-  chobTA@name <- "chartWMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n,wts=wts)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartWMA", as.expression(substitute(list(x = current.chob(), 
+                                                                             n = n, wts = wts, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
   } else {
-   return(chobTA)
-  } 
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- WMA(x.tmp,n=n[li],wts=wts)[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$wma <- ma.tmp
+  if(overlay)
+    lchob$set_frame(on+1)
+  else {
+      lchob$add_frame(ylim=c(min(ma*0.975, na.rm=TRUE), 
+                             max(ma*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
+      lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartWMA {{{
 `chartWMA` <-
@@ -1537,7 +2261,7 @@ function(x) {
       ma <- WMA(x@TA.values,n=x@params$n[li],wts=x@params$wts)
       if(x@new) {
         par(new=TRUE)
-        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+        plot(x.range,seq(min(ma*.975, na.rm=TRUE),max(ma*1.05, na.rm=TRUE),length.out=length(x.range)),
              type='n',axes=FALSE,ann=FALSE)
         title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
         axis(2)
@@ -1551,55 +2275,108 @@ function(x) {
 `addDEMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='pink') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
+  lenv <- new.env()
+  lenv$chartDEMA <- function(x, n, on, with.col, overlay, col) {
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- x$Env$xdata
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
 
-  # get the appropriate data - from the approp. src
-  if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
-    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
-  } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-    x <- as.matrix(target.TA@TA.values)
-
-    if(missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
+      if(missing(with.col)) with.col <- 1
+      
+#      if(is.function(with.col)) {
+#        x.tmp <- do.call(with.col,list(xdata))
+#      } else x.tmp <- xdata[,with.col]
+      x.tmp <- xdata
+    }
+    xsubset <- x$Env$xsubset
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp[xsubset]) - 1)
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    if(length(n) < length(col)) {
+      colors <- 3:10
+    } else colors <- col
+    
+    if(!overlay) {
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    }
+    
+    for(li in 1:length(n)) {
+      ma <- DEMA(x.tmp,n=n[li])[xsubset]
+#      if(x@new) {
+#        par(new=TRUE)
+#        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+#             type='n',axes=FALSE,ann=FALSE)
+#        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+#        axis(2)
+#        box(col=x@params$colors$fg.col)
+#      }
+      lines(x.pos,ma,col=colors[li],lwd=1,type='l')
+    }
   }
-
-  chobTA@TA.values <- x.tmp[lchob@xsubset]
-  chobTA@name <- "chartDEMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartDEMA", as.expression(substitute(list(x = current.chob(), 
+                                                                              n = n, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
+    if(is.function(with.col)) {
+      x.tmp <- do.call(with.col,list(x))
+    } else x.tmp <- x[,with.col]
   } else {
-   return(chobTA)
-  } 
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- DEMA(x.tmp,n=n[li])[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$dema <- ma.tmp
+  if(overlay) {
+    lchob$set_frame(on+1)
+  } else {
+    lchob$add_frame(ylim=lchob$get_ylim()[[abs(on)+1L]], asp=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartDEMA {{{
 `chartDEMA` <-
@@ -1635,56 +2412,116 @@ function(x) {
 `addEVWMA` <- function(n=10,on=1,with.col=Cl,overlay=TRUE,col='yellow') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
-
-  # get the appropriate data - from the approp. src
+  lenv <- new.env()
+  lenv$chartEVWMA <- function(x, n, on, with.col, overlay, col) {
+    
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- x$Env$xdata
+      vo <- x$Env$vo
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
+      
+      if(missing(with.col)) with.col <- 1
+      
+#      if(is.function(with.col)) {
+#        x.tmp <- do.call(with.col,list(xdata))
+#      } else x.tmp <- xdata[,with.col]
+      x.tmp <- xdata
+    }
+    x.tmp <- cbind(x.tmp, vo)
+    
+    if(!has.Vo(x.tmp)) return()
+    
+    xsubset <- x$Env$xsubset
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp[xsubset]) - 1)
+    xlim <- x$Env$xlim
+    ylim <- x$get_ylim()[[abs(on)+1L]]
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    if(length(n) < length(col)) {
+      colors <- 3:10
+    } else colors <- col
+    
+    if(!overlay) {
+      # add inbox color
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+      # add grid lines and left-side axis labels
+      segments(xlim[1], y_grid_lines(ylim), 
+               xlim[2], y_grid_lines(ylim), 
+               col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+      text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+           col = theme$labels, srt = theme$srt, 
+           offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+      # add border of plotting area
+      rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+    }
+    
+    for(li in 1:length(n)) {
+      ma <- EVWMA(x.tmp[, 1],x.tmp[, 2],n=n[li])[xsubset]
+      #      if(x@new) {
+      #        par(new=TRUE)
+      #        plot(x.range,seq(min(ma*.975),max(ma*1.05),length.out=length(x.range)),
+      #             type='n',axes=FALSE,ann=FALSE)
+      #        title(ylab=paste('EMA(',paste(x@params$n[li],collapse=','),')',sep=''))
+      #        axis(2)
+      #        box(col=x@params$colors$fg.col)
+      #      }
+      lines(x.pos,ma,col=colors[li],lwd=1,type='l')
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartEVWMA", as.expression(substitute(list(x = current.chob(), 
+                                                                              n = n, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  vo <- lchob$Env$vo
   if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
+    x <- lchob$Env$xdata
+    
     if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- cbind(do.call(with.col,list(x)),Vo(x))
-    } else x.tmp <- x[,with.col]
-  } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-    x <- as.matrix(target.TA@TA.values)
-
-    if(missing(with.col)) with.col <- 1
-
+    
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
-  }
-  if(!has.Vo(x)) return()
-
-  chobTA@TA.values <- cbind(x.tmp,Vo(x))[lchob@xsubset,] # Price + Volume
-  chobTA@name <- "chartEVWMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
   } else {
-   return(chobTA)
-  } 
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  x.tmp <- cbind(x.tmp, vo)
+
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- EVWMA(x.tmp[, 1],x.tmp[, 2],n=n[li])[xsubset]
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$evwma <- ma.tmp
+  if(overlay) {
+    lchob$set_frame(on+1)
+  } else {
+    lchob$add_frame(ylim=lchob$get_ylim()[[abs(on)+1L]], asp=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartEVWMA {{{
 `chartEVWMA` <-
@@ -1720,59 +2557,112 @@ function(x) {
 `addZLEMA` <- function(n=10,ratio=NULL,on=1,with.col=Cl,overlay=TRUE,col='red') {
 
 
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- !overlay
+  lenv <- new.env()
+  lenv$chartZLEMA <- function(x, n, ratio, on, with.col, overlay, col) {
+    # get the appropriate data - from the approp. src
+    if(on==1) {
+      xdata <- lchob$Env$xdata
+      
+      if(!is.OHLC(xdata) && missing(with.col)) with.col <- 1
+      
+      if(is.function(with.col)) {
+        x.tmp <- do.call(with.col,list(xdata))
+      } else x.tmp <- xdata[,with.col]
+    } else {
+      # get values from TA...
+      name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(x$get_actions(on+1)[[1]]), collapse = "")))
+      which.TA <- which(tolower(names(x$Env$TA)) == tolower(name.TA))
+      target.TA <- names(x$Env$TA)[which.TA]
+      xdata <- get(target.TA, pos = x$Env$TA)
+      
+      if(missing(with.col)) with.col <- 1
 
-  # get the appropriate data - from the approp. src
-  if(on==1) {
-    x <- as.matrix(lchob@xdata)
-
-    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
-
-    if(is.function(with.col)) {
-      x.tmp <- do.call(with.col,list(x))
-    } else x.tmp <- x[,with.col]
-  } else {
-    # get values from TA...
-    which.TA <- which(sapply(lchob@passed.args$TA,function(x) x@new))
-    target.TA <- eval(lchob@passed.args$TA[which.TA][on-1])[[1]]
-
-    if(missing(with.col)) with.col <- 1
-
-    x <- as.matrix(target.TA@TA.values)
-    if(missing(with.col)) {
-      warning('missing "with.col" argument')
-      invisible(return())
+#      if(is.function(with.col)) {
+#        x.tmp <- do.call(with.col,list(x))
+#      } else x.tmp <- x[,with.col]
+      x.tmp <- xdata
     }
+    xsubset <- x$Env$xsubset
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(x.tmp[xsubset]) - 1)
+    xlim <- x$Env$xlim
+    theme <- x$Env$theme
+    y_grid_lines <- x$Env$y_grid_lines
+    if(length(n) != length(col)) {
+      colors <- 3:10
+    } else colors <- col
+    
+    for(li in 1:length(n)) {
+      ma <- ZLEMA(x.tmp,n=n[li],ratio=ratio)[xsubset]
+      if(!overlay) {
+        ylim <- c(min(ma*0.975, na.rm=TRUE), max(ma*1.05, na.rm=TRUE))
+        # add inbox color
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], col=theme$fill)
+        # add grid lines and left-side axis labels
+        segments(xlim[1], y_grid_lines(ylim), 
+                 xlim[2], y_grid_lines(ylim), 
+                 col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3)
+        text(xlim[1], y_grid_lines(ylim), y_grid_lines(ylim), 
+             col = theme$labels, srt = theme$srt, 
+             offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE)
+        # add border of plotting area
+        rect(xlim[1], ylim[1], xlim[2], ylim[2], border=theme$labels)
+        
+        lc <- xts:::legend.coords("topleft", xlim, ylim)
+        legend(x = lc$x, y = lc$y, 
+               legend = paste("EMA (",
+                              paste(n[li],sep=","),"): ",
+                              sprintf("%.3f",last(ma)),
+                              sep = ""), 
+               text.col = colors[li],  
+               xjust = lc$xjust, 
+               yjust = lc$yjust, 
+               bty = "n", 
+               y.intersp=0.95) 
+      }
+      lines(x.pos,ma,col=colors[li],lwd=1,type='l')
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col)), 
+  list(n = n, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col))
+  exp <- parse(text = gsub("list", "chartZLEMA", as.expression(substitute(list(x = current.chob(), 
+                                                                               n = n, ratio = ratio, on = on, with.col = with.col, overlay = overlay, col = col)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if(on==1) {
+    x <- lchob$Env$xdata
+    
+    if(!is.OHLC(x) && missing(with.col)) with.col <- 1
+    
     if(is.function(with.col)) {
       x.tmp <- do.call(with.col,list(x))
     } else x.tmp <- x[,with.col]
-  }
-
-  chobTA@TA.values <- x.tmp[lchob@xsubset]
-  chobTA@name <- "chartZLEMA"
-  chobTA@call <- match.call()
-  chobTA@on <- on # used for deciding when to draw...
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,n=n,ratio=ratio)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
   } else {
-   return(chobTA)
-  } 
+    name.TA <- sub("\\(.*", "", sub(".*chart", "", paste(deparse(lchob$get_actions(on+1)[[1]]), collapse = "")))
+    which.TA <- which(tolower(names(lchob$Env$TA)) == tolower(name.TA))
+    target.TA <- names(lchob$Env$TA)[which.TA]
+    x.tmp <- get(target.TA, pos = lchob$Env$TA)
+  }
+  xsubset <- lchob$Env$xsubset
+  
+  ma.tmp <- NULL
+  for(li in 1:length(n)) {
+    ma <- ZLEMA(x.tmp,n=n[li],ratio=ratio)
+    ma.tmp <- cbind(ma.tmp, ma)
+  }
+  lchob$Env$TA$zlema <- ma.tmp
+  if(overlay)
+    lchob$set_frame(on+1)
+  else {
+    lchob$add_frame(ylim=c(min(ma.tmp*0.975, na.rm=TRUE), 
+                           max(ma.tmp*1.05, na.rm=TRUE)), asp=1, fixed=TRUE)
+    lchob$next_frame()
+  }
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartZLEMA {{{
 `chartZLEMA` <-
@@ -1806,41 +2696,35 @@ function(x) {
 
 # addExpiry {{{
 `addExpiry` <- function(type='options',lty='dotted') {
-  lchob <- get.current.chob()
-  chobTA <- new("chobTA")
-  chobTA@new <- FALSE
-
-  # get the appropriate data - from the approp. src
-  #if(from.fig==1) {
-  x <- lchob@xdata
-
-  if(type=='options') {
-    index.of.exp <- options.expiry(x)
-  } else index.of.exp <- futures.expiry(x)
-
-  chobTA@TA.values <- index.of.exp[index.of.exp %in% lchob@xsubset] # single numeric vector
-  chobTA@name <- "chartExpiry"
-  chobTA@call <- match.call()
-  chobTA@on <- 1
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        col=col,lty=lty)
-  if(is.null(sys.call(-1))) {
-    TA <- lchob@passed.args$TA
-    lchob@passed.args$TA <- c(TA,chobTA)
-    lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-    do.call('chartSeries.chob',list(lchob))
-    invisible(chobTA)
-  } else {
-   return(chobTA)
-  } 
+  lenv <- new.env()
+  lenv$chartExpiry <- function(x, type, lty) {
+    
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    xdata <- xdata[xsubset]
+    spacing <- x$Env$theme$spacing
+    theme <- x$Env$theme
+    
+    if(type=='options') {
+      index.of.exp <- options.expiry(xdata)
+    } else index.of.exp <- futures.expiry(xdata)
+    
+    for(ex in 1:length(index.of.exp)) {
+      abline(v=index.of.exp[ex]*spacing, lty=lty,col=theme$Expiry)
+    }
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(type=type,lty=lty)), list(type=type,lty=lty))
+  exp <- parse(text = gsub("list", "chartExpiry", as.expression(substitute(list(x = current.chob(), 
+                                                                                type=type,lty=lty)))), srcfile = NULL)
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  
+  lchob$set_frame(-2)
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } # }}}
 # chartExpiry {{{
 `chartExpiry` <-

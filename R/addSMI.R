@@ -3,12 +3,78 @@
 `addSMI` <- function(n=13,slow=25,fast=2,signal=9,ma.type='EMA') {
 
 
-  lchob <- get.current.chob()
+  lenv <- new.env()
+  lenv$chartSMI <- function(x, n, slow, fast, signal, ma.type) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    
+    xx <- if(is.OHLC(xdata)) {
+      cbind(Hi(xdata),Lo(xdata),Cl(xdata))
+    } else if(is.null(dim(xdata))) {
+      xdata
+    } else {
+      xdata[,1] 
+    }
+    
+    smi <- SMI(xx, n=n, nFast=fast,
+               nSlow=slow, nSig=signal, maType=ma.type)[xsubset]
+    
+    spacing <- x$Env$theme$spacing
+    x.pos <- 1 + spacing * (1:NROW(smi) - 1)
+    xlim <- x$Env$xlim
+    ylim <- c(-max(abs(smi[,1]), na.rm = TRUE), 
+                max(abs(smi[,1]), na.rm = TRUE))*1.05
+    theme <- x$Env$theme
+    
+    lines(x.pos,smi[,1],col=theme$SMI$col$smi,lwd=1,type='l')
+    lines(x.pos,smi[,2],col=theme$SMI$col$signal,lwd=1,lty='dotted',type='l')
+    
+  }
+  mapply(function(name, value) {
+    assign(name, value, envir = lenv)
+  }, names(list(n = n,fast = fast,slow = slow,signal = signal,ma.type = ma.type)), 
+  list(n = n,fast = fast,slow = slow,signal = signal,ma.type = ma.type))
+  exp <- parse(text = gsub("list", "chartSMI", as.expression(substitute(list(x = current.chob(), 
+                                                                              n = n,fast = fast,slow = slow,signal = signal,ma.type = ma.type)))), srcfile = NULL)
+  exp <- c(exp, expression(
+    text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
+         paste("Stochastic Momentum Index (",
+               paste(n,fast,slow,signal,sep=','),
+               "):", sep = ""), col = theme$fg, 
+         pos = 4),
+    
+    text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
+         paste("\n\n\nSMI: ",sprintf("%.3f",last(smi[xsubset,1])), sep = ""), 
+         col = theme$SMI$col$smi, pos = 4),
+    
+    text(0, max(abs(smi[,1]), na.rm = TRUE)*.9,
+         paste("\n\n\n\n\nSignal: ",
+               sprintf("%.3f",last(smi[xsubset,2])), sep = ""), 
+         col = theme$SMI$col$signal, pos = 4)))
+  exp <- c(expression(
+    smi <- TA$smi,
+    # add inbox color
+    rect(xlim[1], -max(abs(smi[,1]), na.rm = TRUE)*1.05, xlim[2], max(abs(smi[,1]), na.rm = TRUE)*1.05, col=theme$fill),
+    # add grid lines and left-side axis labels
+    segments(xlim[1], y_grid_lines(c(-max(abs(smi[,1]), na.rm = TRUE),max(abs(smi[,1]), na.rm = TRUE))*1.05), 
+             xlim[2], y_grid_lines(c(-max(abs(smi[,1]), na.rm = TRUE),max(abs(smi[,1]), na.rm = TRUE))*1.05), 
+             col = theme$grid, lwd = x$Env$grid.ticks.lwd, lty = 3),
+    text(xlim[1], y_grid_lines(c(-max(abs(smi[,1]), na.rm = TRUE),max(abs(smi[,1]), na.rm = TRUE))*1.05), y_grid_lines(c(-max(abs(smi[,1]), na.rm = TRUE),max(abs(smi[,1]), na.rm = TRUE))*1.05), 
+         col = theme$labels, srt = theme$srt, 
+         offset = 0.5, pos = 2, cex = theme$cex.axis, xpd = TRUE),
+    # add border of plotting area
+    rect(xlim[1], -max(abs(smi[,1]), na.rm = TRUE)*1.05, xlim[2], max(abs(smi[,1]), na.rm = TRUE)*1.05, border=theme$labels)), exp)
   
-  x <- as.matrix(lchob@xdata)
-
-  chobTA <- new("chobTA")
-  chobTA@new <- TRUE
+  lchob <- current.chob()
+  ncalls <- length(lchob$Env$call_list)
+  lchob$Env$call_list[[ncalls + 1]] <- match.call()
+  if (is.null(lchob$Env$theme$SMI)) {
+    lchob$Env$theme$SMI$col$smi <- "#0033CC"
+      lchob$Env$theme$SMI$col$signal <- "#BFCFFF"
+  }
+  
+  x <- lchob$Env$xdata
+  xsubset <- lchob$Env$xsubset
 
   xx <- if(is.OHLC(x)) {
     cbind(Hi(x),Lo(x),Cl(x))
@@ -20,33 +86,13 @@
 
   smi <- SMI(xx, n=n, nFast=fast,
              nSlow=slow, nSig=signal, maType=ma.type)
-
-# subset here
-# smi <- smi[lchob@sindex]
-
-  chobTA@TA.values <- smi[lchob@xsubset,]
-  chobTA@name <- "chartSMI"
-  chobTA@call <- match.call()
-  chobTA@params <- list(xrange=lchob@xrange,
-                        colors=lchob@colors,
-                        color.vol=lchob@color.vol,
-                        multi.col=lchob@multi.col,
-                        spacing=lchob@spacing,
-                        width=lchob@width,
-                        bp=lchob@bp,
-                        x.labels=lchob@x.labels,
-                        time.scale=lchob@time.scale,
-                        n=n,slow=slow,fast=fast,signal=signal,
-                        ma.type=ma.type)
-  #if(is.null(sys.call(-1))) {
-  #  TA <- lchob@passed.args$TA
-  #  lchob@passed.args$TA <- c(TA,chobTA)
-  #  lchob@windows <- lchob@windows + ifelse(chobTA@new,1,0)
-  #  do.call('chartSeries.chob',list(lchob))
-  #  invisible(chobTA)
-  #} else {
-  return(chobTA)
-  #} 
+  lchob$Env$TA$smi <- smi
+  
+  lchob$add_frame(ylim=c(-max(abs(smi[,1]), na.rm = TRUE), 
+                         max(abs(smi[,1]), na.rm = TRUE))*1.05, asp=1, fixed=TRUE)
+  lchob$next_frame()
+  lchob$replot(exp, env=c(lenv, lchob$Env), expr=TRUE)
+  lchob
 } #}}}
 # chartSMI {{{
 `chartSMI` <-
