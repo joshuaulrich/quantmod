@@ -7,5 +7,7 @@ WISHLIST
 ^\.git
 ^\.gitignore
 ^.*\.orig$
-^.*\.md$
+^README.md$
+^CONTRIBUTING.md$
+^CRAN_comments.md$
 .travis.yml

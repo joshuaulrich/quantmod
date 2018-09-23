@@ -18,7 +18,7 @@ function(Symbols=NULL,
                 'and getOption("getSymbols.auto.assign") will still be checked for\n',
                 'alternate defaults.\n\n',
                 'This message is shown once per session and may be disabled by setting \n',
-                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for details.')
+                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for details.\n')
         options("getSymbols.warning4.0"=FALSE)
       }
       importDefaults("getSymbols")
@@ -264,8 +264,8 @@ function(symbol, from, to, period, type, handle)
   e <- match.arg(type, c("history", "div", "split"))
   n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
   u <- paste0("https://query", n, ".finance.yahoo.com/v7/finance/download/",
-              symbol, "?period1=", from, "&period2=", to, "&interval=", p,
-              "&events=", e, "&crumb=", handle$cb)
+              symbol, sprintf("?period1=%.0f&period2=%.0f", from, to),
+              "&interval=", p, "&events=", e, "&crumb=", handle$cb)
   return(u)
 }
 
@@ -574,88 +574,11 @@ function(Symbols,env,return.class='xts',
          to=Sys.Date(),
          ...)
 {
-     fix.google.bug <- TRUE
-     importDefaults("getSymbols.google")
-     this.env <- environment()
-     for(var in names(list(...))) {
-        # import all named elements that are NON formals
-        assign(var, list(...)[[var]], this.env)
-     }
-
-     default.return.class <- return.class
-     default.from <- from
-     default.to <- to
-
-     if(!hasArg("verbose")) verbose <- FALSE
-     if(!hasArg("auto.assign")) auto.assign <- TRUE
-     google.URL <- "http://finance.google.com/finance/historical?"
-
-     # Google CSV contains English month abbreviations
-     # Ensure strptime() uses an English locale in this call
-     lc_time <- Sys.getlocale("LC_TIME")
-     on.exit(Sys.setlocale(category = "LC_TIME", locale = lc_time))
-     Sys.setlocale(category = "LC_TIME", locale = "C")
-
-     tmp <- tempfile()
-     on.exit(unlink(tmp), add = TRUE)
-
-     for(i in 1:length(Symbols)) {
-       return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
-       return.class <- ifelse(is.null(return.class),default.return.class,
-                              return.class)
-       from <- getSymbolLookup()[[Symbols[[i]]]]$from
-       from <- if(is.null(from)) default.from else from
-       to <- getSymbolLookup()[[Symbols[[i]]]]$to
-       to <- if(is.null(to)) default.to else to
-
-       from.y <- as.numeric(strsplit(as.character(from),'-',)[[1]][1])
-       from.m <- as.numeric(strsplit(as.character(from),'-',)[[1]][2])
-       from.d <- as.numeric(strsplit(as.character(from),'-',)[[1]][3])
-       to.y <- as.numeric(strsplit(as.character(to),'-',)[[1]][1])
-       to.m <- as.numeric(strsplit(as.character(to),'-',)[[1]][2])
-       to.d <- as.numeric(strsplit(as.character(to),'-',)[[1]][3])
-
-       Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
-       Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
-       if(verbose) cat("downloading ",Symbols.name,".....\n\n")
-       download.file(paste(google.URL,
-                           "q=",Symbols.name,
-                           "&startdate=",month.abb[from.m],
-                           "+",sprintf('%.2d',from.d),
-                           ",+",from.y,
-                           "&enddate=",month.abb[to.m],
-                           "+",sprintf('%.2d',to.d),
-                           ",+",to.y,
-                           "&output=csv",
-                           sep=''),destfile=tmp,quiet=!verbose)
-       fr <- read.csv(tmp)
-       if(verbose) cat("done.\n")
-       fr <- fr[nrow(fr):1,] #google data is backwards
-       if(fix.google.bug) {
-         bad.dates <- c('29-Dec-04','30-Dec-04','31-Dec-04')
-         if(as.Date(from,origin='1970-01-01') < as.Date("2003-12-28",origin='1970-01-01') &&
-            as.Date(to,origin='1970-01-01') > as.Date("2003-12-30",origin='1970-01-01')) {
-           dup.dates <- which(fr[,1] %in% bad.dates)[(1:3)]
-           fr <- fr[-dup.dates,]
-           warning("google duplicate bug - missing Dec 28,29,30 of 2003")
-         }
-       }
-       fr <- xts(as.matrix(fr[,-1]),
-                 as.Date(strptime(fr[,1],"%d-%B-%y"),origin='1970-01-01'),
-                 src='google',updated=Sys.time())
-       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
-                             c('Open','High','Low','Close','Volume'),
-                             sep='.')
-       # convert '-' to NAs
-       suppressWarnings(storage.mode(fr) <- "numeric")
-       fr <- convert.time.series(fr=fr,return.class=return.class)
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
-       if(auto.assign)
-         assign(Symbols[[i]],fr,env)
-     }
-     if(auto.assign)
-       return(Symbols)
-     return(fr)
+  msg <- paste0(sQuote("getSymbols.google"), " is defunct.",
+         "\nGoogle Finance stopped providing data in March, 2018.",
+         "\nYou could try setting src = \"yahoo\" instead.",
+         "\nSee help(\"Defunct\") and help(\"quantmod-defunct\")")
+  .Defunct("getSymbols", "quantmod", msg = msg)
 }
 # }}}
 
@@ -1200,16 +1123,15 @@ function(Symbols,env,return.class='xts',
                    " Symbol: ", Symbols[[i]])
        }
        oanda.URL <- paste0("https://www.oanda.com/fx-for-business/",
-                           "historical-rates/api/update/?&widget=1",
-                           "&source=OANDA&display=absolute&adjustment=0",
-                           "&data_range=c",
-                           "&quote_currency=", currency.pair[1],
+                           "historical-rates/api/data/update/",
+                           "?&source=OANDA&adjustment=0",
+                           "&base_currency=", currency.pair[1],
                            "&start_date=", from,
                            "&end_date=", to,
                            "&period=daily",
                            "&price=mid",
                            "&view=table",
-                           "&base_currency_0=", currency.pair[2])
+                           "&quote_currency_0=", currency.pair[2])
        # Fetch data (jsonlite::fromJSON will handle connection)
        tbl <- jsonlite::fromJSON(oanda.URL, simplifyVector = FALSE)
        Data <- tbl[[1]][[1]]$data
@@ -1301,18 +1223,18 @@ getSymbols.av <- function(Symbols, env, api.key,
     periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
     periodicity <- match.arg(periodicity, valid.periodicity)
     
-    if (adjusted && periodicity != "daily")
-      stop("getSymbols.av: Only daily data can be adjusted.", call.=FALSE)
+    if (adjusted && periodicity == "intraday")
+      stop("getSymbols.av: Intraday data cannot be adjusted.", call.=FALSE)
     
     sym.name <- getSymbolLookup()[[sym]]$name
     sym.name <- if (is.null(sym.name)) sym else sym.name
     
-    FUNCTION <-
+    FUNCTION <- paste0("TIME_SERIES_",
       switch(periodicity,
-             daily = if (adjusted) "TIME_SERIES_DAILY_ADJUSTED" else "TIME_SERIES_DAILY",
-             weekly = "TIME_SERIES_WEEKLY",
-             monthly = "TIME_SERIES_MONTHLY",
-             intraday = "TIME_SERIES_INTRADAY" )
+             daily = if (adjusted) "DAILY_ADJUSTED" else "DAILY",
+             weekly = if (adjusted) "WEEKLY_ADJUSTED" else "WEEKLY",
+             monthly = if (adjusted) "MONTHLY_ADJUSTED" else "MONTHLY",
+             intraday = "INTRADAY" ))
     
     if (verbose) cat("loading", sym.name, ".....")
     
@@ -1427,6 +1349,125 @@ getSymbols.av <- function(Symbols, env, api.key,
 
 # Mnemonic alias, letting callers use getSymbols("IBM", src="alphavantage")
 getSymbols.alphavantage <- getSymbols.av
+
+#
+#  Download OHLC Data From Tiingo
+#  
+#  Meant to be called internally by getSymbols().
+#  
+getSymbols.tiingo <- function(Symbols, env, api.key,
+                              return.class="xts",
+                              periodicity="daily",
+                              adjust=FALSE,
+                              from='2007-01-01',
+                              to=Sys.Date(),
+                              data.type="json",
+                              ...) {
+  
+  importDefaults("getSymbols.tiingo")
+  this.env <- environment()
+  for (var in names(list(...))) {
+    assign(var, list(...)[[var]], this.env)
+  }
+  
+  if (!hasArg("api.key")) {
+    stop("getSymbols.tiingo: An API key is required (api.key). Register",
+         " at https://api.tiingo.com.", call.=FALSE)
+  }
+  if (!hasArg("auto.assign")) auto.assign <- TRUE
+  if (!hasArg("verbose")) verbose <- FALSE
+  if (!hasArg("warnings")) warnings <- TRUE
+  
+  valid.periodicity <- c("daily", "weekly", "monthly", "annually")
+  periodicity <- match.arg(periodicity, valid.periodicity)
+  default.return.class <- return.class
+  default.periodicity <- periodicity
+  
+  if (!requireNamespace("jsonlite", quietly=TRUE)) {
+    stop("getSymbols.tiingo: Package", dQuote("jsonlite"), "is required but",
+         " cannot be loaded.", call.=FALSE)
+  }
+  
+  tmp <- tempfile()
+  on.exit(file.remove(tmp))
+  
+  downloadOne <- function(sym, default.return.class, default.periodicity) {
+    
+    return.class <- getSymbolLookup()[[sym]]$return.class
+    return.class <- if (is.null(return.class)) default.return.class else return.class
+    periodicity <- getSymbolLookup()[[sym]]$periodicity
+    periodicity <- if (is.null(periodicity)) default.periodicity else periodicity
+    periodicity <- match.arg(periodicity, valid.periodicity)
+    sym.name <- getSymbolLookup()[[sym]]$name
+    sym.name <- if (is.null(sym.name)) sym else sym.name
+    
+    if (verbose) cat("loading", sym.name, ".....")
+    from.strftime <- strftime(from, format = "%Y-%m-%d")
+    to.strftime <- strftime(to, format = "%Y-%m-%d")
+    
+    tiingo.names <- c("open", "high", "low", "close", "volume",
+                      "adjOpen", "adjHigh", "adjLow", "adjClose",
+                      "adjVolume", "divCash", "splitFactor")
+    qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
+                             "Open", "High", "Low", "Close", "Volume",
+                             "DivCash", "SplitFactor"), sep=".")
+    if (isTRUE(adjust)) {
+      return.columns <- tiingo.names[6:10]
+    } else {
+      return.columns <- tiingo.names[1:5]
+    }
+    URL <- paste0("https://api.tiingo.com/tiingo/",
+                  periodicity, "/",
+                  sym.name, "/prices",
+                  "?startDate=", from.strftime,
+                  "&endDate=", to.strftime,
+                  "&format=", data.type,
+                  "&token=", api.key,
+                  "&columns=", paste0(return.columns, collapse=","))
+    # If rate limit is hit, the csv API returns HTTP 200 (OK), while json API
+    # returns HTTP 429. The latter caused download.file() to error, but the
+    # contents of 'tmp' still contain the error message.
+    response <- curl::curl_fetch_disk(URL, tmp)
+
+    if (data.type == "json") {
+      stock.data <- jsonlite::fromJSON(tmp)
+      if (verbose) cat("done.\n")
+    } else {
+      stock.data <- read.csv(tmp, as.is=TRUE)
+    }
+    # check for error
+    if (!all(return.columns %in% names(stock.data))) {
+      if (data.type == "json") {
+        msg <- jsonlite::fromJSON(tmp)$detail
+      } else {
+        msg <- readLines(tmp, warn=FALSE)
+      }
+      msg <- sub("Error: ", "", msg)
+      stop(msg, call. = FALSE)
+    }
+    tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
+    stock.data[, "date"] <- NULL
+    colnames(stock.data) <- qm.names[match(colnames(stock.data), tiingo.names)]
+    # convert data to xts
+    xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
+    xts.data <- convert.time.series(xts.data, return.class=return.class)
+    # order columns
+    xts.data <- OHLCV(xts.data)
+    if (auto.assign)
+      assign(sym, xts.data, env)
+    return(xts.data)
+  }
+  
+  matrices <- lapply(Symbols, FUN=downloadOne,
+                     default.return.class=default.return.class,
+                     default.periodicity=default.periodicity)
+  
+  if (auto.assign) {
+    return(Symbols)
+  } else {
+    return(matrices[[1]])
+  }
+}
 
 # convert.time.series {{{
 `convert.time.series` <- function(fr,return.class) {
