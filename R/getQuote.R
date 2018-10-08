@@ -68,14 +68,7 @@ function(Symbols,what=standardQuote(),...) {
     Qposix <- .POSIXct(sq[,"regularMarketTime"], tz=tz[1L])
   } else {
     warning("symbols have different timezones; converting to local time")
-    convertTZ <- function(x) {
-      tz <- x$exchangeTimezoneName[1]
-      times <- .POSIXct(x$regularMarketTime, tz)
-      attr(times, "tzone") <- NULL
-      times
-    }
-    Qposix <- sapply(split(sq, sq$exchangeTimezoneName), convertTZ)
-    Qposix <- .POSIXct(Qposix, tz=NULL)  # force local timezone
+    Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
 
   Symbols <- unlist(strsplit(Symbols,','))
