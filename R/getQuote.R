@@ -314,41 +314,49 @@ getQuote.av <- function(Symbols, api.key, ...) {
   rownames(output) <- output$Symbol
   return(output[, c("Trade Time", "Last", "Volume")])
 }
-getQuote.tiingo <- function(Symbols, api.key, ...) {
+
+`getQuote.tiingo` <- function(Symbols, api.key, ...) {
     #docs: https://api.tiingo.com/docs/iex/realtime
+    #NULL Symbols will retrive quotes for all symbols 
     importDefaults("getQuote.tiingo")
     if (!hasArg("api.key")) {
         stop("getQuote.tiingo: An API key is required (api.key). Registration at https://api.tiingo.com/.", call. = FALSE)
     }
-    URL <- paste0("https://api.tiingo.com/iex/?token=", api.key, "&tickers=")
-    batch.size = 100L
-    result <- NULL
-    for (i in seq(1, length(Symbols), batch.size)) {
-        if (i > 1L) {
-            Sys.sleep(0.25)
-            cat("getQuote.tiingo downloading batch", i, ":", i + batch.size - 1L, "\n")
-        }
-        batchSymbols <- Symbols[i:min(nSymbols, i + batch.size - 1L)]
-        batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
-        batch.result <- jsonlite::fromJSON(batchURL)
-        #set column data types for each batch so we dont get issues with rbind
-        for (cn in colnames(batch.result)) {
-            if (grepl("timestamp", cn, ignore.case = T)) {
-                batch.result[, cn] <- as.POSIXct(batch.result[, cn])
+
+    if(is.null(Symbols)) {
+        URL <- paste0("https://api.tiingo.com/iex/?token=", api.key)
+        r <- jsonlite::fromJSON(URL)
+    } else {
+        URL <- paste0("https://api.tiingo.com/iex/?token=", api.key, "&tickers=")
+        batch.size = 100L
+        r <- NULL
+        for (i in seq(1, length(Symbols), batch.size)) {
+            if (i > 1L) {
+                Sys.sleep(0.25)
+                cat("getQuote.tiingo downloading batch", i, ":", i + batch.size - 1L, "\n")
             }
-            else if (!(cn == "ticker")) {
-                batch.result[, cn] <- as.numeric(batch.result[, cn])
-            }
+            batchSymbols <- Symbols[i:min(Symbols, i + batch.size - 1L)]
+            batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
+            batch.result <- jsonlite::fromJSON(batchURL)
+            r <- rbind(r, batch.result)
         }
-        result <- rbind(result, batch.result)
     }
-    colnames(result) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(result), perl = TRUE)
-    result$`Trade Time` <- result$LastsaleTimeStamp
+    #set column data types for each batch so we dont get issues with rbind
+    for (cn in colnames(r)) {
+        if (grepl("timestamp", cn, ignore.case = T)) {
+            r[, cn] <- as.POSIXct(r[, cn])
+        }
+        else if (!(cn == "ticker")) {
+            r[, cn] <- as.numeric(r[, cn])
+        }
+    }
+    colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
+    r$`Trade Time` <- r$LastsaleTimeStamp
 
     # merge join to produce empty rows for missing results from AV
     # so that return value has the same number of rows and order as the input
-    output <- merge(data.frame(Ticker = Symbols), result, by = "Ticker", all.x = TRUE)
-    rownames(output) <- output$Ticker
+    if(!is.null(Symbols)) r <- merge(data.frame(Ticker = Symbols), r, by = "Ticker", all.x = TRUE)
+    rownames(r) <- r$Ticker
     std.cols <- c("Trade Time", "Open", "High", "Low", "Last", "Volume")
-    return(output[, c(std.cols, setdiff(colnames(output), c(std.cols, "Ticker")))])
+    return(r[, c(std.cols, setdiff(colnames(r), c(std.cols, "Ticker")))])
 }
