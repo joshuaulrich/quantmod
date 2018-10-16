@@ -323,10 +323,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
         stop("getQuote.tiingo: An API key is required (api.key). Registration at https://api.tiingo.com/.", call. = FALSE)
     }
 
-    if(is.null(Symbols)) {
-        URL <- paste0("https://api.tiingo.com/iex/?token=", api.key)
-        r <- jsonlite::fromJSON(URL)
-    } else {
+    if(!is.null(Symbols)) {
         URL <- paste0("https://api.tiingo.com/iex/?token=", api.key, "&tickers=")
         batch.size = 100L
         r <- NULL
@@ -338,18 +335,33 @@ getQuote.av <- function(Symbols, api.key, ...) {
             batchSymbols <- Symbols[i:min(Symbols, i + batch.size - 1L)]
             batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
             batch.result <- jsonlite::fromJSON(batchURL)
+            print(tail(batch.result))
+            #do type conversions for each batch so we deont get issues with rbind
+            for (cn in colnames(batch.result)) {
+                if (grepl("timestamp", cn, ignore.case = T)) {
+                    batch.result[, cn] <- as.POSIXct(batch.result[, cn])
+                }
+                else if (!(cn == "ticker")) {
+                    batch.result[, cn] <- as.numeric(batch.result[, cn])
+                }
+            }
             r <- rbind(r, batch.result)
         }
-    }
-    #set column data types for each batch so we dont get issues with rbind
-    for (cn in colnames(r)) {
-        if (grepl("timestamp", cn, ignore.case = T)) {
-            r[, cn] <- as.POSIXct(r[, cn])
+    } else {
+        URL <- paste0("https://api.tiingo.com/iex/?token=", api.key)
+        batch.result <- jsonlite::fromJSON(URL)
+        print(tail(batch.result))
+        for (cn in colnames(batch.result)) {
+            if (grepl("timestamp", cn, ignore.case = T)) {
+                batch.result[, cn] <- as.POSIXct(batch.result[, cn])
+            }
+            else if (!(cn == "ticker")) {
+                batch.result[, cn] <- as.numeric(batch.result[, cn])
+            }
         }
-        else if (!(cn == "ticker")) {
-            r[, cn] <- as.numeric(r[, cn])
-        }
+        r <- batch.result
     }
+
     colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
     r$`Trade Time` <- r$LastsaleTimeStamp
 
