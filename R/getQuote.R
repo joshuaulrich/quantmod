@@ -323,34 +323,30 @@ getQuote.av <- function(Symbols, api.key, ...) {
         stop("getQuote.tiingo: An API key is required (api.key). Registration at https://api.tiingo.com/.", call. = FALSE)
     }
 
-    if(!is.null(Symbols)) {
-        URL <- paste0("https://api.tiingo.com/iex/?token=", api.key, "&tickers=")
-        batch.size = 100L
-        r <- NULL
-        for (i in seq(1, length(Symbols), batch.size)) {
-            if (i > 1L) {
-                Sys.sleep(0.25)
-                cat("getQuote.tiingo downloading batch", i, ":", i + batch.size - 1L, "\n")
-            }
-            batchSymbols <- Symbols[i:min(Symbols, i + batch.size - 1L)]
-            batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
-            batch.result <- jsonlite::fromJSON(batchURL)
-            print(tail(batch.result))
-            #do type conversions for each batch so we deont get issues with rbind
-            for (cn in colnames(batch.result)) {
-                if (grepl("timestamp", cn, ignore.case = T)) {
-                    batch.result[, cn] <- as.POSIXct(batch.result[, cn])
-                }
-                else if (!(cn == "ticker")) {
-                    batch.result[, cn] <- as.numeric(batch.result[, cn])
-                }
-            }
-            r <- rbind(r, batch.result)
-        }
+    base.url <- paste0("https://api.tiingo.com/iex/?token=", api.key)
+    r <- NULL
+    if (is.null(Symbols)) {
+        batch.size = 1L
+        batch.length =1L
     } else {
-        URL <- paste0("https://api.tiingo.com/iex/?token=", api.key)
-        batch.result <- jsonlite::fromJSON(URL)
-        print(tail(batch.result))
+        batch.size = 100L
+        batch.length = length(Symbols)
+    }
+
+    for (i in seq(1L, batch.length, batch.size)) {
+        if (i > 1L) {
+            Sys.sleep(0.25)
+            cat("getQuote.tiingo downloading batch", i, ":", i + batch.size - 1L, "\n")
+        }
+
+        if (is.null(Symbols)) {
+            batch.url <- base.url
+        } else {
+            batch.url <- paste0(base.url, "&tickers=", paste(Symbols[i:min(Symbols, i + batch.size - 1L)], collapse = ","))
+        }
+
+        batch.result <- jsonlite::fromJSON(batch.url)
+        #do type conversions for each batch so we dont get issues with rbind
         for (cn in colnames(batch.result)) {
             if (grepl("timestamp", cn, ignore.case = T)) {
                 batch.result[, cn] <- as.POSIXct(batch.result[, cn])
@@ -359,7 +355,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
                 batch.result[, cn] <- as.numeric(batch.result[, cn])
             }
         }
-        r <- batch.result
+        r <- rbind(r, batch.result)
     }
 
     colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
