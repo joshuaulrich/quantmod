@@ -359,7 +359,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
   }
 
   colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
-  r$`Trade Time` <- r$LastsaleTimeStamp
+  r[, "Trade Time"] <- r[, "LastSaleTimestamp"]
 
   # merge join to produce empty rows for missing results from AV
   # so that return value has the same number of rows and order as the input
