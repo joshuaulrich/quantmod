@@ -320,17 +320,18 @@ getQuote.av <- function(Symbols, api.key, ...) {
   # NULL Symbols will retrieve quotes for all symbols 
   importDefaults("getQuote.tiingo")
   if(!hasArg("api.key")) {
-    stop("getQuote.tiingo: An API key is required (api.key). Registration at https://api.tiingo.com/.", call. = FALSE)
+    stop("getQuote.tiingo: An API key is required (api.key). ",
+         "Registration at https://api.tiingo.com/.", call. = FALSE)
   }
 
   base.url <- paste0("https://api.tiingo.com/iex/?token=", api.key)
   r <- NULL
   if(is.null(Symbols)) {
-    batch.size = 1L
-    batch.length = 1L
+    batch.size <- 1L
+    batch.length <- 1L
   } else {
-    batch.size = 100L
-    batch.length = length(Symbols)
+    batch.size <- 100L
+    batch.length <- length(Symbols)
   }
 
   for(i in seq(1L, batch.length, batch.size)) {
@@ -349,10 +350,10 @@ getQuote.av <- function(Symbols, api.key, ...) {
     batch.result <- jsonlite::fromJSON(batch.url)
     # do type conversions for each batch so we don't get issues with rbind
     for(cn in colnames(batch.result)) {
-      if(grepl("timestamp", cn, ignore.case = T)) {
+      if(grepl("timestamp", cn, ignore.case = TRUE)) {
         batch.result[, cn] <- as.POSIXct(batch.result[, cn])
       }
-      else if(!(cn == "ticker")) {
+      else if(cn != "ticker") {
         batch.result[, cn] <- as.numeric(batch.result[, cn])
       }
     }
