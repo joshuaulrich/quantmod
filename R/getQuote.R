@@ -334,15 +334,16 @@ getQuote.av <- function(Symbols, api.key, ...) {
   }
 
   for(i in seq(1L, batch.length, batch.size)) {
+    batch.end <- min(batch.length, i + batch.size - 1L)
     if(i > 1L) {
       Sys.sleep(0.25)
-      cat("getQuote.tiingo downloading batch", i, ":", i + batch.size - 1L, "\n")
+      cat("getQuote.tiingo downloading batch", i, ":", batch.end, "\n")
     }
 
     if(is.null(Symbols)) {
       batch.url <- base.url
     } else {
-      batch.url <- paste0(base.url, "&tickers=", paste(Symbols[i:min(Symbols, i + batch.size - 1L)], collapse = ","))
+      batch.url <- paste0(base.url, "&tickers=", paste(Symbols[i:batch.end], collapse = ","))
     }
 
     batch.result <- jsonlite::fromJSON(batch.url)
