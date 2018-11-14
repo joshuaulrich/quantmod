@@ -295,6 +295,12 @@ getQuote.av <- function(Symbols, api.key, ...) {
     batchSymbols <- Symbols[i:min(nSymbols, i + 99)]
     batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
     response <- jsonlite::fromJSON(batchURL)
+
+    if(NROW(response[["Stock Quotes"]]) < 1) {
+      syms <- paste(batchSymbols, collapse = ", ")
+      stop("No data for symbols: ", syms)
+    }
+
     if(is.null(result)) {
       result <- response[["Stock Quotes"]]
     } else {
@@ -348,6 +354,12 @@ getQuote.av <- function(Symbols, api.key, ...) {
     }
 
     batch.result <- jsonlite::fromJSON(batch.url)
+
+    if(NROW(batch.result) < 1) {
+      syms <- paste(Symbols[i:batch.end], collapse = ", ")
+      stop("No data for symbols: ", syms)
+    }
+
     # do type conversions for each batch so we don't get issues with rbind
     for(cn in colnames(batch.result)) {
       if(grepl("timestamp", cn, ignore.case = TRUE)) {
