@@ -11,11 +11,7 @@ function(x) {
   which(format(index(x),"%d") > 14 &
         format(index(x),"%d") < 22 &
         format(index(x),"%w")==5 &
-        as.numeric(months(x,TRUE)) %in% c(3,6,9,12))
-}
-months.xts <- function(x, abbreviate)
-{
-  months(structure(.index(x), class=c('POSIXt','POSIXct'))) 
+        (.indexmon(x)+1) %in% c(3,6,9,12))
 }
 
 `nmicroseconds` <-
