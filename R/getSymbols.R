@@ -1447,12 +1447,21 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     }
     tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
     stock.data[, "date"] <- NULL
+
+    # adjusted column names
+    adjcols <- grepl("^adj", colnames(stock.data))
+    # order Tiingo column names before converting to quantmod names
+    stock.data <- OHLCV(stock.data)
+    if (any(adjcols)) {
+      # put adjusted columns last
+      stock.data <- stock.data[, c(which(!adjcols), which(adjcols))]
+    }
+    # now convert to quantmod column names
     colnames(stock.data) <- qm.names[match(colnames(stock.data), tiingo.names)]
+
     # convert data to xts
     xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
     xts.data <- convert.time.series(xts.data, return.class=return.class)
-    # order columns
-    xts.data <- OHLCV(xts.data)
     if (auto.assign)
       assign(sym, xts.data, env)
     return(xts.data)
