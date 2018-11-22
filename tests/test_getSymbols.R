@@ -70,7 +70,7 @@ stopifnot(exists("DGS10", e))
 rm(DGS10, pos = e)
 
 x <- try({
-  getSymbols("EUR/USD;WYSIWYG", env = e, src = "oanda")
+  getSymbols("EUR/USD;WYS/WYG", env = e, src = "oanda")
 }, silent = TRUE)
 stopifnot(exists("EURUSD", e))
 rm(EURUSD, pos = e)
