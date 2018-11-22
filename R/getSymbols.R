@@ -81,6 +81,8 @@ function(Symbols=NULL,
                              Symbols[Symbols==x]
                            }
                            )))
+        # was getSymbols() called with more than 1 symbol?
+        .has1sym. <- length(Symbols) < 2L
         #Symbols <- as.list(Symbols)
         all.symbols <- list()
         for(symbol.source in unique(as.character(Symbols))) {
@@ -91,7 +93,8 @@ function(Symbols=NULL,
                                            #reload.Symbols=reload.Symbols,
                                            verbose=verbose,warnings=warnings,
                                            auto.assign=auto.assign,
-                                           ...))
+                                           ...,
+                                           .has1sym.=.has1sym.))
           if(!auto.assign)
             return(symbols.returned)
           for(each.symbol in symbols.returned) all.symbols[[each.symbol]] <- symbol.source 
@@ -399,9 +402,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
        }
        }, silent = TRUE)
        if (inherits(test, "try-error")) {
-         msg <- attr(test, "condition")$message
-         warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-                 msg, call. = FALSE, immediate. = TRUE)
+         msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                       ".\n", attr(test, "condition")$message)
+         if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+           stop(msg)
+         }
+         warning(msg, call. = FALSE, immediate. = TRUE)
          noDataSym <- c(noDataSym, returnSym[[i]])
        }
      }
@@ -571,9 +577,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
             
             }, silent = TRUE)
             if (inherits(test, "try-error")) {
-                msg <- attr(test, "condition")$message
-                warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-                        msg, call. = FALSE, immediate. = TRUE)
+                msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                              ".\n", attr(test, "condition")$message)
+                if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+                  stop(msg)
+                }
+                warning(msg, call. = FALSE, immediate. = TRUE)
                 noDataSym <- c(noDataSym, returnSym[[i]])
             }
         }
@@ -658,13 +667,15 @@ function(Symbols,env,return.class='xts',
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
-			}, silent = TRUE)
-			if (inherits(test, "try-error")) {
-			  msg <- attr(test, "condition")$message
-			  warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-				msg, call. = FALSE, immediate. = TRUE)
-			  noDataSym <- c(noDataSym, returnSym[[i]])
-			}
+            }, silent = TRUE)
+            if (inherits(test, "try-error")) {
+                msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                              ".\n", attr(test, "condition")$message)
+                if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+                  stop(msg)
+                }
+                warning(msg, call. = FALSE, immediate. = TRUE)
+            }
         }
         DBI::dbDisconnect(con)
         if(auto.assign)
@@ -730,9 +741,12 @@ function(Symbols,env,return.class='xts',
             if(verbose) cat('done\n')
             }, silent = TRUE)
             if (inherits(test, "try-error")) {
-              msg <- attr(test, "condition")$message
-              warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-                msg, call. = FALSE, immediate. = TRUE)
+              msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                            ".\n", attr(test, "condition")$message)
+              if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+                stop(msg)
+              }
+              warning(msg, call. = FALSE, immediate. = TRUE)
               noDataSym <- c(noDataSym, returnSym[[i]])
             }
         }
@@ -781,9 +795,12 @@ function(Symbols,env,return.class='xts',
          assign(Symbols[[i]],fr,env)
        }, silent = TRUE)
        if (inherits(test, "try-error")) {
-         msg <- attr(test, "condition")$message
-         warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-           msg, call. = FALSE, immediate. = TRUE)
+         msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                       ".\n", attr(test, "condition")$message)
+         if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+           stop(msg)
+         }
+         warning(msg, call. = FALSE, immediate. = TRUE)
          noDataSym <- c(noDataSym, returnSym[[i]])
        }
      }
@@ -921,9 +938,12 @@ function(Symbols,env,
       assign(Symbols[[i]],fr,env)
     }, silent = TRUE)
     if (inherits(test, "try-error")) {
-      msg <- attr(test, "condition")$message
-      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-        msg, call. = FALSE, immediate. = TRUE)
+       msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                     ".\n", attr(test, "condition")$message)
+       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+         stop(msg)
+       }
+       warning(msg, call. = FALSE, immediate. = TRUE)
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -991,9 +1011,12 @@ function(Symbols,env,
       assign(Symbols[[i]],fr,env)
     }, silent = TRUE)
     if (inherits(test, "try-error")) {
-      msg <- attr(test, "condition")$message
-      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-        msg, call. = FALSE, immediate. = TRUE)
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -1062,9 +1085,12 @@ function(Symbols,env,
       assign(Symbols[[i]],fr,env)
     }, silent = TRUE)
     if (inherits(test, "try-error")) {
-      msg <- attr(test, "condition")$message
-      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-        msg, call. = FALSE, immediate. = TRUE)
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -1125,9 +1151,12 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
       }
     }, silent = TRUE)
     if (inherits(test, "try-error")) {
-      msg <- attr(test, "condition")$message
-      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-        msg, call. = FALSE, immediate. = TRUE)
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -1252,9 +1281,12 @@ function(Symbols,env,return.class='xts',
          assign(Symbols[[i]],fr,env)
      }, silent = TRUE)
      if (inherits(test, "try-error")) {
-       msg <- attr(test, "condition")$message
-       warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-         msg, call. = FALSE, immediate. = TRUE)
+       msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                     ".\n", attr(test, "condition")$message)
+       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+         stop(msg)
+       }
+       warning(msg, call. = FALSE, immediate. = TRUE)
        noDataSym <- c(noDataSym, returnSym[[i]])
      }
      }
@@ -1451,9 +1483,12 @@ getSymbols.av <- function(Symbols, env, api.key,
         default.periodicity = default.periodicity)
     }, silent = TRUE)
     if (inherits(test, "try-error")) {
-      msg <- attr(test, "condition")$message
-      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-        msg, call. = FALSE, immediate. = TRUE)
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
   }
@@ -1587,9 +1622,12 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
         default.periodicity = default.periodicity)
     }, silent = TRUE)
     if (inherits(test, "try-error")) {
-      msg <- attr(test, "condition")$message
-      warning("Unable to import ", dQuote(returnSym[[i]]), ".\n",
-        msg, call. = FALSE, immediate. = TRUE)
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
   }
