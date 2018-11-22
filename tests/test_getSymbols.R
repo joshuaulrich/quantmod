@@ -55,11 +55,13 @@ x <- try({
 stopifnot(exists("IBM", e))
 rm(IBM, pos = e)
 
-x <- try({
-  getSymbols("IBM;WYSIWYG", env = e, src = "av", api.key = apikey)
-}, silent = TRUE)
-stopifnot(exists("IBM", e))
-rm(IBM, pos = e)
+if (apikey != "") {
+  x <- try({
+    getSymbols("IBM;WYSIWYG", env = e, src = "av", api.key = apikey)
+  }, silent = TRUE)
+  stopifnot(exists("IBM", e))
+  rm(IBM, pos = e)
+}
 
 x <- try({
   getSymbols("DGS10;WYSIWYG", env = e, src = "FRED")
