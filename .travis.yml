@@ -15,7 +15,7 @@ before_install:
   - ./run.sh bootstrap
 
 install:
-  - ./run.sh install_aptget r-cran-zoo r-cran-xts r-cran-ttr r-cran-curl
+  - ./run.sh install_aptget r-cran-zoo r-cran-xts r-cran-ttr r-cran-curl r-cran-jsonlite r-cran-xml r-cran-downloader
 
 script:
   - ./run.sh run_tests

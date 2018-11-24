@@ -81,6 +81,8 @@ function(Symbols=NULL,
                              Symbols[Symbols==x]
                            }
                            )))
+        # was getSymbols() called with more than 1 symbol?
+        .has1sym. <- length(Symbols) < 2L
         #Symbols <- as.list(Symbols)
         all.symbols <- list()
         for(symbol.source in unique(as.character(Symbols))) {
@@ -91,7 +93,8 @@ function(Symbols=NULL,
                                            #reload.Symbols=reload.Symbols,
                                            verbose=verbose,warnings=warnings,
                                            auto.assign=auto.assign,
-                                           ...))
+                                           ...,
+                                           .has1sym.=.has1sym.))
           if(!auto.assign)
             return(symbols.returned)
           for(each.symbol in symbols.returned) all.symbols[[each.symbol]] <- symbol.source 
@@ -283,15 +286,6 @@ function(Symbols,env,return.class='xts',index.class="Date",
          periodicity="daily",
          curl.options=list())
 {
-     if(getOption("getSymbols.yahoo.warning",TRUE)) {
-       # Warn about Yahoo Finance quality and stability
-       message("\nWARNING: There have been significant changes to Yahoo Finance data.",
-               "\nPlease see the Warning section of ", sQuote("?getSymbols.yahoo"), " for details.\n",
-               "\nThis message is shown once per session and may be disabled by setting\n",
-               "options(\"getSymbols.yahoo.warning\"=FALSE).")
-       options("getSymbols.yahoo.warning"=FALSE)
-     }
-
      importDefaults("getSymbols.yahoo")
      this.env <- environment()
      for(var in names(list(...))) {
@@ -316,7 +310,10 @@ function(Symbols,env,return.class='xts',index.class="Date",
      tmp <- tempfile()
      on.exit(unlink(tmp))
 
-     for(i in 1:length(Symbols)) {
+     returnSym <- Symbols
+     noDataSym <- NULL
+     for(i in seq_along(Symbols)) {
+       test <- try({
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
@@ -403,9 +400,19 @@ function(Symbols,env,return.class='xts',index.class="Date",
          message("pausing 1 second between requests for more than 5 symbols")
          Sys.sleep(1)
        }
+       }, silent = TRUE)
+       if (inherits(test, "try-error")) {
+         msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                       ".\n", attr(test, "condition")$message)
+         if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+           stop(msg)
+         }
+         warning(msg, call. = FALSE, immediate. = TRUE)
+         noDataSym <- c(noDataSym, returnSym[[i]])
+       }
      }
      if(auto.assign)
-       return(Symbols)
+       return(setdiff(returnSym, noDataSym))
      return(fr)
 }
 # }}}
@@ -437,7 +444,11 @@ function(Symbols,env,return.class='xts',index.class="Date",
           stop("package:",dQuote("XML"),"cannot be loaded.")
 
         yahoo.URL <- "https://info.finance.yahoo.co.jp/history/"
-        for(i in 1:length(Symbols)) {
+
+        returnSym <- Symbols
+        noDataSym <- NULL
+        for(i in seq_along(Symbols)) {
+            test <- try({
             # The name of the symbol, which will actually be used as the
             # variable name. It needs to start with YJ, and it will be appended
             # if it does not.
@@ -498,13 +509,17 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 
                 fdoc <- XML::htmlParse(tmp)
                 rows <- XML::xpathApply(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
-                if (length(rows) == 1) break
+                if (length(rows) <= 1) break
                 
                 totalrows <- c(totalrows, rows)
                 page <- page + 1
             }
             if(verbose) cat("done.\n")
             
+            if (is.null(rows)) {
+              stop("No historical data for ", dQuote(Symbols[[i]]), ".")
+            }
+
             # Available columns
             cols <- c('Open','High','Low','Close','Volume','Adjusted')
             
@@ -560,9 +575,19 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 Sys.sleep(1)
             }
             
+            }, silent = TRUE)
+            if (inherits(test, "try-error")) {
+                msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                              ".\n", attr(test, "condition")$message)
+                if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+                  stop(msg)
+                }
+                warning(msg, call. = FALSE, immediate. = TRUE)
+                noDataSym <- c(noDataSym, returnSym[[i]])
+            }
         }
         if(auto.assign)
-            return(Symbols)
+            return(setdiff(returnSym, noDataSym))
         return(fr)
     }
 # }}}
@@ -612,7 +637,10 @@ function(Symbols,env,return.class='xts',
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
                 Symbols <- Symbols[Symbols %in% db.Symbols]
         }
-        for(i in 1:length(Symbols)) {
+        returnSym <- Symbols
+        noDataSym <- NULL
+        for(i in seq_along(Symbols)) {
+            test <- try({
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],
                     paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),
@@ -639,10 +667,19 @@ function(Symbols,env,return.class='xts',
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
+            }, silent = TRUE)
+            if (inherits(test, "try-error")) {
+                msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                              ".\n", attr(test, "condition")$message)
+                if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+                  stop(msg)
+                }
+                warning(msg, call. = FALSE, immediate. = TRUE)
+            }
         }
         DBI::dbDisconnect(con)
         if(auto.assign)
-          return(Symbols)
+          return(setdiff(returnSym, noDataSym))
         return(fr)
 }
 "getSymbols.sqlite" <- getSymbols.SQLite
@@ -681,7 +718,10 @@ function(Symbols,env,return.class='xts',
                 warning(paste('could not load symbol(s): ',paste(missing.db.symbol,collapse=', ')))
                 Symbols <- Symbols[Symbols %in% db.Symbols]
         }
-        for(i in 1:length(Symbols)) {
+        returnSym <- Symbols
+        noDataSym <- NULL
+        for(i in seq_along(Symbols)) {
+            test <- try({
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
@@ -699,10 +739,20 @@ function(Symbols,env,return.class='xts',
             if(auto.assign)
               assign(Symbols[[i]],fr,env)
             if(verbose) cat('done\n')
+            }, silent = TRUE)
+            if (inherits(test, "try-error")) {
+              msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                            ".\n", attr(test, "condition")$message)
+              if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+                stop(msg)
+              }
+              warning(msg, call. = FALSE, immediate. = TRUE)
+              noDataSym <- c(noDataSym, returnSym[[i]])
+            }
         }
         DBI::dbDisconnect(con)
         if(auto.assign)
-          return(Symbols)
+          return(setdiff(returnSym, noDataSym))
         return(fr)
 }
 "getSymbols.mysql" <- getSymbols.MySQL
@@ -723,8 +773,13 @@ function(Symbols,env,return.class='xts',
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-     for(i in 1:length(Symbols)) {
+
+     returnSym <- Symbols
+     noDataSym <- NULL
+
+     for(i in seq_along(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
+       test <- try({
        URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
        try.download.file(URL, destfile=tmp, quiet=!verbose, ...)
        fr <- read.csv(tmp,na.string=".")
@@ -738,9 +793,19 @@ function(Symbols,env,return.class='xts',
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
+       }, silent = TRUE)
+       if (inherits(test, "try-error")) {
+         msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                       ".\n", attr(test, "condition")$message)
+         if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+           stop(msg)
+         }
+         warning(msg, call. = FALSE, immediate. = TRUE)
+         noDataSym <- c(noDataSym, returnSym[[i]])
+       }
      }
      if(auto.assign)
-       return(Symbols)
+       return(setdiff(returnSym, noDataSym))
      return(fr)
 } #}}}
 
@@ -826,7 +891,11 @@ function(Symbols,env,
   if(!hasArg("verbose")) verbose <- FALSE
   if(!hasArg("auto.assign")) auto.assign <- TRUE
 
-  for(i in 1:length(Symbols)) {
+  returnSym <- Symbols
+  noDataSym <- NULL
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
     return.class <- ifelse(is.null(return.class),default.return.class,
                            return.class)
@@ -867,9 +936,19 @@ function(Symbols,env,
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
     if(auto.assign)
       assign(Symbols[[i]],fr,env)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+       msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                     ".\n", attr(test, "condition")$message)
+       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+         stop(msg)
+       }
+       warning(msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
     }
     if(auto.assign)
-      return(Symbols)
+      return(setdiff(returnSym, noDataSym))
     return(fr)
 }
 #}}}
@@ -895,7 +974,11 @@ function(Symbols,env,
   if(!hasArg("verbose")) verbose <- FALSE
   if(!hasArg("auto.assign")) auto.assign <- TRUE
 
-  for(i in 1:length(Symbols)) {
+  returnSym <- Symbols
+  noDataSym <- NULL
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
     return.class <- ifelse(is.null(return.class),default.return.class,
                            return.class)
@@ -926,9 +1009,19 @@ function(Symbols,env,
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
     if(auto.assign)
       assign(Symbols[[i]],fr,env)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
     }
     if(auto.assign)
-      return(Symbols)
+      return(setdiff(returnSym, noDataSym))
     return(fr)
 }
 #}}}
@@ -954,7 +1047,11 @@ function(Symbols,env,
   if(!hasArg("verbose")) verbose <- FALSE
   if(!hasArg("auto.assign")) auto.assign <- TRUE
 
-  for(i in 1:length(Symbols)) {
+  returnSym <- Symbols
+  noDataSym <- NULL
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
     return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
     return.class <- ifelse(is.null(return.class),default.return.class,
                            return.class)
@@ -986,9 +1083,19 @@ function(Symbols,env,
     Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
     if(auto.assign)
       assign(Symbols[[i]],fr,env)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
     }
     if(auto.assign)
-      return(Symbols)
+      return(setdiff(returnSym, noDataSym))
     return(fr)
 }
 #}}}
@@ -1017,7 +1124,11 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
   
     if(missing(endDateTime)) endDateTime <- NULL
   
-    for(i in 1:length(Symbols)) {
+    returnSym <- Symbols
+    noDataSym <- NULL
+
+    for(i in seq_along(Symbols)) {
+      test <- try({
       Contract <- getSymbolLookup()[[Symbols[i]]]$Contract
       if(inherits(Contract,'twsContract')) {
         fr <- do.call('reqHistoricalData',list(tws, Contract, endDateTime=endDateTime,
@@ -1038,9 +1149,19 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
       } else {
         warning(paste('unable to load',Symbols[i],': missing twsContract definition'))
       }
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
     }
     if(auto.assign)
-      return(Symbols)
+      return(setdiff(returnSym, noDataSym))
     return(fr) 
   }
 }
@@ -1097,7 +1218,12 @@ function(Symbols,env,return.class='xts',
 
      tmp <- tempfile()
      on.exit(unlink(tmp))
-     for(i in 1:length(Symbols)) {
+
+     returnSym <- Symbols
+     noDataSym <- NULL
+
+     for(i in seq_along(Symbols)) {
+       test <- try({
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
        return.class <- ifelse(is.null(return.class),default.return.class,
                               return.class)
@@ -1153,9 +1279,19 @@ function(Symbols,env,return.class='xts',
        Symbols[[i]] <-toupper(gsub('\\^|/','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
+     }, silent = TRUE)
+     if (inherits(test, "try-error")) {
+       msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                     ".\n", attr(test, "condition")$message)
+       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+         stop(msg)
+       }
+       warning(msg, call. = FALSE, immediate. = TRUE)
+       noDataSym <- c(noDataSym, returnSym[[i]])
+     }
      }
      if(auto.assign)
-       return(Symbols)
+       return(setdiff(returnSym, noDataSym))
      return(fr)
 }#}}}
 
@@ -1336,12 +1472,29 @@ getSymbols.av <- function(Symbols, env, api.key,
     return(mat)
   }
   
-  matrices <- lapply(Symbols, FUN=downloadOne,
-                     default.return.class=default.return.class,
-                     default.periodicity=default.periodicity)
-  
+  returnSym <- Symbols
+  noDataSym <- NULL
+  matrices <- list()
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
+      matrices[[i]] <- downloadOne(Symbols[[i]],
+        default.return.class = default.return.class,
+        default.periodicity = default.periodicity)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
+  }
+
   if (auto.assign) {
-    return(Symbols)
+    return(setdiff(returnSym, noDataSym))
   } else {
     return(matrices[[1]])
   }
@@ -1467,12 +1620,29 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     return(xts.data)
   }
   
-  matrices <- lapply(Symbols, FUN=downloadOne,
-                     default.return.class=default.return.class,
-                     default.periodicity=default.periodicity)
+  returnSym <- Symbols
+  noDataSym <- NULL
+  matrices <- list()
+
+  for(i in seq_along(Symbols)) {
+    test <- try({
+      matrices[[i]] <- downloadOne(Symbols[[i]],
+        default.return.class = default.return.class,
+        default.periodicity = default.periodicity)
+    }, silent = TRUE)
+    if (inherits(test, "try-error")) {
+      msg <- paste0("Unable to import ", dQuote(returnSym[[i]]),
+                    ".\n", attr(test, "condition")$message)
+      if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
+        stop(msg)
+      }
+      warning(msg, call. = FALSE, immediate. = TRUE)
+      noDataSym <- c(noDataSym, returnSym[[i]])
+    }
+  }
   
   if (auto.assign) {
-    return(Symbols)
+    return(setdiff(returnSym, noDataSym))
   } else {
     return(matrices[[1]])
   }
