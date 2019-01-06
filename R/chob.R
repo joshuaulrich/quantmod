@@ -15,7 +15,7 @@ function(x,pos)
 `get.chob` <-
 function()
 {
-  x <- .chob$.chob
+  x <- xts:::.plotxtsEnv$.xts_chob
   return(x)
 }
 
