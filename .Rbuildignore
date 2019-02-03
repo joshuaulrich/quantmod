@@ -1,5 +1,6 @@
 src
 WISHLIST
+LICENSE
 #R/replot.R
 #R/chart_Series.R
 ^.*\.Rproj$

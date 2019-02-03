@@ -6,6 +6,16 @@ trading. It provides a rapid prototyping environment that makes modeling easier
 by removing the repetitive workflow issues surrounding data management and
 visualization.
 
+### Professionally-supported quantmod now available
+
+Tidelift gives software development teams a single source for purchasing and maintaining their software, with professional-grade assurances from the experts who know it best, while seamlessly integrating with existing tools.
+
+[Get supported quantmod with the Tidelift Subscription](https://tidelift.com/subscription/pkg/cran-quantmod?utm_source=cran-quantmod&utm_medium=referral&utm_campaign=readme)
+
+### Supporting quantmod through Patreon
+
+If you are interested in supporting this project, please consider [becoming a patron](https://www.patreon.com/joshuaulrich).
+
 ### Installation
 
 The current release is available on [CRAN](https://CRAN.R-project.org/package=quantmod),
