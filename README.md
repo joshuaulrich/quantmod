@@ -70,7 +70,7 @@ mailing list (you must subscribe to post).
 
 ### Contributing
 
-Please see the [contributing guide](CONTRIBUTING.md).
+Please see the [contributing guide](.github/CONTRIBUTING.md).
 
 ### See Also
 
