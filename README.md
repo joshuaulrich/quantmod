@@ -73,11 +73,6 @@ Ask your question on [Stack Overflow](http://stackoverflow.com/questions/tagged/
 or the [R-SIG-Finance](https://stat.ethz.ch/mailman/listinfo/r-sig-finance)
 mailing list (you must subscribe to post).
 
-###### Want hands-on experience?
-
-- [DataCamp course on importing and managing financial data](https://www.datacamp.com/courses/importing-and-managing-financial-data-in-r)
-- [DataCamp course on manipulating time series with xts & zoo](https://www.datacamp.com/courses/manipulating-time-series-data-in-r-with-xts-zoo)
-
 ### Contributing
 
 Please see the [contributing guide](.github/CONTRIBUTING.md).
