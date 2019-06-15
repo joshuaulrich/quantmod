@@ -61,11 +61,12 @@ with class defined by \code{return.class}.
 }
 \references{ 
 \itemize{
-   \cite{MySQL AB \url{http://www.mysql.com}}
+   \cite{MySQL AB \url{https://www.mysql.com}}
 
-   \cite{David A. James and Saikat DebRoy (2006).
-         R Interface to the MySQL databse.
-         \url{www.omegahat.net}}
+   \cite{
+     Jeroen Ooms and David James and Saikat DebRoy and Hadley Wickham and Jeffrey Horner (2019).
+     RMySQL: Database Interface and 'MySQL' Driver for R.
+     \url{https://CRAN.R-project.org/package=RMySQL}}
 
    \cite{R-SIG-DB. DBI: R Database Interface}
  }
