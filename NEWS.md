@@ -1,3 +1,13 @@
+### Changes in 0.4-15 (2019-06-15)
+
+1. Add an environment variable to control whether to run tests that import
+  from Yahoo Finance. `getDividends()` tests were failing because Yahoo
+  Finance wasn't returning all dividend history for "CF".
+1. Write one message the first time `quantmod::as.zoo.data.frame()` is called.
+  This method was added years before `zoo::as.zoo.data.frame()` existed, but
+  it should be deprecated in favor of the zoo version. The package that owns
+  the class should also own the methods.
+
 ### Changes in 0.4-14 (2019-03-23)
 
 #### BUG FIXES
