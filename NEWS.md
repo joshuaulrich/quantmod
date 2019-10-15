@@ -1,3 +1,53 @@
+### Changes in 0.4-15 (2019-06-15)
+
+1. Add an environment variable to control whether to run tests that import
+  from Yahoo Finance. `getDividends()` tests were failing because Yahoo
+  Finance wasn't returning all dividend history for "CF".
+1. Write one message the first time `quantmod::as.zoo.data.frame()` is called.
+  This method was added years before `zoo::as.zoo.data.frame()` existed, but
+  it should be deprecated in favor of the zoo version. The package that owns
+  the class should also own the methods.
+
+### Changes in 0.4-14 (2019-03-23)
+
+#### BUG FIXES
+1. Fix `getSymbols.tiingo()` so the Open and Close columns aren't swapped.
+  Thanks to Steve Bronder for the report and PR.
+  [#233](https://github.com/joshuaulrich/quantmod/pull/233)
+  [#234](https://github.com/joshuaulrich/quantmod/issues/234)
+1. Fix `getQuote.yahoo()` for quotes in multiple timezones. Thanks to
+  Philippe Verspeelt for the report and PR.
+  [#246](https://github.com/joshuaulrich/quantmod/issues/246)
+  [#248](https://github.com/joshuaulrich/quantmod/pull/248)
+1. Update `getDividends()` because Yahoo Finance now provides raw dividends
+  instead of split-adjusted dividends. Thanks to Douglas Barnard for the
+  report.
+  [#253](https://github.com/joshuaulrich/quantmod/issues/253)
+1. Fix `futures.expiry()`. Thanks to @pjheink for the report.
+  [#257](https://github.com/joshuaulrich/quantmod/issues/257)
+1. Fix `getSymbols.tiingo()` to return correct columns for ticker "LOW".
+  Thanks to @srtg4we5gsetrgwhreyt the report.
+  [#259](https://github.com/joshuaulrich/quantmod/issues/259)
+1. Fix `getSymbols.yahooj()` to avoid infinite loop when the requested
+  symbol doesn't have data. Thanks to Wouter Thielen for the review.
+  [#63](https://github.com/joshuaulrich/quantmod/issues/63)
+1. Update `getSplits()` because Yahoo Finance now provides the actual split
+  adjustment ratio, instead of the inverse (e.g. now 1/2 instead of 2/1).
+  [#265](https://github.com/joshuaulrich/quantmod/issues/265)
+
+
+#### NEW FEATURES
+1. Extend `getQuote()` to support Tiingo. Thanks to Ethan Smith for the
+  feature request and PR.
+  [#247](https://github.com/joshuaulrich/quantmod/issues/247)
+  [#250](https://github.com/joshuaulrich/quantmod/pull/250)
+1. Extend `getSymbols()` to catch errors for individual ticker symbols and
+  continue processing any remaining ticker symbols, instead of throwing an
+  error. More useful error messages are also provided. Thanks to @helgasoft
+  for testing and feedback.
+  [#135](https://github.com/joshuaulrich/quantmod/issues/135)
+
+
 ### Changes in 0.4-13 (2018-04-13)
 
 #### BUG FIXES

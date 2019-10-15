@@ -25,11 +25,11 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   fr <- xts(fr[,2],as.Date(fr[,1]))
   colnames(fr) <- paste(Symbol.name,'div',sep='.')
 
-  # dividends from Yahoo are split-adjusted; need to un-adjust
-  if(src[1] == "yahoo" && !split.adjust) {
+  # dividends from Yahoo are not split-adjusted
+  if(src[1] == "yahoo" && split.adjust) {
     splits <- getSplits(Symbol.name, from="1900-01-01")
     if(is.xts(splits) && is.xts(fr) && nrow(splits) > 0 && nrow(fr) > 0) {
-      fr <- fr / adjRatios(splits=merge(splits, index(fr)))[,1]
+      fr <- fr * adjRatios(splits=merge(splits, index(fr)))[,1]
     }
   }
 
