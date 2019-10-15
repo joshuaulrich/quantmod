@@ -14,8 +14,6 @@ function(Symbols,src='yahoo',what, ...) {
 
 `getQuote.yahoo` <-
 function(Symbols,what=standardQuote(),...) {
-  tmp <- tempfile()
-  on.exit(unlink(tmp))
   if(length(Symbols) > 1 && is.character(Symbols))
     Symbols <- paste(Symbols,collapse=";")
   length.of.symbols <- length(unlist(strsplit(Symbols, ";")))
@@ -48,13 +46,11 @@ function(Symbols,what=standardQuote(),...) {
   # exchange, fullExchangeName, market, sourceInterval, exchangeTimezoneName,
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
-  download.file(paste0(
-                "https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
+  URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
                 Symbols,
-                "&fields=",QFc),
-                destfile=tmp,quiet=TRUE)
+                "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(tmp)
+  response <- jsonlite::fromJSON(URL)
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
