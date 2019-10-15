@@ -34,7 +34,7 @@ in terms of underlying 3 character symbol or by name (e.g. XAU (gold) , XAG (sil
 XPD (palladium), or XPT (platinum)).
 
 There are unique aspects of any continuously traded commodity, and it
-is recommended that the user visit \url{https://www.oanda.com} for
+is recommended that the user visit \url{http://www.oanda.com} for
 details on specific pricing issues.
 
 See \code{getSymbols} and \code{getSymbls.oanda} for more detail.

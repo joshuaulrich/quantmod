@@ -7,7 +7,7 @@ Access to 191 currency and metal prices, downloadable
 as more that 36000 currency pairs from Oanda.com.
 
 Downloads \code{Symbols} to specified \code{env} from
-\url{https://www.oanda.com} historical currency database.
+\url{www.oanda.com} historical currency database.
 This method is not meant to be called directly, instead
 a call to \code{getSymbols("x",src="oanda")} will
 in turn call this method. It is documented for the
@@ -55,7 +55,7 @@ Oanda rates are quoted as one unit of base currency to the
 equivelant amount of foreign
 currency.
 }
-\references{ Oanda.com \url{https://www.oanda.com} }
+\references{ Oanda.com \url{http://www.oanda.com} }
 \author{ Jeffrey A. Ryan }
 \seealso{ Currencies: \code{\link{getSymbols.FRED}},
           \code{\link{getSymbols}} }

@@ -256,7 +256,6 @@ export(
     getSymbols.yahoo,
     getSymbols.yahooj,
     getSymbols.oanda,
-    getSymbols.tiingo,
     #getSymbols.Bloomberg,
     #getSymbols.IBrokers,
     getSymbols.csv,

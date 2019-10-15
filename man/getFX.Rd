@@ -36,7 +36,7 @@ a vector of downloaded symbol names will be returned.
 
 See \code{getSymbols} and \code{getSymbols.oanda} for more detail.
 }
-\references{ Oanda.com \url{https://www.oanda.com} }
+\references{ Oanda.com \url{http://www.oanda.com} }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}}, \code{\link{getSymbols.oanda}} }
 \examples{

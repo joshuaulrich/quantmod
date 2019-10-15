@@ -13,19 +13,13 @@ print.quantmodEnv <- function(x, ...) {
 
 .onAttach <- function(libname,pkgname) {
   msg <- "Version 0.4-0 included new data defaults. See ?getSymbols."
+  if (interactive()) {
+    msg <- paste0(msg, "\nLearn from a quantmod author: https://www.datacamp.com/courses/importing-and-managing-financial-data-in-r")
+  }
   packageStartupMessage(msg)
   # --as-cran check is complaining of this, as a NOTE
   #attach(NULL, name='.quantmodEnv')  
 }
-
-# Loading quantmod produces the following message:
-#
-# Registered S3 method overwritten by 'quantmod':
-#   method            from
-#   as.zoo.data.frame zoo
-#
-# Message users that this method will be deprecated in a future release.
-options(quantmod.deprecate.as.zoo.data.frame = TRUE)
 
 setOldClass("zoo");
 setOldClass("xts");

@@ -108,9 +108,7 @@ getSymbols(c('QQQQ','DIA'))
 
 ## OR
 
-\dontrun{
 saveSymbolLookup()
 loadSymbolLookup()
-}
 }
 \keyword{ utilities }
