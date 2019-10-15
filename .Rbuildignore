@@ -1,5 +1,6 @@
 src
 WISHLIST
+LICENSE
 #R/replot.R
 #R/chart_Series.R
 ^.*\.Rproj$
@@ -7,5 +8,7 @@ WISHLIST
 ^\.git
 ^\.gitignore
 ^.*\.orig$
-^.*\.md$
+^README.md$
+^CONTRIBUTING.md$
+^CRAN_comments.md$
 .travis.yml

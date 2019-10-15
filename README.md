@@ -6,6 +6,16 @@ trading. It provides a rapid prototyping environment that makes modeling easier
 by removing the repetitive workflow issues surrounding data management and
 visualization.
 
+### Professionally-supported quantmod now available
+
+Tidelift gives software development teams a single source for purchasing and maintaining their software, with professional-grade assurances from the experts who know it best, while seamlessly integrating with existing tools.
+
+[Get supported quantmod with the Tidelift Subscription](https://tidelift.com/subscription/pkg/cran-quantmod?utm_source=cran-quantmod&utm_medium=referral&utm_campaign=readme)
+
+### Supporting quantmod through Patreon
+
+If you are interested in supporting this project, please consider [becoming a patron](https://www.patreon.com/joshuaulrich).
+
 ### Installation
 
 The current release is available on [CRAN](https://CRAN.R-project.org/package=quantmod),
@@ -39,10 +49,8 @@ It is possible to import data from a variety of sources with one quantmod
 function: `getSymbols()`. For example:
 
 ```r
-> getSymbols("GOOG", src = "google")   # from google finance
-[1] "YHOO"
-> getSymbols("YHOO", src = "yahoo")    # from yahoo finance
-[1] "GOOG"
+> getSymbols("AAPL", src = "yahoo")    # from yahoo finance
+[1] "AAPL"
 > getSymbols("DEXJPUS", src = "FRED")  # FX rates from FRED
 [1] "DEXJPUS"
 ```
@@ -65,14 +73,9 @@ Ask your question on [Stack Overflow](http://stackoverflow.com/questions/tagged/
 or the [R-SIG-Finance](https://stat.ethz.ch/mailman/listinfo/r-sig-finance)
 mailing list (you must subscribe to post).
 
-###### Want hands-on experience?
-
-- [DataCamp course on importing and managing financial data](https://www.datacamp.com/courses/importing-and-managing-financial-data-in-r)
-- [DataCamp course on manipulating time series with xts & zoo](https://www.datacamp.com/courses/manipulating-time-series-data-in-r-with-xts-zoo)
-
 ### Contributing
 
-Please see the [contributing guide](CONTRIBUTING.md).
+Please see the [contributing guide](.github/CONTRIBUTING.md).
 
 ### See Also
 

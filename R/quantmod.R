@@ -12,6 +12,23 @@ function(x)
 `as.zoo.data.frame`<-
 function(x,row.date=TRUE,...)
 {
+    # Registered S3 method overwritten by 'quantmod':
+    #   method            from
+    #   as.zoo.data.frame zoo
+    send.message <- getOption("quantmod.deprecate.as.zoo.data.frame", NULL)
+    if(is.null(send.message)) {
+        # Only message once if user hasn't set an option value
+        send.message <- TRUE
+        options(quantmod.deprecate.as.zoo.data.frame = FALSE)
+    }
+    if(isTRUE(send.message)) {
+        message(
+            "\nNOTE: quantmod::as.zoo.data.frame() is deprecated",
+            "\n  Use as.zoo(x, order.by = as.Date(rownames(x))) instead.",
+            "\n  This note is printed once. To see it for every call, set",
+            "\n  options(quantmod.deprecate.as.zoo.data.frame = TRUE)\n")
+    }
+
     # ignore row.date if order.by is specified
     if(hasArg("order.by")) {
         zoo(x,...)

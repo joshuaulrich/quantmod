@@ -5,8 +5,7 @@
 \alias{viewFin}
 \title{ Download and View Financial Statements }
 \description{
-Download Income Statement, Balance Sheet, and
-Cash Flow Statements from Google Finance.
+Download Income Statement, Balance Sheet, and Cash Flow Statements.
 }
 \usage{
 getFinancials(Symbol, env = parent.frame(), src = "google", 
@@ -21,7 +20,7 @@ viewFinancials(x, type=c('BS','IS','CF'), period=c('A','Q'),
   \item{Symbol}{ one or more valid google symbol, as a character vector or
   semi-colon delimited string }
   \item{env}{ where to create the object }
-  \item{src}{ currently unused }
+  \item{src}{ currently no sources are implemented }
   \item{auto.assign}{ should results be loaded to the environment }
   \item{\dots}{ currently unused }
   \item{x}{ an object of class financials }
@@ -30,11 +29,7 @@ viewFinancials(x, type=c('BS','IS','CF'), period=c('A','Q'),
   \item{subset}{ \sQuote{xts} style subset string }
 }
 \details{
-A utility to download financial statements for
-publically traded companies. The data is directly
-from Google finance.  All use of the data is
-under there Terms of Service, available at
-\url{http://www.google.com/accounts/TOS}.
+A utility to download financial statements for publicly traded companies.
 
 Individual statements can be accessed using
 standard \R list extraction tools, or by
@@ -50,15 +45,15 @@ which statements to view - (A) for annual and (Q)
 for quarterly.
 }
 \value{
-  Six individual matricies organized in a list of class \sQuote{financials}:
+  Six individual matrices organized in a list of class \sQuote{financials}:
   \item{ IS }{ a list containing (Q)uarterly and (A)nnual Income Statements }
   \item{ BS }{ a list containing (Q)uarterly and (A)nnual Balance Sheets }
   \item{ CF }{ a list containing (Q)uarterly and (A)nnual Cash Flow Statements }
 }
-\references{ Google Finance BETA: \url{http://finance.google.com/finance}}
 \author{ Jeffrey A. Ryan }
 \note{
 As with all free data, you may be getting exactly what you pay for.
+Sometimes that may be absolutely nothing.
 }
 \examples{
 \dontrun{
