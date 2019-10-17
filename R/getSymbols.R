@@ -768,6 +768,7 @@ function(Symbols,env,return.class='xts',
        test <- try({
        URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
        fr <- read.csv(curl::curl(URL),na.string=".")
+       
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1],origin='1970-01-01'),
