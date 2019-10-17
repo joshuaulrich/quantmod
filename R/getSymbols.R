@@ -1560,7 +1560,6 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
       stock.data <- read.csv(curl::curl(URL), as.is=TRUE)
     }
     # check for error
-    #TODO: need to test this error path with removed file io
     if (!all(return.columns %in% names(stock.data))) {
       if (data.type == "json") {
         msg <- stock.data$detail
