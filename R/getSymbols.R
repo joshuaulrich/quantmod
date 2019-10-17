@@ -232,7 +232,7 @@ formals(loadSymbols) <- loadSymbols.formals
         # random query to avoid cache
         ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
         cu <- paste0("https://finance.yahoo.com?", ru)
-        z <- curl::curl_fetch_memory(cu, handle = h) #load landing page to generate crumbs
+        z <- curl::curl_fetch_memory(cu, handle = h)
         if (NROW(curl::handle_cookies(h)) > 0)
           break;
         Sys.sleep(0.1)
@@ -343,7 +343,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
                  call. = FALSE, immediate. = TRUE)
          # re-create handle
          handle <- .getHandle(curl.options, force.new = TRUE)
-         # try again
+         # try again. must rebuild url with crumbs
+         yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
+                                interval, "history", handle)
          fr <- try(read.csv(curl::curl(yahoo.URL, handle = handle$ch), na.strings="null"),
                    silent = TRUE)
          # error if second attempt also failed
