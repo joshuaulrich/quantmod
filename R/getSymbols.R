@@ -232,7 +232,7 @@ formals(loadSymbols) <- loadSymbols.formals
         # random query to avoid cache
         ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
         cu <- paste0("https://finance.yahoo.com?", ru)
-        curl::curl_fetch_memory(cu, handle = h)
+        z <- curl::curl_fetch_memory(cu, handle = h) #load landing page to generate crumbs
         if (NROW(curl::handle_cookies(h)) > 0)
           break;
         Sys.sleep(0.1)
