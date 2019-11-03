@@ -34,3 +34,6 @@ x <- try(
   quantmod::getSymbols("AAPL", src = "tiingo", data.type = "json", api.key = errorKey)
 , silent = TRUE)
 stopifnot(inherits(x, "try-error"))
+
+x <- try(quantmod::getQuote("SPY;WYSIWYG", src = "yahoo"), silent = TRUE)
+stopifnot(inherits(x, "data.frame") && rownames(x) == c("SPY", "WYSIWYG"))
