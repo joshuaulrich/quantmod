@@ -11,7 +11,7 @@ if (apikey != "") {
 
   Sys.sleep(60) #AV throttles to 5 calls per minute
 
-    ibm_weekly_unadj <- getSymbols("IBM", src = "av", api.key = apikey,
+  ibm_weekly_unadj <- getSymbols("IBM", src = "av", api.key = apikey,
     adjusted = FALSE, periodicity = "weekly", auto.assign = FALSE)
   ibm_weekly_adj   <- getSymbols("IBM", src = "av", api.key = apikey,
     adjusted = TRUE, periodicity = "weekly", auto.assign = FALSE)

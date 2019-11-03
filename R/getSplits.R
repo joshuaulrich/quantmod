@@ -18,7 +18,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   handle <- .getHandle()
   yahoo.URL <- .yahooURL(Symbol.name, from.posix, to.posix,
                          "1d", "split", handle)
-  
+
   fr <- read.csv(curl::curl(yahoo.URL, handle=handle$ch), as.is=TRUE)
 
   if(NROW(fr)==0) {

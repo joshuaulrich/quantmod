@@ -16,7 +16,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   handle <- .getHandle()
   yahoo.URL <- .yahooURL(Symbol.name, from.posix, to.posix,
                          "1d", "div", handle)
-  
+
   fr <- read.csv(curl::curl(yahoo.URL,handle=handle$ch))
   fr <- xts(fr[,2],as.Date(fr[,1]))
   colnames(fr) <- paste(Symbol.name,'div',sep='.')
