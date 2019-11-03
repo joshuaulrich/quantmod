@@ -225,9 +225,6 @@ formals(loadSymbols) <- loadSymbols.formals
 
     # establish session
     new.session <- function() {
-      tmp <- tempfile()
-      on.exit(unlink(tmp))
-
       for (i in 1:5) {
         h <- curl::new_handle()
         curl::handle_setopt(h, .list = curl.options)
@@ -235,7 +232,7 @@ formals(loadSymbols) <- loadSymbols.formals
         # random query to avoid cache
         ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
         cu <- paste0("https://finance.yahoo.com?", ru)
-        curl::curl_download(cu, tmp, handle = h)
+        z <- curl::curl_fetch_memory(cu, handle = h)
         if (NROW(curl::handle_cookies(h)) > 0)
           break;
         Sys.sleep(0.1)
@@ -307,9 +304,6 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      handle <- .getHandle(curl.options)
 
-     tmp <- tempfile()
-     on.exit(unlink(tmp))
-
      returnSym <- Symbols
      noDataSym <- NULL
      for(i in seq_along(Symbols)) {
@@ -340,30 +334,27 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
        yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
                               interval, "history", handle)
-       dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
-                                     quiet = !verbose, handle = handle$ch),
-                  silent = TRUE)
+       fr <- try(read.csv(curl::curl(yahoo.URL, handle = handle$ch), na.strings="null"),
+                 silent = TRUE)
 
-       if (inherits(dl, "try-error")) {
+       if (inherits(fr, "try-error")) {
          # warn user about the failure
          warning(Symbols.name, " download failed; trying again.",
                  call. = FALSE, immediate. = TRUE)
          # re-create handle
          handle <- .getHandle(curl.options, force.new = TRUE)
-         # try again
+         # try again. must rebuild url with crumbs
          yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
                                 interval, "history", handle)
-         dl <- try(curl::curl_download(yahoo.URL, destfile = tmp,
-                                       quiet = !verbose, handle = handle$ch),
-                    silent = TRUE)
+         fr <- try(read.csv(curl::curl(yahoo.URL, handle = handle$ch), na.strings="null"),
+                   silent = TRUE)
          # error if second attempt also failed
-         if (inherits(dl, "try-error")) {
+         if (inherits(fr, "try-error")) {
            stop(Symbols.name, " download failed after two attempts. Error",
-                " message:\n", attr(dl, "condition")$message, call. = FALSE)
+                " message:\n", attr(fr, "condition")$message, call. = FALSE)
          }
        }
 
-       fr <- read.csv(tmp, na.strings="null")
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1]),
@@ -492,10 +483,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
             
             page <- 1
             totalrows <- c()
-            tmp <- tempfile()
-            on.exit(unlink(tmp))
             while (TRUE) {
-                download.file(paste(yahoo.URL,
+                URL <- paste(yahoo.URL,
                                     "?code=",Symbols.name,
                                     "&sm=",from.m,
                                     "&sd=",sprintf('%.2d',from.d),
@@ -505,9 +494,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
                                     "&ey=",to.y,
                                     "&tm=d",
                                     "&p=",page,
-                                    sep=''),destfile=tmp,quiet=!verbose)
+                                    sep='')
                 
-                fdoc <- XML::htmlParse(tmp)
+                fdoc <- XML::htmlParse(URL)
                 rows <- XML::xpathApply(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
                 if (length(rows) <= 1) break
                 
@@ -771,9 +760,6 @@ function(Symbols,env,return.class='xts',
      if(!hasArg("auto.assign")) auto.assign <- TRUE
      FRED.URL <- "https://fred.stlouisfed.org/series"
 
-     tmp <- tempfile()
-     on.exit(unlink(tmp))
-
      returnSym <- Symbols
      noDataSym <- NULL
 
@@ -781,8 +767,8 @@ function(Symbols,env,return.class='xts',
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
        test <- try({
        URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
-       try.download.file(URL, destfile=tmp, quiet=!verbose, ...)
-       fr <- read.csv(tmp,na.string=".")
+       fr <- read.csv(curl::curl(URL),na.string=".")
+
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
                  as.Date(fr[,1],origin='1970-01-01'),
@@ -1216,9 +1202,6 @@ function(Symbols,env,return.class='xts',
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
 
-     tmp <- tempfile()
-     on.exit(unlink(tmp))
-
      returnSym <- Symbols
      noDataSym <- NULL
 
@@ -1336,9 +1319,6 @@ getSymbols.av <- function(Symbols, env, api.key,
          " cannot be loaded.", call.=FALSE)
   }
   
-  tmp <- tempfile()
-  on.exit(file.remove(tmp))
-  
   #
   # For daily, weekly, and monthly data, timestamps are "yyyy-mm-dd".
   # For intraday data, timestamps are "yyyy-mm-dd HH:MM:SS".
@@ -1382,10 +1362,8 @@ getSymbols.av <- function(Symbols, env, api.key,
                   "&datatype=", data.type,
                   "&apikey=", api.key)
     
-    download.file(url=URL, destfile=tmp, quiet=!verbose)
-
     if (data.type == "json") {
-      lst <- jsonlite::fromJSON(tmp)
+      lst <- jsonlite::fromJSON(URL)
 
       #
       # Errors return a list with one element: An error message
@@ -1458,7 +1436,7 @@ getSymbols.av <- function(Symbols, env, api.key,
       mat <- xts(rows, tm.stamps, src="alphavantage", updated=updated)
       mat <- convert.time.series(mat, return.class=return.class)
     } else {
-      mat <- as.xts(read.zoo(tmp, header=TRUE, sep=","),
+      mat <- as.xts(read.zoo(curl::curl(URL), header=TRUE, sep=","),
                     src="alphavantage", updated=Sys.time())
       # convert column names to symbol.series
       cn <- colnames(mat)
@@ -1541,9 +1519,6 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
          " cannot be loaded.", call.=FALSE)
   }
   
-  tmp <- tempfile()
-  on.exit(file.remove(tmp))
-  
   downloadOne <- function(sym, default.return.class, default.periodicity) {
     
     return.class <- getSymbolLookup()[[sym]]$return.class
@@ -1580,20 +1555,19 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     # If rate limit is hit, the csv API returns HTTP 200 (OK), while json API
     # returns HTTP 429. The latter caused download.file() to error, but the
     # contents of 'tmp' still contain the error message.
-    response <- curl::curl_fetch_disk(URL, tmp)
 
     if (data.type == "json") {
-      stock.data <- jsonlite::fromJSON(tmp)
+      stock.data <- jsonlite::fromJSON(URL)
       if (verbose) cat("done.\n")
     } else {
-      stock.data <- read.csv(tmp, as.is=TRUE)
+      stock.data <- read.csv(curl::curl(URL), as.is=TRUE)
     }
     # check for error
     if (!all(return.columns %in% names(stock.data))) {
       if (data.type == "json") {
-        msg <- jsonlite::fromJSON(tmp)$detail
+        msg <- stock.data$detail
       } else {
-        msg <- readLines(tmp, warn=FALSE)
+        msg <- readLines(curl::curl(URL), warn=FALSE)
       }
       msg <- sub("Error: ", "", msg)
       stop(msg, call. = FALSE)

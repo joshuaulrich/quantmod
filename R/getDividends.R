@@ -13,15 +13,11 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   from.posix <- .dateToUNIX(from)
   to.posix <- .dateToUNIX(to)
 
-  tmp <- tempfile()
-  on.exit(unlink(tmp))
-
   handle <- .getHandle()
   yahoo.URL <- .yahooURL(Symbol.name, from.posix, to.posix,
                          "1d", "div", handle)
-  curl::curl_download(yahoo.URL, destfile=tmp, quiet=!verbose, handle=handle$ch)
 
-  fr <- read.csv(tmp)
+  fr <- read.csv(curl::curl(yahoo.URL,handle=handle$ch))
   fr <- xts(fr[,2],as.Date(fr[,1]))
   colnames(fr) <- paste(Symbol.name,'div',sep='.')
 

@@ -26,6 +26,11 @@
 function(url, destfile, method, quiet = FALSE, mode = "w", cacheOK = TRUE,
          extra = getOption("download.file.extra"), ...)
 {
+  # no longer used
+  # appears to have only been callled by getSymbols.FRED() to handle https
+  # downloads that are now handled by curl
+  # leaving in place in case needed for some other scenario
+
   if (missing(method))
     method <- getOption("download.file.method", default="auto")
 
