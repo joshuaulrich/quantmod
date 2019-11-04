@@ -79,7 +79,6 @@ function(Symbols,what=standardQuote(),...) {
   # Add the trade time and setNames() on other elements
   qflist <- c(list(regularMarketTime = Qposix), setNames(qflist, QF))
   
-
   df <- data.frame(qflist, stringsAsFactors = FALSE, check.names = FALSE)
 
   rownames(df) <- Symbols
@@ -88,7 +87,6 @@ function(Symbols,what=standardQuote(),...) {
   }
   df
 }
-
 
 # integrate this into the main getQuote.yahoo, after branching that
 #
