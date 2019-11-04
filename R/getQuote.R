@@ -303,7 +303,6 @@ getQuote.av <- function(Symbols, api.key, ...) {
       result <- rbind(result, response[["Stock Quotes"]])
     }
   }
-
   colnames(result) <- c("Symbol", "Last", "Volume", "Trade Time")
   result$Volume <- suppressWarnings(as.numeric(result$Volume))
   result$Last <- as.numeric(result$Last)
