@@ -67,20 +67,15 @@ function(Symbols,what=standardQuote(),...) {
     Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
 
-  Symbols <- unlist(strsplit(Symbols,','))
+  Symbols <- sq$symbol
 
-  if (length(Symbols) != NROW(sq)) {
-    sq <- merge(list(symbol = Symbols), sq, by = "symbol", all = TRUE)
-  }
-
-    # Extract user-requested columns. Convert to list to avoid
+  # Extract user-requested columns. Convert to list to avoid
   # 'undefined column' error with data.frame.
   qflist <- setNames(as.list(sq)[QF], QF)
 
   # Fill any missing columns with NA
   pad <- rep(NA, length(Symbols))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
-
   # Add the trade time and setNames() on other elements
   qflist <- c(list(regularMarketTime = Qposix), setNames(qflist, QF))
   
@@ -285,7 +280,6 @@ getQuote.av <- function(Symbols, api.key, ...) {
                 "?function=BATCH_STOCK_QUOTES",
                 "&apikey=", api.key,
                 "&symbols=")
-  Symbols <- unlist(strsplit(Symbols,';'))
   # av supports batches of 100
   nSymbols <- length(Symbols)
   result <- NULL
@@ -309,18 +303,16 @@ getQuote.av <- function(Symbols, api.key, ...) {
       result <- rbind(result, response[["Stock Quotes"]])
     }
   }
+
+  #Format output
   colnames(result) <- c("Symbol", "Last", "Volume", "Trade Time")
   result$Volume <- suppressWarnings(as.numeric(result$Volume))
   result$Last <- as.numeric(result$Last)
   quoteTZ <- response[["Meta Data"]][["3. Time Zone"]]
   result$`Trade Time` <- as.POSIXct(result$`Trade Time`, tz = quoteTZ)
-
-  # merge join to produce empty rows for missing results from AV
-  # so that return value has the same rows and order as the input
-  output <- merge(data.frame(Symbol = Symbols), result,
-                  by = "Symbol", all.x = TRUE)
-  rownames(output) <- output$Symbol
-  return(output[, c("Trade Time", "Last", "Volume")])
+  rownames(result) <- result$Symbol
+  
+  return(result[, c("Trade Time", "Last", "Volume")])
 }
 
 `getQuote.tiingo` <- function(Symbols, api.key, ...) {
@@ -331,8 +323,6 @@ getQuote.av <- function(Symbols, api.key, ...) {
     stop("getQuote.tiingo: An API key is required (api.key). ",
          "Registration at https://api.tiingo.com/.", call. = FALSE)
   }
-
-  Symbols <- unlist(strsplit(Symbols,';'))
 
   base.url <- paste0("https://api.tiingo.com/iex/?token=", api.key)
   r <- NULL
@@ -376,16 +366,9 @@ getQuote.av <- function(Symbols, api.key, ...) {
     r <- rbind(r, batch.result)
   }
 
-  colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
-  colnames(r)[which(colnames(r) == "LastsaleTimeStamp")] <- "Trade Time"
-
-  # merge join to produce empty rows for missing results from AV
-  # so that return value has the same number of rows and order as the input
-  if(NROW(r) != length(Symbols)) {
-    r <- merge(data.frame(Ticker = Symbols), r, by = "Ticker", all.x = TRUE)
-  }
-  
-  rownames(r) <- r$Ticker
-  std.cols <- c("Trade Time", "Open", "High", "Low", "Last", "Volume")
-  return(r[, c(std.cols, setdiff(colnames(r), c(std.cols, "Ticker")))])
+  #Format output
+  rownames(r) <- r$ticker
+  r <- r[ c("lastsaleTimeStamp", "open", "low", "high", "last", "volume")]
+  colnames(r) <- c("Trade Time", "Open", "High", "Low", "Last", "Volume")
+  return(r)
 }
