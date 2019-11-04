@@ -76,7 +76,7 @@ function(Symbols,what=standardQuote(),...) {
   # Fill any missing columns with NA
   pad <- rep(NA, length(Symbols))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
-  
+
   # Add the trade time and setNames() on other elements
   qflist <- c(list(regularMarketTime = Qposix), setNames(qflist, QF))
 
@@ -88,6 +88,7 @@ function(Symbols,what=standardQuote(),...) {
   }
   df
 }
+
 
 # integrate this into the main getQuote.yahoo, after branching that
 #
