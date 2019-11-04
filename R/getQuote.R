@@ -304,14 +304,14 @@ getQuote.av <- function(Symbols, api.key, ...) {
     }
   }
 
-  #Format output
   colnames(result) <- c("Symbol", "Last", "Volume", "Trade Time")
   result$Volume <- suppressWarnings(as.numeric(result$Volume))
   result$Last <- as.numeric(result$Last)
   quoteTZ <- response[["Meta Data"]][["3. Time Zone"]]
   result$`Trade Time` <- as.POSIXct(result$`Trade Time`, tz = quoteTZ)
+
+  #Format output
   rownames(result) <- result$Symbol
-  
   return(result[, c("Trade Time", "Last", "Volume")])
 }
 
