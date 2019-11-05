@@ -6,21 +6,27 @@
 
 `getQuote` <-
 function(Symbols,src='yahoo',what, ...) {
+  Symbols <- unique(unlist(strsplit(Symbols,";")))
   args <- list(Symbols=Symbols,...)
   if(!missing(what))
       args$what <- what
-  do.call(paste('getQuote',src,sep='.'), args)
+  r <- do.call(paste('getQuote',src,sep='.'), args)
+  if(NROW(r) != length(Symbols)){
+    r$Symbol <- rownames(r)
+    r <- merge(list(Symbol = Symbols), r,
+                  by = "Symbol", all.x = TRUE)
+    rownames(r) <- r$Symbol
+    r$Symbol <- NULL
+  }
+  return(r)
 }
 
 `getQuote.yahoo` <-
 function(Symbols,what=standardQuote(),...) {
-  if(length(Symbols) > 1 && is.character(Symbols))
-    Symbols <- paste(Symbols,collapse=";")
-  length.of.symbols <- length(unlist(strsplit(Symbols, ";")))
+  length.of.symbols <- length(Symbols)
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
     # we will recursively call getQuote.yahoo to handle each block of 200
-    Symbols <- unlist(strsplit(Symbols,";"))
     all.symbols <- lapply(seq(1,length.of.symbols,200),
                           function(x) na.omit(Symbols[x:(x+199)]))
     df <- NULL
@@ -33,7 +39,6 @@ function(Symbols,what=standardQuote(),...) {
     cat("...done\n")
     return(df)
   }
-  Symbols <- paste(strsplit(Symbols,';')[[1]],collapse=',')
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
     QF.names <- what[[2]]
@@ -47,10 +52,10 @@ function(Symbols,what=standardQuote(),...) {
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
   URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
-                Symbols,
+                paste(Symbols,collapse=','),
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(URL)
+  response <- jsonlite::fromJSON(curl::curl(URL))
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
@@ -67,7 +72,7 @@ function(Symbols,what=standardQuote(),...) {
     Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
 
-  Symbols <- unlist(strsplit(Symbols,','))
+  Symbols <- sq$symbol
 
   # Extract user-requested columns. Convert to list to avoid
   # 'undefined column' error with data.frame.
