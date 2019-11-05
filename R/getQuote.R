@@ -390,7 +390,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
 
   # merge join to produce empty rows for missing results from AV
   # so that return value has the same number of rows and order as the input
-  if(NROW(r) != length(Symbols)) {
+  if(length(Symbols) != NROW(r)) {
     r <- merge(data.frame(Ticker = Symbols), r, by = "Ticker", all.x = TRUE)
   }
 
