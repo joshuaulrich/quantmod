@@ -82,7 +82,7 @@ function(Symbols,what=standardQuote(),...) {
     sq <- merge(list(symbol = Symbols), sq, by = "symbol", all = TRUE)
   }
 
-    # Extract user-requested columns. Convert to list to avoid
+  # Extract user-requested columns. Convert to list to avoid
   # 'undefined column' error with data.frame.
   qflist <- setNames(as.list(sq)[QF], QF)
 
@@ -385,14 +385,15 @@ getQuote.av <- function(Symbols, api.key, ...) {
   }
 
   colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
-  colnames(r)[which(colnames(r) == "LastsaleTimeStamp")] <- "Trade Time"
+  r[, "Trade Time"] <- r[, "LastSaleTimestamp"]
+  r[, "LastSaleTimestamp"] <- NULL
 
   # merge join to produce empty rows for missing results from AV
   # so that return value has the same number of rows and order as the input
   if(NROW(r) != length(Symbols)) {
     r <- merge(data.frame(Ticker = Symbols), r, by = "Ticker", all.x = TRUE)
   }
-  
+
   rownames(r) <- r$Ticker
   std.cols <- c("Trade Time", "Open", "High", "Low", "Last", "Volume")
   return(r[, c(std.cols, setdiff(colnames(r), c(std.cols, "Ticker")))])
