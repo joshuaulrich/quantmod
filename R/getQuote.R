@@ -6,10 +6,19 @@
 
 `getQuote` <-
 function(Symbols,src='yahoo',what, ...) {
+  Symbols <- unique(unlist(strsplit(Symbols,";")))
   args <- list(Symbols=Symbols,...)
   if(!missing(what))
       args$what <- what
-  do.call(paste('getQuote',src,sep='.'), args)
+  r <- do.call(paste('getQuote',src,sep='.'), args)
+  if(NROW(r) != length(Symbols)){
+    r$Symbol <- rownames(r)
+    r <- merge(list(Symbol = Symbols), r,
+                  by = "Symbol", all.x = TRUE)
+    rownames(r) <- r$Symbol
+    r$Symbol <- NULL
+  }
+  return(r)
 }
 
 `getQuote.yahoo` <-
