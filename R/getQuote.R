@@ -10,15 +10,7 @@ function(Symbols,src='yahoo',what, ...) {
   args <- list(Symbols=Symbols,...)
   if(!missing(what))
       args$what <- what
-  r <- do.call(paste('getQuote',src,sep='.'), args)
-  if(NROW(r) != length(Symbols)){
-    r$Symbol <- rownames(r)
-    r <- merge(list(Symbol = Symbols), r,
-                  by = "Symbol", all.x = TRUE)
-    rownames(r) <- r$Symbol
-    r$Symbol <- NULL
-  }
-  return(r)
+  do.call(paste('getQuote',src,sep='.'), args)
 }
 
 `getQuote.yahoo` <-
@@ -39,6 +31,7 @@ function(Symbols,what=standardQuote(),...) {
     cat("...done\n")
     return(df)
   }
+  Symbols <- paste(Symbols,collapse=',')
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
     QF.names <- what[[2]]
@@ -52,7 +45,7 @@ function(Symbols,what=standardQuote(),...) {
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
   URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
-                paste(Symbols,collapse=','),
+                Symbols,
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
   response <- jsonlite::fromJSON(curl::curl(URL))
@@ -72,7 +65,7 @@ function(Symbols,what=standardQuote(),...) {
     Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
 
-  Symbols <- sq$symbol
+  Symbols <- unlist(strsplit(Symbols,','))
 
   # Extract user-requested columns. Convert to list to avoid
   # 'undefined column' error with data.frame.
