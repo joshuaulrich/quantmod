@@ -6,6 +6,7 @@
 
 `getQuote` <-
 function(Symbols,src='yahoo',what, ...) {
+  Symbols <- unique(unlist(strsplit(Symbols,";")))
   args <- list(Symbols=Symbols,...)
   if(!missing(what))
       args$what <- what
@@ -14,13 +15,10 @@ function(Symbols,src='yahoo',what, ...) {
 
 `getQuote.yahoo` <-
 function(Symbols,what=standardQuote(),...) {
-  if(length(Symbols) > 1 && is.character(Symbols))
-    Symbols <- paste(Symbols,collapse=";")
-  length.of.symbols <- length(unlist(strsplit(Symbols, ";")))
+  length.of.symbols <- length(Symbols)
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
     # we will recursively call getQuote.yahoo to handle each block of 200
-    Symbols <- unlist(strsplit(Symbols,";"))
     all.symbols <- lapply(seq(1,length.of.symbols,200),
                           function(x) na.omit(Symbols[x:(x+199)]))
     df <- NULL
@@ -33,7 +31,7 @@ function(Symbols,what=standardQuote(),...) {
     cat("...done\n")
     return(df)
   }
-  Symbols <- paste(strsplit(Symbols,';')[[1]],collapse=',')
+  SymbolsString <- paste(Symbols,collapse=',')
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
     QF.names <- what[[2]]
@@ -47,7 +45,7 @@ function(Symbols,what=standardQuote(),...) {
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
   URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
-                Symbols,
+                SymbolsString,
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
   response <- jsonlite::fromJSON(URL)
@@ -66,8 +64,6 @@ function(Symbols,what=standardQuote(),...) {
     warning("symbols have different timezones; converting to local time")
     Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
-
-  Symbols <- unlist(strsplit(Symbols,','))
 
   # merge join to produce empty rows for missing results, so that
   # return value has the same number of rows and order as the input
@@ -287,7 +283,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
                 "?function=BATCH_STOCK_QUOTES",
                 "&apikey=", api.key,
                 "&symbols=")
-  Symbols <- unlist(strsplit(Symbols,';'))
+
   # av supports batches of 100
   nSymbols <- length(Symbols)
   result <- NULL
