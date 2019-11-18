@@ -1,3 +1,6 @@
+av.key <- Sys.getenv("AV_API_KEY")
+tiingo.key <- Sys.getenv("TIINGO_API_KEY")
+
 # Call as.zoo before quantmod is loaded and registers its S3 method
 dc <- c("2015-01-01", "2016-01-01", "2017-01-01")
 dd <- as.Date(dc)
@@ -35,5 +38,16 @@ x <- try(
 , silent = TRUE)
 stopifnot(inherits(x, "try-error"))
 
-x <- try(quantmod::getQuote("SPY;WYSIWYG", src = "yahoo"), silent = TRUE)
-stopifnot(inherits(x, "data.frame") && rownames(x) == c("SPY", "WYSIWYG"))
+syms <- c("SPY", "WYSIWYG")
+symstr <- paste(syms, collapse = ";")
+x <- try(getQuote(symstr, src = "yahoo"), silent = TRUE)
+stopifnot(inherits(x, "data.frame") && all(rownames(x) == syms))
+
+if (av.key != "") {
+  x <- try(getQuote(symstr, src = "av", api.key = av.key), silent = TRUE)
+  stopifnot(inherits(x, "data.frame") && all(rownames(x) == syms))
+}
+if (tiingo.key != "") {
+  x <- try(getQuote(symstr, src = "tiingo", api.key = tiingo.key), silent = TRUE)
+  stopifnot(inherits(x, "data.frame") && all(rownames(x) == syms))
+}

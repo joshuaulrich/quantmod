@@ -79,7 +79,8 @@ function(Symbols,what=standardQuote(),...) {
   Symbols <- unlist(strsplit(Symbols,','))
 
   if (length(Symbols) != NROW(sq)) {
-    sq <- merge(list(symbol = Symbols), sq, by = "symbol", all = TRUE)
+    allSymbols <- data.frame(symbol = Symbols, stringsAsFactors = FALSE)
+    sq <- merge(allSymbols, sq, by = "symbol", all = TRUE)
   }
 
   # Extract user-requested columns. Convert to list to avoid
@@ -391,7 +392,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
   # merge join to produce empty rows for missing results from AV
   # so that return value has the same number of rows and order as the input
   if(length(Symbols) != NROW(r)) {
-    r <- merge(data.frame(Ticker = Symbols), r, by = "Ticker", all.x = TRUE)
+    allSymbols <- data.frame(Ticker = Symbols, stringsAsFactors = FALSE)
+    r <- merge(allSymbols, r, by = "Ticker", all.x = TRUE)
   }
 
   rownames(r) <- r$Ticker
