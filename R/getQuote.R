@@ -48,7 +48,7 @@ function(Symbols,what=standardQuote(),...) {
                 SymbolsString,
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(curl::curl(URL))
+  response <- jsonlite::fromJSON(URL)
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
