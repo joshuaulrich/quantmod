@@ -67,6 +67,13 @@ function(Symbols,what=standardQuote(),...) {
 
   Symbols <- unlist(strsplit(Symbols,','))
 
+  # merge join to produce empty rows for missing results, so that
+  # return value has the same number of rows and order as the input
+  if (length(Symbols) != NROW(sq)) {
+    allSymbols <- data.frame(symbol = Symbols, stringsAsFactors = FALSE)
+    sq <- merge(allSymbols, sq, by = "symbol", all = TRUE)
+  }
+
   # Extract user-requested columns. Convert to list to avoid
   # 'undefined column' error with data.frame.
   qflist <- setNames(as.list(sq)[QF], QF)
@@ -278,6 +285,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
                 "?function=BATCH_STOCK_QUOTES",
                 "&apikey=", api.key,
                 "&symbols=")
+  Symbols <- unlist(strsplit(Symbols,';'))
   # av supports batches of 100
   nSymbols <- length(Symbols)
   result <- NULL
@@ -324,6 +332,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
          "Registration at https://api.tiingo.com/.", call. = FALSE)
   }
 
+  Symbols <- unlist(strsplit(Symbols,';'))
+
   base.url <- paste0("https://api.tiingo.com/iex/?token=", api.key)
   r <- NULL
   if(is.null(Symbols)) {
@@ -368,10 +378,15 @@ getQuote.av <- function(Symbols, api.key, ...) {
 
   colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
   r[, "Trade Time"] <- r[, "LastSaleTimestamp"]
+  r[, "LastSaleTimestamp"] <- NULL
 
-  # merge join to produce empty rows for missing results from AV
-  # so that return value has the same number of rows and order as the input
-  if(!is.null(Symbols)) r <- merge(data.frame(Ticker = Symbols), r, by = "Ticker", all.x = TRUE)
+  # merge join to produce empty rows for missing results, so that
+  # return value has the same number of rows and order as the input
+  if(length(Symbols) != NROW(r)) {
+    allSymbols <- data.frame(Ticker = Symbols, stringsAsFactors = FALSE)
+    r <- merge(allSymbols, r, by = "Ticker", all.x = TRUE)
+  }
+
   rownames(r) <- r$Ticker
   std.cols <- c("Trade Time", "Open", "High", "Low", "Last", "Volume")
   return(r[, c(std.cols, setdiff(colnames(r), c(std.cols, "Ticker")))])
