@@ -69,6 +69,8 @@ function(Symbols,what=standardQuote(),...) {
 
   Symbols <- unlist(strsplit(Symbols,','))
 
+  # merge join to produce empty rows for missing results, so that
+  # return value has the same number of rows and order as the input
   if (length(Symbols) != NROW(sq)) {
     allSymbols <- data.frame(symbol = Symbols, stringsAsFactors = FALSE)
     sq <- merge(allSymbols, sq, by = "symbol", all = TRUE)
@@ -380,8 +382,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
   r[, "Trade Time"] <- r[, "LastSaleTimestamp"]
   r[, "LastSaleTimestamp"] <- NULL
 
-  # merge join to produce empty rows for missing results from AV
-  # so that return value has the same number of rows and order as the input
+  # merge join to produce empty rows for missing results, so that
+  # return value has the same number of rows and order as the input
   if(length(Symbols) != NROW(r)) {
     allSymbols <- data.frame(Ticker = Symbols, stringsAsFactors = FALSE)
     r <- merge(allSymbols, r, by = "Ticker", all.x = TRUE)
