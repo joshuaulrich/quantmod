@@ -31,7 +31,7 @@ function(Symbols,what=standardQuote(),...) {
     cat("...done\n")
     return(df)
   }
-  Symbols <- paste(Symbols,collapse=',')
+  SymbolsString <- paste(Symbols,collapse=',')
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
     QF.names <- what[[2]]
@@ -45,7 +45,7 @@ function(Symbols,what=standardQuote(),...) {
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
   URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
-                Symbols,
+                SymbolsString,
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
   response <- jsonlite::fromJSON(curl::curl(URL))
@@ -64,8 +64,6 @@ function(Symbols,what=standardQuote(),...) {
     warning("symbols have different timezones; converting to local time")
     Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
-
-  Symbols <- unlist(strsplit(Symbols,','))
 
   # merge join to produce empty rows for missing results, so that
   # return value has the same number of rows and order as the input
@@ -285,7 +283,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
                 "?function=BATCH_STOCK_QUOTES",
                 "&apikey=", api.key,
                 "&symbols=")
-  Symbols <- unlist(strsplit(Symbols,';'))
+
   # av supports batches of 100
   nSymbols <- length(Symbols)
   result <- NULL
