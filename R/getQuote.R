@@ -229,8 +229,8 @@ matrix(c(
   #"Short Ratio", "Short Ratio", "s7",
 
   # dividends / splits
-  "Ex-Dividend Date", "Ex-Dividend Date", "dividendDate",
-  #"Dividend Pay Date", "Dividend Pay Date", "r1",
+  "Ex-Dividend Date", "Ex-Dividend Date", "exDividendDate",
+  "Dividend Pay Date", "Dividend Pay Date", "dividendDate",
   "Dividend/Share", "Dividend/Share", "trailingAnnualDividendRate",
   "Dividend Yield", "Dividend Yield", "trailingAnnualDividendYield",
 
