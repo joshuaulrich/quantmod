@@ -48,7 +48,7 @@ function(Symbols,what=standardQuote(),...) {
                 SymbolsString,
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(URL)
+  response <- jsonlite::fromJSON(curl::curl(URL))
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
@@ -294,7 +294,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
     }
     batchSymbols <- Symbols[i:min(nSymbols, i + 99)]
     batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
-    response <- jsonlite::fromJSON(batchURL)
+    response <- jsonlite::fromJSON(curl::curl(batchURL))
 
     if(NROW(response[["Stock Quotes"]]) < 1) {
       syms <- paste(batchSymbols, collapse = ", ")
@@ -355,7 +355,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
       batch.url <- paste0(base.url, "&tickers=", paste(Symbols[i:batch.end], collapse = ","))
     }
 
-    batch.result <- jsonlite::fromJSON(batch.url)
+    batch.result <- jsonlite::fromJSON(curl::curl(batch.url))
 
     if(NROW(batch.result) < 1) {
       syms <- paste(Symbols[i:batch.end], collapse = ", ")
