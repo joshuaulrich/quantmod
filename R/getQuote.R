@@ -78,7 +78,7 @@ function(Symbols,what=standardQuote(),...) {
   qflist <- setNames(as.list(sq)[QF], QF)
 
   # Fill any missing columns with NA
-  pad <- rep(NA, length(sq))
+  pad <- rep(NA, nrow(sq))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
 
   # Add the trade time and setNames() on other elements
