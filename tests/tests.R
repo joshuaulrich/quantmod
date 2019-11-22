@@ -42,6 +42,11 @@ syms <- c("SPY", "WYSIWYG")
 symstr <- paste(syms, collapse = ";")
 x <- try(getQuote(symstr, src = "yahoo"), silent = TRUE)
 stopifnot(inherits(x, "data.frame") && all(rownames(x) == syms))
+stopifnot(!is.na(x["SPY", "Last"]) && is.na(x["WYSIWYG", "Last"]))
+
+#test batch handling
+x <- getQuote(c("SPY", paste0(LETTERS, 1:199), "IWM"), src = "yahoo")
+stopifnot(inherits(x, "data.frame") && nrow(x) == 201L)
 
 if (av.key != "") {
   x <- try(getQuote(symstr, src = "av", api.key = av.key), silent = TRUE)
