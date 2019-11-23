@@ -372,7 +372,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
   }
 
   # Normalize column names and output
-  r <- r[, c("ticker", "lastSaleTimestamp", "open", "high", "low", "last", "volume")]
+  r <- r[, c("ticker", "lastsaleTimeStamp", "open", "high", "low", "last", "volume")]
   colnames(r) <- c("Symbol", "Trade Time", "Open", "High", "Low", "Last", "Volume")
   return(r)
 }
