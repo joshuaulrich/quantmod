@@ -11,9 +11,10 @@ function(Symbols,src='yahoo',what, ...) {
   if(!missing(what))
       args$what <- what
   df <- do.call(paste('getQuote',src,sep='.'), args)
-  if(nrow(df) != length(Symbols)){
-    #merge to generate empty rows for missing results from underlying source
-    df <- merge(list(Symbol = Symbols), df, by = "Symbol", all.x = TRUE)  
+  if(nrow(df) != length(Symbols)) {
+    # merge to generate empty rows for missing results from underlying source
+    allSymbols <- data.frame(Symbol = Symbols, stringsAsFactors = FALSE)
+    df <- merge(allSymbols, df, by = "Symbol", all.x = TRUE)
   }
   rownames(df) <- df$Symbol
   df$Symbol <- NULL
@@ -58,7 +59,6 @@ function(Symbols,what=standardQuote(),...) {
   response <- jsonlite::fromJSON(curl::curl(URL))
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
-    Symbols <- sq$symbol
   } else {
     stop(response$quoteResponse$error)
   }
@@ -81,8 +81,9 @@ function(Symbols,what=standardQuote(),...) {
   pad <- rep(NA, nrow(sq))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
 
-  # Add the trade time and setNames() on other elements
-  qflist <- c(list(Symbol = Symbols, regularMarketTime = Qposix), setNames(qflist, QF))
+  # Add the symbols and trade time, and setNames() on other elements
+  qflist <- c(list(Symbol = sq$symbol, regularMarketTime = Qposix),
+              setNames(qflist, QF))
 
   df <- data.frame(qflist, stringsAsFactors = FALSE, check.names = FALSE)
 
@@ -312,8 +313,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
   result$Last <- as.numeric(result$Last)
   quoteTZ <- response[["Meta Data"]][["3. Time Zone"]]
   result$`Trade Time` <- as.POSIXct(result$`Trade Time`, tz = quoteTZ)
-  
-  #Normalize column names and output
+
+  # Normalize column names and output
   return(result[, c("Symbol", "Trade Time", "Last", "Volume")])
 }
 
@@ -369,9 +370,9 @@ getQuote.av <- function(Symbols, api.key, ...) {
     }
     r <- rbind(r, batch.result)
   }
-  
-  #Normalize column names and output
-  r <- r[, c("ticker", "lastsaleTimeStamp", "open", "high", "low", "last", "volume")]
+
+  # Normalize column names and output
+  r <- r[, c("ticker", "lastSaleTimestamp", "open", "high", "low", "last", "volume")]
   colnames(r) <- c("Symbol", "Trade Time", "Open", "High", "Low", "Last", "Volume")
   return(r)
 }
