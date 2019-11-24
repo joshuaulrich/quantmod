@@ -10,7 +10,15 @@ function(Symbols,src='yahoo',what, ...) {
   args <- list(Symbols=Symbols,...)
   if(!missing(what))
       args$what <- what
-  do.call(paste('getQuote',src,sep='.'), args)
+  df <- do.call(paste('getQuote',src,sep='.'), args)
+  if(nrow(df) != length(Symbols)) {
+    # merge to generate empty rows for missing results from underlying source
+    allSymbols <- data.frame(Symbol = Symbols, stringsAsFactors = FALSE)
+    df <- merge(allSymbols, df, by = "Symbol", all.x = TRUE)
+  }
+  rownames(df) <- df$Symbol
+  df$Symbol <- NULL
+  df
 }
 
 `getQuote.yahoo` <-
@@ -65,29 +73,22 @@ function(Symbols,what=standardQuote(),...) {
     Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
   }
 
-  # merge join to produce empty rows for missing results, so that
-  # return value has the same number of rows and order as the input
-  if (length(Symbols) != NROW(sq)) {
-    allSymbols <- data.frame(symbol = Symbols, stringsAsFactors = FALSE)
-    sq <- merge(allSymbols, sq, by = "symbol", all = TRUE)
-  }
-
   # Extract user-requested columns. Convert to list to avoid
   # 'undefined column' error with data.frame.
   qflist <- setNames(as.list(sq)[QF], QF)
 
   # Fill any missing columns with NA
-  pad <- rep(NA, length(Symbols))
+  pad <- rep(NA, nrow(sq))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
 
-  # Add the trade time and setNames() on other elements
-  qflist <- c(list(regularMarketTime = Qposix), setNames(qflist, QF))
+  # Add the symbols and trade time, and setNames() on other elements
+  qflist <- c(list(Symbol = sq$symbol, regularMarketTime = Qposix),
+              setNames(qflist, QF))
 
   df <- data.frame(qflist, stringsAsFactors = FALSE, check.names = FALSE)
 
-  rownames(df) <- Symbols
   if(!is.null(QF.names)) {
-    colnames(df) <- c('Trade Time',QF.names)
+    colnames(df) <- c('Symbol','Trade Time',QF.names)
   }
   df
 }
@@ -313,12 +314,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
   quoteTZ <- response[["Meta Data"]][["3. Time Zone"]]
   result$`Trade Time` <- as.POSIXct(result$`Trade Time`, tz = quoteTZ)
 
-  # merge join to produce empty rows for missing results from AV
-  # so that return value has the same rows and order as the input
-  output <- merge(data.frame(Symbol = Symbols), result,
-                  by = "Symbol", all.x = TRUE)
-  rownames(output) <- output$Symbol
-  return(output[, c("Trade Time", "Last", "Volume")])
+  # Normalize column names and output
+  return(result[, c("Symbol", "Trade Time", "Last", "Volume")])
 }
 
 `getQuote.tiingo` <- function(Symbols, api.key, ...) {
@@ -374,18 +371,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
     r <- rbind(r, batch.result)
   }
 
-  colnames(r) <- gsub("(^[[:alpha:]])", "\\U\\1", colnames(r), perl = TRUE)
-  r[, "Trade Time"] <- r[, "LastSaleTimestamp"]
-  r[, "LastSaleTimestamp"] <- NULL
-
-  # merge join to produce empty rows for missing results, so that
-  # return value has the same number of rows and order as the input
-  if(length(Symbols) != NROW(r)) {
-    allSymbols <- data.frame(Ticker = Symbols, stringsAsFactors = FALSE)
-    r <- merge(allSymbols, r, by = "Ticker", all.x = TRUE)
-  }
-
-  rownames(r) <- r$Ticker
-  std.cols <- c("Trade Time", "Open", "High", "Low", "Last", "Volume")
-  return(r[, c(std.cols, setdiff(colnames(r), c(std.cols, "Ticker")))])
+  # Normalize column names and output
+  r <- r[, c("ticker", "lastSaleTimestamp", "open", "high", "low", "last", "volume")]
+  colnames(r) <- c("Symbol", "Trade Time", "Open", "High", "Low", "Last", "Volume")
+  return(r)
 }
