@@ -18,7 +18,8 @@ function(Symbols,src='yahoo',what, ...) {
   }
   rownames(df) <- df$Symbol
   df$Symbol <- NULL
-  df
+  # order result the same as Symbols input
+  df[Symbols,]
 }
 
 `getQuote.yahoo` <-

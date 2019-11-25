@@ -56,3 +56,8 @@ if (tiingo.key != "") {
   x <- try(getQuote(symstr, src = "tiingo", api.key = tiingo.key), silent = TRUE)
   stopifnot(inherits(x, "data.frame") && all(rownames(x) == syms))
 }
+
+# ensure symbol order is preserved
+syms <- sample(c("SPY", "TLT", "IWM", "QQQ", "WYSIWYG"))
+x <- try(getQuote(syms, src = "yahoo"), silent = TRUE)
+stopifnot(inherits(x, "data.frame") && all(rownames(x) == syms))
