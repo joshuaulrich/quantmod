@@ -24,7 +24,8 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   if(NROW(fr)==0) {
     fr <- NA
   } else {
-    fr$V3 <- vapply(parse(text=fr[,2]), eval, numeric(1))
+    fr[,2] <- gsub(":", "/", fr[,2], fixed = TRUE)
+    fr$V3 <- 1 / vapply(parse(text=fr[,2]), eval, numeric(1))
     fr <- xts(fr$V3, as.Date(fr[,1], "%Y-%m-%d"))
     colnames(fr) <- paste(Symbol.name,'spl',sep='.')
   }
