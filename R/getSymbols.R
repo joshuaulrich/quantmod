@@ -382,7 +382,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
        if(is.xts(fr))
-         indexClass(fr) <- index.class
+         tclass(fr) <- index.class
 
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
@@ -554,7 +554,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
             
             fr <- convert.time.series(fr=fr,return.class=return.class)
             if(is.xts(fr))
-                indexClass(fr) <- index.class
+                tclass(fr) <- index.class
             
             Symbols[[i]] <- symname
             if(auto.assign)

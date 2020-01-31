@@ -18,7 +18,7 @@ function(x,
 
   if(!is.xts(x)) x <- as.xts(x)
 
-  indexClass(x) <- "POSIXct"
+  tclass(x) <- "POSIXct"
 
   if(!is.null(subset) & is.character(subset)) {
     if(strsplit(subset,' ')[[1]][1] %in% c('first','last')) {
@@ -390,7 +390,7 @@ function(x,
 
   x <- na.omit(x)
 
-  indexClass(x) <- "POSIXct"
+  tclass(x) <- "POSIXct"
 
   if(!is.null(subset) & is.character(subset)) {
     if(strsplit(subset,' ')[[1]][1] %in% c('first','last')) {

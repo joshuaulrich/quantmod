@@ -1037,7 +1037,7 @@ function(x) {
 
     x <- lchob@xdata
     i <- when
-    indexClass(x) <- "POSIXct"
+    tclass(x) <- "POSIXct"
     POSIXindex <- index(x)
     if (missing(i)) 
         i <- 1:NROW(x)
