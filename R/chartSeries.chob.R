@@ -162,7 +162,7 @@ function(x)
   par('adj'=old.adj)
 
   # TA calculation and drawing loops
-  if(x@windows > 1 | length(x@passed.args$TA) > 0) {
+  if(x@windows > 1 || length(x@passed.args$TA) > 0) {
 
     for(i in 1:x@windows) {
 

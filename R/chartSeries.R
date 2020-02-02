@@ -20,7 +20,7 @@ function(x,
 
   tclass(x) <- "POSIXct"
 
-  if(!is.null(subset) & is.character(subset)) {
+  if(!is.null(subset) && is.character(subset)) {
     if(strsplit(subset,' ')[[1]][1] %in% c('first','last')) {
       subsetvec <- strsplit(subset,' ')[[1]]
       if(length(subsetvec) < 3) {
@@ -60,7 +60,7 @@ function(x,
   if(is.character(theme)) theme <- chartTheme(theme)
   if(!missing(up.col)) theme$up.col <- up.col 
   if(!missing(dn.col)) theme$dn.col <- dn.col 
-  if(missing(multi.col) | !multi.col) { # interpret as FALSE
+  if(missing(multi.col) || !multi.col) { # interpret as FALSE
     multi.col <- FALSE
     theme$dn.up.col <- theme$up.col
     theme$up.up.col <- theme$up.col
@@ -102,9 +102,9 @@ function(x,
   ep <- c(rev(rev(ep)[-1]),rev(ep)[1]-1)
 
   x.labels <- format(index(x)[ep + 1], "%n%b%n%Y")
-  if (time.scale == "weekly" | time.scale == "daily") 
+  if (time.scale == "weekly" || time.scale == "daily") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%Y")
-  if (time.scale == "minute" | time.scale == "hourly") 
+  if (time.scale == "minute" || time.scale == "hourly") 
       x.labels <- format(index(x)[ep + 1], "%b %d%n%H:%M")
 
   chob <- new("chob")
@@ -392,7 +392,7 @@ function(x,
 
   tclass(x) <- "POSIXct"
 
-  if(!is.null(subset) & is.character(subset)) {
+  if(!is.null(subset) && is.character(subset)) {
     if(strsplit(subset,' ')[[1]][1] %in% c('first','last')) {
       subsetvec <- strsplit(subset,' ')[[1]]
       if(length(subsetvec) < 3) {
@@ -432,7 +432,7 @@ function(x,
   if(is.character(theme)) theme <- chartTheme(theme)
   if(!missing(up.col)) theme$up.col <- up.col 
   if(!missing(dn.col)) theme$dn.col <- dn.col 
-  if(missing(multi.col) | !multi.col) { # interpret as FALSE
+  if(missing(multi.col) || !multi.col) { # interpret as FALSE
     multi.col <- FALSE
     theme$dn.up.col <- theme$up.col
     theme$up.up.col <- theme$up.col

@@ -34,7 +34,7 @@
   }
     
   signal.summary <- table(trade.signal[,2])
-  if(any(signal.summary==0) | dim(signal.summary)==1) {
+  if(any(signal.summary==0) || dim(signal.summary)==1) {
       warning("Model results are all one direction.")
   }
 

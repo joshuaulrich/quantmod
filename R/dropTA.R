@@ -1,6 +1,6 @@
 `swapTA` <-
 function(ta1,ta2,occ1=1,occ2=1,dev) {
-  if(missing(ta1) | missing(ta2)) stop("two TA indicator required")
+  if(missing(ta1) || missing(ta2)) stop("two TA indicator required")
 
   # default to the current device if none specified  
   if(missing(dev)) dev <- dev.cur()

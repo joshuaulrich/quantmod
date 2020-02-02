@@ -10,7 +10,7 @@
   trade.offset = 0;
   quantmod <- getModelData(x);
   if(class(quantmod) != "quantmod") stop("model must be of class quantmod");
-  if(!is.null(trade.dates) & length(trade.dates) < 2) stop("trade.dates must be of length 2");
+  if(!is.null(trade.dates) && length(trade.dates) < 2) stop("trade.dates must be of length 2");
   model.data <- modelData(quantmod,trade.dates,exclude.training=exclude.training);
   fitted.zoo <- predictModel(quantmod@fitted.model,model.data,...)
   if(class(fitted.zoo) != "zoo") {

@@ -32,7 +32,7 @@ function(name=TRUE,last=TRUE) {
   exp <- parse(text = gsub("list", "plot_axis", as.expression(substitute(list(x = current.chob(), 
                show.last=last, show.name=name,...)))), srcfile = NULL)
   plot_object <- current.chob()
-  plot_object$Env$mar <- c(3,1,0,if(name & last) if(plot_object$Env$theme$rylab) 5 else 4 else 3)
+  plot_object$Env$mar <- c(3,1,0,if(name && last) if(plot_object$Env$theme$rylab) 5 else 4 else 3)
   lenv$xdata <- plot_object$Env$xdata
   plot_object$set_frame(2,clip=FALSE)
   plot_object$add(exp, env=c(lenv,plot_object$Env), expr=TRUE, clip=FALSE)

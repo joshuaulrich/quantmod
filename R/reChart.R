@@ -46,7 +46,7 @@ function (type = c("auto", "candlesticks", "matchsticks",
 
   ########### subset ##########
   if(!missing(subset)) {
-    if (!is.null(subset) & is.character(subset)) {
+    if (!is.null(subset) && is.character(subset)) {
         if (strsplit(subset, " ")[[1]][1] %in% c("first", "last")) {
             subsetvec <- strsplit(subset, " ")[[1]]
             if (length(subsetvec) < 3) {
@@ -102,7 +102,7 @@ function (type = c("auto", "candlesticks", "matchsticks",
   ########### end chartTheme ##########
 
   ########### multi.col ##########
-  if(missing(theme) & !missing(multi.col) ) 
+  if(missing(theme) && !missing(multi.col) ) 
     stop(paste(sQuote('theme'),'must be specified in conjunction with',
          sQuote('multi.col')))
   theme <- chob@colors

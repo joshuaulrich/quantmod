@@ -18,7 +18,7 @@
   if (max.vol > 1e+07) 
     vol.scale <- list(1e+06, "millions")
   
-  if(lchob@color.vol & is.OHLC(x)) {
+  if(lchob@color.vol && is.OHLC(x)) {
     # calculate colors for bars, if applicable.
     Opens  <- Op(x)
     Closes <- Cl(x)

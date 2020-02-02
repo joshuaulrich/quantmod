@@ -15,7 +15,7 @@ function(x,period='monthly',subset=NULL,type='arithmetic',leading=TRUE,...) {
     TS <- TRUE
   } else TS <- FALSE
 
-  if(has.Op(xx) & has.Cl(xx)) {
+  if(has.Op(xx) && has.Cl(xx)) {
     getFirst <- function(X) Op(X)
     getLast  <- function(X) Cl(X)
   } else getFirst <- getLast <- function(X) X[,1]

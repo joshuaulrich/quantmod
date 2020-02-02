@@ -524,7 +524,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 
                 # 2 cells means it is a stocksplit row
                 # So extract stocksplit data and recalculate the matrix we have so far
-                if (length(cells) == 2 & length(cols) == 6 & nrow(mat) > 1) {
+                if (length(cells) == 2 && length(cols) == 6 & nrow(mat) > 1) {
                     ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(XML::xmlValue(cells[[2]]), "[^0-9]+")))))
                     factor <- ss.data[2] / ss.data[1]
                     
