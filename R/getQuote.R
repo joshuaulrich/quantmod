@@ -282,42 +282,84 @@ getQuote.av <- function(Symbols, api.key, ...) {
          " at https://www.alphavantage.co/.", call.=FALSE)
   }
   URL <- paste0("https://www.alphavantage.co/query",
-                "?function=BATCH_STOCK_QUOTES",
+                "?function=GLOBAL_QUOTE",
                 "&apikey=", api.key,
-                "&symbols=")
+                "&symbol=")
 
-  # av supports batches of 100
-  nSymbols <- length(Symbols)
-  result <- NULL
-  for(i in seq(1, nSymbols, 100)) {
-    if(i > 1) {
-      Sys.sleep(0.25)
-      cat("getQuote.av downloading batch", i, ":", i + 99, "\n")
+  # column metadata
+  map <- data.frame(
+    qm.names = c("Symbol", "Open", "High", "Low", "Last", "Volume",
+                "Trade Time", "P. Close", "Change", "% Change"),
+    av.names = c("symbol", "open", "high", "low", "price", "volume",
+                "latest trading day", "previous close", "change", "change percent"),
+    is.number = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE),
+    stringsAsFactors = FALSE
+  )
+  prefix <- sprintf("%02d.", seq_len(nrow(map)))
+  map[["av.names"]] <- paste(prefix, map[["av.names"]])
+
+  # Function to process each quote response
+  quote2df <-
+    function(response, map)
+  {
+    # Expected response structure
+    qres <- setNames(vector("list", nrow(map)), map[["av.names"]])
+
+    elem <- function(el)
+    {
+      # process numeric columns
+      res <- NA_real_
+      if (!is.null(el)) {
+        haspct <- grepl("%", el, fixed = TRUE)
+        if (haspct) {
+          el <- sub("%", "", el, fixed = TRUE)
+          res <- as.numeric(el) / 100
+        } else {
+          res <- as.numeric(el)
+        }
+      }
+      res
     }
-    batchSymbols <- Symbols[i:min(nSymbols, i + 99)]
-    batchURL <- paste0(URL, paste(batchSymbols, collapse = ","))
-    response <- jsonlite::fromJSON(curl::curl(batchURL))
+    tmp <- modifyList(qres, response)
+    tonum <- map[["is.number"]]
+    tmp[tonum] <- lapply(tmp[tonum], elem)
 
-    if(NROW(response[["Stock Quotes"]]) < 1) {
-      syms <- paste(batchSymbols, collapse = ", ")
-      stop("Error in getQuote.av; no data for symbols: ",
-           syms, call. = FALSE)
-    }
+    data.frame(tmp, stringsAsFactors = FALSE)
+  }
 
-    if(is.null(result)) {
-      result <- response[["Stock Quotes"]]
+  # get latest daily quotes from AV
+  # they don't have batch quotes anymore as of Feb 2020
+  Symbols <- toupper(Symbols)
+  qlist <- list()
+
+  for (Symbol in Symbols) {
+    # Alpha Vantage's standard API is limited 5 calls/minute (~0.0833/sec)
+    Sys.sleep(0.1)
+    resp <- jsonlite::fromJSON(paste0(URL, Symbol))
+
+    if (names(resp)[1] != "Global Quote") {
+      msg <- paste(names(resp)[1], resp[[1]], sep = ": ")
+      warning(paste0("getQuote.av didn't return a quote for ", Symbol, "\n",
+                     "\tMessage: \"", msg, "\""),
+              call. = FALSE, immediate. = TRUE)
     } else {
-      result <- rbind(result, response[["Stock Quotes"]])
+      resp <- resp[[1]]  # resp$`Global Quote`
+      qlist[[Symbol]] <- quote2df(resp, map)
     }
   }
-  colnames(result) <- c("Symbol", "Last", "Volume", "Trade Time")
-  result$Volume <- suppressWarnings(as.numeric(result$Volume))
-  result$Last <- as.numeric(result$Last)
-  quoteTZ <- response[["Meta Data"]][["3. Time Zone"]]
-  result$`Trade Time` <- as.POSIXct(result$`Trade Time`, tz = quoteTZ)
 
-  # Normalize column names and output
-  return(result[, c("Symbol", "Trade Time", "Last", "Volume")])
+  qdf <- do.call(rbind, qlist)
+
+  if (NROW(qdf) < 1) {
+    syms <- paste(Symbols, collapse = ", ")
+    stop("Error in getQuote.av; no data for symbols: ",
+         syms, call. = FALSE)
+  }
+
+  names(qdf) <- map[["qm.names"]]
+  qdf[["Trade Time"]] <- as.Date(qdf[["Trade Time"]])
+
+  return(qdf)
 }
 
 `getQuote.tiingo` <- function(Symbols, api.key, ...) {
