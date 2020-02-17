@@ -300,7 +300,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
 
     if(NROW(response[["Stock Quotes"]]) < 1) {
       syms <- paste(batchSymbols, collapse = ", ")
-      stop("No data for symbols: ", syms)
+      stop("Error in getQuote.av; no data for symbols: ",
+           syms, call. = FALSE)
     }
 
     if(is.null(result)) {
@@ -357,7 +358,8 @@ getQuote.av <- function(Symbols, api.key, ...) {
 
     if(NROW(batch.result) < 1) {
       syms <- paste(Symbols[i:batch.end], collapse = ", ")
-      stop("No data for symbols: ", syms)
+      stop("Error in getQuote.tiingo; no data for symbols: ",
+           syms, call. = FALSE)
     }
 
     # do type conversions for each batch so we don't get issues with rbind
