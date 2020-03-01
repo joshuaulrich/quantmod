@@ -19,9 +19,14 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     # clean up colnames, in case there's weirdness in the JSON
     names(x) <- tolower(gsub("[[:space:]]", "", names(x)))
     # set cleaned up colnames to current output colnames
-    d <- with(x, data.frame(Strike=strike, Last=lastprice, Chg=change,
-      Bid=bid, Ask=ask, Vol=volume, OI=openinterest,
-      row.names=contractsymbol, stringsAsFactors=FALSE))
+    d <- with(x, data.frame(Strike=strike, 
+                            Last=lastprice, 
+                            Chg=change,
+                            Bid=bid, 
+                            Ask=ask, 
+                            Vol= if("volume" %in% names(x)) {volume} else {NA}, 
+                            OI= if("openinterest" %in% names(x)) {openinterest} else {NA},
+                            row.names=contractsymbol, stringsAsFactors=FALSE))
     # remove commas from the numeric data
     d[] <- lapply(d, gsub, pattern=",", replacement="", fixed=TRUE)
     d[] <- lapply(d, type.convert, as.is=TRUE)
