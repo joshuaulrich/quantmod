@@ -3,6 +3,10 @@ WISHLIST
 LICENSE
 #R/replot.R
 #R/chart_Series.R
+vignettes
+^.*\.Rcheck$
+^.*\.tar.gz$
+^.*\.patch$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.git
