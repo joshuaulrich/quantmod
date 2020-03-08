@@ -1,3 +1,48 @@
+### Changes in 0.4-16 (2020-03-08)
+
+1. Remove disk I/O from `getSymbols()` and `getQuote()`. This avoids any disk
+  contention, and makes the implementation pattern more consistent with other
+  functions that import data. Thanks to Ethan Smith suggestion and PR.
+  [#280](https://github.com/joshuaulrich/quantmod/issues/280)
+  [#281](https://github.com/joshuaulrich/quantmod/pull/281)
+
+1. Make `getQuote()` robust to symbols without data, so it does not error if
+  one or more symbols are not found. Also return quotes in the same order as
+  the 'Symbols' argument. Thanks to Ethan Smith feature request and PR.
+  [#279](https://github.com/joshuaulrich/quantmod/issues/279)
+  [#282](https://github.com/joshuaulrich/quantmod/pull/282)
+  [#288](https://github.com/joshuaulrich/quantmod/pull/288)
+
+1. Handle semicolon-delimited symbol string handling to main `getQuote()`
+  function. This makes `getQuote()` consistent with `getSymbols()`. Thanks to
+  Ethan Smith suggestion and PR.
+  [#284](https://github.com/joshuaulrich/quantmod/issues/284)
+  [#285](https://github.com/joshuaulrich/quantmod/pull/285)
+
+1. Fix ex-dividend and pay date mapping. `getQuote()` returned the dividend
+  pay date labeled as the ex-dividend date. Thanks to @matiasandina for the
+  report.
+  [#287](https://github.com/joshuaulrich/quantmod/issues/287)
+
+1. Fix Yahoo Finance split ratio. The delimiter changed from "/" to ":".
+  For example, a 2-for-1 split was 1/2 but is now "2:1". Thanks to @helgasoft
+  for the report.
+  [#292](https://github.com/joshuaulrich/quantmod/issues/292)
+
+1. Error messages from `getQuote.alphavantage()` and `getQuote.tiingo()` no
+  longer contain the API key when symbols can't be found.
+  [#286](https://github.com/joshuaulrich/quantmod/issues/286)
+
+1. Fix `getQuote.alphavantage()` by replacing the defunct batch quote request
+  with a loop over the single quote request. Thanks to @helgasoft for the
+  report and patch.
+  [#296](https://github.com/joshuaulrich/quantmod/issues/296)
+
+1. Update `getOptionChain()` to handle empty volume or open interest
+  Thank to @jrburl for the report and PR.
+  [#299](https://github.com/joshuaulrich/quantmod/issues/299)
+
+
 ### Changes in 0.4-15 (2019-06-15)
 
 1. Add an environment variable to control whether to run tests that import
