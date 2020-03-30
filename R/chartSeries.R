@@ -354,7 +354,7 @@ function(x,subset = NULL,
 
 # chartTheme {{{
 `chartTheme` <- function(theme='black',...) {
-  ctheme <- get(".chart.theme",as.environment("package:quantmod"))
+  ctheme <- .chart.theme
   attr(ctheme,".Environment") <- NULL
   current.theme <- ctheme[[theme]]
   ll <- list(...)
