@@ -1,3 +1,8 @@
+### Changes in 0.4-17 (2020-03-31)
+
+1. `chartTheme()` now works when quantmod is not attached. Thanks to Kurt
+  Hornik for the report.
+
 ### Changes in 0.4-16 (2020-03-08)
 
 1. Remove disk I/O from `getSymbols()` and `getQuote()`. This avoids any disk
