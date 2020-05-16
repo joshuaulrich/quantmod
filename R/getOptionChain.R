@@ -2,10 +2,12 @@
 function(Symbols, Exp=NULL, src="yahoo", ...) {
   Call <- paste("getOptionChain",src,sep=".")
   if(missing(Exp)) {
-    do.call(Call, list(Symbols=Symbols, ...))
+    optionChain <- do.call(Call, list(Symbols=Symbols, ...))
   } else {
-    do.call(Call, list(Symbols=Symbols, Exp=Exp, ...))
+    optionChain <- do.call(Call, list(Symbols=Symbols, Exp=Exp, ...))
   }
+  # only return non- NULL elements
+  optionChain[!vapply(optionChain, is.null, logical(1))]
 }
 
 getOptionChain.yahoo <- function(Symbols, Exp, ...)
@@ -42,7 +44,16 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     urlExp <- paste0(urlExp, "?&date=", Exp)
 
   # Fetch data (jsonlite::fromJSON will handle connection)
-  tbl <- jsonlite::fromJSON(urlExp)
+  tbl <- try(jsonlite::fromJSON(urlExp), silent = TRUE)
+
+  if(inherits(tbl, "try-error")) {
+    msg <- attr(tbl, "condition")[["message"]]
+    expDate <- .Date(Exp / 86400)
+    warning("no data for '", Symbols[1], "' expiry ", expDate,
+            ", omitting\n\t(server response: ", msg, ")",
+            immediate. = TRUE, call. = FALSE)
+    return(NULL)
+  }
 
   # Only return nearest expiry (default served by Yahoo Finance), unless the user specified Exp
   if(!missing(Exp) && checkExp) {
