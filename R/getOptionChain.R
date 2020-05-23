@@ -28,6 +28,9 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
                             Ask=ask, 
                             Vol= if("volume" %in% names(x)) {volume} else {NA}, 
                             OI= if("openinterest" %in% names(x)) {openinterest} else {NA},
+                            LastTradeTime= if("lasttradedate" %in% names(x)) {lasttradedate} else {NA},
+                            IV= if("impliedvolatility" %in% names(x)) {impliedvolatility} else {NA},
+                            ITM= if("inthemoney" %in% names(x)) {inthemoney} else {NA},
                             row.names=contractsymbol, stringsAsFactors=FALSE))
     # remove commas from the numeric data
     d[] <- lapply(d, gsub, pattern=",", replacement="", fixed=TRUE)
@@ -94,6 +97,12 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
   }
 
   dftables <- lapply(tbl$optionChain$result$options[[1]][,c("calls","puts")], `[[`, 1L)
+
+  # convert trade time to exchange timezone before calling NewToOld
+  tz <- tbl$optionChain$result$quote$exchangeTimezoneName[1L]
+  dftables$calls$lastTradeDate <- .POSIXct(dftables$calls$lastTradeDate, tz = tz)
+  dftables$puts$lastTradeDate <- .POSIXct(dftables$puts$lastTradeDate, tz = tz)
+
   dftables <- mapply(NewToOld, x=dftables, SIMPLIFY=FALSE)
   dftables
 }
