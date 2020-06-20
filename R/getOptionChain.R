@@ -15,7 +15,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
   if(!requireNamespace("jsonlite", quietly=TRUE))
     stop("package:",dQuote("jsonlite"),"cannot be loaded.")
 
-  NewToOld <- function(x) {
+  NewToOld <- function(x, tz = NULL) {
     if(is.null(x) || length(x) < 1)
       return(NULL)
     # clean up colnames, in case there's weirdness in the JSON
@@ -32,9 +32,8 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
                             IV= if("impliedvolatility" %in% names(x)) {impliedvolatility} else {NA},
                             ITM= if("inthemoney" %in% names(x)) {inthemoney} else {NA},
                             row.names=contractsymbol, stringsAsFactors=FALSE))
-    # remove commas from the numeric data
-    d[] <- lapply(d, gsub, pattern=",", replacement="", fixed=TRUE)
-    d[] <- lapply(d, type.convert, as.is=TRUE)
+    # convert trade time to exchange timezone
+    d$LastTradeTime <- .POSIXct(d$LastTradeTime, tz=tz)
     d
   }
 
@@ -98,12 +97,9 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
   dftables <- lapply(tbl$optionChain$result$options[[1]][,c("calls","puts")], `[[`, 1L)
 
-  # convert trade time to exchange timezone before calling NewToOld
   tz <- tbl$optionChain$result$quote$exchangeTimezoneName[1L]
-  dftables$calls$lastTradeDate <- .POSIXct(dftables$calls$lastTradeDate, tz = tz)
-  dftables$puts$lastTradeDate <- .POSIXct(dftables$puts$lastTradeDate, tz = tz)
 
-  dftables <- mapply(NewToOld, x=dftables, SIMPLIFY=FALSE)
+  dftables <- lapply(dftables, NewToOld, tz=tz)
   dftables
 }
 
