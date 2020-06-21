@@ -334,8 +334,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
        yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
                               interval, "history", handle)
-       fr <- try(read.csv(curl::curl(yahoo.URL, handle = handle$ch), na.strings="null"),
-                 silent = TRUE)
+       conn <- curl::curl(yahoo.URL, handle = handle$ch)
+       fr <- try(read.csv(conn, na.strings="null"), silent = TRUE)
 
        if (inherits(fr, "try-error")) {
          # warn user about the failure
@@ -346,10 +346,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
          # try again. must rebuild url with crumbs
          yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
                                 interval, "history", handle)
-         fr <- try(read.csv(curl::curl(yahoo.URL, handle = handle$ch), na.strings="null"),
-                   silent = TRUE)
+         close(conn)
+         conn <- curl::curl(yahoo.URL, handle = handle$ch)
+         fr <- try(read.csv(conn, na.strings="null"), silent = TRUE)
          # error if second attempt also failed
          if (inherits(fr, "try-error")) {
+           close(conn)
            stop(Symbols.name, " download failed after two attempts. Error",
                 " message:\n", attr(fr, "condition")$message, call. = FALSE)
          }
