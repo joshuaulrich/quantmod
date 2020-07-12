@@ -433,8 +433,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
         if(!hasArg("verbose")) verbose <- FALSE
         if(!hasArg("auto.assign")) auto.assign <- TRUE
 
-        if(!requireNamespace("XML", quietly=TRUE))
-          stop("package:",dQuote("XML"),"cannot be loaded.")
+        if(!requireNamespace("xml2", quietly=TRUE))
+          stop("package:",dQuote("xml2"),"cannot be loaded.")
 
         yahoo.URL <- "https://info.finance.yahoo.co.jp/history/"
 
@@ -498,8 +498,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
                                     "&p=",page,
                                     sep='')
                 
-                fdoc <- XML::htmlParse(URL)
-                rows <- XML::xpathApply(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
+                fdoc <- xml2::read_html(URL)
+                rows <- xml2::xml_find_all(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
                 if (length(rows) <= 1) break
                 
                 totalrows <- c(totalrows, rows)
@@ -515,19 +515,19 @@ function(Symbols,env,return.class='xts',index.class="Date",
             cols <- c('Open','High','Low','Close','Volume','Adjusted')
             
             firstrow <- totalrows[[1]]
-            cells <- XML::getNodeSet(firstrow, "th")
+            cells <- xml2::xml_find_all(firstrow, "th")
             if (length(cells) == 5) cols <- cols[-(5:6)]
 
             # Process from the start, for easier stocksplit management
             totalrows <- rev(totalrows)
             mat <- matrix(0, ncol=length(cols) + 1, nrow=0, byrow=TRUE)
             for(row in totalrows) {
-                cells <- XML::getNodeSet(row, "td")
+                cells <- xml2::xml_find_all(row, "td")
                 
                 # 2 cells means it is a stocksplit row
                 # So extract stocksplit data and recalculate the matrix we have so far
                 if (length(cells) == 2 && length(cols) == 6 & nrow(mat) > 1) {
-                    ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(XML::xmlValue(cells[[2]]), "[^0-9]+")))))
+                    ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(xml2::xml_text(cells[[2]]), "[^0-9]+")))))
                     factor <- ss.data[2] / ss.data[1]
                     
                     mat <- rbind(t(apply(mat[-nrow(mat),], 1, function(x) {
@@ -541,10 +541,10 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 # \u5e74 = "year"
                 # \u6708 = "month"
                 # \u65e5 = "day"
-                date <- as.Date(XML::xmlValue(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
+                date <- as.Date(xml2::xml_text(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
                 entry <- c(date)
                 for(n in 2:length(cells)) {
-                    entry <- cbind(entry, as.numeric(gsub(",", "", XML::xmlValue(cells[[n]]))))
+                    entry <- cbind(entry, as.numeric(gsub(",", "", xml2::xml_text(cells[[n]]))))
                 }
                 
                 mat <- rbind(mat, entry)
