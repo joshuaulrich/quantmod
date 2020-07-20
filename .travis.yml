@@ -4,10 +4,11 @@ language: c
 
 sudo: required
 
-dist: trusty
+dist: bionic
 
 env:
   global:
+    - R_VERSION="4.0"
     - _R_CHECK_FORCE_SUGGESTS_=false
 
 before_install:
