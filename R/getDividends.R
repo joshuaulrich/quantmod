@@ -1,6 +1,7 @@
 `getDividends` <-
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
-         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,split.adjust=TRUE,...) {
+         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,split.adjust=TRUE,...,
+         curl.options=list()) {
 
   if(missing(env))
     env <- parent.frame(1)
@@ -17,7 +18,13 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   yahoo.URL <- .yahooURL(Symbol.name, from.posix, to.posix,
                          "1d", "div", handle)
 
-  fr <- read.csv(curl::curl(yahoo.URL,handle=handle$ch))
+  conn <- curl::curl(yahoo.URL,handle=handle$ch)
+  fr <- try(read.csv(conn, as.is=TRUE), silent = TRUE)
+
+  if (inherits(fr, "try-error")) {
+    fr <- retry.yahoo(Symbol.name, from.posix, to.posix, "1d", "div", conn)
+  }
+
   fr <- xts(fr[,2],as.Date(fr[,1]))
   colnames(fr) <- paste(Symbol.name,'div',sep='.')
 

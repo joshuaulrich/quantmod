@@ -1,6 +1,7 @@
 `getSplits` <-
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
-         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...) {
+         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...,
+         curl.options=list()) {
 
   # Function written by Joshua Ulrich, using
   # getSymbols.yahoo as a guide.
@@ -19,7 +20,12 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   yahoo.URL <- .yahooURL(Symbol.name, from.posix, to.posix,
                          "1d", "split", handle)
 
-  fr <- read.csv(curl::curl(yahoo.URL, handle=handle$ch), as.is=TRUE)
+  conn <- curl::curl(yahoo.URL, handle=handle$ch)
+  fr <- try(read.csv(conn, as.is=TRUE), silent=TRUE)
+
+  if (inherits(fr, "try-error")) {
+    fr <- retry.yahoo(Symbol.name, from.posix, to.posix, "1d", "split", conn)
+  }
 
   if(NROW(fr)==0) {
     fr <- NA

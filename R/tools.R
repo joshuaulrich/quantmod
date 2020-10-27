@@ -58,3 +58,38 @@ function(url, destfile, method, quiet = FALSE, mode = "w", cacheOK = TRUE,
     }
   }
 }
+
+retry.yahoo <-
+function(symbol,
+         from,
+         to,
+         interval,
+         type,
+         conn,
+         ...,
+         curl.options = list())
+{
+     warning(symbol, " download failed; trying again.",
+             call. = FALSE, immediate. = TRUE)
+
+     # re-create handle
+     handle <- .getHandle(curl.options, force.new = TRUE)
+
+     # try again. must rebuild url with crumbs
+     yahoo.URL <- .yahooURL(symbol, from, to, interval, type, handle)
+
+     close(conn)
+     conn <- curl::curl(yahoo.URL, handle = handle$ch)
+
+     fr <- try(read.csv(conn, ..., as.is = TRUE), silent = TRUE)
+
+     # error if second attempt also failed
+     if (inherits(fr, "try-error")) {
+         close(conn)
+         stop(symbol, " download failed after two attempts. Error",
+              " message:\n", attr(fr, "condition")$message, call. = FALSE)
+     }
+
+     # return data
+     return(fr)
+}
