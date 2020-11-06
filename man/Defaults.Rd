@@ -17,7 +17,7 @@ getDefaults(name = NULL, arg = NULL)
 importDefaults(calling.fun)
 }
 \arguments{
-  \item{name}{ name of function, quoted or unquoted }
+  \item{name}{ name of function, quoted or unquoted (see Details) }
   \item{\dots}{ name=value default pairs }
   \item{confirm}{ prompt before unsetting defaults }
   \item{arg}{ values to retrieve } 
@@ -35,6 +35,10 @@ importDefaults(calling.fun)
       function one at a time, without having to retype all previous values.
       Assigning \code{NULL} to any argument will remove the argument from
       the defaults list.
+
+      \code{name} can be an unquoted, bare symbol only at the top-level. It
+      must be a quoted character string if you call \code{setDefaults} inside
+      a function. 
     }
     \item{unsetDefaults}{
       Removes name=value pairs from the defaults list.
