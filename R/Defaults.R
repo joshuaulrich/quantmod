@@ -96,7 +96,7 @@ function (name, ...)
         first.choice <- which(is.valid)
         if(length(first.choice) < 1) {
           # nothing visible and valid
-          stop("argument 'name' must be a function that contains a",
+          stop("argument 'name' must be a function that contains a ",
                "call to 'importDefaults()'")
         }
       } else {
