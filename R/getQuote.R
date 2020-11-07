@@ -6,6 +6,8 @@
 
 `getQuote` <-
 function(Symbols,src='yahoo',what, ...) {
+  importDefaults("getQuote")
+
   Symbols <- unique(unlist(strsplit(Symbols,";")))
   args <- list(Symbols=Symbols,...)
   if(!missing(what))
@@ -24,6 +26,8 @@ function(Symbols,src='yahoo',what, ...) {
 
 `getQuote.yahoo` <-
 function(Symbols,what=standardQuote(),...) {
+  importDefaults("getQuote.yahoo")
+
   length.of.symbols <- length(Symbols)
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
