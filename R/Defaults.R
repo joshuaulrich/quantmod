@@ -5,14 +5,15 @@ function(calling.fun=NULL) {
   if(is.function(calling.fun)) calling.fun <- deparse(substitute(calling.fun))
   if(is.null(sc)) 
     stop("importDefaults is only valid inside a function call") 
+
   funcall <- as.character(sc[[1]])
   funcall <- if(funcall[1] %in% c("::", ":::")) funcall[3] else funcall[1]
   if(funcall != calling.fun) return()
-  #calling.fun <- as.character(match.call(call=as.call(sys.call(-1)))[1])
+
   all.defaults <- getDefaults(calling.fun)
   if(is.null(all.defaults)) return()
   envir <- as.environment(-1)
-  #passed.args <- names(sapply(match.call(call=as.call(sys.call(-1)))[-1],deparse))
+
   passed.args <- names(as.list(match.call(
                        definition=eval(parse(text=calling.fun)),
                        call=as.call(sys.call(-1)))))[-1]
