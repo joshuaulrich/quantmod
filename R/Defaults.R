@@ -16,7 +16,7 @@ function(calling.fun=NULL) {
   passed.args <- names(as.list(match.call(
                        definition=eval(parse(text=calling.fun)),
                        call=as.call(sys.call(-1)))))[-1]
-  formal.args <- names(formals(as.character(sys.call(-1))))
+  formal.args <- names(formals(as.character(sys.call(-1)[[1]])))
   default.args <- names(which(sapply(all.defaults,function(x) !is.null(x))==TRUE))
   for(arg in formal.args) {
     if(!arg %in% passed.args) {
