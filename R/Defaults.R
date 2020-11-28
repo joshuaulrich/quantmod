@@ -16,27 +16,29 @@ function(calling.fun=NULL) {
 
   passed.args <- names(as.list(match.call(
                        definition=eval(parse(text=calling.fun)),
-                       call=as.call(sys.call(-1)))))[-1]
-  formal.args <- names(formals(as.character(sys.call(-1)[[1]])))
+                       call=sc)))[-1]
+  formal.args <- names(formals(calling.fun))
   default.args <- names(which(sapply(all.defaults,function(x) !is.null(x))==TRUE))
+
   for(arg in formal.args) {
     if(!arg %in% passed.args) {
       if(arg %in% default.args) {
-        if(typeof(all.defaults[arg][[1]])=='list') {
-          assign(arg, as.vector(all.defaults[arg][[1]]),envir=envir)
-        } 
-        else if(typeof(all.defaults[arg][[1]]) %in% c('symbol','language')) {
-          assign(arg, all.defaults[arg][[1]],envir=envir)
+        this.default <- all.defaults[arg][[1]]
+        if(typeof(this.default)=='list') {
+          assign(arg, as.vector(this.default),envir=envir)
         }
-        else if(typeof(all.defaults[arg][[1]])=="character") {
-           if(length(all.defaults[arg][[1]])==1) {
-             assign(arg, eval(parse(text=all.defaults[arg][[1]])),envir=envir)
+        else if(typeof(this.default) %in% c('symbol','language')) {
+          assign(arg, this.default,envir=envir)
+        }
+        else if(typeof(this.default)=="character") {
+           if(length(this.default)==1) {
+             assign(arg, eval(parse(text=this.default)),envir=envir)
            } else {
-             assign(arg, as.character(parse(text=all.defaults[arg][[1]])),envir=envir)
+             assign(arg, as.character(parse(text=this.default)),envir=envir)
            }
         }
         else {
-          assign(arg, as.vector(unlist(all.defaults[arg][[1]])),envir=envir)
+          assign(arg, as.vector(unlist(this.default)),envir=envir)
         }
       }
     }
