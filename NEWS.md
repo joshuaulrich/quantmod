@@ -1,3 +1,44 @@
+### Changes in 0.4-18 (2020-11-29)
+
+1. Fix issues handling https:// in `getSymbols.yahooj()`. Thanks to @lobo1981
+  and @tchevri for the reports and @ethanbsmith for the suggestion to move
+  from XML to xml2.
+  [#310](https://github.com/joshuaulrich/quantmod/issues/310)
+  [#312](https://github.com/joshuaulrich/quantmod/issues/312)
+
+1. Fix `getSymbols.yahoo()`, `getDividends()`, and `getSplits()` so they all
+  handle download errors and retry again. Thanks for @helgasoft for the report
+  on `getSymbols.yahoo()` and @msfsalla for the report on `getDividends()` and
+  `getSplits()`.
+  [#307](https://github.com/joshuaulrich/quantmod/issues/307)
+  [#314](https://github.com/joshuaulrich/quantmod/issues/314)
+
+1. Add implied volatility and last trade date to `getOptionChain()` output.
+  Thanks to @hd2581 and @romanlelek for the reports. And thanks to
+  @rjvelasquezm for noticing the error when `lastTradeDate` is `NULL`.
+  [#224](https://github.com/joshuaulrich/quantmod/issues/224)
+  [#304](https://github.com/joshuaulrich/quantmod/issues/304)
+
+1. Fix `getOptionChain()` to throw a warning and return `NULL` for every
+  expiry that doesn't have data.
+  [#299](https://github.com/joshuaulrich/quantmod/issues/299)
+
+1. Add "Defaults" handling to `getQuote()` and `getQuote.yahoo()`. Thanks to
+  @ethanbsmith for the report.
+  [#291](https://github.com/joshuaulrich/quantmod/issues/291)
+
+1. Add Bid and Ask fields to the output from `getQuote()`. Thanks to @jrburl
+  for the report and PR.
+  [#302](https://github.com/joshuaulrich/quantmod/pull/302)
+
+1. Fix "Defaults" to handle unexported function (e.g. `getQuote.av()`. Thanks
+  to @helgasoft for the report.
+  [#316](https://github.com/joshuaulrich/quantmod/issues/316)
+
+1. `importDefaults()` doesn't call `get()` on vector with length > 1. Thanks
+  to Kurt Hornik for the report.
+  [#319](https://github.com/joshuaulrich/quantmod/issues/319)
+
 ### Changes in 0.4-17 (2020-03-31)
 
 1. `chartTheme()` now works when quantmod is not attached. Thanks to Kurt
@@ -46,6 +87,7 @@
 1. Update `getOptionChain()` to handle empty volume or open interest
   Thank to @jrburl for the report and PR.
   [#299](https://github.com/joshuaulrich/quantmod/issues/299)
+  [#300](https://github.com/joshuaulrich/quantmod/pull/300)
 
 
 ### Changes in 0.4-15 (2019-06-15)
