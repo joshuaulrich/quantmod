@@ -1,7 +1,10 @@
 library(quantmod)
 
+# Tests for getSymbols
+test_getsymbols <- Sys.getenv("QUANTMOD_TEST_GETSYMBOLS")
+
 # Checks for Alpha Vantage
-apikey <- Sys.getenv("AV_API_KEY")
+apikey <- Sys.getenv("QUANTMOD_AV_API_KEY")
 if (apikey != "") {
   ibm_daily_unadj <- getSymbols("IBM", src = "av", api.key = apikey,
     adjusted = FALSE, periodicity = "daily", auto.assign = FALSE)
@@ -39,43 +42,46 @@ rm(IBM)
 
 e <- new.env()
 
-x <- try({
-  getSymbols("IBM;WYSIWYG", env = e, src = "csv", dir = td, col.names = cn)
-}, silent = TRUE)
-stopifnot(exists("IBM", e))
-rm(IBM, pos = e)
-
-x <- try({
-  getSymbols("IBM;WYSIWYG", env = e, src = "rda", dir = td, col.names = cn)
-}, silent = TRUE)
-stopifnot(exists("IBM", e))
-rm(IBM, pos = e)
-
-x <- try({
-  getSymbols("IBM;WYSIWYG", env = e, src = "yahoo")
-}, silent = TRUE)
-stopifnot(exists("IBM", e))
-rm(IBM, pos = e)
-
-if (apikey != "") {
+# Test getSymbols() works if only passed one symbol that does not have data.
+if (test_getsymbols != "") {
   x <- try({
-    getSymbols("IBM;WYSIWYG", env = e, src = "av", api.key = apikey)
+    getSymbols("IBM;WYSIWYG", env = e, src = "csv", dir = td, col.names = cn)
   }, silent = TRUE)
   stopifnot(exists("IBM", e))
   rm(IBM, pos = e)
+
+  x <- try({
+    getSymbols("IBM;WYSIWYG", env = e, src = "rda", dir = td, col.names = cn)
+  }, silent = TRUE)
+  stopifnot(exists("IBM", e))
+  rm(IBM, pos = e)
+
+  x <- try({
+    getSymbols("IBM;WYSIWYG", env = e, src = "yahoo")
+  }, silent = TRUE)
+  stopifnot(exists("IBM", e))
+  rm(IBM, pos = e)
+
+  if (apikey != "") {
+    x <- try({
+      getSymbols("IBM;WYSIWYG", env = e, src = "av", api.key = apikey)
+    }, silent = TRUE)
+    stopifnot(exists("IBM", e))
+    rm(IBM, pos = e)
+  }
+
+  x <- try({
+    getSymbols("DGS10;WYSIWYG", env = e, src = "FRED")
+  }, silent = TRUE)
+  stopifnot(exists("DGS10", e))
+  rm(DGS10, pos = e)
+
+  x <- try({
+    getSymbols("EUR/USD;WYS/WYG", env = e, src = "oanda")
+  }, silent = TRUE)
+  stopifnot(exists("EURUSD", e))
+  rm(EURUSD, pos = e)
 }
-
-x <- try({
-  getSymbols("DGS10;WYSIWYG", env = e, src = "FRED")
-}, silent = TRUE)
-stopifnot(exists("DGS10", e))
-rm(DGS10, pos = e)
-
-x <- try({
-  getSymbols("EUR/USD;WYS/WYG", env = e, src = "oanda")
-}, silent = TRUE)
-stopifnot(exists("EURUSD", e))
-rm(EURUSD, pos = e)
 
 # Ensure getSymbols() errors if only passed one symbol that does not have data.
 # "csv" and "rda" already skip missing symbols
@@ -102,7 +108,9 @@ x <- try({
 stopifnot(inherits(x, "try-error"))
 
 # Individual getSymbols() "methods" should not error if only passed one symbol.
-setSymbolLookup(AAPL = "yahoo", DGS10 = "FRED")
-getSymbols("AAPL;DGS10", env = e)
-stopifnot(exists("AAPL", e))
-stopifnot(exists("DGS10", e))
+if (test_getsymbols != "") {
+  setSymbolLookup(AAPL = "yahoo", DGS10 = "FRED")
+  getSymbols("AAPL;DGS10", env = e)
+  stopifnot(exists("AAPL", e))
+  stopifnot(exists("DGS10", e))
+}

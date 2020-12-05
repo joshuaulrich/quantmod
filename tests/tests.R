@@ -1,5 +1,5 @@
-av.key <- Sys.getenv("AV_API_KEY")
-tiingo.key <- Sys.getenv("TIINGO_API_KEY")
+av.key <- Sys.getenv("QUANTMOD_AV_API_KEY")
+tiingo.key <- Sys.getenv("QUANTMOD_TIINGO_API_KEY")
 
 # Call as.zoo before quantmod is loaded and registers its S3 method
 dc <- c("2015-01-01", "2016-01-01", "2017-01-01")
