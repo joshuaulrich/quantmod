@@ -24,17 +24,7 @@ Release checklist for quantmod
 * Ensure [all CRAN checks](https://cran.r-project.org/web/checks/check_results_quantmod.html) are addressed
 
 * Upload to CRAN
-    * Include comment about using `assign()`
-        The calls to attach() are made in the function attachSymbols().  This
-        function is a mechanism to wrap the complexity of attaching multiple
-        symbols (a database of potentially thousands of individual instrument
-        names) with one simple call.  Based on previous emails with CRAN
-        regarding this specific attach usage, and the lack of anything beyond
-        the NOTE 'finding' the call, this seems well within the scope of
-        behavior required by CRAN.  Note that the name of the function doing
-        this attach is an extension of the attach name itself, which makes the
-        function's purpose clear. 
-    * Make sure to include any necessary comments to CRAN
+    * Add any new comments the [CRAN comments](CRAN_comments.md) file
 
 * Post "on CRAN now"
     * Tag release
