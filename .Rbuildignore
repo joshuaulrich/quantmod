@@ -15,4 +15,5 @@ vignettes
 ^README.md$
 ^CONTRIBUTING.md$
 ^CRAN_comments.md$
+^release-checklist.md$
 .travis.yml
