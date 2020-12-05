@@ -66,7 +66,7 @@ An object of the original class, with prices
 adjusted for splits and dividends.
 }
 \references{
-Yahoo Finance \url{http://finance.yahoo.com}
+Yahoo Finance \url{https://finance.yahoo.com}
 }
 \author{
 Jeffrey A. Ryan

@@ -52,7 +52,7 @@ defined by 'return.class'.
 }
 \references{
 \itemize{
-   \cite{SQLite \url{http://www.sqlite.org}}
+   \cite{SQLite \url{https://www.sqlite.org/index.html}}
 
    \cite{David A. James 
          RSQLite: SQLite interface for R

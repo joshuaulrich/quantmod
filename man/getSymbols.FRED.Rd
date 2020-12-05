@@ -61,7 +61,7 @@ one of the following solutions:
     \item{Set the \code{download.file.method} global option.}
   }
 }
-\references{ St. Louis Fed: Economic Data - FRED \url{http://research.stlouisfed.org/fred2/}
+\references{ St. Louis Fed: Economic Data - FRED \url{https://fred.stlouisfed.org/}
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}},

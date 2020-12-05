@@ -68,7 +68,7 @@ In the case of xts objects, the indexing will be by Date. This
 can be altered with the \code{index.class} argument.  See
 \code{indexClass} for more information on changing index classes.
 }
-\references{ Yahoo Finance: \url{http://finance.yahoo.com} }
+\references{ Yahoo Finance: \url{https://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}},
           \code{\link{setSymbolLookup}} }

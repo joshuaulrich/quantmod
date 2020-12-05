@@ -51,7 +51,7 @@ to the environment specified by \code{env}.
 All other cases will return the dividend data
 as an \code{xts} object.
 }
-\references{ Yahoo! Finance: \url{http://finance.yahoo.com}}
+\references{ Yahoo! Finance: \url{https://finance.yahoo.com}}
 \author{ Jeffrey A. Ryan }
 \note{ 
 This function is very preliminary - and will most likely

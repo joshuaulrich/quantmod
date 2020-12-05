@@ -49,7 +49,7 @@ All other cases will return the split data
 as an \code{xts} object.  \code{NA} is returned if there
 is no split data.
 }
-\references{ Yahoo! Finance: \url{http://finance.yahoo.com}}
+\references{ Yahoo! Finance: \url{https://finance.yahoo.com}}
 \author{ Josh Ulrich }
 \note{ 
 This function is very preliminary - and will most likely

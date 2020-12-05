@@ -32,7 +32,7 @@ If \code{Exp} is set to \code{NULL}, all expirations
 will be returned. Not explicitly setting will only
 return the front month.
 }
-\references{ \url{http://finance.yahoo.com} }
+\references{ \url{https://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan, Joshua M. Ulrich }
 \examples{
 \dontrun{
