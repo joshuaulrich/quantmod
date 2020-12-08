@@ -1,9 +1,9 @@
 library(quantmod)
 
-test.yahoo.finance <- nzchar(Sys.getenv("QUANTMOD_TEST_YAHOO_FINANCE"))
+test.web.endpoints <- Sys.getenv("QUANTMOD_TEST_WEB_ENDPOINTS")
 
 # split-adjusted by default
-if (test.yahoo.finance) {
+if (nzchar(test.web.endpoints)) {
   cf.div.adj <- as.numeric(getDividends("CF")["2015"])
   stopifnot(isTRUE(all.equal(cf.div.adj, rep(0.3, 4))))
   cf.div.raw <- as.numeric(getDividends("CF", split.adjust = FALSE)["2015"])
