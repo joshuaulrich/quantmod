@@ -304,29 +304,37 @@ getQuote.av <- function(Symbols, api.key, ...) {
 
   # Function to process each quote response
   quote2df <-
-    function(response, map)
+    function(response, map, symbol)
   {
     # Expected response structure
     qres <- setNames(vector("list", nrow(map)), map[["av.names"]])
 
-    elem <- function(el)
+    elem <- function(el, isnum)
     {
-      # process numeric columns
       res <- NA_real_
       if (!is.null(el)) {
-        haspct <- grepl("%", el, fixed = TRUE)
-        if (haspct) {
-          el <- sub("%", "", el, fixed = TRUE)
-          res <- as.numeric(el) / 100
+        if (isnum) {
+          # process numeric columns
+          haspct <- grepl("%", el, fixed = TRUE)
+          if (haspct) {
+            el <- sub("%", "", el, fixed = TRUE)
+            res <- as.numeric(el) / 100
+          } else {
+            res <- as.numeric(el)
+          }
         } else {
-          res <- as.numeric(el)
+          res <- el
         }
       }
       res
     }
     tmp <- modifyList(qres, response)
-    tonum <- map[["is.number"]]
-    tmp[tonum] <- lapply(tmp[tonum], elem)
+    tmp <- Map(elem, el = tmp, isnum = map[["is.number"]])
+
+    # populate Symbol column for symbols missing quotes
+    if (is.na(tmp[["01. symbol"]])) {
+      tmp[["01. symbol"]] <- symbol
+    }
 
     data.frame(tmp, stringsAsFactors = FALSE)
   }
@@ -348,7 +356,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
               call. = FALSE, immediate. = TRUE)
     } else {
       resp <- resp[[1]]  # resp$`Global Quote`
-      qlist[[Symbol]] <- quote2df(resp, map)
+      qlist[[Symbol]] <- quote2df(resp, map, Symbol)
     }
   }
 
