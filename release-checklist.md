@@ -24,10 +24,10 @@ Release checklist for quantmod
 * Ensure [all CRAN checks](https://cran.r-project.org/web/checks/check_results_quantmod.html) are addressed
 
 * Upload to CRAN
-    * Add any new comments the [CRAN comments](CRAN_comments.md) file
+    * Add any new comments to the [CRAN comments](CRAN_comments.md) file
 
 * Post "on CRAN now"
-    * Tag release
+    * Tag version and create release
     * Close milestone
     * Announce:
         * Blog post, tweet, R-announce, etc
