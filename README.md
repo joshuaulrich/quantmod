@@ -12,9 +12,9 @@ Available as part of the Tidelift Subscription.
 
 The maintainers of `quantmod` and thousands of other packages are working with Tidelift to deliver commercial support and maintenance for the open source dependencies you use to build your applications. Save time, reduce risk, and improve code health, while paying the maintainers of the exact dependencies you use. [Learn more.](https://tidelift.com/subscription/pkg/cran-quantmod?utm_source=cran-quantmod&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)
 
-### Supporting quantmod through Patreon
+### Supporting quantmod development
 
-If you are interested in supporting this project, please consider [becoming a patron](https://www.patreon.com/joshuaulrich).
+If you are interested in supporting the ongoing development and maintenance of quantmod, please consider [becoming a sponsor](https://github.com/sponsors/joshuaulrich).
 
 ### Installation
 
