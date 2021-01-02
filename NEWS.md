@@ -1,3 +1,9 @@
+### Changes in 0.4-18.1 (2021-mm-dd)
+
+1. Fix `addMACD()` when `col` is specified. Thanks to @nvalueanalytics for the
+  report!
+  [#321](https://github.com/joshuaulrich/quantmod/issues/321)
+
 ### Changes in 0.4-18 (2020-11-29)
 
 1. Fix issues handling https:// in `getSymbols.yahooj()`. Thanks to @lobo1981

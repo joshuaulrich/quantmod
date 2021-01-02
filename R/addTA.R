@@ -947,8 +947,9 @@ function(x) {
   chobTA <- new("chobTA")
   chobTA@new <- TRUE
 
-  col <- if(missing(col)) col <- c('#999999','#777777',
-                              '#BBBBBB','#FF0000')
+  if(missing(col)) {
+    col <- c('#999999','#777777', '#BBBBBB','#FF0000')
+  }
 
   xx <- if(is.OHLC(x)) {
     Cl(x)
