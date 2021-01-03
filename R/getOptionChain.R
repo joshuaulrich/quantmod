@@ -21,9 +21,14 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     # clean up colnames, in case there's weirdness in the JSON
     names(x) <- tolower(gsub("[[:space:]]", "", names(x)))
     # set cleaned up colnames to current output colnames
-    d <- with(x, data.frame(Strike=strike, 
+    d <- with(x, data.frame(ContractID= if("contractsymbol" %in% names(x)) {contractsymbol} else {NA},
+                            ConractSize= if("contractsize" %in% names(x)) {contractsize} else {NA},
+                            Currency= if("currency" %in% names(x)) {currency} else {NA},
+                            Expiration= as.POSIXct(expiration,origin="1970-01-01", tz="UTC"),
+                            Strike=strike, 
                             Last=lastprice, 
                             Chg=change,
+                            ChgPct= if("percentchange" %in% names(x)) {percentchange} else {NA},
                             Bid= if("bid" %in% names(x)) {bid} else {NA}, 
                             Ask= if("ask" %in% names(x)) {ask} else {NA},    
                             Vol= if("volume" %in% names(x)) {volume} else {NA}, 
