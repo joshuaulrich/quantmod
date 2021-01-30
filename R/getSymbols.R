@@ -755,7 +755,7 @@ function(Symbols,env,return.class='xts',
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
        test <- try({
        URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
-       fr <- read.csv(curl::curl(URL),na.string=".")
+       fr <- read.csv(curl::curl(URL),na.strings=".")
 
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
