@@ -44,7 +44,9 @@ function(Symbols,what=standardQuote(),...) {
     cat("...done\n")
     return(df)
   }
-  SymbolsString <- paste(Symbols,collapse=',')
+  # escape symbols that have special characters
+  escapedSymbols <- sapply(Symbols, URLencode, reserved = TRUE)
+  SymbolsString <- paste(escapedSymbols, collapse = ',')
   if(inherits(what, 'quoteFormat')) {
     QF <- what[[1]]
     QF.names <- what[[2]]
