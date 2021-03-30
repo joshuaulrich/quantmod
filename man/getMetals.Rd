@@ -56,9 +56,11 @@ See \code{getSymbols} and \code{getSymbols.oanda} for more detail.
 \examples{
 \dontrun{
 
-getFX(c("gold","XPD"))
+getMetals(c("gold", "XPD"))
 
-getFX("plat",from="2005-01-01")
+## warning: Oanda only provides historical data for the past 180 days
+getMetals("plat", from = "2005-01-01")
+
 }
 }
 \keyword{ utilities}
