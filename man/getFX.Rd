@@ -14,7 +14,6 @@ getFX(Currencies,
       warning = TRUE,
       auto.assign = TRUE, ...)
 }
-%- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{Currencies}{ Currency pairs expressed as \sQuote{CUR/CUR} }
   \item{from}{ start date expressed in ISO CCYY-MM-DD format }
@@ -30,8 +29,12 @@ A convenience wrapper to \code{getSymbols(x,src='oanda')}. See
 \code{getSymbols} and \code{getSymbls.oanda} for more detail.
 }
 \value{
-The results of the call will be the data will be assigned
-automatically to the environment specified (parent by default). Additionally
+Data will be assigned
+automatically to the environment specified (the parent environment by default).
+If \code{auto.assign = FALSE}, the data from a single metal
+request will simply be returned from the function call.
+
+If \code{auto.assign = TRUE} is used (the default)
 a vector of downloaded symbol names will be returned.
 
 See \code{getSymbols} and \code{getSymbols.oanda} for more detail.
@@ -47,6 +50,4 @@ getFX("USD/JPY")
 getFX("EUR/USD",from="2005-01-01")
 }
 }
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
 \keyword{ utilities}
