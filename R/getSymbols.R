@@ -339,7 +339,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
        if (inherits(fr, "try-error")) {
          fr <- retry.yahoo(Symbols.name, from.posix, to.posix, interval,
-                           "history", curl.options = curl.options,
+                           "history", conn, curl.options = curl.options,
                            na.strings = NULL)
        }
 
