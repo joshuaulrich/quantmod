@@ -10,17 +10,7 @@ function(Symbols=NULL,
          symbol.lookup=TRUE,
          auto.assign=getOption('getSymbols.auto.assign',TRUE),
          ...)  {
-      if(getOption("getSymbols.warning4.0",TRUE)) {
-        # transition message for 0.4-0 to 0.5-0
-        message(sQuote('getSymbols'), ' currently uses auto.assign=TRUE by default, but will\n',
-                'use auto.assign=FALSE in 0.5-0. You will still be able to use\n',
-                sQuote('loadSymbols'), ' to automatically load data. getOption("getSymbols.env")\n',
-                'and getOption("getSymbols.auto.assign") will still be checked for\n',
-                'alternate defaults.\n\n',
-                'This message is shown once per session and may be disabled by setting \n',
-                'options("getSymbols.warning4.0"=FALSE). See ?getSymbols for details.\n')
-        options("getSymbols.warning4.0"=FALSE)
-      }
+
       importDefaults("getSymbols")
       #  to enable as-it-was behavior, set this:
       #  options(getSymbols=list(env=substitute(parent.frame(3))))
