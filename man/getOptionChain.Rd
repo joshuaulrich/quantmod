@@ -6,15 +6,17 @@ Function to download option chain data from
 data providers.
 }
 \usage{
-getOptionChain(Symbols, Exp = NULL, src="yahoo", ...)
+getOptionChain(Symbols, Exp = NULL, src="yahoo", \dots)
 }
 \arguments{
-  \item{Symbols}{ The name of the underlying symbol. }
+  \item{Symbols}{ The name of the underlying symbol. Source \sQuote{yahoo} only 
+   allows for a single ticker while source \sQuote{orats} can return multiple tickers.}
   \item{Exp}{ One or more expiration dates, NULL, or an ISO-8601 style string.
     If \code{Exp} is missing, only the front month contract will be returned.
  }
-  \item{src}{ Source of data.  Currently only \sQuote{yahoo} is provided. }
-  \item{\dots}{ Additional parameters. }
+  \item{src}{ Source of data.  One of \sQuote{yahoo} or \sQuote{orats} with
+    a default of \sQuote{yahoo}.}
+  \item{\dots}{ Additional parameters.}
 }
 \details{
 This function is a wrapper to data-provider specific
@@ -32,8 +34,16 @@ If \code{Exp} is set to \code{NULL}, all expirations
 will be returned. Not explicitly setting will only
 return the front month.
 }
+<<<<<<< HEAD
 \references{ \url{https://finance.yahoo.com} }
 \author{ Jeffrey A. Ryan, Joshua M. Ulrich }
+=======
+\references{
+ \url{http://finance.yahoo.com},
+ \url{https://docs.orats.io/datav2-api-guide/data.html#strikes}
+}
+\author{ Jeffrey A. Ryan, Joshua M. Ulrich, Steve Bronder }
+>>>>>>> Adds orats source for getOptionChain()
 \examples{
 \dontrun{
 # Only the front-month expiry
@@ -42,6 +52,11 @@ AAPL.OPT <- getOptionChain("AAPL")
 AAPL.OPTS <- getOptionChain("AAPL", NULL)
 # All 2015 and 2016 expiries
 AAPL.2015 <- getOptionChain("AAPL", "2015/2016")
+# Using orats backend
+NFLX.AAPL.2021 <- getOptionChain(c("NFLX", "AAPL"), "2021", src = "orats", 
+  api.key = Sys.getenv("ORATS_API_KEY"))
 }
 }
+\seealso{\code{\link{getOptionChain.orats}}}
 \keyword{ utilities }% __ONLY ONE__ keyword per line
+

@@ -29,7 +29,7 @@ getMetals(Metals,
 \details{
 A convenience wrapper to \code{getSymbols(x,src='oanda')}.
 
-The most useful aspect of getMetals is the ablity to specify the Metals
+The most useful aspect of getMetals is the ability to specify the Metals
 in terms of underlying 3 character symbol or by name (e.g. XAU (gold) , XAG (silver),
 XPD (palladium), or XPT (platinum)).
 
@@ -41,11 +41,11 @@ See \code{getSymbols} and \code{getSymbls.oanda} for more detail.
 }
 \value{
 Data will be assigned
-automatically to the environment specified (parent by default).
-If auto.assign is set to FALSE, the data from a single metal
+automatically to the environment specified (the parent environment by default).
+If \code{auto.assign = FALSE}, the data from a single metal
 request will simply be returned from the function call.
 
-If auto.assign is used (the default)
+If \code{auto.assign = TRUE} is used (the default)
 a vector of downloaded symbol names will be returned.
 
 See \code{getSymbols} and \code{getSymbols.oanda} for more detail.
@@ -56,9 +56,9 @@ See \code{getSymbols} and \code{getSymbols.oanda} for more detail.
 \examples{
 \dontrun{
 
-getFX(c("gold","XPD"))
+getMetals(c("gold","XPD"))
 
-getFX("plat",from="2005-01-01")
+getMetals("plat",from="2005-01-01")
 }
 }
 \keyword{ utilities}
