@@ -34,16 +34,11 @@ If \code{Exp} is set to \code{NULL}, all expirations
 will be returned. Not explicitly setting will only
 return the front month.
 }
-<<<<<<< HEAD
-\references{ \url{https://finance.yahoo.com} }
-\author{ Jeffrey A. Ryan, Joshua M. Ulrich }
-=======
+\author{ Jeffrey A. Ryan, Joshua M. Ulrich, Steve Bronder }
 \references{
  \url{http://finance.yahoo.com},
  \url{https://docs.orats.io/datav2-api-guide/data.html#strikes}
 }
-\author{ Jeffrey A. Ryan, Joshua M. Ulrich, Steve Bronder }
->>>>>>> Adds orats source for getOptionChain()
 \examples{
 \dontrun{
 # Only the front-month expiry
