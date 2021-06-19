@@ -21,25 +21,53 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     # clean up colnames, in case there's weirdness in the JSON
     names(x) <- tolower(gsub("[[:space:]]", "", names(x)))
     # set cleaned up colnames to current output colnames
-    d <- with(x, data.frame(ContractID= if("contractsymbol" %in% names(x)) {contractsymbol} else {NA},
-                            ConractSize= if("contractsize" %in% names(x)) {contractsize} else {NA},
-                            Currency= if("currency" %in% names(x)) {currency} else {NA},
-                            Expiration= as.POSIXct(expiration,origin="1970-01-01", tz="UTC"),
-                            Strike=strike, 
-                            Last=lastprice, 
-                            Chg=change,
-                            ChgPct= if("percentchange" %in% names(x)) {percentchange} else {NA},
-                            Bid= if("bid" %in% names(x)) {bid} else {NA}, 
-                            Ask= if("ask" %in% names(x)) {ask} else {NA},    
-                            Vol= if("volume" %in% names(x)) {volume} else {NA}, 
-                            OI= if("openinterest" %in% names(x)) {openinterest} else {NA},
-                            LastTradeTime= if("lasttradedate" %in% names(x)) {lasttradedate} else {NA},
-                            IV= if("impliedvolatility" %in% names(x)) {impliedvolatility} else {NA},
-                            ITM= if("inthemoney" %in% names(x)) {inthemoney} else {NA},
-                            row.names=contractsymbol, stringsAsFactors=FALSE))
+    cnames <- c(contractsymbol = "ContractID",
+                contractsize = "ConractSize",
+                currency = "Currency",
+                expiration = "Expiration",
+                strike = "Strike",
+                lastprice = "Last",
+                change = "Chg",
+                percentchange = "ChgPct",
+                bid = "Bid",
+                ask = "Ask",
+                volume = "Vol",
+                openinterest = "OI",
+                lasttradedate = "LastTradeTime",
+                impliedvolatility = "IV",
+                inthemoney = "ITM")
+
+    # create template data.frame for results
+    N <- NROW(x)
+    d <- structure(
+        list(ContractID    = rep(NA_character_, N),
+             ConractSize   = rep(NA_character_, N),
+             Currency      = rep(NA_character_, N),
+             Expiration    = rep(NA_integer_, N),
+             Strike        = rep(NA_real_, N),
+             Last          = rep(NA_real_, N),
+             Chg           = rep(NA_real_, N),
+             ChgPct        = rep(NA_real_, N),
+             Bid           = rep(NA_real_, N),
+             Ask           = rep(NA_real_, N),
+             Vol           = rep(NA_integer_, N),
+             OI            = rep(NA_integer_, N),
+             LastTradeTime = rep(NA_integer_, N),
+             IV            = rep(NA_real_, N),
+             ITM           = rep(NA, N)),
+        row.names = c(NA, -N), class = "data.frame")
+
+    # fill in available results
+    result.colnames <- cnames[names(x)]
+    d[, result.colnames] <- x
+
+    # convert expiration to POSIXct for theta decay calculations
+    d$Expiration <- as.POSIXct(d$Expiration, origin = "1970-01-01", tz = "UTC")
+
     # convert trade time to exchange timezone
     d$LastTradeTime <- .POSIXct(d$LastTradeTime, tz=tz)
-    d
+
+    return(d)
   }
 
   # Don't check the expiry date if we're looping over dates we just scraped
