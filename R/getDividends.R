@@ -3,8 +3,14 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
          auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,split.adjust=TRUE,...,
          curl.options=list()) {
 
-  if(missing(env))
+  tmp.symbol <- Symbol
+  if(missing(env)) {
     env <- parent.frame(1)
+  } else {
+    if(exists(Symbol, envir = env)) {
+      tmp.symbol <- get(Symbol, envir = env)
+    }
+  }
   if(is.null(env))
     auto.assign <- FALSE
   Symbol.name <- ifelse(!is.character(Symbol),
@@ -36,10 +42,10 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
     }
   }
 
-  if(is.xts(Symbol)) {
+  if(is.xts(tmp.symbol)) {
     if(auto.update) {
-      xtsAttributes(Symbol) <- list(dividends=fr)
-      assign(Symbol.name,Symbol,envir=env)
+      xtsAttributes(tmp.symbol) <- list(dividends=fr)
+      assign(Symbol.name,tmp.symbol,envir=env)
     }
   } else if(auto.assign) {
       assign(paste(Symbol.name,'div',sep='.'),fr,envir=env)
