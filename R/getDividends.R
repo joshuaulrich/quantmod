@@ -10,6 +10,10 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
     if(exists(Symbol, envir = env, inherits = FALSE)) {
       tmp.symbol <- get(Symbol, envir = env)
     }
+    if(!missing(auto.assign) && !isTRUE(auto.assign) && !is.null(env)) {
+      warning("ignoring 'auto.assign = FALSE' because 'env' is specified")
+    }
+    auto.assign <- TRUE
   }
   if(is.null(env))
     auto.assign <- FALSE
