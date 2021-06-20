@@ -7,7 +7,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   if(missing(env)) {
     env <- parent.frame(1)
   } else {
-    if(exists(Symbol, envir = env)) {
+    if(exists(Symbol, envir = env, inherits = FALSE)) {
       tmp.symbol <- get(Symbol, envir = env)
     }
   }
