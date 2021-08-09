@@ -128,7 +128,7 @@ function(x) {
     if(is.null(x@params$legend)) legend <- function(legend,text.col,...) {}
 
     if(is.character(x@params$legend) && x@params$legend != "auto") {
-      legend("topleft", legend=x@params$legend, bty='n', y.inter=0.95)
+      legend("topleft", legend=x@params$legend, bty='n', y.intersp=0.95)
       legend <- function(legend,text.col,...) { }
     }
 
