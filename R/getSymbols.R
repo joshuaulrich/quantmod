@@ -1470,7 +1470,6 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
                               adjust=FALSE,
                               from='2007-01-01',
                               to=Sys.Date(),
-                              data.type="json",
                               ...) {
   
   importDefaults("getSymbols.tiingo")
@@ -1510,25 +1509,13 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     if (verbose) cat("loading", sym.name, ".....")
     from.strftime <- strftime(from, format = "%Y-%m-%d")
     to.strftime <- strftime(to, format = "%Y-%m-%d")
-    
-    tiingo.names <- c("open", "high", "low", "close", "volume",
-                      "adjOpen", "adjHigh", "adjLow", "adjClose",
-                      "adjVolume", "divCash", "splitFactor")
-    qm.names <- paste(sym, c("Open", "High", "Low", "Close", "Volume",
-                             "Open", "High", "Low", "Close", "Volume",
-                             "DivCash", "SplitFactor"), sep=".")
-    if (isTRUE(adjust)) {
-      return.columns <- tiingo.names[6:10]
-    } else {
-      return.columns <- tiingo.names[1:5]
-    }
+
     URL <- paste0("https://api.tiingo.com/tiingo/",
                   periodicity, "/",
                   sym.name, "/prices",
                   "?startDate=", from.strftime,
                   "&endDate=", to.strftime,
-                  "&format=", data.type,
-                  "&columns=", paste0(return.columns, collapse=","))
+                  "&format=csv")
     # If rate limit is hit, the csv API returns HTTP 200 (OK), while json API
     # returns HTTP 429. The latter caused download.file() to error, but the
     # contents of 'tmp' still contain the error message.
@@ -1536,36 +1523,21 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     curl::handle_setheaders(h, Authorization = paste("Token", api.key))
     response <- curl::curl_fetch_memory(URL, h)
     response.data <- rawToChar(response$content)
+    stock.data <- read.csv(text=response.data, as.is=TRUE, header=TRUE)
 
-    if (data.type == "json") {
-      stock.data <- jsonlite::fromJSON(response.data)
-      if (verbose) cat("done.\n")
-    } else {
-      stock.data <- read.csv(text=response.data, as.is=TRUE)
-    }
     # check for error
-    if (!all(return.columns %in% names(stock.data))) {
-      if (data.type == "json") {
-        msg <- stock.data$detail
-      } else {
-        msg <- readLines(response.data, warn=FALSE)
-      }
-      msg <- sub("Error: ", "", msg)
+    if (NCOL(stock.data) < 5) {
+      msg <- sub("Error: ", "", response.data)
       stop(msg, call. = FALSE)
     }
     tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
-    stock.data[, "date"] <- NULL
 
-    # adjusted column names
-    adjcols <- grepl("^adj", colnames(stock.data))
-    # order Tiingo column names before converting to quantmod names
-    stock.data <- OHLCV(stock.data)
-    if (any(adjcols)) {
-      # put adjusted columns last
-      stock.data <- stock.data[, c(which(!adjcols), which(adjcols))]
+    if (adjust) {
+      stock.data <- stock.data[, c("adjOpen", "adjHigh", "adjLow", "adjClose", "adjVolume")]
+    } else {
+      stock.data <- stock.data[, c("open", "high", "low", "close", "volume")]
     }
-    # now convert to quantmod column names
-    colnames(stock.data) <- qm.names[match(colnames(stock.data), tiingo.names)]
+    colnames(stock.data) <- paste(sym, c("Open", "High", "Low", "Close", "Volume"), sep=".")
 
     # convert data to xts
     xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
