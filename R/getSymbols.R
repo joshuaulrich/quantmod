@@ -1534,7 +1534,6 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
       stock.data <- stock.data[, c("open", "high", "low", "close", "volume", "adjClose")]
       colnames(stock.data) <- paste(sym, c("Open", "High", "Low", "Close", "Volume", "Adjusted"), sep=".")
     }
-    
 
     # convert data to xts
     xts.data <- xts(stock.data, tm.stamps, src="tiingo", updated=Sys.time())
