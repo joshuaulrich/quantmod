@@ -5,6 +5,7 @@ Version: 0.4.18.1
 Authors@R: c(
   person(given=c("Jeffrey","A."), family="Ryan", role=c("aut","cph")),
   person(given=c("Joshua","M."), family="Ulrich", role=c("cre","aut"), email="josh.m.ulrich@gmail.com"),
+  person(given=c("Ethan","B."), family="Smith", role="ctb"),
   person(given="Wouter", family="Thielen", role="ctb"),
   person(given="Paul", family="Teetor", role="ctb"),
   person(given="Steve", family="Bronder", role="ctb")
