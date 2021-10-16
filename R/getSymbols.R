@@ -1515,23 +1515,18 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
                   sym.name, "/prices",
                   "?startDate=", from.strftime,
                   "&endDate=", to.strftime,
-                  "&format=csv")
-    # If rate limit is hit, the csv API returns HTTP 200 (OK), while json API
-    # returns HTTP 429. The latter caused download.file() to error, but the
-    # contents of 'tmp' still contain the error message.
-    h <- curl::new_handle()
-    curl::handle_setheaders(h, Authorization = paste("Token", api.key))
-    response <- curl::curl_fetch_memory(URL, h)
-    response.data <- rawToChar(response$content)
-    stock.data <- read.csv(text=response.data, as.is=TRUE, header=TRUE)
-
+                  "&format=csv",
+                  "&token=", api.key)
+    #tiingo will return a text error for ticker not found, which read.csv converts
+    #to a zero row, 1 column data.frame, with a warning
+    stock.data <- suppressWarnings(read.csv(URL, as.is=TRUE))
     # check for error
-    if (NCOL(stock.data) < 5) {
-      msg <- sub("Error: ", "", response.data)
+    if (NCOL(stock.data) == 1) {
+      msg <- sub("Error: ", "", colnames(stock.data))
       stop(msg, call. = FALSE)
     }
+    
     tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
-
     if (adjust) {
       stock.data <- stock.data[, c("adjOpen", "adjHigh", "adjLow", "adjClose", "adjVolume")]
     } else {
