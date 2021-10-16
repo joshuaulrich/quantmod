@@ -4,6 +4,8 @@ S3method(print, quantmodEnv)
 # NAMESPACE file for quantmod
 import(methods, zoo, xts, TTR)
 
+importClassesFrom(xts, xts)
+
 importFrom(graphics,
   abline,
   axTicks,
