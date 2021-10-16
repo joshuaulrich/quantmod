@@ -5,3 +5,4 @@ quantmod.Rproj
 src/*.o
 src/*.so
 src/*.dll
+*.Rproj
