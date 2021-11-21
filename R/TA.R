@@ -25,7 +25,7 @@ shading <- function(x)
     warning('need logical object')
   runs <- rle(as.logical(x))
   list(
-     start=cumsum(runs$length)[which(runs$values)] - runs$length[which(runs$values)]+1,
+     start=cumsum(runs$lengths)[which(runs$values)] - runs$lengths[which(runs$values)]+1,
        end=cumsum(runs$lengths)[which(runs$values)]
       )
 }
