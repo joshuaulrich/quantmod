@@ -1510,11 +1510,11 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
     from.strftime <- strftime(from, format = "%Y-%m-%d")
     to.strftime <- strftime(to, format = "%Y-%m-%d")
 
-    URL <- paste0("https://api.tiingo.com/tiingo/",
-                  periodicity, "/",
+    URL <- paste0("https://api.tiingo.com/tiingo/daily/",
                   sym.name, "/prices",
                   "?startDate=", from.strftime,
                   "&endDate=", to.strftime,
+                  "&resampleFreq=", periodicity,
                   "&format=csv",
                   "&token=", api.key)
     #tiingo will return a text error for ticker not found, which read.csv converts
@@ -1526,7 +1526,8 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
       stop(msg, call. = FALSE)
     }
     
-    tm.stamps <- as.POSIXct(stock.data[, "date"], ...)
+    tm.stamps <- as.Date(stock.data[, "date"])
+
     if (adjust) {
       stock.data <- stock.data[, c("adjOpen", "adjHigh", "adjLow", "adjClose", "adjVolume")]
     } else {
