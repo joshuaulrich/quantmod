@@ -47,7 +47,8 @@ for quarterly.
 \value{
   Six individual matrices and a data.frame organized in a list of class \sQuote{financials}:
   \item{ periods }{ a data.frame containing Fiscal year and quarter corresponding to each statement contained in the results. 
-  The \code{ending} column in this data.frame matches the column name in the statement matrix corresponding to period.
+  This acts as a manifest for the contents of the rest of the structure.
+  The \code{ending} column matches the column name in the statement matrix corresponding to period.
    }
   \item{ IS }{ a list containing (Q)uarterly and (A)nnual Income Statements }
   \item{ BS }{ a list containing (Q)uarterly and (A)nnual Balance Sheets }
@@ -62,7 +63,7 @@ currently only implemented for tiingo, which requres a paid license.
 }
 \examples{
 \dontrun{
-getFinancials('BA')  # returns JAVA.f to "env"
+getFinancials('BA')  # returns BA.f to "env"
 getFin('AAPL') # returns AAPL.f to "env"
 
 viewFin(BA.f, "IS", "Q")  # Quarterly Income Statement
