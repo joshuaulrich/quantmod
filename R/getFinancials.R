@@ -1,9 +1,8 @@
 `getFinancials` <-
 getFin <-
-  function(Symbols, env=parent.frame(), src = "tiingo", auto.assign=TRUE, from = Sys.Date()-720, to=Sys.Date(), api.key=NULL, ...) {
+  function(Symbols, env=parent.frame(), src = "tiingo", auto.assign=TRUE, from = Sys.Date()-720, to=Sys.Date(), ...) {
   importDefaults("getFinancials")
   #TODO: add documentation and tests
-
   src <- match.arg(src, "tiingo")
   if (src != "tiingo") stop("src = ", sQuote(src), " is not implemented")
 
@@ -14,15 +13,15 @@ getFin <-
 
   Symbols <- strsplit(Symbols, ";")
   ret.sym <- list()
-  for(s in Symbols) {
+  for(sym in Symbols) {
     z <- try(structure(do.call(paste("getFinancials", src, sep = "."),
-                               args = list(Symbol = s, from = from, to = to, api.key = api.key, ...)),
-             symbol = s, class = "financials", src = src, updated = Sys.time()))
+                               args = list(Symbol = sym, from = from, to = to, ...)),
+             symbol = sym, class = "financials", src = src, updated = Sys.time()))
     if (auto.assign) {
       if (inherits(z, "financials")) {
-        new.sym <- paste(gsub(":", ".", Symbol.name), "f", sep = ".")
+        new.sym <- paste(gsub(":", ".", sym), "f", sep = ".")
         assign(new.sym, z, env)
-        ret.sym[[length(ret.sym + 1)]] <- new.sym
+        ret.sym[[length(ret.sym) + 1]] <- new.sym
         }
     } else {
         return(z)
@@ -69,8 +68,10 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
 }
 
 getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
+  importDefaults("getFinancials.tiingo")
   URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?startDate=%s&endDate=%s&token=%s", Symbol, from, to, api.key)
   d <- jsonlite::fromJSON(URL)
+  if (length(d) == 0) stop("No data returned for Symbol:", Symbol)
 
   r <- list(periods = data.frame(
                           type = ifelse(d$quarter == 0, "A", "Q"),

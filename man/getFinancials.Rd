@@ -8,7 +8,7 @@
 Download Income Statement, Balance Sheet, and Cash Flow Statements.
 }
 \usage{
-getFinancials(Symbol, env = parent.frame(), src = "google", 
+getFinancials(Symbol, env = parent.frame(), src = "tiingo", 
               auto.assign = TRUE,
               ...)
 
@@ -45,22 +45,27 @@ which statements to view - (A) for annual and (Q)
 for quarterly.
 }
 \value{
-  Six individual matrices organized in a list of class \sQuote{financials}:
+  Six individual matrices and a data.frame organized in a list of class \sQuote{financials}:
+  \item{ periods }{ a data.frame containing Fiscal year and quarter corresponding to each statement contained in the results. 
+  The \code{ending} column in this data.frame matches the column name in the statement matrix corresponding to period.
+   }
   \item{ IS }{ a list containing (Q)uarterly and (A)nnual Income Statements }
   \item{ BS }{ a list containing (Q)uarterly and (A)nnual Balance Sheets }
   \item{ CF }{ a list containing (Q)uarterly and (A)nnual Cash Flow Statements }
+
+  Only the data structure itself is normalized. Individual statement matrixes use field names from the underlying source. 
+  Please refer to the source documentation for definitions and explanations.
 }
-\author{ Jeffrey A. Ryan }
+\author{ Jeffrey A. Ryan, Ethan Smith }
 \note{
-As with all free data, you may be getting exactly what you pay for.
-Sometimes that may be absolutely nothing.
+currently only implemented for tiingo, which requres a paid license.
 }
 \examples{
 \dontrun{
-getFinancials('JAVA')  # returns JAVA.f to "env"
+getFinancials('BA')  # returns JAVA.f to "env"
 getFin('AAPL') # returns AAPL.f to "env"
 
-viewFin(JAVA.f, "IS", "Q")  # Quarterly Income Statement
+viewFin(BA.f, "IS", "Q")  # Quarterly Income Statement
 viewFin(AAPL.f, "CF", "A")   # Annual Cash Flows
 
 str(AAPL.f)
