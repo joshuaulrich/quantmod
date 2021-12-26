@@ -1,10 +1,34 @@
 `getFinancials` <-
-getFin <- function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
-  src <- match.arg(src, "google")
-  if (src != "google") {
-    stop("src = ", sQuote(src), " is not implemented")
+getFin <-
+  function(Symbols, env=parent.frame(), src = "tiingo", auto.assign=TRUE, from = Sys.Date()-720, to=Sys.Date(), api.key=NULL, ...) {
+  importDefaults("getFinancials")
+  #TODO: add documentation and tests
+
+  src <- match.arg(src, "tiingo")
+  if (src != "tiingo") stop("src = ", sQuote(src), " is not implemented")
+
+  if(is.null(env))
+    auto.assign <- FALSE
+  if(!auto.assign && length(Symbols)>1)
+    stop("must use auto.assign=TRUE for multiple Symbols requests")
+
+  Symbols <- strsplit(Symbols, ";")
+  ret.sym <- list()
+  for(s in Symbols) {
+    z <- try(structure(do.call(paste("getFinancials", src, sep = "."),
+                               args = list(Symbol = s, from = from, to = to, api.key = api.key, ...)),
+             symbol = s, class = "financials", src = src, updated = Sys.time()))
+    if (auto.assign) {
+      if (inherits(z, "financials")) {
+        new.sym <- paste(gsub(":", ".", Symbol.name), "f", sep = ".")
+        assign(new.sym, z, env)
+        ret.sym[[length(ret.sym + 1)]] <- new.sym
+        }
+    } else {
+        return(z)
+    }
   }
-  getFinancials.google(Symbol, env, auto.assign = auto.assign, ...)
+  return(unlist(ret.sym))
 }
 
 getFinancials.google <-
@@ -25,7 +49,7 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
 
 `viewFin` <-
 `viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
-                             subset = NULL) {
+                             subset = "") {
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
   type <- match.arg(toupper(type[1]),c('BS','IS','CF'))
   period <- match.arg(toupper(period[1]),c('A','Q')) 
@@ -37,19 +61,41 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
                      A='Annual',
                      Q='Quarterly')
 
-  if(is.null(subset)) {
-    message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
-    return(x[[type]][[period]])
-  } else {
-    tmp.table <- as.matrix(as.xts(t(x[[type]][[period]]),dateFormat='Date')[subset])
-    dn1 <- rownames(tmp.table)
-    dn2 <- colnames(tmp.table)
-    tmp.table <- t(tmp.table)[, NROW(tmp.table):1]
-    if(is.null(dim(tmp.table))) {
-      dim(tmp.table) <- c(NROW(tmp.table),1)
-      dimnames(tmp.table) <- list(dn2,dn1)
+  message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
+  return(t(x[[type]][[period]][subset]))
+}
+
+getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
+  URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?startDate=%s&endDate=%s&token=%s", Symbol, from, to, api.key)
+  d <- jsonlite::fromJSON(URL)
+
+  r <- list(periods = data.frame(
+                          type = ifelse(d$quarter == 0, "A", "Q"),
+                          year = d$year,
+                          quarter = ifelse(d$quarter == 0, NA_integer_, d$quarter),
+                          ending = as.Date(d$date)
+                          )
+            )
+
+  #tiiingo section names
+  name.map <- list(balanceSheet = "BS",
+                   incomeStatement = "IS",
+                   cashFlow ="CF")
+
+  #merge into a single df with columns for each period
+  for (st in names(name.map)) {
+    nm <- name.map[[st]]
+    if (!is.null(nm)) {
+      # suppress duplicate column names on merge
+      mdf <- suppressWarnings(Reduce(function(x,y){merge(x, y, all = TRUE, by = "dataCode")}, d$statementData[[st]]))
+      m <- sapply(mdf[,-1], as.numeric) #convert merged dataframe to numeric matrix and transpose
+      rownames(m) <- mdf[[1]]
+      m <- t(m) #transpose for conversion to xts
+      q.idx <- which(r$periods$type == "Q")
+      r[[nm]] <- list(Q = xts(m[q.idx,, drop = FALSE], order.by = r$periods$ending[q.idx]),
+                      A = xts(m[-q.idx,, drop = FALSE], order.by = r$periods$ending[-q.idx])
+                      )
     }
-    message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
-    return(tmp.table)
   }
+  return(r)
 }
