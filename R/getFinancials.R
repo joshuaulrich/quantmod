@@ -49,11 +49,10 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
 
 `viewFin` <-
 `viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
-                             subset = "") {
+                             subset = NULL) {
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
   type <- match.arg(toupper(type[1]),c('BS','IS','CF'))
-  period <- match.arg(toupper(period[1]),c('A','Q')) 
-
+  period <- match.arg(toupper(period[1]),c('A','Q'))
 
   statements <- list(BS='Balance Sheet',
                      IS='Income Statement',
@@ -62,7 +61,11 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
                      Q='Quarterly')
 
   message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
-  return(t(x[[type]][[period]][subset]))
+  r <- x[[type]][[period]]
+  if (is.null(subset))
+    return(r)
+  else
+    return(t(as.xts(t(r))[subset]))
 }
 
 getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
@@ -88,13 +91,11 @@ getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
     if (!is.null(nm)) {
       # suppress duplicate column names on merge
       mdf <- suppressWarnings(Reduce(function(x,y){merge(x, y, all = TRUE, by = "dataCode")}, d$statementData[[st]]))
-      m <- sapply(mdf[,-1], as.numeric) #convert merged dataframe to numeric matrix and transpose
+      m <- sapply(mdf[,-1], as.numeric) #convert merged dataframe to numeric matrix
       rownames(m) <- mdf[[1]]
-      m <- t(m) #transpose for conversion to xts
+      colnames(m) <- as.character(r$periods$ending)
       q.idx <- which(r$periods$type == "Q")
-      r[[nm]] <- list(Q = xts(m[q.idx,, drop = FALSE], order.by = r$periods$ending[q.idx]),
-                      A = xts(m[-q.idx,, drop = FALSE], order.by = r$periods$ending[-q.idx])
-                      )
+      r[[nm]] <- list(Q = m[,q.idx, drop = FALSE],A = m[,-q.idx, drop = FALSE])
     }
   }
   return(r)
