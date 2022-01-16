@@ -55,8 +55,8 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
 }
 
 `viewFin` <-
-`viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
-                             subset = NULL) {
+  `viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
+                               subset = NULL) {
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
   type <- match.arg(toupper(type[1]),c('BS','IS','CF'))
   period <- match.arg(toupper(period[1]),c('A','Q'))
@@ -69,13 +69,13 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
 
   message(paste(statements[[period]],statements[[type]],'for',attr(x,'symbol')))
   r <- x[[type]][[period]]
-  if (is.null(subset))
+  if (is.null(r) || is.null(subset))
     return(r)
   else
     return(t(as.xts(t(r))[subset]))
 }
 
-nancials.tiingo <- function(Symbol, from, to, api.key, ...) {
+getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
   #API Documentation: https://api.tiingo.com/documentation/fundamentals
   importDefaults("getFinancials.tiingo")
   #while the api supports CSV, json is a bit more effecient over the wire
@@ -91,21 +91,22 @@ nancials.tiingo <- function(Symbol, from, to, api.key, ...) {
     ending = as.Date(d$date)
   )
 
-  #tiiingo type to normalized types
-  statement.types <- list(balanceSheet = "BS",
-                   incomeStatement = "IS",
-                   cashFlow ="CF")
-  period.names <- c("Q","A")
+  #normalized to tiingo mappings
+  statement.types <- list(BS = "balanceSheet",
+                          IS = "incomeStatement",
+                          CF = "cashFlow")
+  statement.periods <- list(A='Annual',
+                            Q='Quarterly')
 
-  r <- lapply(names(statement.types),  function(st) {
+  r <- lapply(statement.types,  function(st) {
     #warning, some periods may be missing statement types
     statements <- d$statementData[[st]]
     if (length(statements) < 1) {
       warning("No", statement.types[[statement.type]], "data for", Symbol)
-      z <-vector(mode='list', length = length(period.names))
+      z <- vector(mode='list', length = length(period.names))
     } else {
       missing <- sapply(statements, is.null)
-      z <- lapply(period.names, function(pn) {
+      z <- lapply(names(statement.periods), function(pn) {
         selected <- which(periods$period == pn & !missing)
         if (length(selected) > 0) {
           merged <- Reduce(function(x,y) {
@@ -120,10 +121,10 @@ nancials.tiingo <- function(Symbol, from, to, api.key, ...) {
         return(m)
       })
     }
-    names(z) <- period.names
+    names(z) <- names(statement.periods)
     return(z)
   })
-  names(r) <- statement.types
+  names(r) <- names(statement.types)
   r$periods <- periods
   return(r)
 }
