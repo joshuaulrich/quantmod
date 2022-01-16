@@ -1,8 +1,10 @@
 `getFinancials` <-
-getFin <-
+  getFin <-
   function(Symbols, env=parent.frame(), src = "tiingo", auto.assign=TRUE, from = Sys.Date()-720, to=Sys.Date(), ...) {
   importDefaults("getFinancials")
-  #TODO: add documentation and tests
+  #As much desired generic functionality, erro handlign and recovery has been moved into the master function
+  #source specific fucntions should just fetch data for a single symbol and be as lightweight as possible
+  #TODO: add tests
   src <- match.arg(src, "tiingo")
   if (src != "tiingo") stop("src = ", sQuote(src), " is not implemented")
 
@@ -11,21 +13,27 @@ getFin <-
   if(!auto.assign && length(Symbols)>1)
     stop("must use auto.assign=TRUE for multiple Symbols requests")
 
-  Symbols <- strsplit(Symbols, ";")
+  Symbols <- strsplit(Symbols, ";")[[1]]
   ret.sym <- list()
+  failed.sym <- list()
   for(sym in Symbols) {
     z <- try(structure(do.call(paste("getFinancials", src, sep = "."),
                                args = list(Symbol = sym, from = from, to = to, ...)),
-             symbol = sym, class = "financials", src = src, updated = Sys.time()))
+                       symbol = sym, class = "financials", src = src, updated = Sys.time()))
     if (auto.assign) {
       if (inherits(z, "financials")) {
         new.sym <- paste(gsub(":", ".", sym), "f", sep = ".")
         assign(new.sym, z, env)
         ret.sym[[length(ret.sym) + 1]] <- new.sym
-        }
+      } else {
+        failed.sym[[length(failed.sym) + 1]] <- sym
+      }
     } else {
-        return(z)
+      return(z)
     }
+  }
+  if (length(failed.sym) > 0) {
+    warning("Failed getting financials for ", paste(unlist(failed.sym), collapse = ";"))
   }
   return(unlist(ret.sym))
 }
@@ -67,37 +75,55 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
     return(t(as.xts(t(r))[subset]))
 }
 
-getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
+nancials.tiingo <- function(Symbol, from, to, api.key, ...) {
+  #API Documentation: https://api.tiingo.com/documentation/fundamentals
   importDefaults("getFinancials.tiingo")
-  URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?startDate=%s&endDate=%s&token=%s", Symbol, from, to, api.key)
+  #while the api supports CSV, json is a bit more effecient over the wire
+  URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?startDate=%s&endDate=%s&token=%s",
+                 Symbol, from, to, api.key)
   d <- jsonlite::fromJSON(URL)
   if (length(d) == 0) stop("No data returned for Symbol:", Symbol)
 
-  r <- list(periods = data.frame(
-                          type = ifelse(d$quarter == 0, "A", "Q"),
-                          year = d$year,
-                          quarter = ifelse(d$quarter == 0, NA_integer_, d$quarter),
-                          ending = as.Date(d$date)
-                          )
-            )
+  periods = data.frame(
+    period = ifelse(d$quarter == 0, "A", "Q"),
+    year = d$year,
+    quarter = ifelse(d$quarter == 0, NA_integer_, d$quarter),
+    ending = as.Date(d$date)
+  )
 
-  #tiiingo section names
-  name.map <- list(balanceSheet = "BS",
+  #tiiingo type to normalized types
+  statement.types <- list(balanceSheet = "BS",
                    incomeStatement = "IS",
                    cashFlow ="CF")
+  period.names <- c("Q","A")
 
-  #merge into a single df with columns for each period
-  for (st in names(name.map)) {
-    nm <- name.map[[st]]
-    if (!is.null(nm)) {
-      # suppress duplicate column names on merge
-      mdf <- suppressWarnings(Reduce(function(x,y){merge(x, y, all = TRUE, by = "dataCode")}, d$statementData[[st]]))
-      m <- sapply(mdf[,-1], as.numeric) #convert merged dataframe to numeric matrix
-      rownames(m) <- mdf[[1]]
-      colnames(m) <- as.character(r$periods$ending)
-      q.idx <- which(r$periods$type == "Q")
-      r[[nm]] <- list(Q = m[,q.idx, drop = FALSE],A = m[,-q.idx, drop = FALSE])
+  r <- lapply(names(statement.types),  function(st) {
+    #warning, some periods may be missing statement types
+    statements <- d$statementData[[st]]
+    if (length(statements) < 1) {
+      warning("No", statement.types[[statement.type]], "data for", Symbol)
+      z <-vector(mode='list', length = length(period.names))
+    } else {
+      missing <- sapply(statements, is.null)
+      z <- lapply(period.names, function(pn) {
+        selected <- which(periods$period == pn & !missing)
+        if (length(selected) > 0) {
+          merged <- Reduce(function(x,y) {
+            suppressWarnings(merge(x, y, all = TRUE, by = "dataCode")) #warnings on duplicate column names
+          }, statements[selected])
+          #convert merged dataframe to numeric matrix, warnings on NA numeric conversion
+          m <- suppressWarnings(sapply(merged[,-1], as.double))
+          if (is.null(dim(m))) m <- as.matrix(m, nrow = nrow(merged))
+          rownames(m) <- merged[[1]] #names in first column
+          colnames(m) <- as.character(periods$ending[selected])
+        } else m <- NULL
+        return(m)
+      })
     }
-  }
+    names(z) <- period.names
+    return(z)
+  })
+  names(r) <- statement.types
+  r$periods <- periods
   return(r)
 }
