@@ -1,4 +1,4 @@
-`getFinancials` <- getFin <-
+getFin <- `getFinancials` <-
   function(Symbols, env=parent.frame(), src="tiingo", auto.assign=TRUE, from=Sys.Date()-720, to=Sys.Date(), ...) {
   #As much generic functionality and error handlign has been moved into the master function
   #source specific fucnimplementations should just fetch data for a single symbol and be as lightweight as possible
@@ -31,7 +31,7 @@
   return(unlist(ret.sym))
 }
 
-`viewFinancials` <- `viewFin` <-
+`viewFin` <- `viewFinancials` <-
   function(x, type=c('BS','IS','CF'), period=c('A','Q'), subset = NULL) {
   importDefaults("viewFinancials")
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))

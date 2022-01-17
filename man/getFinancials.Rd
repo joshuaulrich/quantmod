@@ -46,14 +46,12 @@ for quarterly.
 }
 \value{
   Six individual matrices and a data.frame organized in a list of class \sQuote{financials}:
-  \item{ periods }{ a data.frame containing Fiscal year and quarter corresponding to each statement contained in the results. 
-  This acts as a manifest for the contents of the rest of the structure.
-  The \code{ending} column matches the column name in the statement matrix corresponding to period.
-   }
   \item{ IS }{ a list containing (Q)uarterly and (A)nnual Income Statements }
   \item{ BS }{ a list containing (Q)uarterly and (A)nnual Balance Sheets }
   \item{ CF }{ a list containing (Q)uarterly and (A)nnual Cash Flow Statements }
-
+  \item{periods}{a data.frame containing Fiscal year and quarter corresponding to each statement contained in the results. 
+  The \code{date} column matches the column name in the statement matrix corresponding to period. Some sources moy not include this in the output}
+  
   Only the data structure itself is normalized. Individual statement matrixes use field names from the underlying source. 
   Please refer to the source documentation for definitions and explanations.
 }
