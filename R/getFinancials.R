@@ -1,7 +1,7 @@
 `getFinancials` <- getFin <-
   function(Symbols, env=parent.frame(), src="tiingo", auto.assign=TRUE, from=Sys.Date()-720, to=Sys.Date(), ...) {
-  #As much desired generic functionality, error handlign and recovery has been moved into the master function
-  #source specific fucntions should just fetch data for a single symbol and be as lightweight as possible
+  #As much generic functionality and error handlign has been moved into the master function
+  #source specific fucnimplementations should just fetch data for a single symbol and be as lightweight as possible
   importDefaults("getFinancials")
 
   call.name <- paste("getFinancials", src, sep = ".")
@@ -31,8 +31,9 @@
   return(unlist(ret.sym))
 }
 
-`viewFin` <- `viewFinancials` <-
+`viewFinancials` <- `viewFin` <-
   function(x, type=c('BS','IS','CF'), period=c('A','Q'), subset = NULL) {
+  importDefaults("viewFinancials")
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
   type <- match.arg(toupper(type[1]),c('BS','IS','CF'))
   period <- match.arg(toupper(period[1]),c('A','Q'))
@@ -56,18 +57,16 @@ getFinancials.tiingo <- function(Symbol, from, to, as.reported=FALSE, api.key, .
   importDefaults("getFinancials.tiingo")
   URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?format=csv&startDate=%s&endDate=%s&asReported=%s&token=%s",
                  Symbol, from, to, tolower(as.reported), api.key)
-  d <- read.csv(URL)
+  d <- suppressWarnings(read.csv(URL))
   if (ncol(d) == 1 && colnames(d) == "None") stop("No data returned for Symbol: ", Symbol)
 
-  #normalized to tiingo mappings
-  statement.types <- c(balanceSheet = "BS",
-                       incomeStatement = "IS",
-                       cashFlow = "CF")
-
-  d <- d[d$statementType %in% names(statement.types) & d$quarter %in% (0:4),]
+  stypes <- c(balanceSheet = "BS", incomeStatement = "IS", cashFlow = "CF")
+  d <- d[d$statementType %in% names(stypes) & d$quarter %in% (0:4),]
   d$period <- ifelse(d$quarter == 0, "A", "Q")
-  #partition by statement type
-  tsubs <- split(d[, c("date", "dataCode","value", "period")], statement.types[d$statementType])
+  d$statementType <- stypes[d$statementType]
+
+  #partition and format output
+  tsubs <- split(d[, c("date", "dataCode","value", "period")], d$statementType)
   r <- lapply(tsubs, function(tsub) {
     dsubs <- split(tsub, tsub$period)
     #partition by period (Q or A), pivot and convert to a matrix
@@ -75,7 +74,7 @@ getFinancials.tiingo <- function(Symbol, from, to, as.reported=FALSE, api.key, .
       if (NROW(dsub) < 1) return(NULL)
       pivot <- reshape(dsub[, c("date", "dataCode", "value")],
                 timevar = "date", idvar = "dataCode",  direction = "wide")
-      rownames(pivot) <- pivot[[1]]
+      rownames(pivot) <- pivot[[1]] #row names should be unique at this point. an assumption has been violated if not
       pivot <- pivot[, -1, drop = FALSE]
       colnames(pivot) <- gsub("^value\\.", "", colnames(pivot))
       return(as.matrix(pivot))
