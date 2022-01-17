@@ -75,56 +75,36 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
     return(t(as.xts(t(r))[subset]))
 }
 
-getFinancials.tiingo <- function(Symbol, from, to, api.key, ...) {
+getFinancials.tiingo <- function(Symbol, from, to, as.reported = FALSE, api.key, ...) {
   #API Documentation: https://api.tiingo.com/documentation/fundamentals
   importDefaults("getFinancials.tiingo")
-  #while the api supports CSV, json is a bit more effecient over the wire
-  URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?startDate=%s&endDate=%s&token=%s",
-                 Symbol, from, to, api.key)
-  d <- jsonlite::fromJSON(URL)
-  if (length(d) == 0) stop("No data returned for Symbol:", Symbol)
-
-  periods = data.frame(
-    period = ifelse(d$quarter == 0, "A", "Q"),
-    year = d$year,
-    quarter = ifelse(d$quarter == 0, NA_integer_, d$quarter),
-    ending = as.Date(d$date)
-  )
+  URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?format=csv&startDate=%s&endDate=%s&asReported=%s&token=%s",
+                 Symbol, from, to, tolower(as.reported), api.key)
+  d <- read.csv(URL)
+  if (ncol(d) == 1 && colnames(d) == "None") stop("No data returned for Symbol: ", Symbol)
 
   #normalized to tiingo mappings
-  statement.types <- list(BS = "balanceSheet",
-                          IS = "incomeStatement",
-                          CF = "cashFlow")
-  statement.periods <- list(A='Annual',
-                            Q='Quarterly')
+  statement.types <- c(balanceSheet = "BS",
+                          incomeStatement = "IS",
+                          cashFlow = "CF")
 
-  r <- lapply(statement.types,  function(st) {
-    #warning, some periods may be missing statement types
-    statements <- d$statementData[[st]]
-    if (length(statements) < 1) {
-      warning("No", statement.types[[statement.type]], "data for", Symbol)
-      z <- vector(mode='list', length = length(period.names))
-    } else {
-      missing <- sapply(statements, is.null)
-      z <- lapply(names(statement.periods), function(pn) {
-        selected <- which(periods$period == pn & !missing)
-        if (length(selected) > 0) {
-          merged <- Reduce(function(x,y) {
-            suppressWarnings(merge(x, y, all = TRUE, by = "dataCode")) #warnings on duplicate column names
-          }, statements[selected])
-          #convert merged dataframe to numeric matrix, warnings on NA numeric conversion
-          m <- suppressWarnings(sapply(merged[,-1], as.double))
-          if (is.null(dim(m))) m <- as.matrix(m, nrow = nrow(merged))
-          rownames(m) <- merged[[1]] #names in first column
-          colnames(m) <- as.character(periods$ending[selected])
-        } else m <- NULL
-        return(m)
-      })
-    }
-    names(z) <- names(statement.periods)
-    return(z)
+  d <- d[d$statementType %in% names(statement.types) & d$quarter %in% (0:4),]
+  d$period <- ifelse(d$quarter == 0, "A", "Q")
+  #partition by statement type
+  tsubs <- split(d[, c("date", "dataCode","value", "period")], statement.types[d$statementType])
+  r <- lapply(tsubs, function(tsub) {
+    dsubs <- split(tsub, tsub$period)
+    #partition by period (Q or A), pivot and convert to a matrix
+    lapply(dsubs, function(dsub) {
+      pivot <- reshape(dsub[, c("date", "dataCode", "value")],
+                timevar = "date", idvar = "dataCode",  direction = "wide")
+      rownames(pivot) <- pivot[[1]]
+      pivot <- pivot[, -1, drop = FALSE]
+      colnames(pivot) <- gsub("^value\\.", "", colnames(pivot))
+      return(as.matrix(pivot))
+    })
   })
-  names(r) <- names(statement.types)
-  r$periods <- periods
+
+  r$periods <- unique(d[, c("date", "year", "quarter", "period")])
   return(r)
 }
