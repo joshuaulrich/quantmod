@@ -1,62 +1,38 @@
-`getFinancials` <-
-  getFin <-
-  function(Symbols, env=parent.frame(), src = "tiingo", auto.assign=TRUE, from = Sys.Date()-720, to=Sys.Date(), ...) {
-  importDefaults("getFinancials")
-  #As much desired generic functionality, erro handlign and recovery has been moved into the master function
+`getFinancials` <- getFin <-
+  function(Symbols, env=parent.frame(), src="tiingo", auto.assign=TRUE, from=Sys.Date()-720, to=Sys.Date(), ...) {
+  #As much desired generic functionality, error handlign and recovery has been moved into the master function
   #source specific fucntions should just fetch data for a single symbol and be as lightweight as possible
-  #TODO: add tests
-  src <- match.arg(src, "tiingo")
-  if (src != "tiingo") stop("src = ", sQuote(src), " is not implemented")
+  importDefaults("getFinancials")
 
+  call.name <- paste("getFinancials", src, sep = ".")
+  Symbols <- strsplit(Symbols, ";")[[1]]
+  if (length(find(call.name, mode = "function")) < 1)
+    stop("src = ", sQuote(src), " is not implemented")
   if(is.null(env))
     auto.assign <- FALSE
-  if(!auto.assign && length(Symbols)>1)
+  if(!auto.assign && length(Symbols) > 1)
     stop("must use auto.assign=TRUE for multiple Symbols requests")
 
-  Symbols <- strsplit(Symbols, ";")[[1]]
   ret.sym <- list()
-  failed.sym <- list()
-  for(sym in Symbols) {
-    z <- try(structure(do.call(paste("getFinancials", src, sep = "."),
-                               args = list(Symbol = sym, from = from, to = to, ...)),
-                       symbol = sym, class = "financials", src = src, updated = Sys.time()))
+  for (sym in Symbols) {
+    args <- list(Symbol = sym, from = from, to = to, ...)
+    fin <- try(structure(do.call(call.name, args = args),
+      symbol = sym, class = "financials", src = src, updated = Sys.time()))
     if (auto.assign) {
-      if (inherits(z, "financials")) {
+      if (inherits(fin, "financials")) {
         new.sym <- paste(gsub(":", ".", sym), "f", sep = ".")
-        assign(new.sym, z, env)
+        assign(new.sym, fin, env)
         ret.sym[[length(ret.sym) + 1]] <- new.sym
-      } else {
-        failed.sym[[length(failed.sym) + 1]] <- sym
       }
     } else {
-      return(z)
+      return(fin)
     }
-  }
-  if (length(failed.sym) > 0) {
-    warning("Failed getting financials for ", paste(unlist(failed.sym), collapse = ";"))
   }
   return(unlist(ret.sym))
 }
 
-getFinancials.google <-
-function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
-  msg <- paste0(sQuote("getFinancials.google"), " is defunct.",
-         "\nGoogle Finance stopped providing data in March, 2018.",
-         "\nYou could try some of the data sources via Quandl instead.",
-         "\nSee help(\"Defunct\") and help(\"quantmod-defunct\")")
-  .Defunct("Quandl", "quantmod", msg = msg)
-}
-
-
-`print.financials` <- function(x, ...) {
-  cat('Financial Statement for',attr(x,'symbol'),'\n')
-  cat('Retrieved from',attr(x,'src'),'at',format(attr(x,'updated')),'\n')
-  cat('Use "viewFinancials" or "viewFin" to view\n')
-}
-
-`viewFin` <-
-  `viewFinancials` <- function(x, type=c('BS','IS','CF'), period=c('A','Q'),
-                               subset = NULL) {
+`viewFin` <- `viewFinancials` <-
+  function(x, type=c('BS','IS','CF'), period=c('A','Q'), subset = NULL) {
   if(!inherits(x,'financials')) stop(paste(sQuote('x'),'must be of type',sQuote('financials')))
   type <- match.arg(toupper(type[1]),c('BS','IS','CF'))
   period <- match.arg(toupper(period[1]),c('A','Q'))
@@ -75,7 +51,7 @@ function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
     return(t(as.xts(t(r))[subset]))
 }
 
-getFinancials.tiingo <- function(Symbol, from, to, as.reported = FALSE, api.key, ...) {
+getFinancials.tiingo <- function(Symbol, from, to, as.reported=FALSE, api.key, ...) {
   #API Documentation: https://api.tiingo.com/documentation/fundamentals
   importDefaults("getFinancials.tiingo")
   URL <- sprintf("https://api.tiingo.com/tiingo/fundamentals/%s/statements?format=csv&startDate=%s&endDate=%s&asReported=%s&token=%s",
@@ -85,8 +61,8 @@ getFinancials.tiingo <- function(Symbol, from, to, as.reported = FALSE, api.key,
 
   #normalized to tiingo mappings
   statement.types <- c(balanceSheet = "BS",
-                          incomeStatement = "IS",
-                          cashFlow = "CF")
+                       incomeStatement = "IS",
+                       cashFlow = "CF")
 
   d <- d[d$statementType %in% names(statement.types) & d$quarter %in% (0:4),]
   d$period <- ifelse(d$quarter == 0, "A", "Q")
@@ -96,6 +72,7 @@ getFinancials.tiingo <- function(Symbol, from, to, as.reported = FALSE, api.key,
     dsubs <- split(tsub, tsub$period)
     #partition by period (Q or A), pivot and convert to a matrix
     lapply(dsubs, function(dsub) {
+      if (NROW(dsub) < 1) return(NULL)
       pivot <- reshape(dsub[, c("date", "dataCode", "value")],
                 timevar = "date", idvar = "dataCode",  direction = "wide")
       rownames(pivot) <- pivot[[1]]
