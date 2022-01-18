@@ -52,6 +52,28 @@
     return(t(as.xts(t(r))[subset]))
 }
 
+as.data.frame.financials <- function(x) {
+  #reshape nested wide matrices to a long data.frame, adding columns for each nesting level
+  do.call("rbind", args = lapply(c("BS", "IS", "CF"), function(st) { #statement type loop
+    if(is.null(x[[st]])) return(NULL)
+    r <- do.call("rbind", lapply(c("A","Q"), function(p) { #period loop
+      #convert wide matrix to long dataframe
+      p.df <- as.data.frame(x[[st]][[p]])
+      if (is.null(p.df) || nrow(p.df) < 1 || ncol(p.df) < 1 ) return(NULL)
+      cn <- colnames(p.df)
+      p.df <- reshape(p.df, direction = "long", varying = cn, times = cn, v.names = "value", ids = rownames(p.df))
+      rownames(p.df) <- NULL
+      p.df$time <- as.Date(p.df$time)
+      p.df$period <- p
+      p.df <- p.df[, c("time", "id", "period", "value")]
+      colnames(p.df) <- c("date", "entry", "period", "value")
+      return(p.df)
+    }))
+    r$type <- st
+    return(r)
+  }))
+}
+
 getFinancials.tiingo <- function(Symbol, from, to, as.reported=FALSE, api.key, ...) {
   #API Documentation: https://api.tiingo.com/documentation/fundamentals
   importDefaults("getFinancials.tiingo")
@@ -60,6 +82,7 @@ getFinancials.tiingo <- function(Symbol, from, to, as.reported=FALSE, api.key, .
   d <- suppressWarnings(read.csv(URL))
   if (ncol(d) == 1 && colnames(d) == "None") stop("No data returned for Symbol: ", Symbol)
 
+  #reshape long dataframe to nested wide matrices, moving column into list elemnt names
   stypes <- c(balanceSheet = "BS", incomeStatement = "IS", cashFlow = "CF")
   d <- d[d$statementType %in% names(stypes) & d$quarter %in% (0:4),]
   d$period <- ifelse(d$quarter == 0, "A", "Q")
@@ -73,7 +96,7 @@ getFinancials.tiingo <- function(Symbol, from, to, as.reported=FALSE, api.key, .
     lapply(dsubs, function(dsub) {
       if (NROW(dsub) < 1) return(NULL)
       pivot <- reshape(dsub[, c("date", "dataCode", "value")],
-                timevar = "date", idvar = "dataCode",  direction = "wide")
+                       timevar = "date", idvar = "dataCode",  direction = "wide")
       rownames(pivot) <- pivot[[1]] #row names should be unique at this point. an assumption has been violated if not
       pivot <- pivot[, -1, drop = FALSE]
       colnames(pivot) <- gsub("^value\\.", "", colnames(pivot))
