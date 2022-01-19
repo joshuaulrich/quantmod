@@ -31,6 +31,21 @@
   return(unlist(ret.sym))
 }
 
+getFinancials.google <-
+function(Symbol, env=parent.frame(), src="google", auto.assign=TRUE, ...) {
+  msg <- paste0(sQuote("getFinancials.google"), " is defunct.",
+         "\nGoogle Finance stopped providing data in March, 2018.",
+         "\nYou could try some of the data sources via Quandl instead.",
+         "\nSee help(\"Defunct\") and help(\"quantmod-defunct\")")
+  .Defunct("Quandl", "quantmod", msg = msg)
+}
+
+`print.financials` <- function(x, ...) {
+  cat('Financial Statement for',attr(x,'symbol'),'\n')
+  cat('Retrieved from',attr(x,'src'),'at',format(attr(x,'updated')),'\n')
+  cat('Use "viewFinancials" or "viewFin" to view\n')
+}
+
 `viewFinancials` <- `viewFin` <-
   function(x, type=c('BS','IS','CF'), period=c('A','Q'), subset = NULL) {
   importDefaults("viewFinancials")
