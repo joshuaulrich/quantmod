@@ -412,7 +412,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
         if(!requireNamespace("xml2", quietly=TRUE))
           stop("package:",dQuote("xml2"),"cannot be loaded.")
 
-        yahoo.URL <- "https://info.finance.yahoo.co.jp/history/"
+        yahoo.URL <- "https://finance.yahoo.co.jp/quote/"
 
         returnSym <- Symbols
         noDataSym <- NULL
@@ -448,12 +448,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 symname <- paste('YJ', symbol, sep="")
             }
 
-            from.y <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][1])
-            from.m <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][2])
-            from.d <- as.numeric(strsplit(as.character(as.Date(from,origin='1970-01-01')),'-',)[[1]][3])
-            to.y <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][1])
-            to.m <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][2])
-            to.d <- as.numeric(strsplit(as.character(as.Date(to,origin='1970-01-01')),'-',)[[1]][3])
+            from.str <- format(as.Date(from), "%Y%m%d")
+            to.str <- format(as.Date(to), "%Y%m%d")
             
             Symbols.name <- getSymbolLookup()[[symname]]$name
             Symbols.name <- ifelse(is.null(Symbols.name),symbol,Symbols.name)
@@ -462,22 +458,17 @@ function(Symbols,env,return.class='xts',index.class="Date",
             page <- 1
             totalrows <- c()
             while (TRUE) {
-                URL <- paste(yahoo.URL,
-                                    "?code=",Symbols.name,
-                                    "&sm=",from.m,
-                                    "&sd=",sprintf('%.2d',from.d),
-                                    "&sy=",from.y,
-                                    "&em=",to.m,
-                                    "&ed=",sprintf('%.2d',to.d),
-                                    "&ey=",to.y,
-                                    "&tm=d",
-                                    "&p=",page,
-                                    sep='')
-                
+                URL <- paste0(yahoo.URL, Symbols.name, "/history?")
+                URL <- paste0(URL, "from=", from.str, "&to=", to.str, "&timeFrame=d&page=", page)
+
                 fdoc <- xml2::read_html(URL)
-                rows <- xml2::xml_find_all(fdoc, "//table[@class='boardFin yjSt marB6']//tr")
-                if (length(rows) <= 1) break
+
+                rows <- xml2::xml_find_all(fdoc, "//table/tbody/tr")
+                rows <- lapply(rows, function(r) { xml2::xml_text(xml2::xml_children(r)) })
+                rows <- rows[sapply(rows, length) >= 5]
                 
+                if (length(rows) == 0) break
+
                 totalrows <- c(totalrows, rows)
                 page <- page + 1
             }
@@ -490,44 +481,21 @@ function(Symbols,env,return.class='xts',index.class="Date",
             # Available columns
             cols <- c('Open','High','Low','Close','Volume','Adjusted')
             
-            firstrow <- totalrows[[1]]
-            cells <- xml2::xml_find_all(firstrow, "th")
-            if (length(cells) == 5) cols <- cols[-(5:6)]
+            # Handle date + OHLC, when date + OHLCVA isn't returned
+            if (length(totalrows[[1]]) == 5) {
+              cols <- cols[-(5:6)]
+            }
 
             # Process from the start, for easier stocksplit management
             totalrows <- rev(totalrows)
-            mat <- matrix(0, ncol=length(cols) + 1, nrow=0, byrow=TRUE)
-            for(row in totalrows) {
-                cells <- xml2::xml_find_all(row, "td")
-                
-                # 2 cells means it is a stocksplit row
-                # So extract stocksplit data and recalculate the matrix we have so far
-                if (length(cells) == 2 && length(cols) == 6 & nrow(mat) > 1) {
-                    ss.data <- as.numeric(na.omit(as.numeric(unlist(strsplit(xml2::xml_text(cells[[2]]), "[^0-9]+")))))
-                    factor <- ss.data[2] / ss.data[1]
-                    
-                    mat <- rbind(t(apply(mat[-nrow(mat),], 1, function(x) {
-                        x * c(1, rep(1/factor, 4), factor, 1)
-                    })), mat[nrow(mat),])
-                }
-                
-                if (length(cells) != length(cols) + 1) next
-                
-                # Parse the Japanese date format using UTF characters
-                # \u5e74 = "year"
-                # \u6708 = "month"
-                # \u65e5 = "day"
-                date <- as.Date(xml2::xml_text(cells[[1]]), format="%Y\u5e74%m\u6708%d\u65e5")
-                entry <- c(date)
-                for(n in 2:length(cells)) {
-                    entry <- cbind(entry, as.numeric(gsub(",", "", xml2::xml_text(cells[[n]]))))
-                }
-                
-                mat <- rbind(mat, entry)
-            }
-            
-            fr <- xts(mat[, -1], as.Date(mat[, 1]), src="yahooj", updated=Sys.time())
-            
+
+            mat <- do.call(rbind, totalrows)
+
+            dates <- as.Date(mat[,1], format="%Y\u5e74%m\u6708%d\u65e5")
+            ohlc <- gsub(",", "", mat[,-1], fixed = TRUE)
+            storage.mode(ohlc) <- "numeric"  # convert from character to number
+
+            fr <- xts(ohlc, dates, src="yahooj", updated=Sys.time())
             colnames(fr) <- paste(symname, cols, sep='.')
             
             fr <- convert.time.series(fr=fr,return.class=return.class)
