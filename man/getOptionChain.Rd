@@ -36,7 +36,7 @@ return the front month.
 }
 \author{ Jeffrey A. Ryan, Joshua M. Ulrich, Steve Bronder }
 \references{
- \url{http://finance.yahoo.com},
+ \url{https://finance.yahoo.com},
  \url{https://docs.orats.io/datav2-api-guide/data.html#strikes}
 }
 \examples{
