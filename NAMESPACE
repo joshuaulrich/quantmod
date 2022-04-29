@@ -69,7 +69,8 @@ importFrom(utils,
   read.table,
   select.list,
   str,
-  type.convert)
+  type.convert,
+  URLencode)
 
 # new plotting functions (experimental)
 export(new.replot,
