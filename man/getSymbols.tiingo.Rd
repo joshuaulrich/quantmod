@@ -13,7 +13,6 @@
                     adjust=FALSE,
                     from='2007-01-01',
                     to=Sys.Date(),
-                    data.type="json",
                     ...)
 }
 \arguments{
@@ -26,7 +25,6 @@
   \item{adjust}{ adjust for dividends and splits? (FALSE) }
   \item{from}{ Retrieve data no earlier than this date. (2007-01-01)}
   \item{to}{ Retrieve data through this date (Sys.Date())}
-  \item{data.type}{ either \code{"json"} or \code{"csv"} }
   \item{\dots}{ additional parameters as per \code{\link{getSymbols}} }
 }
 \details{
@@ -48,11 +46,6 @@
   This API accessor will return adjusted or unadjusted OHLC as well as split and dividend information.
 
   For daily, weekly, and monthly data, Tiingo says the available data is up to 30 years;
-
-  Tiingo provides access to data via two APIs. You can choose the API via
-  the \code{data.type} argument. \code{data.type="json"}, the default, will
-  import data using the JSON API. This API includes additional metadata (e.g.
-  last updated time, timezone, etc) that is not provided via the CSV API.
 }
 \value{
 A call to \code{getSymbols(Symbols, src="tiingo")} will create objects
