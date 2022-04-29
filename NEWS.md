@@ -1,4 +1,60 @@
-### Changes in 0.4-18.1 (2021-mm-dd)
+### Changes in 0.4-20 (2022-04-29)
+
+1. Remove check for Yahoo Finance cookies because the site no longer
+  responds with a cookie, and that caused the connection attempt to fail.
+  This affected `getSymbols()`, `getDividends()`, and `getSplits()`.
+  Thanks to several users for reporting, and especially to @pverspeelt and
+  @alihru for investigating potential fixes!
+  [#358](https://github.com/joshuaulrich/quantmod/issues/358)
+
+1. Update `getSymbols.yahooj()` for changes to the web page.
+  [#312](https://github.com/joshuaulrich/quantmod/issues/312)
+
+1. Add `HL()` and supporting functions. These are analogues to `HLC()`,
+  `OHLC()`, etc.Thanks for Karl Gauvin for the nudge to implement them.
+
+1. Add adjusted close to `getSymbols.tiingo()` output. Thanks to Ethan Smith
+  for the suggestion and patch!
+  [#289](https://github.com/joshuaulrich/quantmod/issues/289)
+  [#345](https://github.com/joshuaulrich/quantmod/pull/345)
+
+1. Use a Date index for `getSymbols.tiingo()` daily data. Thanks to Ethan
+  Smith for the report!
+  [#350](https://github.com/joshuaulrich/quantmod/issues/350)
+
+1. Remove unneeded arguments to the `getSymbols.tiingo()` implementation.
+  Thanks to Ethan Smith for the suggestion and patch!
+  [#343](https://github.com/joshuaulrich/quantmod/issues/343)
+  [#343](https://github.com/joshuaulrich/quantmod/pull/344)
+
+1. Load dividends and splits data into the correct environment when the user
+  provides a value for the `env` argument. The previous behavior always loaded
+  the data into the environment the function was called from. Thanks to
+  Stewart Wright for the report and patch!
+  [#33](https://github.com/joshuaulrich/quantmod/issues/33)
+
+1. Make `getOptionChain()` return all the fields that Yahoo Finance provides.
+  Thanks to Adam Childers (@rhizomatican) for the patch!
+  [#318](https://github.com/joshuaulrich/quantmod/issues/318)
+  [#336](https://github.com/joshuaulrich/quantmod/pull/336)
+
+1. Add [orats](https://docs.orats.io) as a source for `getOptionChain()`.
+  Thanks to Steve Bronder (@SteveBronder) for the suggestion and implementation!
+  [#325](https://github.com/joshuaulrich/quantmod/pull/325)
+
+1. Improve the error message when `getSymbols()` cannot import data for a
+  symbol because the symbol is not valid or does not have historical data.
+  Thanks to Peter Carl for the report.
+  [#333](https://github.com/joshuaulrich/quantmod/issues/333)
+
+1. Fix the `getMetals()` example in the documentation. The example section
+  previously had an example of `getFX()`. Thanks to Gerhard Nachtmann
+  (@nachti) for the report and patch!
+  [#330](https://github.com/joshuaulrich/quantmod/issues/330)
+
+1. Fix `getQuote()` so it returns data when the ticker symbol contains an "&".
+  Thanks to @pankaj3009 for the report!
+  [#324](https://github.com/joshuaulrich/quantmod/issues/324)
 
 1. Fix `addMACD()` when `col` is specified. Thanks to @nvalueanalytics for the
   report!
