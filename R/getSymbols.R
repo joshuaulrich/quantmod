@@ -209,53 +209,23 @@ formals(loadSymbols) <- loadSymbols.formals
 
   if (is.null(h) || force.new) {
     # create 'h' if it doesn't exist yet
-    if (!force.new) {
-      h <- list()
-    }
+    h <- curl::new_handle()
+    curl::handle_setopt(h, .list = curl.options)
 
-    # establish session
-    new.session <- function() {
-      for (i in 1:5) {
-        h <- curl::new_handle()
-        curl::handle_setopt(h, .list = curl.options)
-
-        # random query to avoid cache
-        ru <- paste(sample(c(letters, 0:9), 4), collapse = "")
-        cu <- paste0("https://finance.yahoo.com?", ru)
-        z <- curl::curl_fetch_memory(cu, handle = h)
-        if (NROW(curl::handle_cookies(h)) > 0)
-          break;
-        Sys.sleep(0.1)
-      }
-
-      if (NROW(curl::handle_cookies(h)) == 0)
-        stop("Could not establish session after 5 attempts.")
-
-      return(h)
-    }
-
-    h$ch <- new.session()
-
-    n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
-    query.srv <- paste0("https://query", n, ".finance.yahoo.com/",
-                        "v1/test/getcrumb")
-    cres <- curl::curl_fetch_memory(query.srv, handle = h$ch)
-
-    h$cb <- rawToChar(cres$content)
     assign("_handle_", h, .quantmodEnv)
   }
   return(h)
 }
 
 .yahooURL <-
-function(symbol, from, to, period, type, handle)
+function(symbol, from, to, period, type)
 {
   p <- match.arg(period, c("1d", "1wk", "1mo"))
   e <- match.arg(type, c("history", "div", "split"))
   n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
   u <- paste0("https://query", n, ".finance.yahoo.com/v7/finance/download/",
               symbol, sprintf("?period1=%.0f&period2=%.0f", from, to),
-              "&interval=", p, "&events=", e, "&crumb=", handle$cb)
+              "&interval=", p, "&events=", e)
   return(u)
 }
 
@@ -323,8 +293,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
 
        yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
-                              interval, "history", handle)
-       conn <- curl::curl(yahoo.URL, handle = handle$ch)
+                              interval, "history")
+       conn <- curl::curl(yahoo.URL, handle = handle)
        fr <- try(read.csv(conn, na.strings="null"), silent = TRUE)
 
        if (inherits(fr, "try-error")) {

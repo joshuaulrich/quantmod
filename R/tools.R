@@ -76,10 +76,10 @@ function(symbol,
      handle <- .getHandle(curl.options, force.new = TRUE)
 
      # try again. must rebuild url with crumbs
-     yahoo.URL <- .yahooURL(symbol, from, to, interval, type, handle)
+     yahoo.URL <- .yahooURL(symbol, from, to, interval, type)
 
      close(conn)
-     conn <- curl::curl(yahoo.URL, handle = handle$ch)
+     conn <- curl::curl(yahoo.URL, handle = handle)
 
      fr <- try(read.csv(conn, ..., as.is = TRUE), silent = TRUE)
 
