@@ -10,7 +10,7 @@ Authors@R: c(
   person(given="Paul", family="Teetor", role="ctb"),
   person(given="Steve", family="Bronder", role="ctb")
   )
-Depends: R (>= 3.2.0), xts(> 0.12.1), zoo, TTR(>= 0.2), methods
+Depends: R (>= 3.2.0), xts(>= 0.9-0), zoo, TTR(>= 0.2), methods
 Imports: curl
 Suggests: DBI,RMySQL,RSQLite,timeSeries,xml2,downloader,jsonlite(>= 1.1)
 Description: Specify, build, trade, and analyse quantitative financial trading strategies.

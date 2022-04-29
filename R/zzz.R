@@ -28,6 +28,7 @@ print.quantmodEnv <- function(x, ...) {
 options(quantmod.deprecate.as.zoo.data.frame = TRUE)
 
 setOldClass("zoo");
+setOldClass("xts");
 setOldClass("Date");
 setClassUnion("xtsORzoo", c("xts","zoo"))
 setClass("quantmod",representation(
