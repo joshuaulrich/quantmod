@@ -229,6 +229,15 @@ function(symbol, from, to, period, type)
   return(u)
 }
 
+.yahooJsonURL <-
+function(symbol, from, to, period, type)
+{
+  u <- paste0("https://query2.finance.yahoo.com/v8/finance/chart/",
+              symbol, sprintf("?period1=%.0f&period2=%.0f", from, to),
+              "&interval=1d")
+  return(u)
+}
+
 .dateToUNIX <- function(Date) {
   posixct <- as.POSIXct(as.Date(Date, origin = "1970-01-01"))
   trunc(as.numeric(posixct))
@@ -241,7 +250,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
          to=Sys.Date(),
          ...,
          periodicity="daily",
-         curl.options=list())
+         curl.options=list(),
+         use.json.api=FALSE)
 {
      importDefaults("getSymbols.yahoo")
      this.env <- environment()
@@ -292,22 +302,41 @@ function(Symbols,env,return.class='xts',index.class="Date",
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
 
-       yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
-                              interval, "history")
-       conn <- curl::curl(yahoo.URL, handle = handle)
-       fr <- try(read.csv(conn, na.strings="null"), silent = TRUE)
+       if(use.json.api) {
+         yahoo.URL <- .yahooJsonURL(Symbols.name, from.posix, to.posix, interval)
+         conn <- curl::curl(yahoo.URL, handle = handle)
+         y <- try(jsonlite::fromJSON(conn)$chart$result, silent = TRUE)
 
-       if (inherits(fr, "try-error")) {
-         fr <- retry.yahoo(Symbols.name, from.posix, to.posix, interval,
-                           "history", conn, curl.options = curl.options,
-                           na.strings = NULL)
+         ohlcv <- unlist(y$indicators$quote[[1]], recursive = FALSE)
+         idx <- as.Date(.POSIXct(y$timestamp[[1]]))
+         x <- xts(do.call(cbind, ohlcv), idx,
+                   src='yahoo', updated=Sys.time())
+
+         fr <- merge(OHLCV(x), adjusted = unlist(y$indicators$adjclose))
+
+         # convert column names to Initial Capitalization
+         cn <- colnames(fr)
+         substring(cn, 1, 1) <- toupper(substring(cn, 1, 1))
+         colnames(fr) <- cn
+
+       } else {
+         yahoo.URL <- .yahooURL(Symbols.name, from.posix, to.posix,
+                                interval, "history")
+         conn <- curl::curl(yahoo.URL, handle = handle)
+         fr <- try(read.csv(conn, na.strings="null"), silent = TRUE)
+
+         if (inherits(fr, "try-error")) {
+           fr <- retry.yahoo(Symbols.name, from.posix, to.posix, interval,
+                             "history", conn, curl.options = curl.options,
+                             na.strings = NULL)
+         }
+
+         if(verbose) cat("done.\n")
+         fr <- xts(as.matrix(fr[,-1]),
+                   as.Date(fr[,1]),
+                   #as.POSIXct(fr[,1], tz=Sys.getenv("TZ")),
+                   src='yahoo',updated=Sys.time())
        }
-
-       if(verbose) cat("done.\n")
-       fr <- xts(as.matrix(fr[,-1]),
-                 as.Date(fr[,1]),
-                 #as.POSIXct(fr[,1], tz=Sys.getenv("TZ")),
-                 src='yahoo',updated=Sys.time())
 
        # warn about missing values
        if (any(is.na(fr))) {
@@ -335,7 +364,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
-       if(i >= 5 && length(Symbols) > 5) {
+       if(!use.json.api && i >= 5 && length(Symbols) > 5) {
          message("pausing 1 second between requests for more than 5 symbols")
          Sys.sleep(1)
        }
