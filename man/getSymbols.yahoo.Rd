@@ -21,8 +21,7 @@ getSymbols.yahoo(Symbols,
                  to = Sys.Date(),
                  ...,
                  periodicity = "daily",
-                 curl.options = list(),
-                 use.json.api = FALSE)
+                 curl.options = list())
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -38,7 +37,6 @@ getSymbols.yahoo(Symbols,
        \item{periodicity}{ periodicity of data to query and return. Must be
                            one of "daily", "weekly", "monthly". ("daily") }
        \item{curl.options}{ options passed to \code{curl::handle_setopt} }
-       \item{use.json.api}{ use the JSON endpoint instead of the CSV endpoint }
 }
 \details{
 Meant to be called internally by \code{getSymbols} (see also).
