@@ -218,11 +218,11 @@ formals(loadSymbols) <- loadSymbols.formals
 }
 
 .yahooJsonURL <-
-function(symbol, from, to, period, type)
+function(symbol, from, to, interval)
 {
   u <- paste0("https://query2.finance.yahoo.com/v8/finance/chart/",
-              symbol, sprintf("?period1=%.0f&period2=%.0f", from, to),
-              "&interval=1d")
+              symbol,
+              sprintf("?period1=%.0f&period2=%.0f&interval=%s", from, to, interval))
   return(u)
 }
 
