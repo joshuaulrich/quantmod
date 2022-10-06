@@ -34,8 +34,8 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   json <- try(jsonlite::fromJSON(conn, simplifyVector = FALSE)$chart$result, silent = TRUE)
 
   if(inherits(json, "try-error")) {
-    msg <- paste0("Unable to import splits for", Symmbol.name,
-                  ".\n", attr(test, "condition")$message)
+    msg <- paste0("Unable to import splits for", Symbol.name,
+                  ".\n", attr(json, "condition")$message)
     stop(msg)
   }
 
