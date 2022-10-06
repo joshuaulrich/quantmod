@@ -84,7 +84,7 @@
 function(x) {
   # if volume is to be plotted, do so here
     # scale volume - vol.divisor
-    if(class(x) != "chobTA") stop("chartVo requires a suitable chobTA object")
+    if(!inherits(x, "chobTA")) stop("chartVo requires a suitable chobTA object")
     Volumes <- x@TA.values
 
     spacing <- x@params$spacing

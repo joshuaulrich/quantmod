@@ -117,7 +117,7 @@ getModelData <- function(x, na.rm=TRUE) {
 function(x,na.rm=TRUE)
 {
     as.POSIXorDate <- function(x) {
-      if("POSIXt" %in% class(x)) {
+      if(inherits(x, "POSIXt")) {
         return(x)
       } else {
         x <- as.Date(x,origin='1970-01-01')
@@ -152,7 +152,7 @@ function(x,na.rm=TRUE)
     if(length(missing.symbols > 0)) getSymbols(missing.symbols,env=environment())
 
     target.data <- get(model.symbols[[1]],environment())
-    if("zoo" %in% class(target.data)) {
+    if(inherits(target.data, "zoo")) {
         target.dates <- index(target.data)
     } else {
         target.dates  <- rownames(target.data)
@@ -206,7 +206,7 @@ function(x,na.rm=TRUE)
 }
 "stripModelData" <-
 function(model) {
-    if(class(model) != "quantmod") stop("model must be of class 'quantmod'");
+    if(!inherits(model, "quantmod")) stop("model must be of class 'quantmod'");
     model@model.data <- zoo(0,0);
     model@price.levels <- zoo(0,0);
     return(model);
