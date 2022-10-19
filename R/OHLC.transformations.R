@@ -199,8 +199,8 @@ function(x)
 `HL` <-
 function(x)
 {
-  if(is.HLC(x))
-    return(x[,has.HLC(x,1)])
+  if(is.HL(x))
+    return(x[,has.HL(x,1)])
   NULL
 }
 

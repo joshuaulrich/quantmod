@@ -15,6 +15,7 @@
 \alias{OpLo}
 \alias{OpOp}
 \alias{Vo}
+\alias{HL}
 \alias{HLC}
 \alias{OHLC}
 \alias{OHLCV}
@@ -54,6 +55,7 @@ increasing, or decreasing. This is managed by \code{diff},
 which provides NA fill and suitable re-indexing.  These
 are here to make trade rules easier to read.
 
+\code{HL} extracts the High and Low columns.
 \code{HLC} extracts the High, Low, and Close columns.
 \code{OHLC} extracts the Open, High, Low, and Close columns.
 
@@ -89,6 +91,7 @@ OpHi(x)
 OpLo(x)
 OpOp(x)
 
+HL(x)
 HLC(x)
 OHLC(x)
 OHLCV(x)

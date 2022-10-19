@@ -202,6 +202,7 @@ export(
        OHLC, has.OHLC, is.OHLC, # OHLC extraction and test
        OHLCV, has.OHLCV, is.OHLCV, # OHLCV extraction and test
        HLC, has.HLC, is.HLC,    # HLC  extraction and test
+       HL, has.HL, is.HL,    # HLC  extraction and test
 
        # quick delta calculation functions
        OpCl, OpOp, ClCl, OpHi, OpLo, LoCl, HiCl, LoHi,
