@@ -30,9 +30,16 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
 
   conn <- curl::curl(yahoo.URL,handle=handle)
   json <- try(jsonlite::fromJSON(conn, simplifyVector = FALSE)$chart$result, silent = TRUE)
+
+  if(inherits(json, "try-error")) {
+    msg <- paste0("Unable to import dividends for ", Symbol.name,
+                  ".\n", attr(json, "condition")$message)
+    stop(msg)
+  }
+
   div.events <- json[[1]][["events"]][["dividends"]]
 
-  if(length(div.events) > 0) {
+  if(!is.null(div.events)) {
     div.to.xts <- function(x) {
       xts(x$amount, as.Date(.POSIXct(x$date, "UTC")))
     }
@@ -40,7 +47,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
     divs <- do.call(rbind, lapply(div.events, div.to.xts))
 
     split.events <- json[[1]][["events"]][["splits"]]
-    if(!split.adjust || length(split.events) == 0) {
+    if(!split.adjust && !is.null(split.events)) {
       # un-adjust dividends for splits
       spl.to.xts <- function(x) {
         ratio <- x$numerator/x$denominator
@@ -52,11 +59,10 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
     }
 
     fr <- divs
+    colnames(fr) <- paste(Symbol.name,'div',sep='.')
   } else {
     fr <- xts(numeric(0), .Date(integer(0)))
   }
-
-  colnames(fr) <- paste(Symbol.name,'div',sep='.')
 
   if(is.xts(tmp.symbol)) {
     if(auto.update) {

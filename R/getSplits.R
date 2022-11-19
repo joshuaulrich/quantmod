@@ -34,23 +34,23 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   json <- try(jsonlite::fromJSON(conn, simplifyVector = FALSE)$chart$result, silent = TRUE)
 
   if(inherits(json, "try-error")) {
-    msg <- paste0("Unable to import splits for", Symbol.name,
+    msg <- paste0("Unable to import splits for ", Symbol.name,
                   ".\n", attr(json, "condition")$message)
     stop(msg)
   }
 
   split.events <- json[[1]][["events"]][["splits"]]
 
-  if(length(split.events) > 0) {
+  if(!is.null(split.events)) {
     to.xts <- function(x) {
       ratio <- x$numerator/x$denominator
       xts(ratio, as.Date(.POSIXct(x$date, "UTC")))
     }
     fr <- 1 / do.call(rbind, lapply(split.events, to.xts))
+    colnames(fr) <- paste(Symbol.name,'spl',sep='.')
   } else {
     fr <- xts(numeric(0), .Date(integer(0)))
   }
-  colnames(fr) <- paste(Symbol.name,'spl',sep='.')
 
   if(is.xts(tmp.symbol)) {
     if(auto.update) {
