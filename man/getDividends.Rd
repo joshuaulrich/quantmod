@@ -16,6 +16,7 @@ getDividends(Symbol,
              verbose = FALSE,
              split.adjust = TRUE,
              ...,
+             colname=NULL,
              curl.options = list())
 }
 %- maybe also 'usage' for other objects documented here.
@@ -31,6 +32,7 @@ getDividends(Symbol,
   \item{split.adjust}{ adjust dividends for splits (\code{TRUE} by default
     because that's what Yahoo returns)}
   \item{\dots}{ currently unused }
+  \item{colname}{ name for the column of data }
   \item{curl.options}{ options passed to \code{curl::curl} }
 }
 \details{
@@ -53,11 +55,7 @@ as an \code{xts} object.
 }
 \references{ Yahoo! Finance: \url{https://finance.yahoo.com}}
 \author{ Jeffrey A. Ryan }
-\note{ 
-This function is very preliminary - and will most likely
-change significantly in the future.
-}
-\seealso{ \code{\link{getSymbols}} }
+\seealso{ \code{\link{getSymbols}}, \code{\link{getSplits}} }
 \examples{
 \dontrun{
 getSymbols("MSFT")

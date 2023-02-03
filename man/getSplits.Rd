@@ -15,6 +15,7 @@ getSplits(Symbol,
           auto.update = FALSE, 
           verbose = FALSE,
           ...,
+          colname=NULL,
           curl.options = list())
 }
 %- maybe also 'usage' for other objects documented here.
@@ -28,6 +29,7 @@ getSplits(Symbol,
   \item{auto.update}{ automatically add split to data object }
   \item{verbose}{ display status of retrieval }
   \item{\dots}{ currently unused }
+  \item{colname}{ name for the column of data }
   \item{curl.options}{ options passed to \code{curl::curl} }
 }
 \details{
@@ -50,11 +52,7 @@ as an \code{xts} object.  \code{NA} is returned if there
 is no split data.
 }
 \references{ Yahoo! Finance: \url{https://finance.yahoo.com}}
-\author{ Josh Ulrich }
-\note{ 
-This function is very preliminary - and will most likely
-change significantly in the future.
-}
+\author{ Joshua Ulrich }
 \seealso{ \code{\link{getSymbols}}, \code{\link{getDividends}} }
 \examples{
 \dontrun{

@@ -1,6 +1,6 @@
 `getSplits` <-
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
-         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...,
+         auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,...,colname=NULL,
          curl.options=list()) {
 
   # Function written by Joshua Ulrich, using
@@ -47,7 +47,11 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
       xts(ratio, as.Date(.POSIXct(x$date, "UTC")))
     }
     fr <- 1 / do.call(rbind, lapply(split.events, to.xts))
-    colnames(fr) <- paste(Symbol.name,'spl',sep='.')
+    if(is.null(colname)) {
+      colnames(fr) <- paste(Symbol.name,'spl',sep='.')
+    } else {
+      colnames(fr) <- colname
+    }
   } else {
     fr <- xts(numeric(0), .Date(integer(0)))
   }
