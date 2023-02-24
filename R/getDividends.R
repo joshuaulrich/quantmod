@@ -1,7 +1,7 @@
 `getDividends` <-
 function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
          auto.assign=FALSE,auto.update=FALSE,verbose=FALSE,split.adjust=TRUE,...,
-         colname=NULL,
+         colname.suffix=".div",
          curl.options=list()) {
 
   tmp.symbol <- Symbol
@@ -60,11 +60,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
     }
 
     fr <- divs
-    if(is.null(colname)) {
-      colnames(fr) <- paste(Symbol.name,'div',sep='.')
-    } else {
-      colnames(fr) <- colname
-    }
+    colnames(fr) <- paste0(Symbol.name, colname.suffix)
   } else {
     fr <- xts(numeric(0), .Date(integer(0)))
   }
