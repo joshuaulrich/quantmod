@@ -25,7 +25,7 @@ function(Symbol,from='1970-01-01',to=Sys.Date(),env=parent.frame(),src='yahoo',
   to.posix <- .dateToUNIX(to)
 
   handle <- .getHandle()
-  yahoo.URL <- .yahooJsonURL(Symbol.name, from.posix, to.posix, "3mo")
+  yahoo.URL <- .yahooJsonURL(Symbol.name, from.posix, to.posix, "1d")
   yahoo.URL <- paste0(yahoo.URL, "&events=div|splits")
 
   conn <- curl::curl(yahoo.URL,handle=handle)
