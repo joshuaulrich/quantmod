@@ -666,6 +666,9 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("from")) from <- ""
+     if(!hasArg("to")) to <- ""
+
      FRED.URL <- "https://fred.stlouisfed.org/series"
 
      returnSym <- Symbols
@@ -683,6 +686,9 @@ function(Symbols,env,return.class='xts',
                  src='FRED',updated=Sys.time())
        dim(fr) <- c(NROW(fr),1)
        colnames(fr) <- as.character(toupper(Symbols[[i]]))
+       # subset between from/to dates before we convert from xts
+       fr <- fr[paste(from, to, sep = "/")]
+
        fr <- convert.time.series(fr=fr,return.class=return.class)
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
        if(auto.assign)
