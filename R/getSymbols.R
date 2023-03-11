@@ -329,6 +329,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
          tclass(fr) <- index.class
 
        Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]])) 
+       returnSym[[i]] <- gsub('\\^', '', returnSym[[i]])
+
        if(auto.assign)
          assign(Symbols[[i]],fr,env)
        }, silent = TRUE)
