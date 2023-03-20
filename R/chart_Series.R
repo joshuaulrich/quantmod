@@ -72,8 +72,8 @@ function(x, type="", spacing=1, up.col="green",dn.col="red",up.border="grey",dn.
   
 } # }}}
 
-# range.bars {{{
-range.bars <-
+# rangeBars {{{
+rangeBars <-
 function(x, type="", spacing=1, line.col="darkorange",
          up.col="green",dn.col="red",up.border="grey",dn.border=up.border) {
   if(is.OHLC(x) && type != "line") {
@@ -357,10 +357,10 @@ chart_Series <- function(x,
   }
   # add main series
   cs$set_frame(2)
-  # need to rename range.bars to something more generic, and allow type= to handle:
+  # need to rename rangeBars to something more generic, and allow type= to handle:
   #  ohlc, hlc, candles, ha-candles, line, area
   #  chart_Perf will be the call to handle relative performace plots
-  cs$add(expression(range.bars(xdata[xsubset], 
+  cs$add(expression(rangeBars(xdata[xsubset],
                     type, 1,
                     fade(theme$line.col,clev),
                     fade(theme$up.col,clev),
@@ -419,7 +419,7 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
              col=theme$grid)
              #col=x$Env$theme$grid)
     series <- merge(series, x$Env$xdata, join="outer",retside=c(TRUE,FALSE))[x$Env$xsubset]
-    range.bars(series, type=type)
+    rangeBars(series, type=type)
   }
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
