@@ -195,8 +195,8 @@ new.replot <- function(frame=1,asp=1,xlim=c(1,10),ylim=list(structure(c(1,10),fi
   return(replot_env)
 } # }}}
 
-str.replot <- function(x, ...) {
-  print(str(unclass(x)))
+str.replot <- function(object, ...) {
+  print(str(unclass(object)))
 }
 
 # print/plot replot methods {{{

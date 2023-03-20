@@ -93,6 +93,7 @@ export(axTicksByValue)
 export(axTicksByTime2)
 S3method(plot, replot)
 S3method(print, replot)
+S3method(str, replot)
 
 #export(.chob,write.chob,get.chob,release.chob)
 
@@ -327,8 +328,10 @@ export(
 
 # S3 methods
 S3method(seriesHi,default)
+S3method(seriesHi,timeSeries)
 S3method(seriesHi,ts)
 S3method(seriesLo,default)
+S3method(seriesLo,timeSeries)
 S3method(seriesLo,ts)
 
 S3method(print,financials)
