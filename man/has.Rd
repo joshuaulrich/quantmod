@@ -58,7 +58,7 @@ has.Trade(x, which = FALSE)
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{ data object }
-  \item{which}{ disply position of match }
+  \item{which}{ display position of match }
 }
 \details{
 Mostly used internally by \pkg{quantmod}, they can be useful
@@ -68,7 +68,7 @@ can be used in OHLC requiring functions like \code{Op},
 
 Columns names must contain the full description of data,
 that is, Open, High, Low, Close, Volume or Adjusted. Abbreviations
-will return \code{FALSE} (or \code{NA} when which=TRUE). See
+will return \code{FALSE} (or \code{NA} when \code{which = TRUE}). See
 \code{\link{quantmod.OHLC}} for details of \pkg{quantmod}
 naming conventions.
 
@@ -85,7 +85,7 @@ Any additional columns in the object does not affect the return value.
 \value{
 A logical value indicating success or failure by default.
 
-If which=TRUE, a numeric value representing the column position
+If \code{which = TRUE}, a numeric value representing the column position
 will be returned.
 
 \code{is.OHLC}, \code{is.HL}, and \code{is.HLC} return a single logical value,
