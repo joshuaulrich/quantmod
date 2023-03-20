@@ -18,6 +18,8 @@
 \alias{is.OHLCV}
 \alias{has.HLC}
 \alias{is.HLC}
+\alias{has.HL}
+\alias{is.HL}
 \title{ Check For OHLC Data }
 \description{
 A set of functions to check for appropriate
@@ -33,6 +35,9 @@ has.OHLCV(x, which = FALSE)
 
 is.HLC(x)
 has.HLC(x, which = FALSE)
+
+is.HL(x)
+has.HL(x, which = FALSE)
 
 has.Op(x, which = FALSE)
 has.Hi(x, which = FALSE)
@@ -67,9 +72,15 @@ will return \code{FALSE} (or \code{NA} when which=TRUE). See
 \code{\link{quantmod.OHLC}} for details of \pkg{quantmod}
 naming conventions.
 
-\code{is.OHLC} (and is.HLC, similarly) will only return TRUE is there are columns
-for Open, High, Low and Close.  Additional columns will not affect
-the value.
+The "is" functions only return \code{TRUE} when the objects has the relevant
+column names:
+\itemize{
+\item \code{is.HL}: High, Low
+\item \code{is.HLC}: High, Low, Close
+\item \code{is.OHLC}: Open, High, Low, Close
+}
+The search for relevant column names is not case sensitive.
+Any additional columns in the object does not affect the return value.
 }
 \value{
 A logical value indicating success or failure by default.
@@ -77,7 +88,8 @@ A logical value indicating success or failure by default.
 If which=TRUE, a numeric value representing the column position
 will be returned.
 
-\code{is.OHLC} and \code{is.HLC} return a single value of TRUE or FALSE.
+\code{is.OHLC}, \code{is.HL}, and \code{is.HLC} return a single logical value,
+either \code{TRUE} or \code{FALSE}.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{quantmod.OHLC}},\code{\link{OHLC.Transformations}} }
