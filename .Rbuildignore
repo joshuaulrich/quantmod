@@ -7,6 +7,7 @@ vignettes
 ^.*\.Rcheck$
 ^.*\.tar.gz$
 ^.*\.patch$
+^.*\.notes$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.git
@@ -17,3 +18,5 @@ vignettes
 ^CRAN_comments.md$
 ^release-checklist.md$
 .travis.yml
+Makefile
+^\.sw*$
