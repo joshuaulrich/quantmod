@@ -1,5 +1,6 @@
 \name{chartTheme}
 \alias{chartTheme}
+\alias{.chart.theme}
 \title{ Create A Chart Theme }
 \description{
 Create a chart.theme object for use within chartSeries

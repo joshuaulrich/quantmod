@@ -6,6 +6,7 @@
 \alias{lineChart}
 \alias{reChart}
 \alias{current.chob}
+\alias{.chob}
 \title{ Create Financial Charts }
 \description{
 Charting tool to create standard financial charts
