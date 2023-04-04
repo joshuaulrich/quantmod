@@ -1,64 +1,65 @@
-### Changes in 0.4-21 (2023-03-29)
+### Changes in 0.4.21 (2023-03-29)
 
 1. Fix S3 method issues. R-devel (83995-ish) added a check for possible S3
-  method issues. Register methods it found that were not registered:
-  `str.replot()`, `seriesHi.timeSeries()`, and `seriesLo.timeSeries()`.
+    method issues. Register methods it found that were not registered:
+    `str.replot()`, `seriesHi.timeSeries()`, and `seriesLo.timeSeries()`.
 
-  It was also confused by `range.bars()` and `unique.formula.names()`. Remove
-  `unique.formula.names()` because it wasn't exported or used internally.
-  Rename `range.bars()` to `rangeBars()`, which isn't exported.
+    It was also confused by `range.bars()` and `unique.formula.names()`. Remove
+    `unique.formula.names()` because it wasn't exported or used internally.
+    Rename `range.bars()` to `rangeBars()`, which isn't exported.
 
-  Thanks to Kurt Hornik for the report!
-  [#375](https://github.com/joshuaulrich/quantmod/issues/375)
+    Thanks to Kurt Hornik for the report!
+    [#375](https://github.com/joshuaulrich/quantmod/issues/375)
 
 1. Remove "^" prefix from `getSymbols()` return value. When the 'Symbols'
-  argument has a "^" prefix and `auto.assign = TRUE`:
-      * `getSymbols()` removes the "^" from the object it creates, but
-      * returns the 'Symbols' argument unchanged, and
-      * removes the "^" from the column names of the object it creates.
+    argument has a "^" prefix and `auto.assign = TRUE`:
 
-  The example below will create an object named `IXIC` but the value of
-  `sym` will be "^IXIC".
+    * `getSymbols()` removes the "^" from the object it creates, but
+    * returns the 'Symbols' argument unchanged, and
+    * removes the "^" from the column names of the object it creates.
 
-      sym <- getSymbols("^IXIC")
+    The example below will create an object named `IXIC` but the value of
+    `sym` will be "^IXIC".
 
-  That means `x <- get(sym)` will not work because an object named `^IXIC`
-  doesn't exist.
-  [#371](https://github.com/joshuaulrich/quantmod/issues/371)
+        sym <- getSymbols("^IXIC")
+
+    That means `x <- get(sym)` will not work because an object named `^IXIC`
+    doesn't exist.
+    [#371](https://github.com/joshuaulrich/quantmod/issues/371)
 
 1. Add 'from' and 'to' arguments to `getSymbols.FRED()`. Users expect to be
-  able to set the 'from' and 'to' arguments for FRED data like they can for
-  Yahoo data. Those values were ignored and the entire series was always
-  returned.
-  [#368](https://github.com/joshuaulrich/quantmod/issues/368)
+    able to set the 'from' and 'to' arguments for FRED data like they can for
+    Yahoo data. Those values were ignored and the entire series was always
+    returned.
+    [#368](https://github.com/joshuaulrich/quantmod/issues/368)
 
 1. Change interval to 1d for `getDividends()` and `getSplits()`. The "3mo"
-  setting caused some dividends to be missing for companies that issued monthly
-  dividends. Note that the response to this request also includes all the OHLCV
-  data. But it's small (less than 1MB for 60+ years of daily data).
-  [#372](https://github.com/joshuaulrich/quantmod/issues/372)
+    setting caused some dividends to be missing for companies that issued monthly
+    dividends. Note that the response to this request also includes all the OHLCV
+    data. But it's small (less than 1MB for 60+ years of daily data).
+    [#372](https://github.com/joshuaulrich/quantmod/issues/372)
 
 1. Handle errors in `getSplits()` and `getDividends()`. `getDividends()` didn't
-  handle cases where the download failed, or when dividends needed to be
-  split-adjusted but there were no splits. It also tried to set colnames
-  on the empty xts object that's returned when there are no dividends.
-  `getSplits()` had the same colnames issue. Check for no splits by testing
-  for `NULL` because that's more explicit. Thanks to Chris Cheung for the
-  report!
-  [#366](https://github.com/joshuaulrich/quantmod/issues/366)
+    handle cases where the download failed, or when dividends needed to be
+    split-adjusted but there were no splits. It also tried to set colnames
+    on the empty xts object that's returned when there are no dividends.
+    `getSplits()` had the same colnames issue. Check for no splits by testing
+    for `NULL` because that's more explicit. Thanks to Chris Cheung for the
+    report!
+    [#366](https://github.com/joshuaulrich/quantmod/issues/366)
 
 1. Export `HL()`, `is.HL()`, and `has.HL()` functions and add documentation.
-  These were added in 0.4.18 but not exported or included in the documentation.
+    These were added in 0.4.18 but not exported or included in the documentation.
 
 1. Use Yahoo Finance v8 JSON endpoint and remove the v7 CSV endpoint. There
-  seems to be a rate limit for the number of tickers you can request via the CSV
-  endpoint. The [yfinance python library](https://github.com/ranaroussi/yfinance)
-  uses the JSON endpoint and doesn't seem to have rate limit issues.
-  [#360](https://github.com/joshuaulrich/quantmod/issues/360)
-  [#362](https://github.com/joshuaulrich/quantmod/issues/362)
-  [#364](https://github.com/joshuaulrich/quantmod/issues/364)
+    seems to be a rate limit for the number of tickers you can request via the CSV
+    endpoint. The [yfinance python library](https://github.com/ranaroussi/yfinance)
+    uses the JSON endpoint and doesn't seem to have rate limit issues.
+    [#360](https://github.com/joshuaulrich/quantmod/issues/360)
+    [#362](https://github.com/joshuaulrich/quantmod/issues/362)
+    [#364](https://github.com/joshuaulrich/quantmod/issues/364)
 
-### Changes in 0.4-20 (2022-04-29)
+### Changes in 0.4.20 (2022-04-29)
 
 1. Remove check for Yahoo Finance cookies because the site no longer
   responds with a cookie, and that caused the connection attempt to fail.
@@ -120,7 +121,7 @@
   report!
   [#321](https://github.com/joshuaulrich/quantmod/issues/321)
 
-### Changes in 0.4-18 (2020-11-29)
+### Changes in 0.4.18 (2020-11-29)
 
 1. Fix issues handling https:// in `getSymbols.yahooj()`. Thanks to @lobo1981
   and @tchevri for the reports and @ethanbsmith for the suggestion to move
@@ -161,7 +162,7 @@
   to Kurt Hornik for the report.
   [#319](https://github.com/joshuaulrich/quantmod/issues/319)
 
-### Changes in 0.4-17 (2020-03-31)
+### Changes in 0.4.17 (2020-03-31)
 
 1. `chartTheme()` now works when quantmod is not attached. Thanks to Kurt
   Hornik for the report.
