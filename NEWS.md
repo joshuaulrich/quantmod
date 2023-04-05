@@ -1,3 +1,10 @@
+### Changes in 0.4.22 (2023-04-05)
+
+1. Move jsonlite from Suggests to Imports so it doesn't cause a problem
+    when a package that doesn't also Suggest jsonlite uses getSymbols().
+    Thanks to Kurt Hornik for the report and fix!
+    [#380](https://github.com/joshuaulrich/quantmod/issues/380)
+
 ### Changes in 0.4.21 (2023-03-29)
 
 1. Fix S3 method issues. R-devel (83995-ish) added a check for possible S3
