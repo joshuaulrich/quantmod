@@ -12,9 +12,6 @@ function(Symbols, Exp=NULL, src="yahoo", ...) {
 
 getOptionChain.yahoo <- function(Symbols, Exp, ...)
 {
-  if(!requireNamespace("jsonlite", quietly=TRUE))
-    stop("package:",dQuote("jsonlite"),"cannot be loaded.")
-
   NewToOld <- function(x, tz = NULL) {
     if(is.null(x) || length(x) < 1)
       return(NULL)

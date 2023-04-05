@@ -41,8 +41,6 @@
 }
 
 getOptionChain.orats <- function(Symbols, Exp, api.key, dte, delta) {
-  if(!requireNamespace("jsonlite", quietly=TRUE))
-    stop("package:",dQuote("jsonlite"),"cannot be loaded.")
 
   if (missing(api.key)) {
     # Check if they have ORATS_API_KEY defined
