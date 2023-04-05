@@ -291,7 +291,11 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
        yahoo.URL <- .yahooJsonURL(Symbols.name, from.posix, to.posix, interval)
        conn <- curl::curl(yahoo.URL, handle = handle)
-       y <- try(jsonlite::fromJSON(conn)$chart$result, silent = TRUE)
+       y <- jsonlite::fromJSON(conn)
+       if (is.null(y$chart) || is.null(y$chart$result)) {
+         stop("no data for", Symbols.name)
+       }
+       y <- y$chart$result
 
        ohlcv <- unlist(y$indicators$quote[[1]], recursive = FALSE)
        idx <- as.Date(.POSIXct(y$timestamp[[1]]))
