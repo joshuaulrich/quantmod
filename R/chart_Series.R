@@ -415,17 +415,27 @@ function(x,
          type = "candlesticks",
          order = NULL,
          on = NA,
-         legend = "auto",
-         theme = NULL,
          name = NULL,
+         theme = NULL,
          ...)
 {
   lenv <- new.env()
-  if(is.null(name)) {
+
+  if(is.null(name) || isTRUE(name == "auto")) {
+    # Checking for `name == "auto"` handles the case where the user explicitly
+    # provided "auto" for the 5th argument. The 5th argument used to be
+    # `legend = "auto"`, but only "auto" was supported.
     name <- deparse(substitute(x))
   }
   lenv$name <- name
-  lenv$plot_series <- function(x, series, type, ...) {
+
+  lenv$plot_series <- function(x, series, type, ..., legend = NULL) {
+    # The 'legend = NULL` argument was added to remove `legend` from `...` to
+    # suppress this warning:
+    ##    Warning message:
+    ##    In plot.xy(xy.coords(x, y), type = type, ...) :
+    ##      "legend" is not a graphical parameter
+
     # vertical grid lines
     if(FALSE) theme <- NULL
     segments(axTicksByTime2(xdata[xsubset]),
@@ -440,8 +450,8 @@ function(x,
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(x=x,type=type,order=order,on=on,legend=legend,...)),
-              list(x=x,type=type,order=order,on=on,legend=legend,...))
+        names(list(x=x,type=type,order=order,on=on,...)),
+              list(x=x,type=type,order=order,on=on,...))
   exp <- parse(text=gsub("list","plot_series",
                as.expression(substitute(list(x=current.chob(),type=type,series=get("x"), ...)))),
                srcfile=NULL)
@@ -496,19 +506,29 @@ add_TA <-
 function(x,
          order = NULL,
          on = NA,
-         legend = "auto",
+         name = NULL,
          yaxis = list(NULL, NULL),
          col = 1,
          taType = NULL,
-         name = NULL,
          ...)
 {
   lenv <- new.env()
-  if(is.null(name)) {
+
+  if(is.null(name) || isTRUE(name == "auto")) {
+    # Checking for `name == "auto"` handles the case where the user explicitly
+    # provided "auto" for the 4th argument. The 4th argument used to be
+    # `legend = "auto"`, but only "auto" was supported.
     name <- deparse(substitute(x))
   }
   lenv$name <- name
-  lenv$plot_ta <- function(x, ta, on, taType, col=col,...) {
+
+  lenv$plot_ta <- function(x, ta, on, taType, col=col, ..., legend=NULL) {
+    # The 'legend = NULL` argument was added to remove `legend` from `...` to
+    # suppress this warning:
+    ##    Warning message:
+    ##    In plot.xy(xy.coords(x, y), type = type, ...) :
+    ##      "legend" is not a graphical parameter
+
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset
     if(all(is.na(on))) {
@@ -539,9 +559,9 @@ function(x,
   lenv$xdata <- x
   # map all passed args (if any) to 'lenv' environment
   mapply(function(name,value) { assign(name,value,envir=lenv) }, 
-        names(list(x=x,order=order,on=on,legend=legend,
+        names(list(x=x,order=order,on=on,
                    taType=taType,col=col,...)),
-              list(x=x,order=order,on=on,legend=legend,
+              list(x=x,order=order,on=on,
                    taType=taType,col=col,...))
   exp <- parse(text=gsub("list","plot_ta",
                as.expression(substitute(list(x=current.chob(),
