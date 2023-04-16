@@ -175,7 +175,7 @@ chart_pars <- function() {
 #  original quantmod:::chartSeries, except the
 #  undesireable ones.
 chart_Series <- function(x, 
-                         name=deparse(substitute(x)), 
+                         name=NULL,
                          type="candlesticks", 
                          subset="", 
                          TA="",
@@ -306,7 +306,11 @@ chart_Series <- function(x,
                 labels=names(axt), #axTicksByTime(xdata[xsubset],format.labels=format.labels)),
                 las=1,lwd.ticks=1,mgp=c(3,1.5,0),tcl=-0.4,cex.axis=.9)),
          expr=TRUE)
+  if(is.null(name)) {
+    name <- deparse(substitute(x))
+  }
   cs$Env$name <- name
+
   text.exp <- c(expression(text(1-1/3,0.5,name,font=2,col='#444444',offset=0,cex=1.1,pos=4)),
                 expression(text(NROW(xdata[xsubset]),0.5,
                            paste(start(xdata[xsubset]),end(xdata[xsubset]),sep=" / "),
@@ -406,9 +410,21 @@ use.chob <- function(use=TRUE) {
 new_ta <- function(FUN, preFUN, postFUN, on=NA, ...) {}
 
 # add_Series {{{
-add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", theme=NULL,...) { 
+add_Series <-
+function(x,
+         type = "candlesticks",
+         order = NULL,
+         on = NA,
+         legend = "auto",
+         theme = NULL,
+         name = NULL,
+         ...)
+{
   lenv <- new.env()
-  lenv$name <- deparse(substitute(x))
+  if(is.null(name)) {
+    name <- deparse(substitute(x))
+  }
+  lenv$name <- name
   lenv$plot_series <- function(x, series, type, ...) {
     # vertical grid lines
     if(FALSE) theme <- NULL
@@ -476,11 +492,22 @@ add_Series <- function(x, type="candlesticks",order=NULL, on=NA, legend="auto", 
   plot_object
 } #}}}
 # add_TA {{{
-add_TA <- function(x, order=NULL, on=NA, legend="auto",
-                   yaxis=list(NULL,NULL),
-                   col=1, taType=NULL, ...) { 
+add_TA <-
+function(x,
+         order = NULL,
+         on = NA,
+         legend = "auto",
+         yaxis = list(NULL, NULL),
+         col = 1,
+         taType = NULL,
+         name = NULL,
+         ...)
+{
   lenv <- new.env()
-  lenv$name <- deparse(substitute(x))
+  if(is.null(name)) {
+    name <- deparse(substitute(x))
+  }
+  lenv$name <- name
   lenv$plot_ta <- function(x, ta, on, taType, col=col,...) {
     xdata <- x$Env$xdata
     xsubset <- x$Env$xsubset

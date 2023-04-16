@@ -25,7 +25,7 @@ in quantmod. Interface, behavior, and functionality will change.
 }
 \usage{
 chart_Series(x,
-             name = deparse(substitute(x)), 
+             name = NULL,
              type = "candlesticks", 
              subset = "",
              TA = "", 
