@@ -26,6 +26,7 @@ function(Symbols,src='yahoo',what, ...) {
 
 .yahooSession <- function() {
   h <- curl::new_handle()
+  #yahoo finance doesnt seem to set cookies wihtout these headers and the cookies are needed
   curl::handle_setheaders(h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
   r <- curl::curl_fetch_memory("https://finance.yahoo.com", handle = h)
   n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
