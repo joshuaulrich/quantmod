@@ -24,15 +24,34 @@ function(Symbols,src='yahoo',what, ...) {
   df[Symbols,]
 }
 
-.yahooSession <- function() {
-  h <- curl::new_handle()
-  #yahoo finance doesnt seem to set cookies wihtout these headers and the cookies are needed
-  curl::handle_setheaders(h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-  r <- curl::curl_fetch_memory("https://finance.yahoo.com", handle = h)
+.yahooSession <- function(force.new = FALSE) {
+  cache.name <- "_yahoo_curl_handle_"
+  h <- get0(cache.name, .quantmodEnv) #get cached handle
+  
+  if (is.null(h) || force.new) {
+    h <- curl::new_handle()
+    #yahoo finance doesn't seem to set cookies without these headers and the
+    #cookies are needed to get the crumb
+    curl::handle_setheaders(h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    r <- curl::curl_fetch_memory("https://finance.yahoo.com", handle = h)
+    if ((r$status_code != 200) || (NROW(curl::handle_cookies(h)) < 1)) 
+      stop("Unable to start yahoo session")
+  }
+
+  #test that we can get a crumb on each call, so that downstream callers dont 
+  #have to handle invalid sessions. while getting the crumb on each call is an
+  #extra network roundtrip, its a very small paylod, so still quite lightweight
   n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
   query.srv <- paste0("https://query", n, ".finance.yahoo.com/", "v1/test/getcrumb")
-  r <- curl::curl_fetch_memory(query.srv, handle = h)
-  list(h = h, crumb = rawToChar(r$content))
+  r <- try(curl::curl_fetch_memory(query.srv, handle = h))
+  if (inherits(r, "try-error") || (r$status_code != 200)) {
+    if (!force.new) ses <- .yahooSession(TRUE) else stop(r)
+  } else {
+    ses <- list(h = h, crumb = rawToChar(r$content))
+    assign(cache.name, h, .quantmodEnv) #cache handle, not session
+  }
+
+  return(ses)
 }
 
 `getQuote.yahoo` <-
