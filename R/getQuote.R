@@ -55,9 +55,8 @@ function(Symbols,src='yahoo',what, ...) {
 }
 
 `getQuote.yahoo` <-
-function(Symbols,what=standardQuote(),yahoo.session = NULL,...) {
+function(Symbols,what=standardQuote(),...) {
   importDefaults("getQuote.yahoo")
-  if (is.null(yahoo.session)) yahoo.session <- .yahooSession()
   length.of.symbols <- length(Symbols)
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
@@ -69,7 +68,7 @@ function(Symbols,what=standardQuote(),yahoo.session = NULL,...) {
     for(i in 1:length(all.symbols)) {
       Sys.sleep(0.5)
       cat(i,", ")
-      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what,yahoo.session = yahoo.session))
+      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what))
     }
     cat("...done\n")
     return(df)
@@ -89,12 +88,11 @@ function(Symbols,what=standardQuote(),yahoo.session = NULL,...) {
   # exchange, fullExchangeName, market, sourceInterval, exchangeTimezoneName,
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
-  URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
+  URL <- paste0("https://query1.finance.yahoo.com/v6/finance/quote?symbols=",
                 SymbolsString,
-                "&crumb=", yahoo.session$crumb,
                 "&fields=",QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(curl::curl(URL, handle = yahoo.session$h))
+  response <- jsonlite::fromJSON(curl::curl(URL))
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
