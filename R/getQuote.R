@@ -34,24 +34,26 @@ function(Symbols,src='yahoo',what, ...) {
     #yahoo finance doesn't seem to set cookies without these headers 
     #and the cookies are needed to get the crumb
     curl::handle_setheaders(ses$h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-    r <- curl::curl_fetch_memory("https://finance.yahoo.com", handle = ses$h)
-    ses$can.crumb <- (r$status_code == 200) && (NROW(curl::handle_cookies(ses$h)) > 0)
+    URL <- "https://finance.yahoo.com"
+    r <- curl::curl_fetch_memory(URL, handle = ses$h)
+    #yahoo redirects to a consent form for GDPR, so urls will differ
+    ses$can.crumb <- (URL == r$url)
     assign(cache.name, ses, .quantmodEnv) #cache session
   }
 
   if (ses$can.crumb) {
-    #test that we can get a crumb on each call, so that downstream callers dont 
-    #have to handle invalid sessions. while getting the crumb on each call is an
-    #extra network roundtrip, its a very small paylod, so still quite lightweight
+    #get a crumb so that downstream callers dont have to handle invalid sessions.
+    #this is a network hop, but very lightweight payload
     n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
     query.srv <- paste0("https://query", n, ".finance.yahoo.com/", "v1/test/getcrumb")
-    r <- try(curl::curl_fetch_memory(query.srv, handle = ses$h))
-    if (inherits(r, "try-error") || (r$status_code != 200)) {
-      if (!force.new) ses <- .yahooSession(TRUE) else ses$can.crumb <- FALSE
-    } else {
+    r <- curl::curl_fetch_memory(query.srv, handle = ses$h)
+    if (r$status_code == 200) {
       ses$crumb = rawToChar(r$content)
+    } else {
+      if (!force.new) ses <- .yahooSession(TRUE) else stop("Unbale to get yahoo crumb")
     }
   }
+
   return(ses)
 }
 
