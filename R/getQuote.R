@@ -25,39 +25,42 @@ function(Symbols,src='yahoo',what, ...) {
 }
 
 .yahooSession <- function(force.new = FALSE) {
-  cache.name <- "_yahoo_curl_handle_"
-  h <- get0(cache.name, .quantmodEnv) #get cached handle
+  cache.name <- "_yahoo_curl_session_"
+  ses <- get0(cache.name, .quantmodEnv) #get cached session
   
-  if (is.null(h) || force.new) {
-    h <- curl::new_handle()
-    #yahoo finance doesn't seem to set cookies without these headers and the
-    #cookies are needed to get the crumb
-    curl::handle_setheaders(h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-    r <- curl::curl_fetch_memory("https://finance.yahoo.com", handle = h)
-    if ((r$status_code != 200) || (NROW(curl::handle_cookies(h)) < 1)) 
-      stop("Unable to start yahoo session")
+  if (is.null(ses) || force.new) {
+    ses <- list()
+    ses$h <- curl::new_handle()
+    #yahoo finance doesn't seem to set cookies without these headers 
+    #and the cookies are needed to get the crumb
+    curl::handle_setheaders(ses$h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    r <- curl::curl_fetch_memory("https://finance.yahoo.com", handle = ses$h)
+    ses$can.crumb <- (r$status_code == 200) && (NROW(curl::handle_cookies(ses$h)) > 0)
+    assign(cache.name, ses, .quantmodEnv) #cache session
   }
 
-  #test that we can get a crumb on each call, so that downstream callers dont 
-  #have to handle invalid sessions. while getting the crumb on each call is an
-  #extra network roundtrip, its a very small paylod, so still quite lightweight
-  n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
-  query.srv <- paste0("https://query", n, ".finance.yahoo.com/", "v1/test/getcrumb")
-  r <- try(curl::curl_fetch_memory(query.srv, handle = h))
-  if (inherits(r, "try-error") || (r$status_code != 200)) {
-    if (!force.new) ses <- .yahooSession(TRUE) else stop(r)
-  } else {
-    ses <- list(h = h, crumb = rawToChar(r$content))
-    assign(cache.name, h, .quantmodEnv) #cache handle, not session
+  if (ses$can.crumb) {
+    #test that we can get a crumb on each call, so that downstream callers dont 
+    #have to handle invalid sessions. while getting the crumb on each call is an
+    #extra network roundtrip, its a very small paylod, so still quite lightweight
+    n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
+    query.srv <- paste0("https://query", n, ".finance.yahoo.com/", "v1/test/getcrumb")
+    r <- try(curl::curl_fetch_memory(query.srv, handle = ses$h))
+    if (inherits(r, "try-error") || (r$status_code != 200)) {
+      if (!force.new) ses <- .yahooSession(TRUE) else ses$can.crumb <- FALSE
+    } else {
+      ses$crumb = rawToChar(r$content)
+    }
   }
-
   return(ses)
 }
 
 `getQuote.yahoo` <-
-function(Symbols,what=standardQuote(),...) {
+function(Symbols,what=standardQuote(),session=NULL,...) {
   importDefaults("getQuote.yahoo")
   length.of.symbols <- length(Symbols)
+  if (is.null(session)) session <- .yahooSession()
+  
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
     # we will recursively call getQuote.yahoo to handle each block of 200
@@ -68,7 +71,7 @@ function(Symbols,what=standardQuote(),...) {
     for(i in 1:length(all.symbols)) {
       Sys.sleep(0.5)
       cat(i,", ")
-      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what))
+      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what,session=session))
     }
     cat("...done\n")
     return(df)
@@ -88,11 +91,15 @@ function(Symbols,what=standardQuote(),...) {
   # exchange, fullExchangeName, market, sourceInterval, exchangeTimezoneName,
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
-  URL <- paste0("https://query1.finance.yahoo.com/v6/finance/quote?symbols=",
-                SymbolsString,
-                "&fields=",QFc)
+  if (session$can.crumb) {
+    URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?crumb=", session$crumb)
+  } else {
+    URL <- "https://query1.finance.yahoo.com/v6/finance/quote?"
+  }
+
+  URL <- paste0(URL, "&symbols=", SymbolsString, "&fields=", QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(curl::curl(URL))
+  response <- jsonlite::fromJSON(curl::curl(URL, handle = session$h))
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
