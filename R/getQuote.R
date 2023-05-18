@@ -37,7 +37,7 @@ function(Symbols,src='yahoo',what, ...) {
     URL <- "https://finance.yahoo.com"
     r <- curl::curl_fetch_memory(URL, handle = ses$h)
     #yahoo redirects to a consent form for GDPR, so urls will differ
-    ses$can.crumb <- (URL == r$url)
+    ses$can.crumb <- ((r$status_code == 200) && (URL == r$url))
     assign(cache.name, ses, .quantmodEnv) #cache session
   }
 
