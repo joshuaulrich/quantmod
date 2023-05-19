@@ -36,8 +36,8 @@ function(Symbols,src='yahoo',what, ...) {
     curl::handle_setheaders(ses$h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
     URL <- "https://finance.yahoo.com"
     r <- curl::curl_fetch_memory(URL, handle = ses$h)
-    #yahoo redirects to a consent form for GDPR, so urls will differ
-    ses$can.crumb <- ((r$status_code == 200) && (URL == r$url))
+    #yahoo redirects to a consent form w/ a single cookie for GDPR:
+    ses$can.crumb <- ((r$status_code == 200) && (URL == r$url) && (NROW(curl::handle_cookies(ses$h)) > 1))
     assign(cache.name, ses, .quantmodEnv) #cache session
   }
 
