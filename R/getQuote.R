@@ -34,9 +34,10 @@ function(Symbols,src='yahoo',what, ...) {
     #yahoo finance doesn't seem to set cookies without these headers 
     #and the cookies are needed to get the crumb
     curl::handle_setheaders(ses$h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
-    URL <- "https://finance.yahoo.com"
+    URL <- "https://finance.yahoo.com/"
     r <- curl::curl_fetch_memory(URL, handle = ses$h)
     #yahoo redirects to a consent form w/ a single cookie for GDPR:
+    #detecting the redirect seems very brittle as its sensitive to the trailing "/"
     ses$can.crumb <- ((r$status_code == 200) && (URL == r$url) && (NROW(curl::handle_cookies(ses$h)) > 1))
     assign(cache.name, ses, .quantmodEnv) #cache session
   }
@@ -50,7 +51,7 @@ function(Symbols,src='yahoo',what, ...) {
     if ((r$status_code == 200) && (length(r$content) > 0)) {
       ses$crumb = rawToChar(r$content)
     } else {
-      if (!force.new) ses <- .yahooSession(TRUE) else stop("Unbale to get yahoo crumb")
+      if (!force.new) ses <- .yahooSession(TRUE) else stop("Unable to get yahoo crumb")
     }
   }
 
