@@ -1,3 +1,14 @@
+### Changes in 0.4.23 (2023-06-14)
+
+1. Fix `getQuote.yahoo()` error. Thanks to Ethan B. Smith for the report and
+    patch!
+    [#382](https://github.com/joshuaulrich/quantmod/issues/382)
+    [#383](https://github.com/joshuaulrich/quantmod/issues/383)
+
+1. Add `name` argument to `add_TA()`. Thanks to @SamoPP for the suggestion!
+    [#377](https://github.com/joshuaulrich/quantmod/issues/377)
+    [#205](https://github.com/joshuaulrich/quantmod/issues/205)
+
 ### Changes in 0.4.22 (2023-04-05)
 
 1. Move jsonlite from Suggests to Imports so it doesn't cause a problem
