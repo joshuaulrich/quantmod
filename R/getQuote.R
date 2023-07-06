@@ -13,7 +13,7 @@ function(Symbols,src='yahoo',what, ...) {
   if(!missing(what))
       args$what <- what
   df <- do.call(paste('getQuote',src,sep='.'), args)
-  if(nrow(df) != length(Symbols)) {
+  if(NROW(df) != length(Symbols)) {
     # merge to generate empty rows for missing results from underlying source
     allSymbols <- data.frame(Symbol = Symbols, stringsAsFactors = FALSE)
     df <- merge(allSymbols, df, by = "Symbol", all.x = TRUE)
@@ -132,7 +132,7 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
   qflist <- setNames(as.list(sq)[QF], QF)
 
   # Fill any missing columns with NA
-  pad <- rep(NA, nrow(sq))
+  pad <- rep(NA, NROW(sq))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
 
   # Add the symbols and trade time, and setNames() on other elements
@@ -348,7 +348,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
     is.number = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE),
     stringsAsFactors = FALSE
   )
-  prefix <- sprintf("%02d.", seq_len(nrow(map)))
+  prefix <- sprintf("%02d.", seq_len(NROW(map)))
   map[["av.names"]] <- paste(prefix, map[["av.names"]])
 
   # Function to process each quote response
@@ -356,7 +356,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
     function(response, map, symbol)
   {
     # Expected response structure
-    qres <- setNames(vector("list", nrow(map)), map[["av.names"]])
+    qres <- setNames(vector("list", NROW(map)), map[["av.names"]])
 
     elem <- function(el, isnum)
     {

@@ -25,7 +25,7 @@
                        fitted.zoo > signal.threshold[2],
                        ifelse(fitted.zoo > 0,1,-1), 0); 
   tmp.index <- index(signal.zoo)[-(1+trade.offset)];
-  market.zoo <- model.data[-(nrow(model.data)+trade.offset),1]
+  market.zoo <- model.data[-(NROW(model.data)+trade.offset),1]
   signal.zoo <- signal.zoo[-c(length(index(signal.zoo))-trade.offset,length(index(signal.zoo)))];
   signal.zoo = merge(market.zoo,signal.zoo)
   index(signal.zoo) <- tmp.index;

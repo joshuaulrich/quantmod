@@ -105,7 +105,7 @@ function(x,i,j,drop=TRUE,...)
   original.cols <- ncol(x)
   original.names <- colnames(x)
   class(x) <- "zoo"
-  if(missing(i)) i <- 1:nrow(x)
+  if(missing(i)) i <- 1:NROW(x)
   if(missing(j)) {
     x <- x[i=i,drop=drop,...]
     class(x) <- c("quantmod.OHLC","zoo")
@@ -114,7 +114,7 @@ function(x,i,j,drop=TRUE,...)
     x <- x[i=i,j=j,drop=drop,...]
     if(is.null(dim(x)))
       dim(x) <- c(NROW(x),NCOL(x))
-    if(ncol(x)==original.cols)
+    if(NCOL(x)==original.cols)
       class(x) <- c("quantmod.OHLC","zoo")
   }
   if(!is.null(dim(x)))
