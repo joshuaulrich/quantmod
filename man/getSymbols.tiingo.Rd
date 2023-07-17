@@ -3,7 +3,7 @@
 \title{ Download OHLC Data from Tiingo }
 \description{
   Downloads historical or realtime equity price data
-  from \url{https://api.tiingo.com/}.
+  from \url{https://www.tiingo.com/}.
   Registration is required.
 }
 \usage{
@@ -35,7 +35,7 @@
   sole purpose of highlighting the arguments accepted.
   
   You must register with Tiingo in order to download their data.
-  Register at their web site, \url{https://api.tiingo.com},
+  Register at their web site, \url{https://www.tiingo.com},
   and you will receive an \emph{API key}:
     a short string of alphanumeric characters (e.g., "FU4U").
   Provide the API key every time you call \code{getSymbols};
