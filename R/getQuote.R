@@ -33,7 +33,9 @@ function(Symbols,src='yahoo',what, ...) {
     ses$h <- curl::new_handle()
     # yahoo finance doesn't seem to set cookies without these headers
     # and the cookies are needed to get the crumb
-    curl::handle_setheaders(ses$h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    curl::handle_setheaders(ses$h, 
+                            accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                           "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183")
     URL <- "https://finance.yahoo.com/"
     r <- curl::curl_fetch_memory(URL, handle = ses$h)
     # yahoo redirects to a consent form w/ a single cookie for GDPR:
