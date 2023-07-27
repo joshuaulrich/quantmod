@@ -298,7 +298,8 @@ function(Symbols,env,return.class='xts',index.class="Date",
        y <- y$chart$result
 
        ohlcv <- unlist(y$indicators$quote[[1]], recursive = FALSE)
-       idx <- as.Date(.POSIXct(y$timestamp[[1]]))
+       tz <- y$meta$exchangeTimezoneName
+       idx <- as.Date(.POSIXct(y$timestamp[[1]], tz = tz), tz = tz)
        x <- xts(do.call(cbind, ohlcv), idx,
                  src='yahoo', updated=Sys.time())
 
