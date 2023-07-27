@@ -1,4 +1,4 @@
-### Changes in 0.4.2X (yyyy-mm-dd)
+### Changes in 0.4.24 (2023-07-17)
 
 1. Fix `getSymbols.oanda()` URL. Thanks to @macray76 for the report.
     [#387](https://github.com/joshuaulrich/quantmod/issues/387)
