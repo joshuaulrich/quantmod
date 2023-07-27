@@ -33,7 +33,9 @@ function(Symbols,src='yahoo',what, ...) {
     ses$h <- curl::new_handle()
     # yahoo finance doesn't seem to set cookies without these headers
     # and the cookies are needed to get the crumb
-    curl::handle_setheaders(ses$h, accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+    curl::handle_setheaders(ses$h, 
+                            accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                           "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183")
     URL <- "https://finance.yahoo.com/"
     r <- curl::curl_fetch_memory(URL, handle = ses$h)
     # yahoo redirects to a consent form w/ a single cookie for GDPR:
@@ -53,7 +55,7 @@ function(Symbols,src='yahoo',what, ...) {
     } else {
       # we were unable to get a crumb
       if (is.retry) {
-        # we couldn't get a crumb with a new session
+        # we already did a retry and still couldn't get a crumb with a new session
         stop("unable to get yahoo crumb")
       } else {
         # we tried to re-use a session but couldn't get a crumb
@@ -71,6 +73,9 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
   importDefaults("getQuote.yahoo")
   length.of.symbols <- length(Symbols)
   if (is.null(session)) session <- .yahooSession()
+  if (!session$can.crumb) {
+    stop("Unbale to obtain yahoo crumb. If this is being called from a GDPR country, Yahoo requires GDPR consent, which cannot be scripted")
+  }
   
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
@@ -102,13 +107,9 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
   # exchange, fullExchangeName, market, sourceInterval, exchangeTimezoneName,
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
-  if (session$can.crumb) {
-    URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?crumb=", session$crumb)
-  } else {
-    URL <- "https://query1.finance.yahoo.com/v6/finance/quote?"
-  }
-
-  URL <- paste0(URL, "&symbols=", SymbolsString, "&fields=", QFc)
+  URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?crumb=", session$crumb,
+                "&symbols=", SymbolsString, 
+                "&fields=", QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
   response <- jsonlite::fromJSON(curl::curl(URL, handle = session$h))
   if (is.null(response$quoteResponse$error)) {
