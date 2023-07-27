@@ -103,7 +103,7 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
     QF.names <- NULL
   }
   # JSON API currently returns the following fields with every request:
-  # language, quoteType, regularMarketTime, marketState, exchangeDataDelayedBy,
+  # language, quoteType, marketState, exchangeDataDelayedBy,
   # exchange, fullExchangeName, market, sourceInterval, exchangeTimezoneName,
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
@@ -117,15 +117,21 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
   } else {
     stop(response$quoteResponse$error)
   }
-  # Always return symbol and time
+
+  # Always return symbol and time (if regularMarketTime is provided)
   # Use exchange TZ, if possible. POSIXct must have only one TZ, so times
   # from different timezones will be converted to a common TZ
-  tz <- sq[, "exchangeTimezoneName"]
-  if (length(unique(tz)) == 1L) {
-    Qposix <- .POSIXct(sq[,"regularMarketTime"], tz=tz[1L])
+  regularMktTime <- sq$regularMarketTime
+  if (is.null(regularMktTime)) {
+    Qposix <- .POSIXct(NA)
   } else {
-    warning("symbols have different timezones; converting to local time")
-    Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
+    tz <- sq[, "exchangeTimezoneName"]
+    if (length(unique(tz)) == 1L) {
+      Qposix <- .POSIXct(regularMktTime, tz = tz[1L])
+    } else {
+      warning("symbols have different timezones; converting to local time")
+      Qposix <- .POSIXct(regularMktTime, tz = NULL)  # force local timezone
+    }
   }
 
   # Extract user-requested columns. Convert to list to avoid
