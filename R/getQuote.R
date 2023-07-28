@@ -207,17 +207,22 @@ yahooQuote.EOD <- structure(list("ohgl1v", c("Open", "High",
   return(structure(list(optcodes[w], optshort[w]), class='quoteFormat'))
 }
 
+# name, shortname, field
 .yahooQuoteFields <-
 matrix(c(
   # quote / symbol
   "Symbol", "Symbol", "symbol",
   "Name", "Name", "shortName",
   "Name (Long)", "NameLong", "longName",
+  "Display Name", "Display Name", "displayName",
   "Quote Type", "Quote Type", "quoteType",
   "Quote Source Name", "Quote Source", "quoteSourceName",
   "Source Interval", "Source Interval", "sourceInterval",
   "Currency", "Currency", "currency",
   "Financial Currency", "Financial Currency", "financialCurrency",
+  "First Trade Date", "First Trade Date", "firstTradeDateMilliseconds",
+  "Region", "Region", "region",
+  "Triggerable", "Triggerable", "triggerable",
 
   # market / exchange
   "Market", "Market", "market",
@@ -244,16 +249,12 @@ matrix(c(
   "Volume", "Volume", "regularMarketVolume",
   "Change in Percent", "% Change", "regularMarketChangePercent",
   "Previous Close", "P. Close", "regularMarketPreviousClose",
-  #"Trade Date", "Trade Date", "d2",
-  #"Last Trade Size", "Last Size", "k3",
-  #"Last Trade (Real-time) With Time", "Last Trade (RT) With Time", "k1",
-  #"Last Trade (With Time)", "Last", "l",
-  #"High Limit", "High Limit", "l2",
-  #"Low Limit", "Low Limit", "l3",
-  #"Order Book (Real-time)", "Order Book (RT)", "i5",
-  #"Days Range", "Days Range", "m",
-  #"Days Range (Real-time)", "Days Range (RT)", "m2",
-  #"52-week Range", "52-week Range", "w",
+
+  "Regular Hours Range", "Regular Hours Range", "regularMarketDayRange",
+  "Post Market Change", "Post Market Change", "postMarketChange",
+  "Post Market Percent Change", "Post Market % Change", "postMarketChangePercent",
+  "Post Market Time", "Post Market Time", "postMarketTime",
+  "Post Market Price", "Post Market Price", "postMarketPrice",
 
   # trading stats
   "Change From 52-week Low", "Change From 52-week Low", "fiftyTwoWeekLowChange",
@@ -262,6 +263,8 @@ matrix(c(
   "Percent Change From 52-week High", "% Change From 52-week High", "fiftyTwoWeekHighChangePercent",
   "52-week Low", "52-week Low", "fiftyTwoWeekLow",
   "52-week High", "52-week High", "fiftyTwoWeekHigh",
+  "52-week Range", "52-week Range", "fiftyTwoWeekRange",
+  "52-week Percent Change", "52-week % Change", "fiftyTwoWeekChangePercent",
 
   "50-day Moving Average", "50-day MA", "fiftyDayAverage",
   "Change From 50-day Moving Average", "Change From 50-day MA", "fiftyDayAverageChange",
@@ -270,31 +273,30 @@ matrix(c(
   "Change From 200-day Moving Average", "Change From 200-day MA", "twoHundredDayAverageChange",
   "Percent Change From 200-day Moving Average", "% Change From 200-day MA", "twoHundredDayAverageChangePercent",
 
+  "Year-to-Date Return", "YTD Return", "ytdReturn",
+  "Trailing 3 Month Return", "Trailing 3mo Return", "trailingThreeMonthReturns",
+  "Trailing 3 Month NAV Return", "Trailing 3mo NAV Return", "trailingThreeMonthNavReturns",
+
   # valuation stats
   "Market Capitalization", "Market Capitalization", "marketCap",
-  #"Market Cap (Real-time)", "Market Cap (RT)", "j3",
   "P/E Ratio", "P/E Ratio", "trailingPE",
-  #"P/E Ratio (Real-time)", "P/E Ratio (RT)", "r2",
-  #"Price/EPS Estimate Current Year", "Price/EPS Estimate Current Year", "r6",
+  "Price/EPS Estimate Current Year", "Price/EPS Estimate Current Year", "priceEpsCurrentYear",
   "Price/EPS Estimate Next Year", "Price/EPS Estimate Next Year", "forwardPE",
   "Price/Book", "Price/Book", "priceToBook",
   "Book Value", "Book Value", "bookValue",
-  #"Price/Sales", "Price/Sales", "p5",
-  #"PEG Ratio", "PEG Ratio", "r5",
-  #"EBITDA", "EBITDA", "j4",
 
   # share stats
   "Average Daily Volume", "Ave. Daily Volume", "averageDailyVolume3Month",
-  #"Average Daily Volume", "Ave. Daily Volume", "averageDailyVolume10Day",
+  "Average Daily Volume", "Ave. Daily Volume", "averageDailyVolume10Day",
   "Shares Outstanding", "Shares Outstanding", "sharesOutstanding",
-  #"Float Shares", "Float Shares", "f6",
-  #"Short Ratio", "Short Ratio", "s7",
 
   # dividends / splits
   "Ex-Dividend Date", "Ex-Dividend Date", "exDividendDate",
   "Dividend Pay Date", "Dividend Pay Date", "dividendDate",
   "Dividend/Share", "Dividend/Share", "trailingAnnualDividendRate",
   "Dividend Yield", "Dividend Yield", "trailingAnnualDividendYield",
+  "Dividend Rate", "Dividend Rate", "dividendRate",
+  "Div Yield", "Div Yield", "dividendYield",
 
   # earnings
   "Earnings Timestamp", "Earnings Timestamp", "earningsTimestamp",
@@ -302,37 +304,20 @@ matrix(c(
   "Earnings End Time", "Earnings End Time", "earningsTimestampEnd",
   "Earnings/Share", "Earnings/Share", "epsTrailingTwelveMonths",
   "EPS Forward", "EPS Forward", "epsForward",
-  #"Earnings/Share", "Earnings/Share", "e",
-  #"EPS Estimate Current Year", "EPS Estimate Current Year", "e7",
-  #"EPS Estimate Next Year", "EPS Estimate Next Year", "e8",
-  #"EPS Estimate Next Quarter", "EPS Estimate Next Quarter", "e9",
+  "EPS Current Year", "EPS Current Year", "epsCurrentYear",
 
   # yahoo / meta
   "Language", "Language", "language",
   "Message Board ID", "Message Board ID", "messageBoardId",
-  "Price Hint", "Price Hint", "priceHint"
+  "Price Hint", "Price Hint", "priceHint",
 
-  # user portfolio
-  #"Trade Links", "Trade Links", "t6",
-  #"Ticker Trend", "Ticker Trend", "t7",
-  #"1 yr Target Price", "1 yr Target Price", "t8",
-  #"Holdings Value", "Holdings Value", "v1",
-  #"Holdings Value (Real-time)", "Holdings Value (RT)", "v7",
-  #"Days Value Change", "Days Value Change", "w1",
-  #"Days Value Change (Real-time)", "Days Value Change (RT)", "w4",
-  #"Price Paid", "Price Paid", "p1",
-  #"Shares Owned", "Shares Owned", "s1",
-  #"Commission", "Commission", "c3",
-  #"Notes", "Notes", "n4",
-  #"More Info", "More Info", "i",
-  #"Annualized Gain", "Annualized Gain", "g3",
-  #"Holdings Gain", "Holdings Gain", "g4",
-  #"Holdings Gain Percent", "Holdings Gain %", "g1",
-  #"Holdings Gain Percent (Real-time)", "Holdings Gain % (RT)", "g5",
-  #"Holdings Gain (Real-time)", "Holdings Gain (RT)", "g6",
-
-  #"Error Indication (returned for symbol changed / invalid)", "Error Indication (returned for symbol changed / invalid)", "e1",
-  ),
+  # other
+  "Average Analyst Rating", "Ave. Analyst Rating", "averageAnalystRating",
+  "Custom Price Alert Confidence", "Custom Price Alert Confidence", "customPriceAlertConfidence",
+  "ESG Populated", "ESG Populated", "esgPopulated",
+  "Crypto Tradeable", "Crypto Tradeable", "cryptoTradeable",
+  "Net Assets", "Net Assets", "netAssets",
+  "Net Expense Ratio", "Net Expense Ratio", "netExpenseRatio"),
 ncol = 3, byrow = TRUE, dimnames = list(NULL, c("name", "shortname", "field")))
 
 getQuote.av <- function(Symbols, api.key, ...) {
