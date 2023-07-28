@@ -118,20 +118,37 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
     stop(response$quoteResponse$error)
   }
 
-  # Always return symbol and time (if regularMarketTime is provided)
+  # milliseconds to seconds
+  milliFields <- c("firstTradeDateMilliseconds", "gmtOffSetMilliseconds")
+  for (field in milliFields) {
+    if (!is.null(sq[[field]])) {
+      sq[[field]] <- sq[[field]] / 1000
+    }
+  }
+
   # Use exchange TZ, if possible. POSIXct must have only one TZ, so times
   # from different timezones will be converted to a common TZ
-  regularMktTime <- sq$regularMarketTime
-  if (is.null(regularMktTime)) {
-    Qposix <- .POSIXct(NA)
+  tz <- sq[["exchangeTimezoneName"]]
+  if (length(unique(tz)) == 1L) {
+    tz <- tz[1]
   } else {
-    tz <- sq[, "exchangeTimezoneName"]
-    if (length(unique(tz)) == 1L) {
-      Qposix <- .POSIXct(regularMktTime, tz = tz[1L])
-    } else {
-      warning("symbols have different timezones; converting to local time")
-      Qposix <- .POSIXct(regularMktTime, tz = NULL)  # force local timezone
+    warning("symbols have different timezones; converting to local time")
+    tz <- NULL
+  }
+
+  # timestamps to POSIXct
+  timeFields <-
+    c("regularMarketTime", "postMarketTime", "exDividendDate", "dividendDate",
+      "earningsTimestamp", "earningsTimestampStart", "earningsTimestampEnd",
+      "firstTradeDateMilliseconds")
+
+  for (field in timeFields) {
+    if (!is.null(sq[[field]])) {
+      sq[[field]] <- .POSIXct(sq[[field]], tz = tz)
     }
+  }
+  if (is.null(sq$regularMarketTime)) {
+    sq$regularMarketTime <- .POSIXct(NA)
   }
 
   # Extract user-requested columns. Convert to list to avoid
@@ -143,7 +160,8 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
 
   # Add the symbols and trade time, and setNames() on other elements
-  qflist <- c(list(Symbol = sq$symbol, regularMarketTime = Qposix),
+  # Always return symbol and time
+  qflist <- c(list(Symbol = sq$symbol, regularMarketTime = sq$regularMarketTime),
               setNames(qflist, QF))
 
   df <- data.frame(qflist, stringsAsFactors = FALSE, check.names = FALSE)
