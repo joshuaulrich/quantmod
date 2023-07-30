@@ -30,7 +30,7 @@ getModelData <- function(x, na.rm=TRUE) {
             m <- merge(m, as.xts(get(model.symbols[[j]], env)), 
                 join = "inner")
         }
-        total.columns[j] <- ncol(m)
+        total.columns[j] <- NCOL(m)
     }
     fullIndex <- index(m)
 #    m <- as.data.frame(m)
@@ -41,7 +41,7 @@ getModelData <- function(x, na.rm=TRUE) {
     }
     mf <- xts(model.frame(model@model.spec, data = env, na.action = NULL), fullIndex)
     if (na.rm) 
-        mf <- rbind(na.exclude(mf[-nrow(mf), ]), mf[nrow(mf), 
+        mf <- rbind(na.exclude(mf[-NROW(mf), ]), mf[NROW(mf),
             ])
     colnames(mf) <- lapply(colnames(mf), function(x) {
         gsub("[) ]", "", gsub("[(,=^:'\"]", ".", x))
@@ -87,7 +87,7 @@ getModelData <- function(x, na.rm=TRUE) {
             m <- merge(m, xts(get(model.symbols[[j]], environment())), 
                 join = "inner")
         }
-        total.columns[j] <- ncol(m)
+        total.columns[j] <- NCOL(m)
     }
     fullIndex <- index(m)
 #    m <- as.data.frame(m)
@@ -100,7 +100,7 @@ getModelData <- function(x, na.rm=TRUE) {
     mf <- xts(model.frame(model@model.spec, data = environment(), 
         na.action = NULL), fullIndex)
     if (na.rm) 
-        mf <- rbind(na.exclude(mf[-nrow(mf), ]), mf[nrow(mf), 
+        mf <- rbind(na.exclude(mf[-NROW(mf), ]), mf[NROW(mf),
             ])
     colnames(mf) <- lapply(colnames(mf), function(x) {
         gsub("[) ]", "", gsub("[(,=^:'\"]", ".", x))
@@ -167,7 +167,7 @@ function(x,na.rm=TRUE)
                        zoo(as.matrix(get(model.symbols[[j]],environment())), #input columns from symbol i
                        as.POSIXorDate(index(get(model.symbols[[j]],environment()))))) 
         }            
-        total.columns[j] <- ncol(m)
+        total.columns[j] <- NCOL(m)
     }
 
     fullIndex <- index(m) 
@@ -186,7 +186,7 @@ function(x,na.rm=TRUE)
     #                ')',collapse=''),sep=''));
     #pl.mf <- zoo(model.frame(pl.formula,data=environment()),as.Date(target.dates))
 
-    if(na.rm) mf <- rbind(na.exclude(mf[-nrow(mf),]),mf[nrow(mf),]);
+    if(na.rm) mf <- rbind(na.exclude(mf[-NROW(mf),]),mf[NROW(mf),]);
 
     colnames(mf) <- lapply(colnames(mf),function(x) 
                         { gsub("[) ]","",gsub("[(,=^:'\"]",".",x)) });

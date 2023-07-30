@@ -13,7 +13,7 @@ function(Symbols,src='yahoo',what, ...) {
   if(!missing(what))
       args$what <- what
   df <- do.call(paste('getQuote',src,sep='.'), args)
-  if(nrow(df) != length(Symbols)) {
+  if(NROW(df) != length(Symbols)) {
     # merge to generate empty rows for missing results from underlying source
     allSymbols <- data.frame(Symbol = Symbols, stringsAsFactors = FALSE)
     df <- merge(allSymbols, df, by = "Symbol", all.x = TRUE)
@@ -24,11 +24,59 @@ function(Symbols,src='yahoo',what, ...) {
   df[Symbols,]
 }
 
-`getQuote.yahoo` <-
-function(Symbols,what=standardQuote(),...) {
-  importDefaults("getQuote.yahoo")
+.yahooSession <- function(is.retry = FALSE) {
+  cache.name <- "_yahoo_curl_session_"
+  ses <- get0(cache.name, .quantmodEnv) # get cached session
+  
+  if (is.null(ses) || is.retry) {
+    ses <- list()
+    ses$h <- curl::new_handle()
+    # yahoo finance doesn't seem to set cookies without these headers
+    # and the cookies are needed to get the crumb
+    curl::handle_setheaders(ses$h, 
+                            accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+                           "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183")
+    URL <- "https://finance.yahoo.com/"
+    r <- curl::curl_fetch_memory(URL, handle = ses$h)
+    # yahoo redirects to a consent form w/ a single cookie for GDPR:
+    # detecting the redirect seems very brittle as its sensitive to the trailing "/"
+    ses$can.crumb <- ((r$status_code == 200) && (URL == r$url) && (NROW(curl::handle_cookies(ses$h)) > 1))
+    assign(cache.name, ses, .quantmodEnv) # cache session
+  }
 
+  if (ses$can.crumb) {
+    # get a crumb so that downstream callers don't have to handle invalid sessions.
+    # this is a network hop, but very lightweight payload
+    n <- if (unclass(Sys.time()) %% 1L >= 0.5) 1L else 2L
+    query.srv <- paste0("https://query", n, ".finance.yahoo.com/v1/test/getcrumb")
+    r <- curl::curl_fetch_memory(query.srv, handle = ses$h)
+    if ((r$status_code == 200) && (length(r$content) > 0)) {
+      ses$crumb <- rawToChar(r$content)
+    } else {
+      # we were unable to get a crumb
+      if (is.retry) {
+        # we already did a retry and still couldn't get a crumb with a new session
+        stop("unable to get yahoo crumb")
+      } else {
+        # we tried to re-use a session but couldn't get a crumb
+        # try to get a crumb using a new session
+        ses <- .yahooSession(TRUE)
+      }
+    }
+  }
+
+  return(ses)
+}
+
+`getQuote.yahoo` <-
+function(Symbols,what=standardQuote(),session=NULL,...) {
+  importDefaults("getQuote.yahoo")
   length.of.symbols <- length(Symbols)
+  if (is.null(session)) session <- .yahooSession()
+  if (!session$can.crumb) {
+    stop("Unbale to obtain yahoo crumb. If this is being called from a GDPR country, Yahoo requires GDPR consent, which cannot be scripted")
+  }
+  
   if(length.of.symbols > 200) {
     # yahoo only works with 200 symbols or less per call
     # we will recursively call getQuote.yahoo to handle each block of 200
@@ -39,7 +87,7 @@ function(Symbols,what=standardQuote(),...) {
     for(i in 1:length(all.symbols)) {
       Sys.sleep(0.5)
       cat(i,", ")
-      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what))
+      df <- rbind(df, getQuote.yahoo(all.symbols[[i]],what,session=session))
     }
     cat("...done\n")
     return(df)
@@ -55,29 +103,52 @@ function(Symbols,what=standardQuote(),...) {
     QF.names <- NULL
   }
   # JSON API currently returns the following fields with every request:
-  # language, quoteType, regularMarketTime, marketState, exchangeDataDelayedBy,
+  # language, quoteType, marketState, exchangeDataDelayedBy,
   # exchange, fullExchangeName, market, sourceInterval, exchangeTimezoneName,
   # exchangeTimezoneShortName, gmtOffSetMilliseconds, tradeable, symbol
   QFc <- paste0(QF,collapse=',')
-  URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?symbols=",
-                SymbolsString,
-                "&fields=",QFc)
+  URL <- paste0("https://query1.finance.yahoo.com/v7/finance/quote?crumb=", session$crumb,
+                "&symbols=", SymbolsString, 
+                "&fields=", QFc)
   # The 'response' data.frame has fields in columns and symbols in rows
-  response <- jsonlite::fromJSON(curl::curl(URL))
+  response <- jsonlite::fromJSON(curl::curl(URL, handle = session$h))
   if (is.null(response$quoteResponse$error)) {
     sq <- response$quoteResponse$result
   } else {
     stop(response$quoteResponse$error)
   }
-  # Always return symbol and time
+
+  # milliseconds to seconds
+  milliFields <- c("firstTradeDateMilliseconds", "gmtOffSetMilliseconds")
+  for (field in milliFields) {
+    if (!is.null(sq[[field]])) {
+      sq[[field]] <- sq[[field]] / 1000
+    }
+  }
+
   # Use exchange TZ, if possible. POSIXct must have only one TZ, so times
   # from different timezones will be converted to a common TZ
-  tz <- sq[, "exchangeTimezoneName"]
+  tz <- sq[["exchangeTimezoneName"]]
   if (length(unique(tz)) == 1L) {
-    Qposix <- .POSIXct(sq[,"regularMarketTime"], tz=tz[1L])
+    tz <- tz[1]
   } else {
     warning("symbols have different timezones; converting to local time")
-    Qposix <- .POSIXct(sq$regularMarketTime, tz = NULL)  # force local timezone
+    tz <- NULL
+  }
+
+  # timestamps to POSIXct
+  timeFields <-
+    c("regularMarketTime", "postMarketTime", "exDividendDate", "dividendDate",
+      "earningsTimestamp", "earningsTimestampStart", "earningsTimestampEnd",
+      "firstTradeDateMilliseconds")
+
+  for (field in timeFields) {
+    if (!is.null(sq[[field]])) {
+      sq[[field]] <- .POSIXct(sq[[field]], tz = tz)
+    }
+  }
+  if (is.null(sq$regularMarketTime)) {
+    sq$regularMarketTime <- .POSIXct(NA)
   }
 
   # Extract user-requested columns. Convert to list to avoid
@@ -85,11 +156,12 @@ function(Symbols,what=standardQuote(),...) {
   qflist <- setNames(as.list(sq)[QF], QF)
 
   # Fill any missing columns with NA
-  pad <- rep(NA, nrow(sq))
+  pad <- rep(NA, NROW(sq))
   qflist <- lapply(qflist, function(e) if (is.null(e)) pad else e)
 
   # Add the symbols and trade time, and setNames() on other elements
-  qflist <- c(list(Symbol = sq$symbol, regularMarketTime = Qposix),
+  # Always return symbol and time
+  qflist <- c(list(Symbol = sq$symbol, regularMarketTime = sq$regularMarketTime),
               setNames(qflist, QF))
 
   df <- data.frame(qflist, stringsAsFactors = FALSE, check.names = FALSE)
@@ -153,17 +225,22 @@ yahooQuote.EOD <- structure(list("ohgl1v", c("Open", "High",
   return(structure(list(optcodes[w], optshort[w]), class='quoteFormat'))
 }
 
+# name, shortname, field
 .yahooQuoteFields <-
 matrix(c(
   # quote / symbol
   "Symbol", "Symbol", "symbol",
   "Name", "Name", "shortName",
   "Name (Long)", "NameLong", "longName",
+  "Display Name", "Display Name", "displayName",
   "Quote Type", "Quote Type", "quoteType",
   "Quote Source Name", "Quote Source", "quoteSourceName",
   "Source Interval", "Source Interval", "sourceInterval",
   "Currency", "Currency", "currency",
   "Financial Currency", "Financial Currency", "financialCurrency",
+  "First Trade Date", "First Trade Date", "firstTradeDateMilliseconds",
+  "Region", "Region", "region",
+  "Triggerable", "Triggerable", "triggerable",
 
   # market / exchange
   "Market", "Market", "market",
@@ -190,16 +267,12 @@ matrix(c(
   "Volume", "Volume", "regularMarketVolume",
   "Change in Percent", "% Change", "regularMarketChangePercent",
   "Previous Close", "P. Close", "regularMarketPreviousClose",
-  #"Trade Date", "Trade Date", "d2",
-  #"Last Trade Size", "Last Size", "k3",
-  #"Last Trade (Real-time) With Time", "Last Trade (RT) With Time", "k1",
-  #"Last Trade (With Time)", "Last", "l",
-  #"High Limit", "High Limit", "l2",
-  #"Low Limit", "Low Limit", "l3",
-  #"Order Book (Real-time)", "Order Book (RT)", "i5",
-  #"Days Range", "Days Range", "m",
-  #"Days Range (Real-time)", "Days Range (RT)", "m2",
-  #"52-week Range", "52-week Range", "w",
+
+  "Regular Hours Range", "Regular Hours Range", "regularMarketDayRange",
+  "Post Market Change", "Post Market Change", "postMarketChange",
+  "Post Market Percent Change", "Post Market % Change", "postMarketChangePercent",
+  "Post Market Time", "Post Market Time", "postMarketTime",
+  "Post Market Price", "Post Market Price", "postMarketPrice",
 
   # trading stats
   "Change From 52-week Low", "Change From 52-week Low", "fiftyTwoWeekLowChange",
@@ -208,6 +281,8 @@ matrix(c(
   "Percent Change From 52-week High", "% Change From 52-week High", "fiftyTwoWeekHighChangePercent",
   "52-week Low", "52-week Low", "fiftyTwoWeekLow",
   "52-week High", "52-week High", "fiftyTwoWeekHigh",
+  "52-week Range", "52-week Range", "fiftyTwoWeekRange",
+  "52-week Percent Change", "52-week % Change", "fiftyTwoWeekChangePercent",
 
   "50-day Moving Average", "50-day MA", "fiftyDayAverage",
   "Change From 50-day Moving Average", "Change From 50-day MA", "fiftyDayAverageChange",
@@ -216,31 +291,30 @@ matrix(c(
   "Change From 200-day Moving Average", "Change From 200-day MA", "twoHundredDayAverageChange",
   "Percent Change From 200-day Moving Average", "% Change From 200-day MA", "twoHundredDayAverageChangePercent",
 
+  "Year-to-Date Return", "YTD Return", "ytdReturn",
+  "Trailing 3 Month Return", "Trailing 3mo Return", "trailingThreeMonthReturns",
+  "Trailing 3 Month NAV Return", "Trailing 3mo NAV Return", "trailingThreeMonthNavReturns",
+
   # valuation stats
   "Market Capitalization", "Market Capitalization", "marketCap",
-  #"Market Cap (Real-time)", "Market Cap (RT)", "j3",
   "P/E Ratio", "P/E Ratio", "trailingPE",
-  #"P/E Ratio (Real-time)", "P/E Ratio (RT)", "r2",
-  #"Price/EPS Estimate Current Year", "Price/EPS Estimate Current Year", "r6",
+  "Price/EPS Estimate Current Year", "Price/EPS Estimate Current Year", "priceEpsCurrentYear",
   "Price/EPS Estimate Next Year", "Price/EPS Estimate Next Year", "forwardPE",
   "Price/Book", "Price/Book", "priceToBook",
   "Book Value", "Book Value", "bookValue",
-  #"Price/Sales", "Price/Sales", "p5",
-  #"PEG Ratio", "PEG Ratio", "r5",
-  #"EBITDA", "EBITDA", "j4",
 
   # share stats
   "Average Daily Volume", "Ave. Daily Volume", "averageDailyVolume3Month",
-  #"Average Daily Volume", "Ave. Daily Volume", "averageDailyVolume10Day",
+  "Average Daily Volume", "Ave. Daily Volume", "averageDailyVolume10Day",
   "Shares Outstanding", "Shares Outstanding", "sharesOutstanding",
-  #"Float Shares", "Float Shares", "f6",
-  #"Short Ratio", "Short Ratio", "s7",
 
   # dividends / splits
   "Ex-Dividend Date", "Ex-Dividend Date", "exDividendDate",
   "Dividend Pay Date", "Dividend Pay Date", "dividendDate",
   "Dividend/Share", "Dividend/Share", "trailingAnnualDividendRate",
   "Dividend Yield", "Dividend Yield", "trailingAnnualDividendYield",
+  "Dividend Rate", "Dividend Rate", "dividendRate",
+  "Div Yield", "Div Yield", "dividendYield",
 
   # earnings
   "Earnings Timestamp", "Earnings Timestamp", "earningsTimestamp",
@@ -248,37 +322,20 @@ matrix(c(
   "Earnings End Time", "Earnings End Time", "earningsTimestampEnd",
   "Earnings/Share", "Earnings/Share", "epsTrailingTwelveMonths",
   "EPS Forward", "EPS Forward", "epsForward",
-  #"Earnings/Share", "Earnings/Share", "e",
-  #"EPS Estimate Current Year", "EPS Estimate Current Year", "e7",
-  #"EPS Estimate Next Year", "EPS Estimate Next Year", "e8",
-  #"EPS Estimate Next Quarter", "EPS Estimate Next Quarter", "e9",
+  "EPS Current Year", "EPS Current Year", "epsCurrentYear",
 
   # yahoo / meta
   "Language", "Language", "language",
   "Message Board ID", "Message Board ID", "messageBoardId",
-  "Price Hint", "Price Hint", "priceHint"
+  "Price Hint", "Price Hint", "priceHint",
 
-  # user portfolio
-  #"Trade Links", "Trade Links", "t6",
-  #"Ticker Trend", "Ticker Trend", "t7",
-  #"1 yr Target Price", "1 yr Target Price", "t8",
-  #"Holdings Value", "Holdings Value", "v1",
-  #"Holdings Value (Real-time)", "Holdings Value (RT)", "v7",
-  #"Days Value Change", "Days Value Change", "w1",
-  #"Days Value Change (Real-time)", "Days Value Change (RT)", "w4",
-  #"Price Paid", "Price Paid", "p1",
-  #"Shares Owned", "Shares Owned", "s1",
-  #"Commission", "Commission", "c3",
-  #"Notes", "Notes", "n4",
-  #"More Info", "More Info", "i",
-  #"Annualized Gain", "Annualized Gain", "g3",
-  #"Holdings Gain", "Holdings Gain", "g4",
-  #"Holdings Gain Percent", "Holdings Gain %", "g1",
-  #"Holdings Gain Percent (Real-time)", "Holdings Gain % (RT)", "g5",
-  #"Holdings Gain (Real-time)", "Holdings Gain (RT)", "g6",
-
-  #"Error Indication (returned for symbol changed / invalid)", "Error Indication (returned for symbol changed / invalid)", "e1",
-  ),
+  # other
+  "Average Analyst Rating", "Ave. Analyst Rating", "averageAnalystRating",
+  "Custom Price Alert Confidence", "Custom Price Alert Confidence", "customPriceAlertConfidence",
+  "ESG Populated", "ESG Populated", "esgPopulated",
+  "Crypto Tradeable", "Crypto Tradeable", "cryptoTradeable",
+  "Net Assets", "Net Assets", "netAssets",
+  "Net Expense Ratio", "Net Expense Ratio", "netExpenseRatio"),
 ncol = 3, byrow = TRUE, dimnames = list(NULL, c("name", "shortname", "field")))
 
 getQuote.av <- function(Symbols, api.key, ...) {
@@ -301,7 +358,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
     is.number = c(FALSE, TRUE, TRUE, TRUE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE),
     stringsAsFactors = FALSE
   )
-  prefix <- sprintf("%02d.", seq_len(nrow(map)))
+  prefix <- sprintf("%02d.", seq_len(NROW(map)))
   map[["av.names"]] <- paste(prefix, map[["av.names"]])
 
   # Function to process each quote response
@@ -309,7 +366,7 @@ getQuote.av <- function(Symbols, api.key, ...) {
     function(response, map, symbol)
   {
     # Expected response structure
-    qres <- setNames(vector("list", nrow(map)), map[["av.names"]])
+    qres <- setNames(vector("list", NROW(map)), map[["av.names"]])
 
     elem <- function(el, isnum)
     {

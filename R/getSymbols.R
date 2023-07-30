@@ -310,12 +310,15 @@ function(Symbols,env,return.class='xts',index.class="Date",
        y <- y$chart$result
 
        ohlcv <- unlist(y$indicators$quote[[1]], recursive = FALSE)
+
        if (periodicity == "intraday") {
          tz <- y$meta$timezone
          idx <- as.POSIXct(y$timestamp[[1]], tz=tz, origin="1970-01-01")
        } else {
-         idx <- as.Date(.POSIXct(y$timestamp[[1]]))
+         tz <- y$meta$exchangeTimezoneName
+         idx <- as.Date(.POSIXct(y$timestamp[[1]], tz = tz), tz = tz)
        }
+
        x <- xts(do.call(cbind, ohlcv), idx,
                  src='yahoo', updated=Sys.time())
 
@@ -1173,8 +1176,7 @@ function(Symbols,env,return.class='xts',
            warning("Oanda only provides historical data for the past 180 days.",
                    " Symbol: ", Symbols[[i]])
        }
-       oanda.URL <- paste0("https://www.oanda.com/fx-for-business/",
-                           "historical-rates/api/data/update/",
+       oanda.URL <- paste0("https://fxds-hcc.oanda.com/api/data/update",
                            "?&source=OANDA&adjustment=0",
                            "&base_currency=", currency.pair[1],
                            "&start_date=", from,
