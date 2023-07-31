@@ -253,7 +253,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
      default.from <- from
      default.to <- to
 
-     intervals <- c(daily = "1d", weekly = "1wk", monthly = "1mo", intraday = "1m")
+     mins <- c(1, 2, 5, 15, 30, 60, 90)
+     min_vals <- paste0(rep(mins, 2), "m")
+     names(min_vals) <- c(paste0(mins, "minutes"), paste0(mins, " minutes"))
+
+     intervals <- c(daily = "1d", weekly = "1wk", monthly = "1mo", hourly = "1h", min_vals)
+
      default.periodicity <- match.arg(periodicity, names(intervals))
 
      if(!hasArg("verbose")) verbose <- FALSE
@@ -277,21 +282,24 @@ function(Symbols,env,return.class='xts',index.class="Date",
          stop("periodicity must be one of: ", paste(intervals, collapse=", "))
        interval <- intervals[p]
 
+       is.intraday <- !(interval %in% c("1d", "1wk", "1mo"))
+
        from <- getSymbolLookup()[[Symbols[[i]]]]$from
        from <- if(is.null(from)) default.from else from
        to <- getSymbolLookup()[[Symbols[[i]]]]$to
        to <- if(is.null(to)) default.to else to
 
-
-       if (periodicity == "intraday" &&
-           difftime(
-             time1 = to, time2 = from, units = "days"
-           ) > 7) {
-         from <- to - 7
-         warning(paste0(
-           "Only a maximum of 7 days is allowed for querying 1m granularity ",
-           "data from 'yahoo'. Setting `from` to '", from, "'."
-         ))
+       if(is.intraday) {
+         from.date <- as.Date(from)
+         to.date <- as.Date(to)
+         n.days <- difftime(time1 = to.date, time2 = from.date, units = "days")
+         if(n.days > 7) {
+           from <- to.date - 7
+           warning(paste0(
+             "Only a maximum of 7 days is allowed for querying intraday data",
+             "data from 'yahoo'. Setting `from` to '", from, "'."
+           ))
+         }
        }
 
        from.posix <- .dateToUNIX(from)
@@ -311,26 +319,21 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
        ohlcv <- unlist(y$indicators$quote[[1]], recursive = FALSE)
 
-       if (periodicity == "intraday") {
-         tz <- y$meta$timezone
-         idx <- as.POSIXct(y$timestamp[[1]], tz=tz, origin="1970-01-01")
-       } else {
-         tz <- y$meta$exchangeTimezoneName
-         idx <- as.Date(.POSIXct(y$timestamp[[1]], tz = tz), tz = tz)
+       tz <- y$meta$exchangeTimezoneName
+       idx <- .POSIXct(y$timestamp[[1]], tz = tz)
+       if (!is.intraday) {
+         idx <- as.Date(idx)
        }
 
        x <- xts(do.call(cbind, ohlcv), idx,
                  src='yahoo', updated=Sys.time())
 
-       if (periodicity != "intraday") {
-         fr <- merge(OHLCV(x), adjusted = unlist(y$indicators$adjclose))
-         cnames <- c("Open", "High", "Low", "Close", "Volume", "Adjusted")
-       } else {
-         fr <- OHLCV(x)
-         cnames <- c("Open", "High", "Low", "Close", "Volume")
+       fr <- OHLCV(x)
+       cnames <- c("Open", "High", "Low", "Close", "Volume")
+       if (!is.intraday) {
+         fr <- merge(fr, adjusted = unlist(y$indicators$adjclose))
+         cnames <- c(cnames, "Adjusted")
        }
-
-
 
        # convert column names to Initial Capitalization
        cn <- colnames(fr)
@@ -356,10 +359,13 @@ function(Symbols,env,return.class='xts',index.class="Date",
        }
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
-       if(is.xts(fr))
-         tclass(fr) <- index.class
+       if(is.xts(fr)) {
+         if(!is.intraday) {
+           tclass(fr) <- index.class
+         }
+       }
 
-       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]]))
+       Symbols[[i]] <- toupper(gsub('\\^','',Symbols[[i]]))
        returnSym[[i]] <- gsub('\\^', '', returnSym[[i]])
 
        if(auto.assign)
