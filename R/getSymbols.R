@@ -263,6 +263,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("warnings")) warnings <- TRUE
 
      handle <- .getHandle(curl.options)
 
@@ -295,10 +296,12 @@ function(Symbols,env,return.class='xts',index.class="Date",
          n.days <- difftime(time1 = to.date, time2 = from.date, units = "days")
          if(n.days > 7) {
            from <- to.date - 7
-           warning(paste0(
-             "Only a maximum of 7 days is allowed for querying intraday data",
-             "data from 'yahoo'. Setting `from` to '", from, "'."
-           ))
+           if(warnings) {
+             warning(paste0(
+               "Only a maximum of 7 days is allowed for querying intraday data",
+               "data from 'yahoo'. Setting `from` to '", from, "'."
+             ))
+           }
          }
        }
 
@@ -341,7 +344,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
        colnames(fr) <- cn
 
        # warn about missing values
-       if (any(is.na(fr))) {
+       if (any(is.na(fr)) && isTRUE(warnings)) {
          warning(Symbols.name, " contains missing values. Some functions will",
                  " not work if objects contain missing values in the middle",
                  " of the series. Consider using na.omit(), na.approx(),",
@@ -377,7 +380,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
          if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
            stop(msg)
          }
-         warning(msg, call. = FALSE, immediate. = TRUE)
+         if (isTRUE(warnings)) {
+           warning(msg, call. = FALSE, immediate. = TRUE)
+         }
          noDataSym <- c(noDataSym, returnSym[[i]])
        }
      }
@@ -409,6 +414,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
 
         if(!hasArg("verbose")) verbose <- FALSE
         if(!hasArg("auto.assign")) auto.assign <- TRUE
+        if(!hasArg("warnings")) warnings <- TRUE
 
         if(!requireNamespace("xml2", quietly=TRUE))
           stop("package:",dQuote("xml2"),"cannot be loaded.")
@@ -518,7 +524,9 @@ function(Symbols,env,return.class='xts',index.class="Date",
                 if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
                   stop(msg)
                 }
-                warning(msg, call. = FALSE, immediate. = TRUE)
+                if (isTRUE(warnings)) {
+                  warning(msg, call. = FALSE, immediate. = TRUE)
+                }
                 noDataSym <- c(noDataSym, returnSym[[i]])
             }
         }
@@ -559,6 +567,7 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("warnings")) warnings <- TRUE
 
      if(!requireNamespace("DBI", quietly=TRUE))
        stop("package:",dQuote("DBI"),"cannot be loaded.")
@@ -610,7 +619,9 @@ function(Symbols,env,return.class='xts',
                 if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
                   stop(msg)
                 }
-                warning(msg, call. = FALSE, immediate. = TRUE)
+                if (isTRUE(warnings)) {
+                  warning(msg, call. = FALSE, immediate. = TRUE)
+                }
             }
         }
         DBI::dbDisconnect(con)
@@ -635,6 +646,7 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("warnings")) warnings <- TRUE
 
      if(!requireNamespace("DBI", quietly=TRUE))
        stop("package:",dQuote("DBI"),"cannot be loaded.")
@@ -682,7 +694,9 @@ function(Symbols,env,return.class='xts',
               if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
                 stop(msg)
               }
-              warning(msg, call. = FALSE, immediate. = TRUE)
+              if (isTRUE(warnings)) {
+                warning(msg, call. = FALSE, immediate. = TRUE)
+              }
               noDataSym <- c(noDataSym, returnSym[[i]])
             }
         }
@@ -705,6 +719,7 @@ function(Symbols,env,return.class='xts',
      }
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("warnings")) warnings <- TRUE
      if(!hasArg("from")) from <- ""
      if(!hasArg("to")) to <- ""
 
@@ -739,7 +754,9 @@ function(Symbols,env,return.class='xts',
          if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
            stop(msg)
          }
-         warning(msg, call. = FALSE, immediate. = TRUE)
+         if (isTRUE(warnings)) {
+           warning(msg, call. = FALSE, immediate. = TRUE)
+         }
          noDataSym <- c(noDataSym, returnSym[[i]])
        }
      }
@@ -829,6 +846,7 @@ function(Symbols,env,
 
   if(!hasArg("verbose")) verbose <- FALSE
   if(!hasArg("auto.assign")) auto.assign <- TRUE
+  if(!hasArg("warnings")) warnings <- TRUE
 
   returnSym <- Symbols
   noDataSym <- NULL
@@ -882,7 +900,9 @@ function(Symbols,env,
        if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
          stop(msg)
        }
-       warning(msg, call. = FALSE, immediate. = TRUE)
+       if (isTRUE(warnings)) {
+         warning(msg, call. = FALSE, immediate. = TRUE)
+       }
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -912,6 +932,7 @@ function(Symbols,env,
 
   if(!hasArg("verbose")) verbose <- FALSE
   if(!hasArg("auto.assign")) auto.assign <- TRUE
+  if(!hasArg("warnings")) warnings <- TRUE
 
   returnSym <- Symbols
   noDataSym <- NULL
@@ -955,7 +976,9 @@ function(Symbols,env,
       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
         stop(msg)
       }
-      warning(msg, call. = FALSE, immediate. = TRUE)
+      if (isTRUE(warnings)) {
+        warning(msg, call. = FALSE, immediate. = TRUE)
+      }
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -985,6 +1008,7 @@ function(Symbols,env,
 
   if(!hasArg("verbose")) verbose <- FALSE
   if(!hasArg("auto.assign")) auto.assign <- TRUE
+  if(!hasArg("warnings")) warnings <- TRUE
 
   returnSym <- Symbols
   noDataSym <- NULL
@@ -1029,7 +1053,9 @@ function(Symbols,env,
       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
         stop(msg)
       }
-      warning(msg, call. = FALSE, immediate. = TRUE)
+      if (isTRUE(warnings)) {
+        warning(msg, call. = FALSE, immediate. = TRUE)
+      }
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -1053,10 +1079,10 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
   for(var in names(list(...))) {
     assign(var, list(...)[[var]], this.env)
   }
-  if(!hasArg("verbose"))
-    verbose <- FALSE
-  if(!hasArg("auto.assign"))
-    auto.assign <- TRUE
+  if(!hasArg("verbose")) verbose <- FALSE
+  if(!hasArg("auto.assign")) auto.assign <- TRUE
+  if(!hasArg("warnings")) warnings <- TRUE
+
   if(is.method.available("twsConnect","IBrokers")) {
     tws <- do.call('twsConnect',list(clientId=1001))
     on.exit(do.call('twsDisconnect',list(tws)))
@@ -1085,7 +1111,7 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
           }
           if(verbose) cat('done\n')
         }
-      } else {
+      } else if (isTRUE(warnings)) {
         warning(paste('unable to load',Symbols[i],': missing twsContract definition'))
       }
     }, silent = TRUE)
@@ -1095,7 +1121,9 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
         stop(msg)
       }
-      warning(msg, call. = FALSE, immediate. = TRUE)
+      if (isTRUE(warnings)) {
+        warning(msg, call. = FALSE, immediate. = TRUE)
+      }
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
     }
@@ -1152,6 +1180,7 @@ function(Symbols,env,return.class='xts',
 
      if(!hasArg("verbose")) verbose <- FALSE
      if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("warnings")) warnings <- TRUE
 
      returnSym <- Symbols
      noDataSym <- NULL
@@ -1172,15 +1201,20 @@ function(Symbols,env,return.class='xts',
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        currency.pair <- strsplit(toupper(Symbols.name),"/")[[1]]
        if(length(currency.pair) != 2) {
-         warning(paste("incorrectly specified currency pair",Symbols.name))
+
+         if(isTRUE(warnings)) {
+           warning(paste("incorrectly specified currency pair",Symbols.name))
+         }
          next
        }
 
        if(verbose) cat("downloading ",Symbols.name,".....")
        # throw warning, but return as much data as possible
        if(from < Sys.Date() - 180) {
+         if(isTRUE(warnings)) {
            warning("Oanda only provides historical data for the past 180 days.",
                    " Symbol: ", Symbols[[i]])
+         }
        }
        oanda.URL <- paste0("https://fxds-hcc.oanda.com/api/data/update",
                            "?&source=OANDA&adjustment=0",
@@ -1219,7 +1253,9 @@ function(Symbols,env,return.class='xts',
        if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
          stop(msg)
        }
-       warning(msg, call. = FALSE, immediate. = TRUE)
+       if (isTRUE(warnings)) {
+         warning(msg, call. = FALSE, immediate. = TRUE)
+       }
        noDataSym <- c(noDataSym, returnSym[[i]])
      }
      }
@@ -1411,7 +1447,9 @@ getSymbols.av <- function(Symbols, env, api.key,
       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
         stop(msg)
       }
-      warning(msg, call. = FALSE, immediate. = TRUE)
+      if (isTRUE(warnings)) {
+        warning(msg, call. = FALSE, immediate. = TRUE)
+      }
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
   }
@@ -1522,7 +1560,9 @@ getSymbols.tiingo <- function(Symbols, env, api.key,
       if (hasArg(".has1sym.") && match.call(expand.dots=TRUE)$.has1sym.) {
         stop(msg)
       }
-      warning(msg, call. = FALSE, immediate. = TRUE)
+      if (isTRUE(warnings)) {
+        warning(msg, call. = FALSE, immediate. = TRUE)
+      }
       noDataSym <- c(noDataSym, returnSym[[i]])
     }
   }
