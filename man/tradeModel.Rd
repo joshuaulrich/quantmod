@@ -52,7 +52,7 @@ A quantmodResults object
 \seealso{  \code{\link{specifyModel}} \code{\link{buildModel}} }
 \examples{
 \dontrun{
-m <- specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ)))
+m <- specifyModel(Next(OpCl(QQQ)) ~ Lag(OpHi(QQQ)))
 m.built <- buildModel(m,method='rpart',training.per=c('2007-01-01','2007-04-01'))
 
 tradeModel(m.built)

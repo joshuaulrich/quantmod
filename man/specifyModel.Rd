@@ -73,10 +73,10 @@ full data set as \code{zoo} object.
 \code{\link{setSymbolLookup}}}
 \examples{
 \dontrun{
-# if QQQQ is not in the Global environment, an attempt will be made
+# if QQQ is not in the Global environment, an attempt will be made
 # to retrieve it from the source specified with getSymbols.Default
 
-specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ),0:3) + Hi(DIA))
+specifyModel(Next(OpCl(QQQ)) ~ Lag(OpHi(QQQ),0:3) + Hi(DIA))
 }
 }
 

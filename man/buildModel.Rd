@@ -51,8 +51,8 @@ An object of class \code{quantmod} with fitted model attached
 \seealso{ \code{\link{specifyModel}} \code{\link{tradeModel}} }
 \examples{
 \dontrun{
-getSymbols('QQQQ',src='yahoo')
-q.model = specifyModel(Next(OpCl(QQQQ)) ~ Lag(OpHi(QQQQ),0:3))
+getSymbols('QQQ',src='yahoo')
+q.model = specifyModel(Next(OpCl(QQQ)) ~ Lag(OpHi(QQQ),0:3))
 buildModel(q.model,method='lm',training.per=c('2006-08-01','2006-09-30'))
 }
 } 

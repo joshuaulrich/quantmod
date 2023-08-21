@@ -70,7 +70,7 @@ any bugs to the maintainer of quantmod.
 \seealso{ \code{\link{getSymbols}}}
 \examples{
 \dontrun{
-getSymbols("QQQQ",src="SQLite")
+getSymbols("QQQ",src="SQLite")
 }
 }
 \keyword{ utilities }

@@ -31,7 +31,7 @@ Returns object of class \code{quantmod.OHLC}
 }
 \examples{
 \dontrun{
-my.model <- specifyModel(Next(OpCl(QQQQ)) ~ Lag(Cl(NDX),0:5))
+my.model <- specifyModel(Next(OpCl(QQQ)) ~ Lag(Cl(NDX),0:5))
 getModelData(my.model)
 }
 }

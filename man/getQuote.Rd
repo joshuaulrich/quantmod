@@ -61,7 +61,7 @@ returns a \code{quoteFormat} object to use with the \code{getQuote} function.
 yahooQuote.EOD
 \dontrun{
 getQuote("AAPL")
-getQuote("QQQQ;SPY;^VXN",what=yahooQF(c("Bid","Ask")))
+getQuote("QQQ;SPY;^VXN",what=yahooQF(c("Bid","Ask")))
 standardQuote()
 yahooQF()
 }

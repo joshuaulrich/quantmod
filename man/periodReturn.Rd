@@ -85,13 +85,13 @@ of the period. Leading period calculations can be suppressed by setting \code{le
 \seealso{\code{\link{getSymbols}}}
 \examples{
 \dontrun{
-getSymbols('QQQQ',src='yahoo')
-allReturns(QQQQ)  # returns all periods
+getSymbols('QQQ',src='yahoo')
+allReturns(QQQ)  # returns all periods
 
-periodReturn(QQQQ,period='yearly',subset='2003::')  # returns years 2003 to present
-periodReturn(QQQQ,period='yearly',subset='2003')  # returns year 2003
+periodReturn(QQQ,period='yearly',subset='2003::')  # returns years 2003 to present
+periodReturn(QQQ,period='yearly',subset='2003')  # returns year 2003
 
-rm(QQQQ)
+rm(QQQ)
 }
 }
 \keyword{ utilities }% at least one, from doc/KEYWORDS

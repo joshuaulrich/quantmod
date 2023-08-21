@@ -88,14 +88,14 @@ the clutter created during a typical session.
 }
 \seealso{ \code{\link{getSymbols}}, \code{\link{options}},}
 \examples{
-setSymbolLookup(QQQQ='yahoo',DIA='MySQL')
-getSymbolLookup('QQQQ')
-getSymbolLookup(c('QQQQ','DIA'))
+setSymbolLookup(QQQ='yahoo',DIA='MySQL')
+getSymbolLookup('QQQ')
+getSymbolLookup(c('QQQ','DIA'))
 
 \dontrun{
-## Will download QQQQ from yahoo
+## Will download QQQ from yahoo
 ## and load DIA from MySQL
-getSymbols(c('QQQQ','DIA'))
+getSymbols(c('QQQ','DIA'))
 }
 
 ## Use something like this to always retrieve

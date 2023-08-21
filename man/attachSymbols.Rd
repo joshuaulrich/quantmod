@@ -100,7 +100,7 @@ This function is new, and all aspects may change in the near future.
 \dontrun{
 attachSymbols()
 SBUX
-QQQQ
+QQQ
 ls()
 }
 }

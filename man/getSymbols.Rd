@@ -190,7 +190,7 @@ using the functionality outside of the \pkg{quantmod} workflow.
 \dontrun{
 setSymbolLookup(QQQ='yahoo',SPY='google')
 
-# loads QQQQ from yahoo (set with setSymbolLookup)
+# loads QQQ from yahoo (set with setSymbolLookup)
 # loads SPY from MySQL (set with setSymbolLookup)
 getSymbols(c('QQQ','SPY'))                
 
