@@ -10,7 +10,6 @@ Quantitative Financial Modelling Framework
 Quantitative Financial Modelling and Trading Framework for R
 }
 \details{
-%\packageDESCRIPTION{quantmod}
 
 The quantmod package for R is designed to
 assist the quantitative trader in the
