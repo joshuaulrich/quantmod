@@ -7,19 +7,19 @@
 \alias{getFinancials.google}
 %
 \description{
-  The functions listed here are no longer part of \pkg{quantmod}.
+  The functionality listed here is no longer part of \pkg{quantmod}.
 }
 \usage{
   # Defunct in 0.4-13
-  getFin(Symbol, env = parent.frame(), src = "google", auto.assign = TRUE, ...)
-  getFinancials(Symbol, env = parent.frame(), src = "google", auto.assign = TRUE, ...)
+  # getFin(Symbol, src = "google")
+  # getFinancials(Symbol, src = "google")
   getSymbols.google(Symbols, env, return.class = "xts", from = "2007-01-01",
     to = Sys.Date(), ...)
 }
 \details{
   Google Finance stopped providing data in March, 2018. This included historical
   price data, and also financial information. This affected \code{getFinancials},
-  \code{getFin}, and \code{getSymbols.google}.
+  \code{getFin}, and \code{getSymbols} when \code{src = "google"}.
 }
 \seealso{
   \code{\link{Defunct}}
