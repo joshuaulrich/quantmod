@@ -102,11 +102,11 @@ function(x,subset=NULL,type='arithmetic',leading=TRUE) {
   x.orig <- x
   x <- try.xts(x)
   all.ret <- cbind(
-    periodReturn(x,'daily',type=type,leading=FALSE),
-    periodReturn(x,'weekly',type=type),
-    periodReturn(x,'monthly',type=type,indexAt='endof'),
-    periodReturn(x,'quarterly',type=type,indexAt='endof'),
-    periodReturn(x,'yearly',type=type)
+    periodReturn(x,'daily',subset,type=type,leading=FALSE),
+    periodReturn(x,'weekly',subset,type=type),
+    periodReturn(x,'monthly',subset,type=type,indexAt='endof'),
+    periodReturn(x,'quarterly',subset,type=type,indexAt='endof'),
+    periodReturn(x,'yearly',subset,type=type)
   )
   colnames(all.ret) <- c('daily','weekly','monthly','quarterly','yearly')
   reclass(all.ret, x.orig)
