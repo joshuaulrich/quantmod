@@ -684,24 +684,6 @@ add_WMA <- function(n=10, wts=1:n, on=1, col='green',...) {
   plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
   plot_object
 } # }}}
-# add_VMA {{{
-add_VMA <- function(w, ratio=1, on=1, col='green',...) {
-  lenv <- new.env()
-  lenv$add_wma <- function(x, w, ratio, col, ...) {
-    xdata <- x$Env$xdata
-    xsubset <- x$Env$xsubset
-    vma <- VMA(Cl(xdata), w=w, ratio=ratio)[xsubset]
-    lines(1:NROW(xdata[xsubset]), vma, col=col, ...)
-  }
-  mapply(function(name,value) { assign(name,value,envir=lenv) }, names(list(w=w,ratio=ratio,col=col,...)), list(w=w,ratio=ratio,col=col,...))
-  exp <- parse(text=gsub("list","add_wma",as.expression(substitute(list(x=current.chob(),w=w,ratio=ratio,col=col,...)))),
-               srcfile=NULL)
-  plot_object <- current.chob()
-  lenv$xdata <- VMA(Cl(plot_object$Env$xdata),w=w,ratio=ratio)
-  plot_object$set_frame(sign(on)*(abs(on)+1L))
-  plot_object$add(exp,env=c(lenv, plot_object$Env),expr=TRUE)
-  plot_object
-} # }}}
 # add_DEMA {{{
 add_DEMA <- function(n=10, on=1, col='pink', ...) {
   lenv <- new.env()
