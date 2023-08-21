@@ -71,6 +71,21 @@ function(Symbols=NULL,
                              Symbols[Symbols==x]
                            }
                            )))
+        # are any symbols reserved words?
+        if(getOption("quantmod.warn.ticker.reserved.word", TRUE)) {
+          reserved.tickers <- c("NA", "TRUE")
+          is.reserved <- reserved.tickers %in% names(Symbols)
+          if(any(is.reserved)) {
+            rtk <- paste(reserved.tickers[is.reserved], collapse = ", ")
+            if (sum(is.reserved) > 1) {
+              msg <- paste("tickers", rtk, "are reserved words")
+            } else {
+              msg <- paste("ticker", rtk, "is a reserved word")
+            }
+            warning(msg, " and must be back-quoted to be used (e.g. `NA`).")
+          }
+        }
+
         # was getSymbols() called with more than 1 symbol?
         .has1sym. <- length(Symbols) < 2L
         #Symbols <- as.list(Symbols)
