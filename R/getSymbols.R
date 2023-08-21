@@ -315,7 +315,7 @@ function(Symbols,env,return.class='xts',index.class="Date",
              warning(paste0(
                "Only a maximum of 7 days is allowed for querying intraday data",
                "data from 'yahoo'. Setting `from` to '", from, "'."
-             ))
+             ), call. = FALSE)
            }
          }
        }
