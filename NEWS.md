@@ -1,3 +1,38 @@
+### Changes in 0.4.25 (2023-08-21)
+
+1. Fix `getQuote.yahoo()` for API changes. Thanks to Ethan B. Smith for the
+    report and patch! Also add error message for users in GDPR countries, since
+    we cannot automatically consent to GDPR and the request fails without
+    consent.
+    [#392](https://github.com/joshuaulrich/quantmod/issues/392)
+    [#393](https://github.com/joshuaulrich/quantmod/issues/393)
+    [#395](https://github.com/joshuaulrich/quantmod/issues/395)
+
+1. Fix `getQuote.yahoo()` when the user only requested metrics that do not have
+    have a value for 'regularMarketTime'. Set the value to NA in these cases
+    so the output remains the same regardless of whether the endpoint returns
+    a 'regularMarketTime' or not. Thanks to @mehdiMBH for the report!
+    [#255](https://github.com/joshuaulrich/quantmod/issues/255)
+
+1. Add fields to `getQuote.yahoo()` that are returned when no fields are
+    explicitly requested. Thanks to @Courvoisier13 for the report!
+    [#335](https://github.com/joshuaulrich/quantmod/issues/335)
+
+1. Add intraday endpoint to `getSymbols.yahoo()`. Thanks to @kapsner for the
+    report and patch! Also allow suppressing the warning if more than 7 days
+    of data are requested (@eddelbuettel).
+    [#351](https://github.com/joshuaulrich/quantmod/issues/351)
+    [#381](https://github.com/joshuaulrich/quantmod/issues/381)
+    [#399](https://github.com/joshuaulrich/quantmod/issues/399)
+
+1. Add warning if `getSymbols()` is called with tickers that are reserved words
+    because accessing them requires back-quotes (e.g. ``NA``).
+    [#401](https://github.com/joshuaulrich/quantmod/issues/401)
+
+1. Fix `allReturns()` when 'subset' is specified. Thanks to @Panagis1980 for
+    the report!
+    [#402](https://github.com/joshuaulrich/quantmod/issues/402)
+
 ### Changes in 0.4.24 (2023-07-17)
 
 1. Fix `getSymbols.oanda()` URL. Thanks to @macray76 for the report.
