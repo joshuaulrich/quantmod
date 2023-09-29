@@ -1062,6 +1062,99 @@ add_BBands <- function(n=20, maType="SMA", sd=2, on=-1, ...) {
   chob
 } # }}}
 
+# add_ADX {{{
+add_ADX <- function(n = 14, maType = "EMA", on = NA, ...) {
+  lenv <- new.env()
+  lenv$add_adx <- function(x, n, col, ...) {
+    xdata <- x$Env$xdata
+    xsubset <- x$Env$xsubset
+    adx <- ADX(HLC(xdata), n = n, ...)[xsubset]
+    x_axis <- seq_len(NROW(xdata[xsubset]))
+    lines(x_axis, adx$DIp, col = "green", ...)
+    lines(x_axis, adx$DIn, col = "red", ...)
+    lines(x_axis, adx$DX,  col = "black", ...)
+    lines(x_axis, adx$ADX, col = "blue", lty = 2, ...)
+  }
+
+  mapply(function(name, value) {
+           assign(name, value, envir = lenv)
+         }, names(list(n = n, ...)), list(n = n, ...))
+
+  exp <- parse(text = gsub("list",
+                           "add_adx",
+                           as.expression(substitute(list(x = current.chob(),
+                                                         n = n, ...)))),
+               srcfile = NULL)
+  plot_object <- current.chob()
+
+  adx <- ADX(HLC(plot_object$Env$xdata), n = n, ...)
+  lenv$xdata <- adx
+
+  # panel header
+  plot_object$add_frame(ylim = c(0, 1), asp = 0.2)
+  plot_object$next_frame()
+  header_expr <- expression({
+    header <- paste0("ADX(", n, "): ")
+    header_width <- strwidth(header)
+    pad <- strwidth("5")
+    last_values <- round(last(xdata[xsubset]), 2)
+    text(x = c(1,
+               1 + header_width,
+               1 + header_width + pad *  6,
+               1 + header_width + pad * 12,
+               1 + header_width + pad * 19),
+         y = 0.3,
+         labels = c(header,
+                    last_values[, 1],
+                    last_values[, 2],
+                    last_values[, 3],
+                    last_values[, 4]),
+         col = c("black", "green", "red", "black", "blue"),
+         adj = c(0, 0),
+         cex = 0.9,
+         offset = 0,
+         pos = 4)
+  })
+  plot_object$add(header_expr, env = c(lenv, plot_object$Env), expr = TRUE)
+
+  # y-axis grid lines and labels
+  lenv$grid_lines <- function(xdata, xsubset) {
+    axTicksByValue(xdata[xsubset], 10, gt = 3)
+  }
+  y_axis_expr <- expression({
+    segments(1,
+             grid_lines(xdata, xsubset),
+             NROW(xdata[xsubset]),
+             grid_lines(xdata, xsubset),
+             col = theme$grid)
+  })
+  y_label_expr <- expression({
+    text(1 - 1/3 - max(strwidth(grid_lines(xdata, xsubset))),
+         grid_lines(xdata, xsubset),
+         noquote(format(grid_lines(xdata, xsubset), justify = "right")),
+         col = theme$labels,
+         offset = 0,
+         pos = 4,
+         cex = 0.9)
+    text(NROW(xdata[xsubset]) + 1/3,
+         grid_lines(xdata, xsubset),
+         noquote(format(grid_lines(xdata, xsubset), justify = "right")),
+         col = theme$labels,
+         offset = 0,
+         pos = 4,
+         cex = 0.9)
+  })
+
+  # data
+  adx_ylim <- c(0, 1.02 * max(adx[plot_object$Env$xsubset], na.rm = TRUE))
+  plot_object$add_frame(ylim = adx_ylim, asp = 1, fixed = TRUE)
+  plot_object$next_frame()
+
+  exp <- c(y_axis_expr, exp, y_label_expr)
+  plot_object$add(exp, env = c(lenv, plot_object$Env), expr = TRUE)
+  plot_object
+} # }}}
+
 # add_Vo {{{
 add_Vo <- function(...) {
   lenv <- new.env()
