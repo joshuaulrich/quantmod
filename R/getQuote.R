@@ -74,7 +74,7 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
   length.of.symbols <- length(Symbols)
   if (is.null(session)) session <- .yahooSession()
   if (!session$can.crumb) {
-    stop("Unbale to obtain yahoo crumb. If this is being called from a GDPR country, Yahoo requires GDPR consent, which cannot be scripted")
+    stop("Unable to obtain yahoo crumb. If this is being called from a GDPR country, Yahoo requires GDPR consent, which cannot be scripted")
   }
   
   if(length.of.symbols > 200) {
