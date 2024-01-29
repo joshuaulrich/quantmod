@@ -10,7 +10,7 @@ function(Symbols, Exp=NULL, src="yahoo", ...) {
   optionChain[!vapply(optionChain, is.null, logical(1))]
 }
 
-getOptionChain.yahoo <- function(Symbols, Exp, ...)
+getOptionChain.yahoo <- function(Symbols, Exp, ..., session=NULL)
 {
   NewToOld <- function(x, tz = NULL) {
     if(is.null(x) || length(x) < 1)
@@ -67,16 +67,24 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
     return(d)
   }
 
+  if (is.null(session)) {
+    session <- .yahooSession()
+  }
+  if (!session$can.crumb) {
+    stop("Unable to obtain yahoo crumb. If this is being called from a GDPR country, Yahoo requires GDPR consent, which cannot be scripted")
+  }
+
   # Don't check the expiry date if we're looping over dates we just scraped
   checkExp <- !hasArg(".expiry.known") || !match.call(expand.dots=TRUE)$.expiry.known
   # Construct URL
-  urlExp <- paste0("https://query2.finance.yahoo.com/v7/finance/options/", Symbols[1])
+  urlExp <- paste0("https://query2.finance.yahoo.com/v7/finance/options/", Symbols[1],
+                   "?crumb=", session$crumb)
   # Add expiry date to URL
   if(!checkExp)
-    urlExp <- paste0(urlExp, "?&date=", Exp)
+    urlExp <- paste0(urlExp, "&date=", Exp)
 
   # Fetch data (jsonlite::fromJSON will handle connection)
-  tbl <- try(jsonlite::fromJSON(urlExp), silent = TRUE)
+  tbl <- try(jsonlite::fromJSON(curl::curl(urlExp, handle = session$h)), silent = TRUE)
 
   if(inherits(tbl, "try-error")) {
     msg <- attr(tbl, "condition")[["message"]]
@@ -94,7 +102,7 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
     if(is.null(Exp)) {
       # Return all expiries if Exp = NULL
-      out <- lapply(all.expiries, getOptionChain.yahoo, Symbols=Symbols, .expiry.known=TRUE)
+      out <- lapply(all.expiries, getOptionChain.yahoo, Symbols=Symbols, .expiry.known=TRUE, session=session)
       # Expiry format was "%b %Y", but that's not unique with weeklies. Change
       # format to "%b.%d.%Y" ("%Y-%m-%d wouldn't be good, since names should
       # start with a letter or dot--naming things is hard).
@@ -116,9 +124,9 @@ getOptionChain.yahoo <- function(Symbols, Exp, ...)
 
       expiry.subset <- all.expiries[valid.expiries]
       if(length(expiry.subset) == 1)
-        return(getOptionChain.yahoo(Symbols, expiry.subset, .expiry.known=TRUE))
+        return(getOptionChain.yahoo(Symbols, expiry.subset, .expiry.known=TRUE, session=session))
       else {
-        out <- lapply(expiry.subset, getOptionChain.yahoo, Symbols=Symbols, .expiry.known=TRUE)
+        out <- lapply(expiry.subset, getOptionChain.yahoo, Symbols=Symbols, .expiry.known=TRUE, session=session)
         # See comment above regarding the output names
         return(setNames(out, format(all.expiries.posix[valid.expiries], "%b.%d.%Y")))
       }
