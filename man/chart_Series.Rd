@@ -2,6 +2,7 @@
 \alias{chart_Series}
 \alias{add_Series}
 \alias{add_MACD}
+\alias{add_ADX}
 \alias{add_BBands}
 \alias{add_RSI}
 \alias{add_SMI}
