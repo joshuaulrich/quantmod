@@ -1,3 +1,13 @@
+### Changes in 0.4.26 (2024-02-14)
+
+1. Fix `chart_Series()` when 'TA' is a vector. Thanks to @comintel for the
+    report.
+    [#403](https://github.com/joshuaulrich/quantmod/issues/403)
+
+1. Fix `getOptionChain.yahoo()` by using the Yahoo Finance 'crumb' like we
+    do in `getSymbols()` and `getQuote()`. Thanks to @cotyreh for the report.
+    [#407](https://github.com/joshuaulrich/quantmod/issues/407)
+
 ### Changes in 0.4.25 (2023-08-21)
 
 1. Fix `getQuote.yahoo()` for API changes. Thanks to Ethan B. Smith for the
