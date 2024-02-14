@@ -33,25 +33,26 @@ containing the TA call in question.  See examples for assistance.
 
 Current components that may be modified with appropriate
 values:
+
 \itemize{
-  \item{fg.col}{foreground color}
-  \item{bg.col}{background color}
-  \item{grid.col}{grid color}
-  \item{border}{border color}
-  \item{minor.tick}{minor tickmark color}
-  \item{major.tick}{major tickmark color}
-  \item{up.col}{up bar/candle color}
-  \item{dn.col}{down bar/candle color}
-  \item{up.up.col}{up after up bar/candle color}
-  \item{up.dn.col}{up after down bar/candle color}
-  \item{dn.dn.col}{down after down bar/candle color}
-  \item{dn.up.col}{down after up bar/candle color}
-  \item{up.border}{up bar/candle border color}
-  \item{dn.border}{down bar/candle border color}
-  \item{up.up.border}{up after up bar/candle border color}
-  \item{up.dn.border}{up after down bar/candle border color}
-  \item{dn.dn.border}{down after down bar/candle border color}
-  \item{dn.up.border}{down after up bar/candle border color}
+  \item \code{fg.col}: foreground color
+  \item \code{bg.col}: background color
+  \item \code{grid.col}: grid color
+  \item \code{border}: border color
+  \item \code{minor.tick}: minor tickmark color
+  \item \code{major.tick}: major tickmark color
+  \item \code{up.col}: up bar/candle color
+  \item \code{dn.col}: down bar/candle color
+  \item \code{up.up.col}: up after up bar/candle color
+  \item \code{up.dn.col}: up after down bar/candle color
+  \item \code{dn.dn.col}: down after down bar/candle color
+  \item \code{dn.up.col}: down after up bar/candle color
+  \item \code{up.border}: up bar/candle border color
+  \item \code{dn.border}: down bar/candle border color
+  \item \code{up.up.border}: up after up bar/candle border color
+  \item \code{up.dn.border}: up after down bar/candle border color
+  \item \code{dn.dn.border}: down after down bar/candle border color
+  \item \code{dn.up.border}: down after up bar/candle border color
 }
 }
 \value{

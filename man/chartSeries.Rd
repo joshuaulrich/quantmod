@@ -109,10 +109,10 @@ chart styles to user tastes.
 charting applications, and follows the following rules:
 
 \itemize{
-  \item{grey}{ => Op[t] < Cl[t] and Op[t] < Cl[t-1]}
-  \item{white}{ => Op[t] < Cl[t] and Op[t] > Cl[t-1]}
-  \item{red}{   => Op[t] > Cl[t] and Op[t] < Cl[t-1]}
-  \item{black}{ => Op[t] > Cl[t] and Op[t] > Cl[t-1]}
+  \item grey  => Op[t] < Cl[t] and Op[t] < Cl[t-1]
+  \item white => Op[t] < Cl[t] and Op[t] > Cl[t-1]
+  \item red   => Op[t] > Cl[t] and Op[t] < Cl[t-1]
+  \item black => Op[t] > Cl[t] and Op[t] > Cl[t-1]
 }
 
 \code{reChart} takes any number of arguments from the original

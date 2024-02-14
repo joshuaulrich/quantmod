@@ -34,55 +34,53 @@ Functions to add technical indicators to a chart.
 The general mechanism to add technical analysis studies or overlays
 to a financial chart created with \code{chartSeries}.
 
-Functionality marked with a \sQuote{*} is via the \pkg{TTR} package. 
-
 General TA charting tool functions:
 \itemize{
-  \item{addTA}{add data as custom indicator }
-  \item{dropTA}{remove technical indicator}
-  \item{moveTA}{move a technical indicator}
-  \item{swapTA}{swap two technical indicators}
+  \item \code{addTA}: add data as custom indicator
+  \item \code{dropTA}: remove technical indicator
+  \item \code{moveTA}: move a technical indicator
+  \item \code{swapTA}: swap two technical indicators
 }
 
 Current technical indicators include:
 \itemize{
-  \item{addADX}{add Welles Wilder's Directional Movement Indicator*}
-  \item{addATR}{add Average True Range *}
-  \item{addAroon}{add Aroon Indicator *}
-  \item{addAroonOsc}{add Aroon Oscillator *}
-  \item{addBBands:}{add Bollinger Bands *}
-  \item{addCCI}{add Commodity Channel Index *}
-  \item{addCMF}{add Chaiken Money Flow *}
-  \item{addChAD}{add Chaiken Accumulation Distribution Line *}
-  \item{addChVol}{add Chaiken Volatility *}
-  \item{addCMO}{add Chande Momentum Oscillator *}
-  \item{addDEMA}{add Double Exponential Moving Average *}
-  \item{addDPO}{add Detrended Price Oscillator *}
-  \item{addEMA}{add Exponential Moving Average *}
-  \item{addEMV}{add Arm's Ease of Movement *}
-  \item{addEnvelope}{add Moving Average Envelope}
-  \item{addEVWMA}{add Exponential Volume Weighted Moving Average *}
-  \item{addExpiry}{add options or futures expiration lines}
-  \item{addKST}{add Know Sure Thing *}
-  \item{addLines}{add line(s)}
-  \item{addMACD:}{add Moving Average Convergence Divergence *}
-  \item{addMFI}{add Money Flow Index *}
-  \item{addMomentum}{add Momentum *}
-  \item{addOBV}{add On-Balance Volume *}
-  \item{addPoints}{add point(s) }
-  \item{addROC:}{add Rate of Change *}
-  \item{addRSI}{add Relative Strength Indicator *}
-  \item{addSAR}{add Parabolic SAR *}
-  \item{addSMA}{add Simple Moving Average *}
-  \item{addSMI}{add Stochastic Momentum Index *}
-  \item{addTDI}{add Trend Direction Index *}
-  \item{addTRIX}{add Triple Smoothed Exponential Oscillator *}
-  \item{addVo}{add Volume if available}
-  \item{addVolatility}{add volatility *}
-  \item{addWMA}{add Weighted Moving Average *}
-  \item{addWPR}{add Williams Percent R *}
-  \item{addZigZag}{add Zig Zag *}
-  \item{addZLEMA}{add ZLEMA *}
+  \item \code{addADX}: add Welles Wilder's Directional Movement Indicator
+  \item \code{addATR}: add Average True Range
+  \item \code{addAroon}: add Aroon Indicator
+  \item \code{addAroonOsc}: add Aroon Oscillator
+  \item \code{addBBands}: add Bollinger Bands
+  \item \code{addCCI}: add Commodity Channel Index
+  \item \code{addCMF}: add Chaiken Money Flow
+  \item \code{addChAD}: add Chaiken Accumulation Distribution Line
+  \item \code{addChVol}: add Chaiken Volatility
+  \item \code{addCMO}: add Chande Momentum Oscillator
+  \item \code{addDEMA}: add Double Exponential Moving Average
+  \item \code{addDPO}: add Detrended Price Oscillator
+  \item \code{addEMA}: add Exponential Moving Average
+  \item \code{addEMV}: add Arm's Ease of Movement
+  \item \code{addEnvelope}: add Moving Average Envelope
+  \item \code{addEVWMA}: add Exponential Volume Weighted Moving Average
+  \item \code{addExpiry}: add options or futures expiration lines
+  \item \code{addKST}: add Know Sure Thing
+  \item \code{addLines}: add line(s)
+  \item \code{addMACD}: add Moving Average Convergence Divergence
+  \item \code{addMFI}: add Money Flow Index
+  \item \code{addMomentum}: add Momentum
+  \item \code{addOBV}: add On-Balance Volume
+  \item \code{addPoints}: add point(s)
+  \item \code{addROC}: add Rate of Change
+  \item \code{addRSI}: add Relative Strength Indicator
+  \item \code{addSAR}: add Parabolic SAR
+  \item \code{addSMA}: add Simple Moving Average
+  \item \code{addSMI}: add Stochastic Momentum Index
+  \item \code{addTDI}: add Trend Direction Index
+  \item \code{addTRIX}: add Triple Smoothed Exponential Oscillator
+  \item \code{addVo}: add Volume (if available)
+  \item \code{addVolatility}: add volatility
+  \item \code{addWMA}: add Weighted Moving Average
+  \item \code{addWPR}: add Williams Percent R
+  \item \code{addZigZag}: add Zig Zag
+  \item \code{addZLEMA}: add ZLEMA
 }
 See the individual functions for specific implementation and argument details.  Details
 of the underlying TTR implementations can be found in \pkg{TTR}.
