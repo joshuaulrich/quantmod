@@ -337,6 +337,14 @@ function(x)
     xx
 }
 
+`ClOp` <-
+function(x)
+{
+    xx <- Delt(lag(Cl(x)), Op(x))
+    colnames(xx) <- paste("ClOp",deparse(substitute(x)),sep='.')
+    xx
+}
+
 `OpOp` <-
 function(x)
 {
