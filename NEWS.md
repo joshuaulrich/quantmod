@@ -1,3 +1,9 @@
+### Changes in 0.4.xx (2024-xx-yy)
+
+1. Add `ClOp()` function to calculate the return between Close[t-1] and Open[t].
+    Thanks to Gabriel Kaiser (@GabrielKaiserQFin) for the contribution!
+    [#412](https://github.com/joshuaulrich/quantmod/pull/412)
+
 ### Changes in 0.4.26 (2024-02-14)
 
 1. Fix `chart_Series()` when 'TA' is a vector. Thanks to @comintel for the

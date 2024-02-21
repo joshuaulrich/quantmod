@@ -4,6 +4,7 @@
 \alias{Ad}
 \alias{Cl}
 \alias{ClCl}
+\alias{ClOp}
 \alias{Hi}
 \alias{HiCl}
 \alias{Lo}
@@ -84,6 +85,7 @@ seriesDecr(x, thresh=0, diff.=1L)
 
 OpCl(x)
 ClCl(x)
+ClOp(x)
 HiCl(x)
 LoCl(x)
 LoHi(x)

@@ -206,7 +206,7 @@ export(
        HL, has.HL, is.HL,    # HLC  extraction and test
 
        # quick delta calculation functions
-       OpCl, OpOp, ClCl, OpHi, OpLo, LoCl, HiCl, LoHi,
+       OpCl, OpOp, ClCl, ClOp, OpHi, OpLo, LoCl, HiCl, LoHi,
 
        seriesHi,seriesLo,
        seriesIncr, seriesDecr,
