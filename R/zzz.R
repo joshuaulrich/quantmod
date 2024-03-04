@@ -18,15 +18,6 @@ print.quantmodEnv <- function(x, ...) {
   #attach(NULL, name='.quantmodEnv')  
 }
 
-# Loading quantmod produces the following message:
-#
-# Registered S3 method overwritten by 'quantmod':
-#   method            from
-#   as.zoo.data.frame zoo
-#
-# Message users that this method will be deprecated in a future release.
-options(quantmod.deprecate.as.zoo.data.frame = TRUE)
-
 setOldClass("zoo");
 setOldClass("xts");
 setOldClass("Date");
