@@ -14,8 +14,6 @@
   model.data <- modelData(quantmod,trade.dates,exclude.training=exclude.training);
   fitted.zoo <- predictModel(quantmod@fitted.model,model.data,...)
   if(inherits(fitted.zoo, "zoo", which = TRUE) != 1) {
-    # if(class(fitted.zoo) != "zoo") {
-    # /\ this is only needed if 'fitted.zoo' is not exactly a zoo object (i.e. not xts)
     fitted.zoo <- zoo(as.vector(fitted.zoo),index(model.data));
   }
   # trade Rule section

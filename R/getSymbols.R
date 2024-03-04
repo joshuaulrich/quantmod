@@ -135,9 +135,9 @@ formals(loadSymbols) <- loadSymbols.formals
 #       # import all named elements that are NON formals
 #       assign(var, list(...)[[var]], this.env)
 #    }
-#    if ((class(from)=="Date" && class(to)=="Date") ||
-#           (class(from)=="character" && length(from)<=8 &&
-#               class(to)=="character" && length(to)<=8 )) {
+#    if ((inherits(from, "Date") && inherits(to, "Date")) ||
+#           (is.character(from) && length(from)<=8 &&
+#               is.character(to) && length(to)<=8 )) {
 #       bb.intraday <- FALSE
 #       bb.call <- bdh
 #       bb.fields <- c("OPEN", "HIGH", "LOW", "PX_LAST", "VOLUME")
@@ -176,12 +176,12 @@ formals(loadSymbols) <- loadSymbols.formals
 #                 bxo <- as.xts(b$open, order.by=b$datetime)
 #                 fr <- merge(bxo,  b$high, b$low, b$close, b$volume)
 #               } else {
-#                 if (class(from)=="character") {
+#                 if (is.character(from)) {
 #                   fromStr <- from
 #                 } else {
 #                   fromStr <- strftime(from,format="%Y%m%d")
 #                 }
-#                 if (class(to)=="character") {
+#                 if (is.character(to)) {
 #                   toStr <- to
 #                 } else {
 #                   toStr <- strftime(to,format="%Y%m%d")

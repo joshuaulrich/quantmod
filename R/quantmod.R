@@ -1,12 +1,12 @@
 "is.quantmod" <-
 function(x)
 {
-  (class(x) == 'quantmod')
+  inherits(x, 'quantmod')
 }
 "is.quantmodResults" <-
 function(x)
 {
-  (class(x) == 'quantmodResults')
+  inherits(x, 'quantmodResults')
 }
 
 `as.zoo.data.frame`<-

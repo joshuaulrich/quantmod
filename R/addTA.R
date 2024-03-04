@@ -1877,7 +1877,7 @@ function(x) {
       stop("improperly set or missing graphics device")
     current.chob <- which(sapply(gchob,
                                  function(x) {
-                                   ifelse(class(x)=="chob" &&
+                                   ifelse(inherits(x, "chob") &&
                                    x@device==as.numeric(dev.cur()),TRUE,FALSE)
                                  }))
     if(identical(current.chob,integer(0))) stop("no current plot")
