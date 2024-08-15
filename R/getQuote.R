@@ -47,7 +47,7 @@ function(Symbols,src='yahoo',what, ...) {
   if (ses$can.crumb) {
     # get a crumb so that downstream callers don't have to handle invalid sessions.
     # this is a network hop, but very lightweight payload
-    query.srv <- paste0("https://query1.finance.yahoo.com/v1/test/getcrumb")
+    query.srv <- "https://query1.finance.yahoo.com/v1/test/getcrumb"
     r <- curl::curl_fetch_memory(query.srv, handle = ses$h)
     if ((r$status_code == 200) && (length(r$content) > 0)) {
       ses$crumb <- rawToChar(r$content)
