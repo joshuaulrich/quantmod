@@ -221,7 +221,7 @@ function(x,which=FALSE)
     return(if(which) colAttr else TRUE)
 
   loc <- grep('\\bOpen\\b',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Open\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Open$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -244,7 +244,7 @@ function(x,which=FALSE)
     return(if(which) colAttr else TRUE)
 
   loc <- grep('\\bHigh\\b',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.High\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.High$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -267,7 +267,7 @@ function(x,which=FALSE)
     return(if(which) colAttr else TRUE)
 
   loc <- grep('\\bLow\\b',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Low\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Low$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -289,7 +289,7 @@ function(x,which=FALSE)
     return(if(which) colAttr else TRUE)
 
   loc <- grep('\\bClose\\b',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Close\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Close$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
