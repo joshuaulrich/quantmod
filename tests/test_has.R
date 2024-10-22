@@ -9,31 +9,31 @@ simple.colnames <- c("Open", "High", "Low", "Close", "Volume", "Adjusted")
 
 #has.OHLC will test underlying has.op, hasCl, etc
 colnames(stock) <- simple.colnames
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 colnames(stock) <- paste("OPEN", simple.colnames, sep = ".")
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 colnames(stock) <- paste("HIGH", simple.colnames, sep = ".")
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 colnames(stock) <- paste("LOW", simple.colnames, sep = ".")
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 colnames(stock) <- paste("ILOW", simple.colnames, sep = ".")
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 colnames(stock) <- paste("LOW.W", simple.colnames, sep = ".")
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 colnames(stock) <- paste("My.LOW", simple.colnames, sep = ".")
-expect_equal(has.OHLC(stock), rep(TRUE,4))
+expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
 expect_true(has.Op(stock))
@@ -114,3 +114,8 @@ colnames(stock) <- gsub("MSFT", "ADJUSTED", cols)
 expect_true(has.Ad(stock))
 expect_equal(has.Ad(stock, which = TRUE), 6)
 expect_identical(colnames(Ad(stock)), colnames(stock)[6])
+
+colnames(stock) <- simple.colnames
+stock$slowD <- stock[,4]
+expect_true(all(has.OHLC(stock)))
+expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
