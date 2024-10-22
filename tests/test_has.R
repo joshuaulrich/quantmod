@@ -115,6 +115,7 @@ expect_true(has.Ad(stock))
 expect_equal(has.Ad(stock, which = TRUE), 6)
 expect_identical(colnames(Ad(stock)), colnames(stock)[6])
 
+# low in colname returned by function TTR::stoch()
 colnames(stock) <- simple.colnames
 stock$slowD <- stock[,4]
 expect_true(all(has.OHLC(stock)))
