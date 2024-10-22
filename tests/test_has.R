@@ -27,6 +27,10 @@ colnames(d) <- paste("ILOW", simple.colnames, sep = ".")
 expect_equal(has.OHLC(d), TRUE)
 expect_equal(has.OHLC(d, which = T), c(1,2,3,4))
 
-colnames(d) <- paste("HIGHW", simple.colnames, sep = ".")
+colnames(d) <- paste("LOW.W", simple.colnames, sep = ".")
+expect_equal(has.OHLC(d), TRUE)
+expect_equal(has.OHLC(d, which = T), c(1,2,3,4))
+
+colnames(d) <- paste("My.LOW", simple.colnames, sep = ".")
 expect_equal(has.OHLC(d), TRUE)
 expect_equal(has.OHLC(d, which = T), c(1,2,3,4))
