@@ -220,8 +220,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Open',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Open',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bOpen\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Open\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -243,8 +243,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('High',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.High',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bHigh\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.High\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -266,8 +266,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Low',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Low',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bLow\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Low\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -288,8 +288,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Close',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Close',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bClose\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Close\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -310,8 +310,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Volume',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Volume',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bVolume\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Volume\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -332,8 +332,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Adjusted',colnames(x),ignore.case=TRUE)
-  if (length(loc) > 1) loc <- grep('\\.Adjusted',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bAdjusted\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Adjusted\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
