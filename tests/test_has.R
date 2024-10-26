@@ -36,6 +36,10 @@ colnames(stock) <- paste("My.LOW", simple.colnames, sep = ".")
 expect_true(all(has.OHLC(stock)))
 expect_equal(has.OHLC(stock, which = T), c(1,2,3,4))
 
+colnames(stock) <- paste("VLOWY", simple.colnames, sep = ".")
+expect_true(all(has.OHLCV(stock)))
+expect_equal(has.OHLCV(stock, which = T), c(1,2,3,4,5))
+
 expect_true(has.Op(stock))
 expect_true(has.Hi(stock))
 expect_true(has.Lo(stock))
