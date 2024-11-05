@@ -207,9 +207,10 @@ function(x)
 `Op` <-
 function(x)
 {
-  if(has.Op(x))
-    return(x[,grep('Open',colnames(x),ignore.case=TRUE)])
-  stop('subscript out of bounds: no column name containing "Open"')
+  loc <- has.Op(x,which = TRUE)
+  if ((length(loc) == 1) && (is.numeric(loc)))
+      return(x[,loc])
+  stop('subscript out of bounds: no or multiple column name containing "Open"')
 }
 
 `has.Op` <-
@@ -219,7 +220,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Open',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bOpen\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Open$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -228,9 +230,10 @@ function(x,which=FALSE)
 `Hi` <-
 function(x)
 {
-  if(has.Hi(x))
-    return(x[,grep('High',colnames(x),ignore.case=TRUE)])
-  stop('subscript out of bounds: no column name containing "High"')
+  loc <- has.Hi(x,which = TRUE)
+  if ((length(loc) == 1) && (is.numeric(loc)))
+      return(x[,loc])
+  stop('subscript out of bounds: no or multiple column name containing "High"')
 }
 
 `has.Hi` <-
@@ -240,7 +243,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('High',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bHigh\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.High$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -249,9 +253,10 @@ function(x,which=FALSE)
 `Lo` <-
 function(x)
 {
-  if(has.Lo(x))
-    return(x[,grep('Low',colnames(x),ignore.case=TRUE)])
-  stop('subscript out of bounds: no column name containing "Low"')
+  loc <- has.Lo(x,which = TRUE)
+  if ((length(loc) == 1) && (is.numeric(loc)))
+      return(x[,loc])
+  stop('subscript out of bounds: no or multiple column name containing "Low"')
 }
 
 `has.Lo` <-
@@ -261,7 +266,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Low',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bLow\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Low$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -270,9 +276,10 @@ function(x,which=FALSE)
 `Cl` <-
 function(x)
 {
-  if(has.Cl(x))
-    return(x[,grep('Close',colnames(x),ignore.case=TRUE)])
-  stop('subscript out of bounds: no column name containing "Close"')
+  loc <- has.Cl(x,which = TRUE)
+  if ((length(loc) == 1) && (is.numeric(loc)))
+      return(x[,loc])
+  stop('subscript out of bounds: no or multiple column name containing "Close"')
 }
 `has.Cl` <-
 function(x,which=FALSE)
@@ -281,7 +288,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Close',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bClose\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Close$',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -290,11 +298,10 @@ function(x,which=FALSE)
 `Vo` <-
 function(x)
 {
-  #vo <- grep('Volume',colnames(x))
-  #if(!identical(vo,integer(0)))
-  if(has.Vo(x))
-    return(x[,grep('Volume',colnames(x),ignore.case=TRUE)])
-  stop('subscript out of bounds: no column name containing "Volume"')
+  loc <- has.Vo(x,which = TRUE)
+  if ((length(loc) == 1) && (is.numeric(loc)))
+      return(x[,loc])
+  stop('subscript out of bounds: no or multiple column name containing "Volume"')
 }
 `has.Vo` <-
 function(x,which=FALSE)
@@ -303,7 +310,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Volume',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bVolume\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Volume\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
@@ -312,9 +320,10 @@ function(x,which=FALSE)
 `Ad` <-
 function(x)
 {
-  if(has.Ad(x))
-    return(x[,grep('Adjusted',colnames(x),ignore.case=TRUE)])
-  stop('subscript out of bounds: no column name containing "Adjusted"')
+  loc <- has.Ad(x,which = TRUE)
+  if ((length(loc) == 1) && (is.numeric(loc)))
+      return(x[,loc])
+  stop('subscript out of bounds: no or multiple column name containing "Adjusted"')
 }
 `has.Ad` <-
 function(x,which=FALSE)
@@ -323,7 +332,8 @@ function(x,which=FALSE)
   if(!is.null(colAttr))
     return(if(which) colAttr else TRUE)
 
-  loc <- grep('Adjusted',colnames(x),ignore.case=TRUE)
+  loc <- grep('\\bAdjusted\\b',colnames(x),ignore.case=TRUE)
+  if (length(loc) > 1) loc <- grep('\\.Adjusted\\b',colnames(x),ignore.case=TRUE)
   if(!identical(loc,integer(0))) {
     return(if(which) loc else TRUE)
   } else FALSE
