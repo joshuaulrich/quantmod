@@ -652,7 +652,7 @@ function(Symbols,env,return.class='xts',
                                db.fields=c('date','o','h','l','c','v','a'),
                                field.names = NULL,
                                user=NULL,password=NULL,dbname=NULL,host='localhost',port=3306,
-                               ...) {
+                               from=NULL, to=NULL, ...) {
      importDefaults("getSymbols.MySQL")
      this.env <- environment()
      for(var in names(list(...))) {
@@ -688,7 +688,13 @@ function(Symbols,env,return.class='xts',
             if(verbose) {
                 cat(paste('Loading ',Symbols[[i]],paste(rep('.',10-nchar(Symbols[[i]])),collapse=''),sep=''))
             }
-            query <- paste("SELECT ",paste(db.fields,collapse=',')," FROM ",Symbols[[i]]," ORDER BY date")
+          
+            if (!is.null(from) & !is.null(to)) {
+              query <- paste("SELECT ", paste(db.fields, collapse = ","), " FROM ", paste("`", Symbols[[i]], "`", sep = ""), " WHERE date >= '", from, "' AND date <= '", to, "' ORDER BY date")
+            } else {
+              query <- paste("SELECT ", paste(db.fields, collapse = ","), " FROM ", paste("`", Symbols[[i]], "`", sep = ""), " ORDER BY date")
+            }
+            
             rs <- DBI::dbSendQuery(con, query)
             fr <- DBI::fetch(rs, n=-1)
             #fr <- data.frame(fr[,-1],row.names=fr[,1])
