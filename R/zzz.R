@@ -152,8 +152,8 @@ setMethod("summary","quantmod", function(object) {
 #)
 
 "fittedModel"<-function(object) {object@fitted.model}
-#setGeneric("fittedModel<-", function(x,...,value) {standardGeneric("fittedModel<-")})
-setGeneric("fittedModel<-", function(object,value) {standardGeneric("fittedModel<-")})
+#setGeneric("fittedModel<-", function(x,...,value) standardGeneric("fittedModel<-"))
+setGeneric("fittedModel<-", function(object,value) standardGeneric("fittedModel<-"))
 #setReplaceMethod("fittedModel","quantmod", function(x,...,value)
 setReplaceMethod("fittedModel","quantmod", function(object,value)
 {
@@ -162,7 +162,7 @@ setReplaceMethod("fittedModel","quantmod", function(object,value)
 }
 )
 
-## setGeneric('plot', function(x,y,...) { standardGeneric('plot') });
+## setGeneric('plot', function(x,y,...) standardGeneric('plot'));
 ## setMethod("plot","tR.results", function(x,y,...) {
 ##     object <- x
 ##     ret.by <- object@return@returnsBy
