@@ -77,11 +77,11 @@ function(Symbols,what=standardQuote(),session=NULL,...) {
     stop("Unable to obtain yahoo crumb. If this is being called from a GDPR country, Yahoo requires GDPR consent, which cannot be scripted")
   }
   
-  if(length.of.symbols > 200) {
-    # yahoo only works with 200 symbols or less per call
+  if(length.of.symbols > 99) {
+    # yahoo only works with 99 symbols or less per call
     # we will recursively call getQuote.yahoo to handle each block of 200
-    all.symbols <- lapply(seq(1,length.of.symbols,200),
-                          function(x) na.omit(Symbols[x:(x+199)]))
+    all.symbols <- lapply(seq(1,length.of.symbols,99),
+                          function(x) na.omit(Symbols[x:(x+98)]))
     df <- NULL
     cat("downloading set: ")
     for(i in 1:length(all.symbols)) {
