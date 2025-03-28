@@ -1,3 +1,8 @@
+### NOTE
+# These tests are not with the rest of the test suite because setDefaults()
+# only works with language symbol arguments at the top level. tinytest runs
+# all tests in an environment that's different from the Global Environment.
+
 library(quantmod)
 
 api.key <- "abc"
