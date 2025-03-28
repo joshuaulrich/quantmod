@@ -1,4 +1,28 @@
-### Changes in 0.4.xx (2024-xx-yy)
+### Changes in 0.4.27 (2025-03-30)
+
+1. Reduce `getQuote()` batch size from 199 to 99. Yahoo started to throw an
+    error for requests of 100 or more symbols at a time. Thanks to @zlfang00
+    for the report and Ethan B. Smith for the patch!
+    [#432](https://github.com/joshuaulrich/quantmod/issues/432)
+    [#433](https://github.com/joshuaulrich/quantmod/pull/433)
+
+1. Follow best practices by removing the encosing '{}' in
+    `setGeneric("fittedModel<-", ...)`. Thanks to Michael Chirico for the PR!
+    [#431](https://github.com/joshuaulrich/quantmod/pull/431)
+
+1. Improve detection of ambiguous 'OHLCVA' colnames in all extractor functions
+    (e.g. `Cl()`, `OHLC()`). This is especially important for `Lo()` because
+    `quantmod::getSymbols("LOW")` returns an object where every column name
+    contains the pattern "LOW.". Another example is `TTR::stoch()`, which
+    returns a column named "slowD". Thanks to Ethan B. Smith for the patch!
+    [#24](https://github.com/joshuaulrich/quantmod/issues/24)
+    [#305](https://github.com/joshuaulrich/quantmod/pull/305)
+    [#306](https://github.com/joshuaulrich/quantmod/pull/306)
+
+1. Continue steps to remove `quantmod:::as.zoo.data.frame()` by throwing a
+    warning every time `quantmod::as.zoo.data.frame()` is called. Previously
+    a message was printed the first time the function was called.
+    [#414](https://github.com/joshuaulrich/quantmod/pull/414)
 
 1. Add `ClOp()` function to calculate the return between Close[t-1] and Open[t].
     Thanks to Gabriel Kaiser (@GabrielKaiserQFin) for the contribution!
