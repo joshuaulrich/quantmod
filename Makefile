@@ -28,6 +28,9 @@ PKG_ALL_FILES := ${PKG_PATH}/DESCRIPTION ${PKG_PATH}/NAMESPACE ${PKG_HEADER_FILE
 HTML_FILES := $(patsubst %.Rmd, %.html, $(wildcard *.Rmd)) \
               $(patsubst %.md, %.html, $(wildcard *.md))
 
+UNIT_TEST_SUITE = ${PKG_PATH}/tests/tinytest.R
+UNIT_TEST_FILES = $(wildcard ${PKG_PATH}/inst/tinytest/test-*.R)
+
 BENCHMARK_FILE = ${PKG_PATH}/inst/benchmarks/benchmark.subset.R
 
 .PHONY: docs build install check tests test clean
