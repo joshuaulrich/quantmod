@@ -48,40 +48,40 @@ e <- new.env()
 x <- try({
   getSymbols("IBM;WYSIWYG", env = e, src = "csv", dir = td, col.names = cn)
 }, silent = TRUE)
-stopifnot(exists("IBM", e))
+expect_true(exists("IBM", e))
 rm(IBM, pos = e)
 
 x <- try({
   getSymbols("IBM;WYSIWYG", env = e, src = "rda", dir = td, col.names = cn)
 }, silent = TRUE)
-stopifnot(exists("IBM", e))
+expect_true(exists("IBM", e))
 rm(IBM, pos = e)
 
 if (nzchar(test.web.endpoints)) {
   x <- try({
     getSymbols("IBM;WYSIWYG", env = e, src = "yahoo")
   }, silent = TRUE)
-  stopifnot(exists("IBM", e))
+  expect_true(exists("IBM", e))
   rm(IBM, pos = e)
 
   if (nzchar(apikey)) {
     x <- try({
       getSymbols("IBM;WYSIWYG", env = e, src = "av", api.key = apikey)
     }, silent = TRUE)
-    stopifnot(exists("IBM", e))
+    expect_true(exists("IBM", e))
     rm(IBM, pos = e)
   }
 
   x <- try({
     getSymbols("DGS10;WYSIWYG", env = e, src = "FRED")
   }, silent = TRUE)
-  stopifnot(exists("DGS10", e))
+  expect_true(exists("DGS10", e))
   rm(DGS10, pos = e)
 
   x <- try({
     getSymbols("EUR/USD;WYS/WYG", env = e, src = "oanda")
   }, silent = TRUE)
-  stopifnot(exists("EURUSD", e))
+  expect_true(exists("EURUSD", e))
   rm(EURUSD, pos = e)
 
   # Ensure getSymbols() errors if only passed one symbol that does not have data.
@@ -89,28 +89,28 @@ if (nzchar(test.web.endpoints)) {
   x <- try({
     getSymbols("WYSIWYG", env = e, src = "yahoo")
   }, silent = TRUE)
-  stopifnot(inherits(x, "try-error"))
+  expect_inherits(x, "try-error")
 
   x <- try({
     getSymbols("WYSIWYG", env = e, src = "FRED")
   }, silent = TRUE)
-  stopifnot(inherits(x, "try-error"))
+  expect_inherits(x, "try-error")
 
   if (nzchar(apikey)) {
     x <- try({
       getSymbols("WYSIWYG", env = e, src = "av", api.key = apikey)
     }, silent = TRUE)
-    stopifnot(inherits(x, "try-error"))
+    expect_inherits(x, "try-error")
   }
 
   x <- try({
     getSymbols("WYS/WYG", env = e, src = "oanda")
   }, silent = TRUE)
-  stopifnot(inherits(x, "try-error"))
+  expect_inherits(x, "try-error")
 
   # Individual getSymbols() "methods" should not error if only passed one symbol.
   setSymbolLookup(AAPL = "yahoo", DGS10 = "FRED")
   getSymbols("AAPL;DGS10", env = e)
-  stopifnot(exists("AAPL", e))
-  stopifnot(exists("DGS10", e))
+  expect_true(exists("AAPL", e))
+  expect_true(exists("DGS10", e))
 }
