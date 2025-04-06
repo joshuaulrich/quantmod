@@ -1,4 +1,4 @@
-### Changes in 0.4.27 (2025-03-30)
+### Changes in 0.4.27 (2025-04-06)
 
 1. Reduce `getQuote()` batch size from 199 to 99. Yahoo started to throw an
     error for requests of 100 or more symbols at a time. Thanks to @zlfang00
