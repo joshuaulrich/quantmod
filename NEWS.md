@@ -18,6 +18,7 @@
     [#24](https://github.com/joshuaulrich/quantmod/issues/24)
     [#305](https://github.com/joshuaulrich/quantmod/pull/305)
     [#306](https://github.com/joshuaulrich/quantmod/pull/306)
+    [#426](https://github.com/joshuaulrich/quantmod/pull/426)
 
 1. Continue steps to remove `quantmod:::as.zoo.data.frame()` by throwing a
     warning every time `quantmod::as.zoo.data.frame()` is called. Previously
