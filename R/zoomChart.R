@@ -23,8 +23,8 @@ function (n = 1, eps = 2)
         }
         else {
             usr <- par("usr")
-            xdata <- get.chob()[[2]]@xdata
-            xsubset <- get.chob()[[2]]@xsubset
+            xdata <- current.chob()$Env$xdata
+            xsubset <- current.chob()$Env$xsubset
             sq <- floor(seq(usr[1], usr[2], 1))
             st <- which(floor(points$x[1]) == sq)/length(sq) * 
                 NROW(xdata[xsubset])
@@ -33,9 +33,10 @@ function (n = 1, eps = 2)
             sorted <- sort(c(st, en))
             st <- sorted[1]
             en <- sorted[2] * 1.05
-            zoomChart(paste(index(xdata[xsubset])[max(1, floor(st), 
-                na.rm = TRUE)], index(xdata[xsubset])[min(ceiling(en), 
-                NROW(xdata[xsubset]), na.rm = TRUE)], sep = "::"))
+            cs <- zoomChart(subset = paste(index(xdata[xsubset])[max(1, floor(st), 
+                    na.rm = TRUE)], index(xdata[xsubset])[min(ceiling(en), 
+                    NROW(xdata[xsubset]), na.rm = TRUE)], sep = "::"))
+            print(cs)
         }
     }
     cat("done\n")
