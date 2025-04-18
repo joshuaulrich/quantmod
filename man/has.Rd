@@ -95,12 +95,12 @@ either \code{TRUE} or \code{FALSE}.
 \seealso{ \code{\link{quantmod.OHLC}},\code{\link{OHLC.Transformations}} }
 \examples{
 \dontrun{
-getSymbols("YHOO")
+getSymbols("AAPL")
 
-is.OHLC(YHOO)
-has.OHLC(YHOO)
+is.OHLC(AAPL)
+has.OHLC(AAPL)
 
-has.Ad(YHOO)
+has.Ad(AAPL)
 
 }
 }

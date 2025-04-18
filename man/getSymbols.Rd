@@ -205,7 +205,7 @@ getSymbols('F',src='yahoo',return.class='ts')
 
 # load into a new environment
 data.env <- new.env()
-getSymbols("YHOO", env=data.env)
+getSymbols("AAPL", env=data.env)
 ls.str(data.env)
 
 # constrain to local scope

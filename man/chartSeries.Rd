@@ -152,18 +152,18 @@ Gabor Grothendieck.  Many thanks to him.
           \code{\link{chartTheme}} }
 \examples{
 \dontrun{
-getSymbols("YHOO")
-chartSeries(YHOO)
-chartSeries(YHOO, subset='last 4 months')
-chartSeries(YHOO, subset='2007::2008-01')
-chartSeries(YHOO,theme=chartTheme('white'))
-chartSeries(YHOO,TA=NULL)   #no volume
-chartSeries(YHOO,TA=c(addVo(),addBBands()))  #add volume and Bollinger Bands from TTR
+getSymbols("AAPL")
+chartSeries(AAPL)
+chartSeries(AAPL, subset='last 4 months')
+chartSeries(AAPL, subset='2007::2008-01')
+chartSeries(AAPL,theme=chartTheme('white'))
+chartSeries(AAPL,TA=NULL)   #no volume
+chartSeries(AAPL,TA=c(addVo(),addBBands()))  #add volume and Bollinger Bands from TTR
 
 addMACD()   #  add MACD indicator to current chart
 
 setTA()
-chartSeries(YHOO)   #draws chart again, this time will all indicators present
+chartSeries(AAPL)   #draws chart again, this time will all indicators present
 }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
