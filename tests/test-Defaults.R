@@ -4,6 +4,7 @@
 # all tests in an environment that's different from the Global Environment.
 
 library(quantmod)
+options(useFancyQuotes = FALSE)
 
 api.key <- "abc"
 src <- "xyz"
