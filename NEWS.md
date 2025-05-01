@@ -120,7 +120,9 @@
     The example below will create an object named `IXIC` but the value of
     `sym` will be "^IXIC".
 
-        sym <- getSymbols("^IXIC")
+    ```r
+    sym <- getSymbols("^IXIC")
+    ```
 
     That means `x <- get(sym)` will not work because an object named `^IXIC`
     doesn't exist.
