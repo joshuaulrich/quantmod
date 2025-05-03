@@ -3,12 +3,13 @@
 \alias{viewFinancials}
 \alias{getFin}
 \alias{viewFin}
+\alias{as.data.frame.financials}
 \title{ Download and View Financial Statements }
 \description{
 Download Income Statement, Balance Sheet, and Cash Flow Statements.
 }
 \usage{
-getFinancials(Symbol, env = parent.frame(), src = "google", 
+getFinancials(Symbol, env = parent.frame(), src = "tiingo", 
               auto.assign = TRUE,
               ...)
 
@@ -43,24 +44,30 @@ sheet, IS for income statement, and CF for cash flow
 statement. The period argument is used to identify
 which statements to view - (A) for annual and (Q)
 for quarterly.
+
+\code{as.data.frame.financials} unpacks the finacials list into a wide formate data.frame
 }
 \value{
-  Six individual matrices organized in a list of class \sQuote{financials}:
+  Six individual matrices and a data.frame organized in a list of class \sQuote{financials}:
   \item{ IS }{ a list containing (Q)uarterly and (A)nnual Income Statements }
   \item{ BS }{ a list containing (Q)uarterly and (A)nnual Balance Sheets }
   \item{ CF }{ a list containing (Q)uarterly and (A)nnual Cash Flow Statements }
+  \item{periods}{a data.frame containing Fiscal year and quarter corresponding to each statement contained in the results. 
+  The \code{date} column matches the column name in the statement matrix corresponding to period. Some sources moy not include this in the output}
+  
+  Only the data structure itself is normalized. Individual statement matrixes use field names from the underlying source. 
+  Please refer to the source documentation for definitions and explanations.
 }
-\author{ Jeffrey A. Ryan }
+\author{ Jeffrey A. Ryan, Ethan Smith }
 \note{
-As with all free data, you may be getting exactly what you pay for.
-Sometimes that may be absolutely nothing.
+currently only implemented for tiingo, which requres a paid license.
 }
 \examples{
 \dontrun{
-getFinancials('JAVA')  # returns JAVA.f to "env"
+getFinancials('BA')  # returns BA.f to "env"
 getFin('AAPL') # returns AAPL.f to "env"
 
-viewFin(JAVA.f, "IS", "Q")  # Quarterly Income Statement
+viewFin(BA.f, "IS", "Q")  # Quarterly Income Statement
 viewFin(AAPL.f, "CF", "A")   # Annual Cash Flows
 
 str(AAPL.f)
