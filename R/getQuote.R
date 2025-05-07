@@ -36,6 +36,20 @@ function(Symbols,src='yahoo',what, ...) {
     curl::handle_setheaders(ses$h, 
                             accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
                            "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36 Edg/115.0.1901.183")
+
+    ciphers <- c("ECDHE-RSA-AES128-GCM-SHA256",
+                 "ECDHE-RSA-AES256-GCM-SHA384",
+                 "ECDHE-ECDSA-AES128-GCM-SHA256",
+                 "ECDHE-ECDSA-AES256-GCM-SHA384",
+                 "ECDHE-RSA-CHACHA20-POLY1305",
+                 "ECDHE-ECDSA-CHACHA20-POLY1305",
+                 "AES128-GCM-SHA256",
+                 "AES256-GCM-SHA384",
+                 "AES128-SHA",
+                 "AES256-SHA")
+    ciphers <- paste(ciphers, collapse = ",")
+    curl::handle_setopt(ses$h, ssl_cipher_list = ciphers)
+
     URL <- "https://finance.yahoo.com/"
     r <- curl::curl_fetch_memory(URL, handle = ses$h)
     # yahoo redirects to a consent form w/ a single cookie for GDPR:
