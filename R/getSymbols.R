@@ -738,7 +738,7 @@ function(Symbols,env,return.class='xts',
      if(!hasArg("from")) from <- ""
      if(!hasArg("to")) to <- ""
 
-     FRED.URL <- "https://fred.stlouisfed.org/series"
+     FRED.URL <- "https://fred.stlouisfed.org/graph/fredgraph.csv?id="
 
      returnSym <- Symbols
      noDataSym <- NULL
@@ -746,7 +746,7 @@ function(Symbols,env,return.class='xts',
      for(i in seq_along(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
        test <- try({
-       URL <- paste(FRED.URL, "/", Symbols[[i]], "/downloaddata/", Symbols[[i]], ".csv", sep="")
+       URL <- paste0(FRED.URL, Symbols[[i]])
        fr <- read.csv(curl::curl(URL),na.strings=".")
 
        if(verbose) cat("done.\n")

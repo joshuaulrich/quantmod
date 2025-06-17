@@ -1,3 +1,8 @@
+### Changes in 0.4.xx (yyyy-mm-dd)
+
+1. Fix FRED URL. Thanks to Nicole Mirea (@nimirea) for the report!
+    [#439](https://github.com/joshuaulrich/quantmod/issues/439)
+
 ### Changes in 0.4.27 (2025-04-06)
 
 1. Reduce `getQuote()` batch size from 199 to 99. Yahoo started to throw an
