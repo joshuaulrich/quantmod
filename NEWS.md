@@ -1,7 +1,15 @@
-### Changes in 0.4.xx (yyyy-mm-dd)
+### Changes in 0.4.28 (2025-06-18)
 
 1. Fix FRED URL. Thanks to Nicole Mirea (@nimirea) for the report!
     [#439](https://github.com/joshuaulrich/quantmod/issues/439)
+
+1. Thanks to Michael Chirico for a couple PRs to handle some minor edge cases.
+    [#436](https://github.com/joshuaulrich/quantmod/pull/436)
+    [#437](https://github.com/joshuaulrich/quantmod/pull/437)
+
+1. Replace "YHOO" with "AAPL" where it is used in documentation, especially
+    in examples. Thanks to @dougedmunds for the report!
+    [#435](https://github.com/joshuaulrich/quantmod/issues/435)
 
 1. Update `getSymbols.csv()` documentation to note that you have to set the
     `format` argument if the date in the CSV is not in a standard format.
