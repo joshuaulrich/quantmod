@@ -3,6 +3,11 @@
 1. Fix FRED URL. Thanks to Nicole Mirea (@nimirea) for the report!
     [#439](https://github.com/joshuaulrich/quantmod/issues/439)
 
+1. Update `getSymbols.csv()` documentation to note that you have to set the
+    `format` argument if the date in the CSV is not in a standard format.
+    Thanks to @reddogg24 for the report that led to this change.
+    [#428](https://github.com/joshuaulrich/quantmod/issues/428)
+
 ### Changes in 0.4.27 (2025-04-06)
 
 1. Reduce `getQuote()` batch size from 199 to 99. Yahoo started to throw an

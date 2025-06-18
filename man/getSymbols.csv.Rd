@@ -49,6 +49,10 @@ by \code{return.class}. Presently this may be \code{ts},
 \note{
 This has yet to be tested on a windows platform. It \emph{should} work
 though file seperators may be an issue.
+
+You may need to set the \code{format} argument in the call if the date is not
+in a standard format in your file. For example \code{format = "\%m/\%d/\%Y"}.
+See \code{\link{strptime}} for format parameters.
 }
 \author{ Jeffrey A. Ryan }
 \seealso{ \code{\link{getSymbols}},
