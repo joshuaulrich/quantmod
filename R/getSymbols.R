@@ -725,7 +725,7 @@ function(Symbols,env,return.class='xts',
 
 # getSymbols.FRED {{{
 `getSymbols.FRED` <- function(Symbols,env,
-     return.class="xts", ...) {
+     return.class="xts", timeout=10, ...) {
      importDefaults("getSymbols.FRED")
      this.env <- environment()
      for(var in names(list(...))) {
@@ -742,12 +742,13 @@ function(Symbols,env,return.class='xts',
 
      returnSym <- Symbols
      noDataSym <- NULL
+     ch <- curl::new_handle(timeout=timeout)
 
      for(i in seq_along(Symbols)) {
        if(verbose) cat("downloading ",Symbols[[i]],".....\n\n")
        test <- try({
        URL <- paste0(FRED.URL, Symbols[[i]])
-       fr <- read.csv(curl::curl(URL),na.strings=".")
+       fr <- read.csv(curl::curl(URL, handle=ch),na.strings=".")
 
        if(verbose) cat("done.\n")
        fr <- xts(as.matrix(fr[,-1]),
