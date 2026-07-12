@@ -20,9 +20,11 @@ getModelData <- function(x, na.rm=TRUE) {
            } 
          }
         )
+    if (length(model.symbols) == 0L)
+        return(model)
     target.data <- get(model.symbols[[1]], env)
     total.columns = NULL
-    for (j in 1:length(model.symbols)) {
+    for (j in seq_along(model.symbols)) {
         if (j == 1) {
             m <- as.xts(target.data)
         }
