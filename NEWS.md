@@ -1,3 +1,10 @@
+### Changes in 0.4.xx (yyyy-mm-dd)
+
+1. Fix `getFX()` and `getMetals()` by updating the Oanda URL. Oanda moved their
+    historical rates API to a new host. The old host still redirects to the new
+    one, but the redirect drops the query string, so requests arrived with no
+    parameters and the server returned "400 Bad Request".
+
 ### Changes in 0.4.29 (2026-06-28)
 
 1. Add `api.key` argument to `getSymbols.FRED()` and nudge users to register
