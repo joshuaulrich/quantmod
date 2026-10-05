@@ -865,7 +865,8 @@ function(Symbols,env,return.class='xts',
      }
 
      fetch_json <- function(URL) {
-       h <- curl::new_handle()
+       # do not follow redirects: the X-API-Key header would go with them
+       h <- curl::new_handle(followlocation=FALSE)
        if(nzchar(api.key)) curl::handle_setheaders(h, "X-API-Key"=api.key)
        res <- curl::curl_fetch_memory(URL, handle=h)
        txt <- rawToChar(res$content)
