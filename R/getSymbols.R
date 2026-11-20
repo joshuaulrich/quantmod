@@ -941,7 +941,7 @@ function(Symbols,env,
       sym.file <- file.path(dir,paste(Symbols[[i]],extension,sep="."))
     }
     if(!file.exists(sym.file)) {
-      cat("\nfile ",paste(Symbols[[i]],"csv",sep='.')," does not exist ",
+      cat("\nfile ",paste(Symbols[[i]],extension,sep='.')," does not exist ",
           "in ",dir,"....skipping\n")
       next
     }
