@@ -1287,7 +1287,7 @@ function(Symbols,env,return.class='xts',
                    " Symbol: ", Symbols[[i]])
          }
        }
-       oanda.URL <- paste0("https://fxds-hcc.oanda.com/api/data/update",
+       oanda.URL <- paste0("https://hcc.corporatefxservices.com/api/data/update",
                            "?&source=OANDA&adjustment=0",
                            "&base_currency=", currency.pair[1],
                            "&start_date=", from,
