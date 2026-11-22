@@ -15,7 +15,7 @@ setClass("tradeLog",representation(
                     exch='character'
                     ), 
                     prototype = list(
-                                date=Sys.Date(),
+                                date=as.Date(as.POSIXct(if (nzchar(stamp <- Sys.getenv("SOURCE_DATE_EPOCH"))) as.numeric(stamp) else Sys.time(), origin="1970-01-01", tz="UTC")),
                                 trade.id=0,
                                 action='',
                                 underlying='',
@@ -26,7 +26,7 @@ setClass("tradeLog",representation(
 				                account.value=10000,
                                 currency='USD',
                                 currency.symbol='$',
-                                start.date=Sys.Date(),
+                                start.date=as.Date(as.POSIXct(if (nzchar(stamp <- Sys.getenv("SOURCE_DATE_EPOCH"))) as.numeric(stamp) else Sys.time(), origin="1970-01-01", tz="UTC")),
                                 exch=''
                     )
         )
