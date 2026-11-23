@@ -258,6 +258,7 @@ export(
     getSymbols.SQLite,
     getSymbols.mysql,
     getSymbols.FRED,
+    getSymbols.FXMacroData,
     getSymbols.yahoo,
     getSymbols.yahooj,
     getSymbols.oanda,
