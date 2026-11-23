@@ -1162,6 +1162,7 @@ useRTH = '1', whatToShow = 'TRADES', time.format = '1', ...)
 
     returnSym <- Symbols
     noDataSym <- NULL
+    fr <- NULL
 
     for(i in seq_along(Symbols)) {
       test <- try({
@@ -1243,15 +1244,15 @@ function(Symbols,env,return.class='xts',
         assign(var, list(...)[[var]], this.env)
      }
 
+     if(!hasArg("verbose")) verbose <- FALSE
+     if(!hasArg("auto.assign")) auto.assign <- TRUE
+     if(!hasArg("warnings")) warnings <- TRUE
+
      if(!auto.assign && length(Symbols) > 1)
        stop("must use auto.assign=TRUE for multiple Symbols requests")
      default.return.class <- return.class
      default.from <- from
      default.to <- to
-
-     if(!hasArg("verbose")) verbose <- FALSE
-     if(!hasArg("auto.assign")) auto.assign <- TRUE
-     if(!hasArg("warnings")) warnings <- TRUE
 
      returnSym <- Symbols
      noDataSym <- NULL

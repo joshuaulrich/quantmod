@@ -1832,7 +1832,7 @@ function(x) {
                         bp=lchob@bp,
                         x.labels=lchob@x.labels,
                         time.scale=lchob@time.scale,
-                        col=col,lty=lty)
+                        lty=lty)
   if(is.null(sys.call(-1))) {
     TA <- lchob@passed.args$TA
     lchob@passed.args$TA <- c(TA,chobTA)
